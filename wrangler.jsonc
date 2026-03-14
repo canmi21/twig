@@ -7,24 +7,24 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "taki-d1",
+      "database_name": "taki-index",
       "database_id": "00000000-0000-0000-0000-000000000000",
       "preview_database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "drizzle/migrations"
-    }
+      "migrations_dir": "drizzle/migrations",
+    },
   ],
   "kv_namespaces": [
     {
       "binding": "CACHE",
       "id": "00000000000000000000000000000000",
-      "preview_id": "00000000000000000000000000000000"
-    }
+      "preview_id": "00000000000000000000000000000000",
+    },
   ],
   "r2_buckets": [
     {
       "binding": "ASSETS",
-      "bucket_name": "taki-assets",
-      "preview_bucket_name": "taki-assets-preview"
-    }
-  ]
+      "bucket_name": "taki-bucket",
+      "preview_bucket_name": "taki-preview",
+    },
+  ],
 }

@@ -12,8 +12,5 @@
   "routerOnly": false,
   "version": 1,
   "framework": "react",
-  "chosenAddOns": [
-    "shadcn",
-    "cloudflare"
-  ]
+  "chosenAddOns": ["shadcn", "cloudflare"]
 }

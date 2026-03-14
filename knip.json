@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+  "ignoreDependencies": ["cloudflare", "entities", "tailwindcss", "tw-animate-css"],
+  "workspaces": {
+    ".": {
+      "entry": ["src/router.tsx"],
+      "project": ["src/**/*.{ts,tsx}", "*.config.ts", "*.config.mjs"]
+    }
+  },
+  "ignoreIssues": {
+    "src/routeTree.gen.ts": ["exports"],
+    "worker-configuration.d.ts": ["exports", "types", "unlisted"]
+  }
+}
