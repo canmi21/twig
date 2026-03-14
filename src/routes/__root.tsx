@@ -3,6 +3,7 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { renderAppShell } from '~/components/app-shell'
+import { THEME_INIT_SCRIPT } from '~/lib/theme'
 import appCss from '~/styles.css?url'
 
 export const Route = createRootRoute({
@@ -22,6 +23,10 @@ export const Route = createRootRoute({
 				name: 'description',
 				content: 'TanStack Start + TailwindCSS + Drizzle + Cloudflare Worker starter.',
 			},
+			{
+				httpEquiv: 'Accept-CH',
+				content: 'Sec-CH-Prefers-Color-Scheme',
+			},
 		],
 		links: [
 			{
@@ -35,9 +40,11 @@ export const Route = createRootRoute({
 
 function rootDocument(props: { children: ReactNode }) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
+				{/* Static script derived from compile-time constant; no user input involved */}
+				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">
 				{renderAppShell(props.children)}

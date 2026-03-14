@@ -19,7 +19,7 @@ function HomePage() {
 	return (
 		<section className="grid gap-8 lg:grid-cols-[1.35fr_0.85fr]">
 			<div className="space-y-6">
-				<div className="border-border/70 text-muted-foreground inline-flex items-center gap-2 rounded-full border bg-white/80 px-3 py-1 text-xs font-medium tracking-[0.24em] uppercase shadow-sm backdrop-blur">
+				<div className="border-border/70 text-muted-foreground inline-flex items-center gap-2 rounded-full border bg-white/80 px-3 py-1 text-xs font-medium tracking-[0.24em] uppercase shadow-sm backdrop-blur dark:bg-white/5">
 					<PackageCheck className="size-3.5" />
 					Full-stack starter ready
 				</div>
@@ -34,7 +34,10 @@ function HomePage() {
 					<p className="text-muted-foreground max-w-2xl text-base leading-7 sm:text-lg">
 						The project is trimmed to a clean baseline with TailwindCSS, shadcn, lucide icons,
 						file-based routes, and server utilities organized under
-						<code className="mx-1 rounded bg-black/5 px-1.5 py-0.5 text-sm">src</code>.
+						<code className="mx-1 rounded bg-black/5 px-1.5 py-0.5 text-sm dark:bg-white/10">
+							src
+						</code>
+						.
 					</p>
 				</div>
 
@@ -82,7 +85,7 @@ function HomePage() {
 					].map((item) => (
 						<article
 							key={item.title}
-							className="border-border/70 rounded-3xl border bg-white/85 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur"
+							className="border-border/70 rounded-3xl border bg-white/85 p-5 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-white/5 dark:shadow-[0_12px_40px_rgba(0,0,0,0.2)]"
 						>
 							<item.icon className="text-accent-foreground mb-4 size-5" />
 							<h2 className="text-foreground text-base font-semibold">{item.title}</h2>
@@ -92,7 +95,7 @@ function HomePage() {
 				</div>
 			</div>
 
-			<aside className="border-border/70 space-y-4 rounded-4xl border bg-white/85 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.08)] backdrop-blur">
+			<aside className="border-border/70 space-y-4 rounded-4xl border bg-white/85 p-6 shadow-[0_16px_50px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-white/5 dark:shadow-[0_16px_50px_rgba(0,0,0,0.2)]">
 				<div>
 					<p className="text-muted-foreground text-sm font-medium tracking-[0.28em] uppercase">
 						Worker status
@@ -114,7 +117,9 @@ function HomePage() {
 							<dt className="text-foreground text-sm font-medium">{item.label}</dt>
 							<dd
 								className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-									item.ready ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+									item.ready
+										? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+										: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
 								}`}
 							>
 								{item.ready ? 'Bound' : 'Placeholder'}

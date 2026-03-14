@@ -2,6 +2,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@custom-variant dark (&.dark);
+
 :root {
 	--background: oklch(0.98 0.01 95);
 	--foreground: oklch(0.23 0.03 248);
@@ -53,6 +55,28 @@
 	--radius-xl: calc(var(--radius) + 4px);
 }
 
+.dark {
+	--background: oklch(0.15 0.02 260);
+	--foreground: oklch(0.93 0.01 95);
+	--card: oklch(0.19 0.02 260);
+	--card-foreground: oklch(0.93 0.01 95);
+	--popover: oklch(0.19 0.02 260);
+	--popover-foreground: oklch(0.93 0.01 95);
+	--primary: oklch(0.75 0.08 245);
+	--primary-foreground: oklch(0.15 0.02 260);
+	--secondary: oklch(0.25 0.02 260);
+	--secondary-foreground: oklch(0.9 0.01 95);
+	--muted: oklch(0.22 0.015 260);
+	--muted-foreground: oklch(0.65 0.02 248);
+	--accent: oklch(0.35 0.05 84);
+	--accent-foreground: oklch(0.9 0.02 95);
+	--destructive: oklch(0.58 0.23 28);
+	--destructive-foreground: oklch(0.93 0.01 95);
+	--border: oklch(0.3 0.02 260);
+	--input: oklch(0.3 0.02 260);
+	--ring: oklch(0.56 0.08 245);
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -78,8 +102,20 @@ body {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.dark body {
+	background:
+		radial-gradient(circle at top left, rgba(244, 114, 182, 0.05), transparent 22%),
+		radial-gradient(circle at right 20%, rgba(56, 189, 248, 0.07), transparent 28%),
+		radial-gradient(circle at bottom center, rgba(245, 158, 11, 0.05), transparent 32%),
+		linear-gradient(180deg, #0f0e14 0%, #141220 52%, #12111a 100%);
+}
+
 ::selection {
 	background: rgba(59, 130, 246, 0.2);
+}
+
+.dark ::selection {
+	background: rgba(96, 165, 250, 0.3);
 }
 
 a {
