@@ -1,0 +1,60 @@
+# AGENTS
+
+## Communication
+
+- Speak Chinese with the user.
+- Keep technical terms in English when they are clearer, such as procedure, manifest, codegen, build, lint, and commit.
+- Keep all file content concise declarative English, including code comments, docs, config, and commit messages.
+- Do not use emoji.
+- The user may use voice input. If a message contains nonsensical words, first try a pronunciation-based match to likely project terms. Ask for clarification if the match is not convincing.
+
+## Decision Making
+
+- Discuss uncertain or risky matters with the user before proceeding.
+- Enter plan mode when a single request contains more than 3 distinct tasks.
+- If self-review reveals improvements outside the requested scope, raise them with the user instead of silently applying them or silently deferring them.
+
+## Toolchain
+
+- Use Bun as the package manager for this repo.
+- Prefer `bun`, `bun run`, `bunx`, `bun add`, and `bun remove` over `npm`, `npx`, or other package manager commands.
+- Do not guess package versions. When adding or updating packages, use Bun to install the current requested version explicitly, usually `@latest` when the user asks for the latest.
+- Respect the repository formatting and analysis toolchain: `oxfmt`, `oxlint`, `eslint`, and `knip`.
+
+## Formatting
+
+- Respect `.editorconfig` and formatter configuration files.
+- Default indentation is tabs with width 2.
+- JSON, JSONC, and JSON5 use 2 spaces.
+- Generated files should not be reformatted unless the project explicitly expects that.
+
+## Naming
+
+- Default to lowercase kebab-case for file names and directory names.
+- Do not introduce uppercase-leading file or directory names unless a framework or generated file requires it.
+- Keep in-file identifiers consistent with language conventions, such as camelCase for TypeScript variables and functions.
+
+## Comments
+
+- Write comments when they add value.
+- Explain why, tradeoffs, or constraints, not obvious mechanics.
+- During refactors, review existing comments before removing them.
+
+## Configurability
+
+- Do not hard-code values that users may reasonably want to customize.
+- Prefer configuration, parameters, or environment variables with sensible defaults.
+- If a value affects runtime behavior, deployment, networking, storage, or timeouts, assume it should be configurable unless there is a strong reason not to.
+
+## Version Control
+
+- Never add AI co-authorship or similar metadata.
+- Use English Conventional Commit messages such as `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `deps:`, `revert:`, and `perf:`.
+- Use a scope only when it materially improves clarity.
+- Do not mention plan phases in commit messages.
+- Do not mention version bumps in commit messages unless the user explicitly asks for that.
+- Before every `git commit`, run `bun run fmt` and `bun run lint`, then fix any failures.
+- When routing, build config, generated files, or dependency wiring change, also run `bun run build` and `bun run knip` before commit.
+- If the user provides a full execution plan and the work completes cleanly, commit directly with the required format when requested.
+- If any issue, ambiguity, or suspected breaking change appears, stop and discuss with the user before committing unless the user explicitly asks otherwise.
+- Do not push unless the user explicitly asks.
