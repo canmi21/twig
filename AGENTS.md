@@ -20,6 +20,7 @@
 - Prefer `bun`, `bun run`, `bunx`, `bun add`, and `bun remove` over `npm`, `npx`, or other package manager commands.
 - Do not guess package versions. When adding or updating packages, use Bun to install the current requested version explicitly, usually `@latest` when the user asks for the latest.
 - Respect the repository formatting and analysis toolchain: `oxfmt`, `oxlint`, `eslint`, and `knip`.
+- Use tmux for long-running tasks with unknown completion time, such as dev servers, watch processes, or build previews.
 
 ## Formatting
 
