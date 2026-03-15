@@ -2,7 +2,10 @@ import type { ReactNode } from 'react'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { AppShell } from '~/components/app-shell'
+import { FloatingNav } from '~/components/floating-nav'
+import { LampCordToggle } from '~/components/lamp-cord-toggle'
+import { ContentWrapper } from '~/components/content-wrapper'
+import { SiteFooter } from '~/components/site-footer'
 import { THEME_INIT_SCRIPT } from '~/lib/theme'
 import appCss from '~/styles.css?url'
 
@@ -47,7 +50,10 @@ function rootDocument(props: { children: ReactNode }) {
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">
-				<AppShell>{props.children}</AppShell>
+				<FloatingNav />
+				<LampCordToggle />
+				<ContentWrapper>{props.children}</ContentWrapper>
+				<SiteFooter />
 				<TanStackDevtools
 					config={{
 						position: 'bottom-right',
