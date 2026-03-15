@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, getRouteApi, Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { getTimelineCursor, type CursorTimeline } from '~/server/functions/content'
 import { getPlatformStatus } from '~/server/functions/health'
@@ -16,8 +16,11 @@ export const Route = createFileRoute('/')({
 	component: HomePage,
 })
 
+const rootApi = getRouteApi('__root__')
+
 function HomePage() {
 	const { items, nextCursor } = Route.useLoaderData()
+	const { settings } = rootApi.useLoaderData()
 
 	const anchorMap = buildAnchorMap(items)
 	const yearGroups = groupByYearMonth(items)
@@ -52,25 +55,22 @@ function HomePage() {
 				<p className="text-content-secondary py-12 text-center">No content found.</p>
 			)}
 
-			{/* "Read more" card -- links to full timeline starting where homepage left off */}
+			{/* read more -- small pill linking to full timeline */}
 			{nextCursor && (
-				<div className="mt-8">
+				<div className="mt-8 flex justify-center">
 					<Link
 						to="/timeline"
 						search={readMoreAt ? { at: readMoreAt } : {}}
 						hash={readMoreHash}
-						className="border-border-default bg-surface hover:bg-elevated group flex items-center justify-between rounded-md border px-5 py-4 no-underline shadow-[var(--shadow-md)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
+						className="border-border-default text-content-secondary hover:text-content-heading hover:border-border-strong inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium no-underline transition-colors"
 					>
-						<div>
-							<p className="text-content-heading text-sm font-semibold">Read more</p>
-							<p className="text-content-tertiary text-xs">Continue browsing the full timeline</p>
-						</div>
-						<ArrowRight className="text-content-tertiary group-hover:text-primary size-4 transition-colors" />
+						Read more
+						<ArrowRight className="size-3" />
 					</Link>
 				</div>
 			)}
 
-			<SiteFooter />
+			<SiteFooter settings={settings} />
 		</section>
 	)
 }

@@ -46,22 +46,29 @@ function FooterThemeToggle() {
 	)
 }
 
-export function SiteFooter() {
+interface SiteFooterProps {
+	settings: {
+		siteTitle: string
+		footerText: string
+		copyright: string
+	}
+}
+
+export function SiteFooter({ settings }: SiteFooterProps) {
 	const year = new Date().getFullYear()
 
 	return (
-		<footer className="border-border-default mt-16 border-t">
+		<footer className="before:bg-border-default relative mt-16 before:absolute before:top-0 before:left-1/2 before:h-px before:w-screen before:-translate-x-1/2">
 			<div className="mx-auto max-w-4xl px-5 py-10">
 				<div className="flex items-start justify-between gap-8">
 					{/* left: content */}
 					<div className="space-y-3">
-						<p className="text-content-heading text-sm font-medium">taki</p>
+						<p className="text-content-heading text-sm font-medium">{settings.siteTitle}</p>
 						<p className="text-content-tertiary max-w-sm text-xs leading-relaxed">
-							A digital alter ego -- posts, projects, thoughts, and more. Built with TanStack Start,
-							deployed on Cloudflare Workers.
+							{settings.footerText}
 						</p>
 						<p className="text-content-tertiary text-xs">
-							&copy; {year} taki. All rights reserved.
+							&copy; {year} {settings.copyright}. All rights reserved.
 						</p>
 					</div>
 

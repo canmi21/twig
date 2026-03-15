@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { createFileRoute, getRouteApi, useRouter } from '@tanstack/react-router'
 import {
 	getTimelineCursor,
 	type CursorTimeline,
@@ -38,8 +38,11 @@ function anchorToUrl(anchor: string): string {
 	return idx === '1' ? `/timeline?at=${dateKey}` : `/timeline?at=${dateKey}#${idx}`
 }
 
+const rootApi = getRouteApi('__root__')
+
 function FullTimelinePage() {
 	const initial = Route.useLoaderData()
+	const { settings } = rootApi.useLoaderData()
 	const { at } = Route.useSearch()
 	const router = useRouter()
 	const [items, setItems] = useState<TimelineItem[]>(initial.items)
@@ -174,7 +177,7 @@ function FullTimelinePage() {
 
 			{loading && <p className="text-content-tertiary py-4 text-center text-sm">Loading...</p>}
 
-			{!cursor && items.length > 0 && <SiteFooter />}
+			{!cursor && items.length > 0 && <SiteFooter settings={settings} />}
 		</section>
 	)
 }

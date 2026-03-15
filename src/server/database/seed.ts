@@ -6,6 +6,7 @@ import {
 	mediaExtension,
 	links,
 	guestbookEntries,
+	siteSettings,
 } from '~/server/database/schema'
 
 function uuid() {
@@ -1059,4 +1060,17 @@ export async function seedDatabase() {
 	await db.insert(mediaExtension).values(seedMediaExtensions)
 	await db.insert(links).values(seedLinks)
 	await db.insert(guestbookEntries).values(seedGuestbook)
+	await db.insert(siteSettings).values([
+		{ key: 'siteTitle', value: 'taki' },
+		{
+			key: 'siteDescription',
+			value: 'A digital alter ego -- posts, projects, thoughts, and more.',
+		},
+		{
+			key: 'footerText',
+			value:
+				'A digital alter ego -- posts, projects, thoughts, and more. Built with TanStack Start, deployed on Cloudflare Workers.',
+		},
+		{ key: 'copyright', value: 'taki' },
+	])
 }

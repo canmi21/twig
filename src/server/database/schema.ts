@@ -54,6 +54,11 @@ export const links = sqliteTable('links', {
 	createdAt: text('created_at').notNull(),
 })
 
+export const siteSettings = sqliteTable('site_settings', {
+	key: text('key').primaryKey(),
+	value: text('value').notNull(),
+})
+
 export const guestbookEntries = sqliteTable('guestbook_entries', {
 	id: text('id').primaryKey(),
 	nickname: text('nickname').notNull(),
