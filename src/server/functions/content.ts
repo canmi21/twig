@@ -5,6 +5,7 @@ import { baseContent, projectExtension, mediaExtension } from '~/server/database
 import type { ContentType } from '~/server/database/constants'
 
 const ITEMS_PER_PAGE = 12
+const CURSOR_LIMIT = 10
 const PREVIEW_LENGTH = 300
 
 export interface TimelineItem {
@@ -36,6 +37,11 @@ export interface TimelineItem {
 		year: number | null
 		comment: string | null
 	}
+}
+
+export interface CursorTimeline {
+	items: TimelineItem[]
+	nextCursor: string | null
 }
 
 export interface PaginatedTimeline {
@@ -214,6 +220,159 @@ export const getTimelineItems = createServerFn({ method: 'GET' }).handler(
 		return { items, totalPages, currentPage: page }
 	},
 )
+
+export const getTimelineCursor = createServerFn({ method: 'GET' }).handler(
+	async ({ data }): Promise<CursorTimeline> => {
+		const input = data as { cursor?: string; limit?: number } | undefined
+		const limit = input?.limit ?? CURSOR_LIMIT
+		const db = getDb()
+		const { renderMarkdown } = await import('~/server/markdown')
+
+		const effectiveDate = sql`coalesce(${baseContent.publishedAt}, ${baseContent.createdAt})`
+		const baseConditions = [eq(baseContent.isDraft, 0)]
+
+		let pinnedItems: TimelineItem[] = []
+
+		if (!input?.cursor) {
+			// first load: fetch pinned items separately
+			const pinnedRows = await db
+				.select()
+				.from(baseContent)
+				.where(and(...baseConditions, eq(baseContent.isPinned, 1)))
+				.orderBy(desc(effectiveDate))
+
+			pinnedItems = await buildTimelineItems(pinnedRows, db, renderMarkdown)
+		}
+
+		// unpinned items with cursor condition
+		const unpinnedConditions = [...baseConditions, eq(baseContent.isPinned, 0)]
+
+		if (input?.cursor) {
+			const [cursorDate, cursorId] = input.cursor.split('__')
+			unpinnedConditions.push(
+				sql`(${effectiveDate} < ${cursorDate} OR (${effectiveDate} = ${cursorDate} AND ${baseContent.id} < ${cursorId}))`,
+			)
+		}
+
+		const unpinnedRows = await db
+			.select()
+			.from(baseContent)
+			.where(and(...unpinnedConditions))
+			.orderBy(desc(effectiveDate), desc(baseContent.id))
+			.limit(limit + 1)
+
+		const hasMore = unpinnedRows.length > limit
+		const slicedRows = unpinnedRows.slice(0, limit)
+		const unpinnedItems = await buildTimelineItems(slicedRows, db, renderMarkdown)
+
+		let nextCursor: string | null = null
+		if (hasMore && slicedRows.length > 0) {
+			const last = slicedRows[slicedRows.length - 1]
+			const lastDate = last.publishedAt ?? last.createdAt
+			nextCursor = `${lastDate}__${last.id}`
+		}
+
+		return {
+			items: [...pinnedItems, ...unpinnedItems],
+			nextCursor,
+		}
+	},
+)
+
+async function buildTimelineItems(
+	rows: Array<{
+		id: string
+		type: string
+		title: string | null
+		content: string
+		summary: string | null
+		tags: string
+		coverImage: string | null
+		slug: string | null
+		isPinned: number
+		metadata: string
+		createdAt: string
+		updatedAt: string
+		publishedAt: string | null
+		isDraft: number
+	}>,
+	db: ReturnType<typeof getDb>,
+	renderMarkdown: (s: string) => Promise<string>,
+): Promise<TimelineItem[]> {
+	if (rows.length === 0) return []
+
+	const contentIds = rows.map((r) => r.id)
+
+	const projectRows = await db
+		.select()
+		.from(projectExtension)
+		.where(
+			sql`${projectExtension.contentId} IN (${sql.join(
+				contentIds.map((id) => sql`${id}`),
+				sql`, `,
+			)})`,
+		)
+
+	const mediaRows = await db
+		.select()
+		.from(mediaExtension)
+		.where(
+			sql`${mediaExtension.contentId} IN (${sql.join(
+				contentIds.map((id) => sql`${id}`),
+				sql`, `,
+			)})`,
+		)
+
+	const projectMap = new Map(projectRows.map((p) => [p.contentId, p]))
+	const mediaMap = new Map(mediaRows.map((m) => [m.contentId, m]))
+
+	return Promise.all(
+		rows.map(async (row): Promise<TimelineItem> => {
+			const preview = truncateContent(row.content, PREVIEW_LENGTH)
+			const contentHtml = await renderMarkdown(preview)
+
+			const item: TimelineItem = {
+				id: row.id,
+				type: row.type as ContentType,
+				title: row.title,
+				contentHtml,
+				summary: row.summary,
+				tags: parseTags(row.tags),
+				coverImage: row.coverImage,
+				slug: row.slug,
+				isPinned: row.isPinned,
+				metadata: parseJson(row.metadata),
+				createdAt: row.createdAt,
+				publishedAt: row.publishedAt,
+			}
+
+			const proj = projectMap.get(row.id)
+			if (proj) {
+				item.project = {
+					status: proj.status,
+					demoUrl: proj.demoUrl,
+					repoUrl: proj.repoUrl,
+					techStack: parseTags(proj.techStack),
+					role: proj.role,
+				}
+			}
+
+			const med = mediaMap.get(row.id)
+			if (med) {
+				item.media = {
+					mediaType: med.mediaType,
+					rating: med.rating,
+					creator: med.creator,
+					cover: med.cover,
+					year: med.year,
+					comment: med.comment,
+				}
+			}
+
+			return item
+		}),
+	)
+}
 
 export const getContentBySlug = createServerFn({ method: 'GET' }).handler(
 	async ({ data }): Promise<ContentDetail | null> => {
