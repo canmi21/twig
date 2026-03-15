@@ -13,7 +13,7 @@ export default createServerEntry({
 		if (url.pathname.startsWith('/uploads/')) {
 			const key = url.pathname.slice(1) // strip leading /
 			const cfEnv = rest[0] as CloudflareEnv
-			const object = await cfEnv.ASSETS.get(key)
+			const object = await cfEnv.taki_bucket.get(key)
 
 			if (!object) {
 				return new Response('Not found', { status: 404 })

@@ -3,5 +3,5 @@ import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '~/server/database/schema'
 
 export function getDb() {
-	return drizzle(env.DB, { schema })
+	return drizzle(env.taki_sql, { schema })
 }

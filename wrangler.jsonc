@@ -6,25 +6,22 @@
   "main": "src/entry-server.ts",
   "d1_databases": [
     {
-      "binding": "DB",
-      "database_name": "taki-index",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "preview_database_id": "00000000-0000-0000-0000-000000000000",
+      "binding": "taki_sql",
+      "database_name": "taki-sql",
+      "database_id": "634aa3df-0fdf-4d74-abe9-9d4d277607f1",
       "migrations_dir": "drizzle/migrations",
     },
   ],
   "kv_namespaces": [
     {
-      "binding": "CACHE",
-      "id": "00000000000000000000000000000000",
-      "preview_id": "00000000000000000000000000000000",
+      "binding": "taki_kv",
+      "id": "e823da6d6efe4ebfa7a33945530c2602",
     },
   ],
   "r2_buckets": [
     {
-      "binding": "ASSETS",
       "bucket_name": "taki-bucket",
-      "preview_bucket_name": "taki-preview",
+      "binding": "taki_bucket",
     },
   ],
 }

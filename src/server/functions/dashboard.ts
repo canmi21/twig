@@ -239,7 +239,7 @@ export const uploadImage = createServerFn({ method: 'POST' }).handler(
 		const bytes = Uint8Array.from(atob(input.base64), (c) => c.charCodeAt(0))
 		const key = `uploads/${Date.now()}-${input.filename}`
 
-		await env.ASSETS.put(key, bytes, {
+		await env.taki_bucket.put(key, bytes, {
 			httpMetadata: { contentType: input.contentType },
 		})
 
