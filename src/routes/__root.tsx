@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { FloatingNav } from '~/components/floating-nav'
@@ -41,6 +41,13 @@ export const Route = createRootRoute({
 	shellComponent: rootDocument,
 })
 
+/** Hide root footer on homepage -- homepage renders its own ratchet footer */
+function RootFooter() {
+	const pathname = useRouterState({ select: (s) => s.location.pathname })
+	if (pathname === '/') return null
+	return <SiteFooter />
+}
+
 function rootDocument(props: { children: ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
@@ -53,7 +60,7 @@ function rootDocument(props: { children: ReactNode }) {
 				<FloatingNav />
 				<LampCordToggle />
 				<ContentWrapper>{props.children}</ContentWrapper>
-				<SiteFooter />
+				<RootFooter />
 				<TanStackDevtools
 					config={{
 						position: 'bottom-right',

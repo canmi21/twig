@@ -254,23 +254,44 @@ export const getTimelineCursor = createServerFn({ method: 'GET' }).handler(
 			)
 		}
 
-		// "until" mode: load all items from newest down to (and including) the target date
+		// "until" mode: load items from newest down to the target date, minimum CURSOR_LIMIT
 		if (input?.until && !input.cursor) {
-			const untilDate = `${input.until}T00:00:00.000Z`
-			const unpinnedRows = await db
+			const dayStart = `${input.until}T00:00:00.000Z`
+
+			// all items on the target date and newer
+			const newerRows = await db
 				.select()
 				.from(baseContent)
-				.where(and(...unpinnedConditions, sql`${effectiveDate} >= ${untilDate}`))
+				.where(and(...unpinnedConditions, sql`${effectiveDate} >= ${dayStart}`))
 				.orderBy(desc(effectiveDate), desc(baseContent.id))
 
-			const unpinnedItems = await buildTimelineItems(unpinnedRows, db, renderMarkdown)
+			// if not enough, pad with older items
+			let olderRows: typeof newerRows = []
+			let hasMoreOlder = false
+			if (newerRows.length < limit) {
+				const deficit = limit - newerRows.length
+				const older = await db
+					.select()
+					.from(baseContent)
+					.where(and(...unpinnedConditions, sql`${effectiveDate} < ${dayStart}`))
+					.orderBy(desc(effectiveDate), desc(baseContent.id))
+					.limit(deficit + 1)
 
-			// cursor for "load more" starts after the last item we fetched
+				hasMoreOlder = older.length > deficit
+				olderRows = older.slice(0, deficit)
+			}
+
+			const allRows = [...newerRows, ...olderRows]
+			const unpinnedItems = await buildTimelineItems(allRows, db, renderMarkdown)
+
 			let nextCursor: string | null = null
-			if (unpinnedRows.length > 0) {
-				const last = unpinnedRows[unpinnedRows.length - 1]
-				const lastDate = last.publishedAt ?? last.createdAt
-				nextCursor = `${lastDate}__${last.id}`
+			if (hasMoreOlder && olderRows.length > 0) {
+				const last = olderRows[olderRows.length - 1]
+				nextCursor = `${last.publishedAt ?? last.createdAt}__${last.id}`
+			} else if (newerRows.length >= limit) {
+				// all items were from the target date or newer, there might be older items
+				const last = newerRows[newerRows.length - 1]
+				nextCursor = `${last.publishedAt ?? last.createdAt}__${last.id}`
 			}
 
 			return {

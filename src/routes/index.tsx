@@ -6,8 +6,9 @@ import {
 	type TimelineItem,
 } from '~/server/functions/content'
 import { getPlatformStatus } from '~/server/functions/health'
-import { groupByYearMonth, buildAnchorMap } from '~/lib/timeline'
+import { groupByYearMonth, buildAnchorMap, itemDateKey } from '~/lib/timeline'
 import { TimelineMonth } from '~/components/timeline-month'
+import { SiteFooter } from '~/components/site-footer'
 
 export const Route = createFileRoute('/')({
 	validateSearch: (search: Record<string, unknown>) => ({
@@ -48,6 +49,9 @@ function TimelinePage() {
 	const routerHistoryRef = useRef(router.history)
 	routerHistoryRef.current = router.history
 
+	// ratchet footer: tracks which item index the footer sits after (only increases)
+	const [ratchetIndex, setRatchetIndex] = useState(initial.items.length)
+
 	const anchorMap = buildAnchorMap(items)
 
 	// scroll to fragment target on mount (once)
@@ -59,9 +63,7 @@ function TimelinePage() {
 		const hash = typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
 		const targetIndex = Math.max(1, Number.parseInt(hash, 10) || 1)
 
-		const dayItems = items.filter(
-			(item) => (item.publishedAt ?? item.createdAt).slice(0, 10) === at,
-		)
+		const dayItems = items.filter((item) => itemDateKey(item) === at)
 		if (dayItems.length === 0) return
 
 		const clampedIndex = Math.min(targetIndex, dayItems.length)
@@ -71,7 +73,7 @@ function TimelinePage() {
 		}
 	}, [at, items])
 
-	// observe all [data-anchor] elements, update URL silently on scroll
+	// anchor tracking: observe all [data-anchor] elements for scroll-based URL updates
 	useEffect(() => {
 		if (typeof window === 'undefined') return
 
@@ -108,62 +110,139 @@ function TimelinePage() {
 			observer.disconnect()
 			if (debounceTimer) clearTimeout(debounceTimer)
 		}
-	}, [items]) // re-observe when items change (Load more)
+	}, [items])
+
+	// ratchet: observe the first post-ratchet item, advance when fully visible
+	useEffect(() => {
+		if (typeof window === 'undefined' || ratchetIndex >= items.length) return
+
+		const postItem = items[ratchetIndex]
+		const el = document.querySelector(
+			`[data-anchor="${anchorMap.get(postItem.id)?.dateKey}#${anchorMap.get(postItem.id)?.index}"]`,
+		)
+		if (!el) return
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) {
+					setRatchetIndex((prev) => prev + 1)
+				}
+			},
+			{ threshold: 0.8, rootMargin: '-80px 0px 0px 0px' },
+		)
+
+		observer.observe(el)
+		return () => observer.disconnect()
+	}, [ratchetIndex, items, anchorMap])
+
+	// auto-load when ratchet approaches end of loaded items
+	const cursorRef = useRef(cursor)
+	cursorRef.current = cursor
+	const loadingRef = useRef(loading)
+	loadingRef.current = loading
+	const itemsLenRef = useRef(items.length)
+	itemsLenRef.current = items.length
 
 	async function loadMore() {
-		if (!cursor || loading) return
+		if (!cursorRef.current || loadingRef.current) return
 		setLoading(true)
 		try {
-			const result: CursorTimeline = await getTimelineCursor({ data: { cursor } })
+			const result: CursorTimeline = await getTimelineCursor({
+				data: { cursor: cursorRef.current },
+			})
 			setItems((prev) => [...prev, ...result.items])
 			setCursor(result.nextCursor)
-
-			if (currentAnchorRef.current) {
-				silentReplaceUrl(router.history, anchorToUrl(currentAnchorRef.current))
-			}
 		} finally {
 			setLoading(false)
 		}
 	}
 
-	const yearGroups = groupByYearMonth(items)
+	const loadMoreRef = useRef(loadMore)
+	loadMoreRef.current = loadMore
+
+	useEffect(() => {
+		if (itemsLenRef.current - ratchetIndex <= 3 && cursorRef.current && !loadingRef.current) {
+			void loadMoreRef.current()
+		}
+	}, [ratchetIndex])
+
+	// split items at ratchet point
+	const preItems = items.slice(0, ratchetIndex)
+	const postItems = items.slice(ratchetIndex)
+	const preGroups = groupByYearMonth(preItems)
+	const postGroups = groupByYearMonth(postItems)
+
+	// check if post-ratchet section continues the same month
+	const lastPreMonth =
+		preItems.length > 0 ? itemDateKey(preItems[preItems.length - 1]).slice(0, 7) : null
+	const firstPostMonth = postItems.length > 0 ? itemDateKey(postItems[0]).slice(0, 7) : null
+	const postContinuesSameMonth = lastPreMonth === firstPostMonth
 
 	return (
 		<section>
-			{yearGroups.map((yearGroup, yi) => (
-				<div key={yearGroup.year}>
-					<div className="space-y-10">
-						{yearGroup.months.map((mg, mi) => (
-							<TimelineMonth
-								key={mg.monthKey}
-								monthKey={mg.monthKey}
-								items={mg.items}
-								hideHeader={yi === 0 && mi === 0}
-								yearLabel={mi === 0 && yi > 0 ? yearGroup.year : undefined}
-								anchorMap={anchorMap}
-								atDate={at}
-							/>
-						))}
-					</div>
-				</div>
-			))}
+			{/* pre-ratchet: confirmed-seen items */}
+			<TimelineSection yearGroups={preGroups} anchorMap={anchorMap} atDate={at} isFirst />
+
+			{/* ratchet footer */}
+			<SiteFooter />
+
+			{/* post-ratchet: items below footer */}
+			{postItems.length > 0 && (
+				<TimelineSection
+					yearGroups={postGroups}
+					anchorMap={anchorMap}
+					atDate={at}
+					hideFirstHeader={postContinuesSameMonth}
+				/>
+			)}
 
 			{items.length === 0 && (
 				<p className="text-content-secondary py-12 text-center">No content found.</p>
 			)}
 
-			{cursor && (
-				<div className="flex justify-center pt-8">
-					<button
-						type="button"
-						onClick={() => void loadMore()}
-						disabled={loading}
-						className="border-border-default text-content-primary hover:bg-elevated disabled:text-content-disabled rounded-full border px-6 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-					>
-						{loading ? 'Loading...' : 'Load more'}
-					</button>
-				</div>
-			)}
+			{loading && <p className="text-content-tertiary py-4 text-center text-sm">Loading...</p>}
 		</section>
+	)
+}
+
+/** Renders year/month grouped timeline sections */
+function TimelineSection({
+	yearGroups,
+	anchorMap,
+	atDate,
+	isFirst = false,
+	hideFirstHeader = false,
+}: {
+	yearGroups: ReturnType<typeof groupByYearMonth>
+	anchorMap: Map<string, { dateKey: string; index: number }>
+	atDate?: string
+	isFirst?: boolean
+	hideFirstHeader?: boolean
+}) {
+	return (
+		<>
+			{yearGroups.map((yearGroup, yi) => (
+				<div key={yearGroup.year}>
+					<div className="space-y-10">
+						{yearGroup.months.map((mg, mi) => {
+							const isAbsoluteFirst = isFirst && yi === 0 && mi === 0
+							const shouldHide = isAbsoluteFirst || (hideFirstHeader && yi === 0 && mi === 0)
+
+							return (
+								<TimelineMonth
+									key={mg.monthKey}
+									monthKey={mg.monthKey}
+									items={mg.items}
+									hideHeader={shouldHide}
+									yearLabel={mi === 0 && yi > 0 ? yearGroup.year : undefined}
+									anchorMap={anchorMap}
+									atDate={atDate}
+								/>
+							)
+						})}
+					</div>
+				</div>
+			))}
+		</>
 	)
 }
