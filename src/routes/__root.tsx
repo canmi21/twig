@@ -41,10 +41,10 @@ export const Route = createRootRoute({
 	shellComponent: rootDocument,
 })
 
-/** Hide root footer on homepage -- homepage renders its own ratchet footer */
+/** Hide root footer on pages that render their own */
 function RootFooter() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname })
-	if (pathname === '/') return null
+	if (pathname === '/' || pathname === '/timeline') return null
 	return <SiteFooter />
 }
 
