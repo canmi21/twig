@@ -1,572 +1,773 @@
 import { count } from 'drizzle-orm'
 import { getDb } from '~/server/database/client'
-import { posts } from '~/server/database/schema'
+import {
+	baseContent,
+	projectExtension,
+	mediaExtension,
+	links,
+	guestbookEntries,
+} from '~/server/database/schema'
 
-const samplePosts = [
+function uuid() {
+	return crypto.randomUUID()
+}
+
+function isoDate(daysAgo: number): string {
+	const d = new Date()
+	d.setDate(d.getDate() - daysAgo)
+	return d.toISOString()
+}
+
+const seedContent = [
+	// ── Posts (4) ──
 	{
-		slug: 'welcome-to-taki',
-		title: 'Welcome to taki',
-		content: `# Welcome
+		id: uuid(),
+		type: 'post',
+		title: 'Building a Digital Alter Ego',
+		slug: 'building-digital-alter-ego',
+		content: `# Building a Digital Alter Ego
 
-This is the first post on **taki**, a blog built with TanStack Start and Cloudflare Workers.
+The internet is full of blogs, but what if your site could be more than a reverse-chronological list of articles?
 
-## What is taki?
+## The Idea
 
-taki is a minimal blog platform with:
+A digital alter ego is a living document -- part blog, part bookshelf, part scrapbook. It captures not just what you *write*, but what you *think*, *build*, *read*, and *listen to*.
 
-- Server-side rendering via TanStack Start
-- Cloudflare D1 for persistence
-- Nord color theme with dark mode
-- View Transition API animations
+> "We are what we repeatedly do. Excellence, then, is not an act, but a habit." -- Aristotle
 
-> "Simplicity is the ultimate sophistication." -- Leonardo da Vinci
-
-Enjoy reading!`,
-	},
-	{
-		slug: 'getting-started-with-tanstack-start',
-		title: 'Getting Started with TanStack Start',
-		content: `# Getting Started with TanStack Start
-
-TanStack Start is a full-stack React framework that combines the best parts of modern web development.
-
-## Key Features
-
-1. **File-based routing** -- routes live in \`src/routes/\`
-2. **Server functions** -- type-safe RPC without API boilerplate
-3. **SSR by default** -- pages render on the server first
-4. **Streaming** -- progressive HTML delivery
-
-## A Simple Server Function
+## The Stack
 
 \`\`\`typescript
-import { createServerFn } from '@tanstack/react-start'
-
-export const getGreeting = createServerFn({ method: 'GET' })
-  .handler(() => {
-    return { message: 'Hello from the server!' }
-  })
-\`\`\`
-
-This function runs only on the server but can be called from any component.`,
-	},
-	{
-		slug: 'cloudflare-d1-with-drizzle',
-		title: 'Using Cloudflare D1 with Drizzle ORM',
-		content: `# Cloudflare D1 with Drizzle ORM
-
-D1 is Cloudflare's serverless SQLite database. Combined with Drizzle ORM, it provides a type-safe database layer at the edge.
-
-## Schema Definition
-
-\`\`\`typescript
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
-
-export const posts = sqliteTable('posts', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  title: text('title').notNull(),
-  content: text('content').notNull(),
-})
-\`\`\`
-
-## Querying
-
-\`\`\`typescript
-const allPosts = await db.select().from(posts).orderBy(desc(posts.createdAt))
-\`\`\`
-
-### Advantages
-
-- **Zero cold starts** -- D1 is always warm
-- **Global replication** -- data close to users
-- **SQL compatibility** -- standard SQLite queries work`,
-	},
-	{
-		slug: 'nord-color-theme',
-		title: 'Designing with the Nord Color Palette',
-		content: `# The Nord Color Palette
-
-Nord is an arctic, north-bluish color palette designed for clean, uncluttered UI.
-
-## The Four Groups
-
-### Polar Night (dark backgrounds)
-- \`#2E3440\` -- darkest base
-- \`#3B4252\` -- elevated surfaces
-- \`#434C5E\` -- subtle highlights
-- \`#4C566A\` -- comments and muted text
-
-### Snow Storm (light backgrounds)
-- \`#D8DEE9\` -- muted text on dark
-- \`#E5E9F0\` -- secondary surfaces
-- \`#ECEFF4\` -- primary background
-
-### Frost (accent blues)
-A gradient from teal to deep blue:
-- \`#8FBCBB\` \`#88C0D0\` \`#81A1C1\` \`#5E81AC\`
-
-### Aurora (semantic colors)
-- Red \`#BF616A\` -- errors, destructive actions
-- Orange \`#D08770\` -- warnings
-- Yellow \`#EBCB8B\` -- highlights
-- Green \`#A3BE8C\` -- success
-- Purple \`#B48EAD\` -- special elements
-
-> Nord works beautifully for both light and dark themes because it was designed as a unified system from the start.`,
-	},
-	{
-		slug: 'view-transitions-api',
-		title: 'Smooth Theme Switching with View Transitions',
-		content: `# View Transitions API
-
-The View Transitions API enables smooth animated transitions between DOM states without complex JavaScript animation libraries.
-
-## How It Works
-
-\`\`\`typescript
-document.startViewTransition(() => {
-  // Update the DOM
-  document.documentElement.classList.toggle('dark')
-})
-\`\`\`
-
-The browser:
-1. Captures the current state as a screenshot
-2. Runs your callback to update the DOM
-3. Captures the new state
-4. Animates between the two snapshots
-
-## Circular Wipe Effect
-
-You can customize the animation with CSS:
-
-\`\`\`css
-::view-transition-new(root) {
-  animation: none;
-  z-index: 9999;
+const stack = {
+  framework: 'TanStack Start',
+  database: 'Cloudflare D1',
+  orm: 'Drizzle',
+  styling: 'Tailwind CSS v4',
+  hosting: 'Cloudflare Workers',
 }
 \`\`\`
 
-Combined with \`clip-path\` animations in JavaScript, this creates an expanding circle reveal from the toggle button.
+### Why This Stack?
 
-### Browser Support
+- **Edge-first**: everything runs close to the user
+- **Type-safe**: from database schema to route params
+- **Minimal**: no CMS, no build-time generation, no bloat
 
-View Transitions are supported in Chrome 111+ and Safari 18+. The implementation should always include a **fallback** for unsupported browsers.`,
+The result is a site that loads fast, stays simple, and grows with you.`,
+		summary: 'Turning a simple blog into a multi-content personal site at the edge.',
+		tags: JSON.stringify(['typescript', 'cloudflare', 'design']),
+		coverImage: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 1,
+		metadata: '{}',
+		createdAt: isoDate(1),
+		updatedAt: isoDate(1),
+		publishedAt: isoDate(1),
 	},
 	{
-		slug: 'markdown-rendering-on-the-edge',
-		title: 'Markdown Rendering on the Edge',
-		content: `# Markdown Rendering on the Edge
+		id: uuid(),
+		type: 'post',
+		title: 'Server Functions Are the New API',
+		slug: 'server-functions-new-api',
+		content: `# Server Functions Are the New API
 
-Rendering Markdown on edge workers requires lightweight parsers that work without Node.js built-in modules.
+REST endpoints had a good run. GraphQL pushed the boundary. But server functions might be the simplest answer yet.
 
-## Why marked?
-
-\`marked\` is a popular choice because:
-
-- **Small bundle** -- ~40KB minified
-- **No dependencies** -- works in any JavaScript runtime
-- **Fast** -- compiled regular expressions
-- **Extensible** -- custom renderers and tokenizers
-
-## Usage
+## What Changed
 
 \`\`\`typescript
-import { marked } from 'marked'
+// Before: manual fetch, manual types, manual error handling
+const res = await fetch('/api/posts?page=2')
+const data: PostsResponse = await res.json()
 
-const html = marked.parse('# Hello **world**')
+// After: one function, fully typed
+const data = await getPostsPaginated({ data: { page: 2 } })
 \`\`\`
 
-## Security Considerations
+The compiler knows the input shape. The compiler knows the output shape. There's no serialization mismatch, no URL typos, no forgotten headers.
 
-Always sanitize user-generated Markdown before rendering. In our case, posts are authored by the site owner, so we trust the content. For user-generated content, consider:
+## When to Still Use REST
 
-- DOMPurify for client-side sanitization
-- A strict allowlist of HTML tags
-- CSP headers to prevent script injection`,
+- Public APIs consumed by third parties
+- Webhooks and integrations
+- When you need HTTP caching semantics
+
+For internal data fetching in a full-stack app? Server functions win.`,
+		summary: 'Why type-safe server functions are replacing REST for internal data fetching.',
+		tags: JSON.stringify(['typescript', 'react', 'architecture']),
+		coverImage: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(5),
+		updatedAt: isoDate(5),
+		publishedAt: isoDate(5),
 	},
 	{
-		slug: 'tailwind-typography-plugin',
-		title: 'Beautiful Prose with @tailwindcss/typography',
-		content: `# @tailwindcss/typography
+		id: uuid(),
+		type: 'post',
+		title: 'Edge Computing Changed My Mental Model',
+		slug: 'edge-computing-mental-model',
+		content: `# Edge Computing Changed My Mental Model
 
-The typography plugin adds a set of \`prose\` classes that style vanilla HTML with beautiful typographic defaults.
+I used to think of servers as faraway machines in Virginia or Frankfurt. Edge computing flipped that.
 
-## Before and After
-
-Without the plugin, rendered Markdown looks unstyled -- headings have no spacing, lists lack indentation, and code blocks blend into the background.
-
-With \`prose\` classes applied:
-
-- Headings get proper size hierarchy and spacing
-- Paragraphs have comfortable line height
-- Code blocks get backgrounds and padding
-- Blockquotes get a left border accent
-- Lists are properly indented
-
-## Dark Mode
-
-\`\`\`html
-<article class="prose dark:prose-invert">
-  <!-- Markdown content here -->
-</article>
-\`\`\`
-
-The \`prose-invert\` class flips all typographic colors for dark backgrounds. Combined with Nord's Snow Storm and Polar Night palettes, it creates excellent readability in both modes.`,
-	},
-	{
-		slug: 'server-side-rendering-react-19',
-		title: 'Server-Side Rendering with React 19',
-		content: `# SSR with React 19
-
-React 19 brings significant improvements to server-side rendering, making frameworks like TanStack Start more powerful.
-
-## Key Improvements
-
-### Streaming SSR
-React 19 streams HTML as components resolve, reducing Time to First Byte:
+## The Old Model
 
 \`\`\`
-Server: <html><body>
-Server: <header>...</header>
-Server: <main> (loading...)
-Server: <article>Full content</article>
-Server: </main></body></html>
+User (Tokyo) -> CDN -> Origin (us-east-1) -> Database (us-east-1)
+                       ~200ms round trip
 \`\`\`
 
-### Selective Hydration
-Only interactive components get hydrated. Static content stays as plain HTML.
+## The New Model
 
-### Server Components
-Components that never ship JavaScript to the client:
-
-\`\`\`typescript
-// This component's code stays on the server
-async function PostList() {
-  const posts = await db.select().from(postsTable)
-  return <ul>{posts.map(p => <li key={p.id}>{p.title}</li>)}</ul>
-}
+\`\`\`
+User (Tokyo) -> Worker (Tokyo) -> D1 (replicated)
+                ~10ms
 \`\`\`
 
-## The Result
+The difference isn't just latency. It changes how you think about:
 
-- Faster initial page loads
-- Less JavaScript sent to the client
-- Better SEO out of the box`,
-	},
-	{
-		slug: 'edge-computing-cloudflare-workers',
-		title: 'Edge Computing with Cloudflare Workers',
-		content: `# Edge Computing with Cloudflare Workers
-
-Cloudflare Workers run your code in 300+ data centers worldwide, bringing computation close to your users.
-
-## Why Edge?
+1. **Caching** -- less necessary when origin is 10ms away
+2. **Error budgets** -- fewer network hops, fewer failures
+3. **Data locality** -- your code runs where your users are
 
 | Metric | Traditional | Edge |
 |--------|-----------|------|
-| Latency | 100-300ms | 10-50ms |
-| Cold start | 500ms-5s | <1ms |
-| Scaling | Manual | Automatic |
+| TTFB | 200-400ms | 20-50ms |
+| Cold start | 1-5s | <1ms |
+| Global consistency | Hard | Built-in |
 
-## Worker Bindings
-
-Workers connect to Cloudflare services through **bindings**:
-
-- **D1** -- SQLite database
-- **R2** -- Object storage (S3-compatible)
-- **KV** -- Key-value store
-- **Durable Objects** -- stateful coordination
-
-## Configuration
-
-\`\`\`jsonc
-// wrangler.jsonc
-{
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "my-database"
-  }]
-}
-\`\`\`
-
-Each binding is available as \`env.DB\`, \`env.ASSETS\`, etc. in your worker code.`,
+> The best optimization is removing the distance between computation and user.`,
+		summary: 'How deploying at the edge changes your architecture thinking.',
+		tags: JSON.stringify(['cloudflare', 'architecture', 'performance']),
+		coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(12),
+		updatedAt: isoDate(12),
+		publishedAt: isoDate(12),
 	},
 	{
-		slug: 'file-based-routing-patterns',
-		title: 'File-Based Routing in TanStack Router',
-		content: `# File-Based Routing
+		id: uuid(),
+		type: 'post',
+		title: 'The Case for Minimal CSS',
+		slug: 'case-for-minimal-css',
+		content: `# The Case for Minimal CSS
 
-TanStack Router uses the file system to define routes, making navigation intuitive and discoverable.
+Every pixel of visual complexity is a decision your user has to process. Less is more.
 
-## Route Structure
+## Design Tokens Over Decoration
 
-\`\`\`
-src/routes/
-  __root.tsx      -> Layout wrapper
-  index.tsx       -> /
-  about.tsx       -> /about
-  post/
-    $slug.tsx     -> /post/:slug (dynamic segment)
-\`\`\`
+Instead of reaching for gradients, shadows, and animations, start with:
 
-## Dynamic Routes
-
-The \`$\` prefix creates a dynamic segment:
-
-\`\`\`typescript
-// src/routes/post/$slug.tsx
-export const Route = createFileRoute('/post/$slug')({
-  loader: ({ params }) => getPostBySlug(params.slug),
-  component: PostPage,
-})
-\`\`\`
-
-## Loaders
-
-Each route can define a **loader** that fetches data before the component renders:
-
-\`\`\`typescript
-loader: ({ params }) => {
-  return fetchPost(params.slug)
-}
-\`\`\`
-
-Loaders run on both server (SSR) and client (navigation), ensuring data is always available when the component mounts.
-
-### Type Safety
-
-Route params, search params, and loader data are **fully typed** -- no runtime checks needed.`,
-	},
-	{
-		slug: 'css-custom-properties-theming',
-		title: 'CSS Custom Properties for Theming',
-		content: `# CSS Custom Properties for Theming
-
-CSS custom properties (variables) are the backbone of modern theming systems.
-
-## The Pattern
-
-Define variables on \`:root\` and override in \`.dark\`:
+- **Typography**: a clear size scale and line height
+- **Spacing**: consistent padding and margin rhythm
+- **Color**: a small, intentional palette
 
 \`\`\`css
 :root {
-  --background: #eceff4;
-  --foreground: #2e3440;
-}
-
-.dark {
-  --background: #2e3440;
-  --foreground: #d8dee9;
+  --text-heading: oklch(0.2 0.005 90);
+  --text-primary: oklch(0.35 0.01 90);
+  --text-secondary: oklch(0.55 0.01 90);
+  --border-default: oklch(0.88 0.005 90);
 }
 \`\`\`
 
-## With Tailwind CSS v4
+## When to Add Complexity
 
-Tailwind v4 reads variables directly via \`@theme\`:
+Add visual weight only when it serves a purpose:
 
-\`\`\`css
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-\`\`\`
+- **Borders** separate distinct content regions
+- **Shadows** indicate elevation (modals, dropdowns)
+- **Color accents** guide attention to interactive elements
+- **Transitions** provide continuity during state changes
 
-Now \`bg-background\` and \`text-foreground\` automatically adapt to the active theme.
-
-## Advantages Over Class-Based Theming
-
-1. **No JavaScript** -- pure CSS switching
-2. **Inherited** -- children automatically get parent theme
-3. **Performant** -- single class toggle, no re-renders
-4. **Composable** -- nest themes within themes`,
+Everything else is noise.`,
+		summary: 'Why restraint in CSS leads to better user experiences.',
+		tags: JSON.stringify(['design', 'css', 'typography']),
+		coverImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(20),
+		updatedAt: isoDate(20),
+		publishedAt: isoDate(20),
 	},
-	{
-		slug: 'building-a-blog-with-tanstack',
-		title: 'Building a Blog from Scratch',
-		content: `# Building a Blog from Scratch
 
-This blog is built with a minimal stack: TanStack Start for the framework, D1 for storage, and Markdown for content.
+	// ── Projects (2) ──
+	{
+		id: 'proj-taki',
+		type: 'project',
+		title: 'taki',
+		slug: 'taki',
+		content: `# taki
+
+A minimal personal site engine built on TanStack Start and Cloudflare Workers.
+
+## Goals
+
+- Ship a personal site that feels like *you*, not a template
+- Support multiple content types: posts, notes, thoughts, media logs
+- Run entirely at the edge with zero cold starts
 
 ## Architecture
 
+The app is a single Cloudflare Worker that handles SSR, API calls, and static assets. D1 provides the database, and Drizzle ORM keeps everything type-safe.
+
 \`\`\`
-Browser <-> Cloudflare Worker <-> D1 Database
-           (TanStack Start)     (SQLite)
+Browser <-> Worker (SSR + API) <-> D1 (SQLite)
 \`\`\`
 
-### Content Pipeline
+## Status
 
-1. Posts are stored as **Markdown** in the database
-2. On request, the server fetches and returns raw Markdown
-3. The client renders Markdown to HTML using \`marked\`
-4. \`@tailwindcss/typography\` styles the output
-
-## Design Decisions
-
-- **No CMS** -- posts are seeded directly, keeping the stack simple
-- **No build-time generation** -- pages are rendered on demand at the edge
-- **Client-side Markdown** -- avoids HTML storage, keeps content portable
-- **Pagination** -- 10 posts per page, ordered by creation date
-
-## What Could Come Next
-
-- RSS feed generation
-- Full-text search with D1
-- Post categories and tags
-- Reading time estimates`,
+Actively developed. Current focus: timeline view and content type system.`,
+		summary: 'A minimal personal site engine on TanStack Start + Cloudflare Workers.',
+		tags: JSON.stringify(['typescript', 'react', 'cloudflare']),
+		coverImage: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 1,
+		metadata: '{}',
+		createdAt: isoDate(3),
+		updatedAt: isoDate(1),
+		publishedAt: isoDate(3),
 	},
 	{
-		slug: 'drizzle-orm-migration-workflow',
-		title: 'Database Migrations with Drizzle Kit',
-		content: `# Database Migrations with Drizzle Kit
+		id: 'proj-kaze',
+		type: 'project',
+		title: 'kaze',
+		slug: 'kaze',
+		content: `# kaze
 
-Drizzle Kit provides a schema-first migration workflow that generates SQL from your TypeScript schema definitions.
+A CLI tool for scaffolding edge-first web projects.
 
-## The Workflow
+## Features
 
-### 1. Define Schema
+- Interactive project setup with sensible defaults
+- Templates for TanStack Start, Hono, and vanilla Workers
+- Built-in D1 schema generation
+- Opinionated but ejectable config (oxlint, oxfmt, Tailwind)
+
+## Usage
+
+\`\`\`bash
+bunx kaze init my-project
+cd my-project
+bun dev
+\`\`\`
+
+The scaffolder asks a few questions and generates a project structure with all the boilerplate pre-configured.`,
+		summary: 'CLI scaffolder for edge-first web projects.',
+		tags: JSON.stringify(['typescript', 'cli', 'tooling']),
+		coverImage: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(30),
+		updatedAt: isoDate(15),
+		publishedAt: isoDate(30),
+	},
+
+	// ── Thoughts (4) ──
+	{
+		id: uuid(),
+		type: 'thought',
+		title: null,
+		slug: null,
+		content:
+			'Sometimes the best refactor is deleting the abstraction and writing the three lines of code inline.',
+		summary: null,
+		tags: JSON.stringify(['code']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ mood: 'contemplative' }),
+		createdAt: isoDate(2),
+		updatedAt: isoDate(2),
+		publishedAt: isoDate(2),
+	},
+	{
+		id: uuid(),
+		type: 'thought',
+		title: null,
+		slug: null,
+		content:
+			'Spent the morning watching rain hit the window. No code today. Some days are for recharging.',
+		summary: null,
+		tags: JSON.stringify(['life']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ mood: 'calm' }),
+		createdAt: isoDate(7),
+		updatedAt: isoDate(7),
+		publishedAt: isoDate(7),
+	},
+	{
+		id: uuid(),
+		type: 'thought',
+		title: null,
+		slug: null,
+		content:
+			"Type safety is like seatbelts. You don't notice them until the one time they save you.",
+		summary: null,
+		tags: JSON.stringify(['typescript']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ mood: 'thoughtful' }),
+		createdAt: isoDate(14),
+		updatedAt: isoDate(14),
+		publishedAt: isoDate(14),
+	},
+	{
+		id: uuid(),
+		type: 'thought',
+		title: null,
+		slug: null,
+		content:
+			'The best documentation is a well-named function. The second best is a comment explaining why.',
+		summary: null,
+		tags: JSON.stringify(['code']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ mood: 'opinionated' }),
+		createdAt: isoDate(25),
+		updatedAt: isoDate(25),
+		publishedAt: isoDate(25),
+	},
+
+	// ── Notes (3) ──
+	{
+		id: uuid(),
+		type: 'note',
+		title: 'TIL: Drizzle D1 Batch API',
+		slug: 'til-drizzle-d1-batch',
+		content: `Drizzle supports D1's batch API for running multiple queries in a single round trip:
 
 \`\`\`typescript
-export const posts = sqliteTable('posts', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  slug: text('slug').unique().notNull(),
-  title: text('title').notNull(),
+const results = await db.batch([
+  db.select().from(posts).limit(10),
+  db.select({ total: count() }).from(posts),
+])
+\`\`\`
+
+This is significantly faster than sequential queries because D1 can optimize the execution plan. Each query in the batch runs in the same transaction.
+
+Worth remembering for any page that needs multiple independent queries.`,
+		summary: 'Using Drizzle batch API for efficient multi-query D1 calls.',
+		tags: JSON.stringify(['drizzle', 'cloudflare', 'til']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(4),
+		updatedAt: isoDate(4),
+		publishedAt: isoDate(4),
+	},
+	{
+		id: uuid(),
+		type: 'note',
+		title: 'oklch Is the Future of CSS Color',
+		slug: 'oklch-css-color',
+		content: `Switched all my design tokens to oklch and the difference is noticeable. Colors feel more perceptually uniform -- a 0.1 lightness step looks the same regardless of hue.
+
+The format: \`oklch(lightness chroma hue)\`
+
+- Lightness: 0 (black) to 1 (white)
+- Chroma: 0 (gray) to ~0.4 (vivid)
+- Hue: 0-360 degrees
+
+The killer feature: you can adjust lightness without shifting the perceived hue. Try that with HSL and watch your blues turn purple.`,
+		summary: 'Why oklch produces more consistent color scales than HSL.',
+		tags: JSON.stringify(['css', 'design', 'til']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(9),
+		updatedAt: isoDate(9),
+		publishedAt: isoDate(9),
+	},
+	{
+		id: uuid(),
+		type: 'note',
+		title: 'Bun Shell Scripting',
+		slug: 'bun-shell-scripting',
+		content: `Bun's shell API is surprisingly nice for scripting tasks that would normally be bash:
+
+\`\`\`typescript
+import { $ } from 'bun'
+
+const files = await $\`find src -name "*.ts" | wc -l\`.text()
+console.log(\`TypeScript files: \${files.trim()}\`)
+\`\`\`
+
+Cross-platform, type-safe, and no need to escape strings. Using it for all my project scripts now.`,
+		summary: "Using Bun's built-in shell API for cross-platform scripting.",
+		tags: JSON.stringify(['bun', 'tooling', 'til']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(18),
+		updatedAt: isoDate(18),
+		publishedAt: isoDate(18),
+	},
+
+	// ── Snippets (2) ──
+	{
+		id: uuid(),
+		type: 'snippet',
+		title: 'Type-Safe Search Params',
+		slug: null,
+		content: `Validate and type search params in TanStack Router:
+
+\`\`\`typescript
+export const Route = createFileRoute('/')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Number(search.page) || 1,
+    type: (search.type as string) || undefined,
+    tag: (search.tag as string) || undefined,
+  }),
+  loaderDeps: ({ search }) => search,
+  loader: ({ deps }) => getTimeline(deps),
 })
 \`\`\`
 
-### 2. Generate Migration
-
-\`\`\`bash
-bun run db:generate
-\`\`\`
-
-This diffs your schema against the previous state and generates a SQL migration file.
-
-### 3. Apply Migration
-
-Migrations can be applied:
-- **Locally**: via \`wrangler d1 migrations apply\`
-- **Remotely**: during deployment
-
-## Benefits
-
-- **Type safety** -- schema and queries share the same types
-- **Incremental** -- only changed columns generate migration steps
-- **Reviewable** -- generated SQL files can be code-reviewed
-- **Rollback-friendly** -- each migration is a separate file`,
+The \`validateSearch\` function acts as both parser and type guard. Downstream code gets full type inference with zero runtime overhead beyond the validation itself.`,
+		summary: 'Pattern for validated, typed search params in TanStack Router.',
+		tags: JSON.stringify(['typescript', 'react']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ language: 'typescript' }),
+		createdAt: isoDate(6),
+		updatedAt: isoDate(6),
+		publishedAt: isoDate(6),
 	},
 	{
-		slug: 'web-performance-edge',
-		title: 'Web Performance at the Edge',
-		content: `# Web Performance at the Edge
-
-Deploying to the edge dramatically improves web performance metrics.
-
-## Core Web Vitals Impact
-
-### Largest Contentful Paint (LCP)
-Edge SSR reduces LCP because:
-- HTML is generated close to the user
-- No round-trip to a distant origin server
-- Streaming delivers visible content faster
-
-### First Input Delay (FID)
-Selective hydration means:
-- Less JavaScript to parse
-- Interactive elements respond sooner
-- Non-interactive content never blocks the main thread
-
-### Cumulative Layout Shift (CLS)
-SSR eliminates layout shift from:
-- Content loading states
-- Font swaps (with proper font loading)
-- Dynamic content insertion
-
-## Measuring Performance
+		id: uuid(),
+		type: 'snippet',
+		title: 'Truncate at Word Boundary',
+		slug: null,
+		content: `Clean text truncation that never cuts mid-word:
 
 \`\`\`typescript
-// Use the Performance API
-const lcp = performance.getEntriesByType('largest-contentful-paint')
-console.log('LCP:', lcp[lcp.length - 1]?.startTime)
+function truncateAtBoundary(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text
+  const truncated = text.slice(0, maxLen)
+  const boundary = Math.max(
+    truncated.lastIndexOf('\\n'),
+    truncated.lastIndexOf(' '),
+  )
+  return (boundary > maxLen * 0.5
+    ? truncated.slice(0, boundary)
+    : truncated) + '...'
+}
 \`\`\`
 
-## Practical Tips
+Prefers breaking at newlines, falls back to spaces. The 50% threshold prevents degenerate cases where a long word at the start would truncate too aggressively.`,
+		summary: 'Word-boundary-aware text truncation in TypeScript.',
+		tags: JSON.stringify(['typescript', 'utils']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ language: 'typescript' }),
+		createdAt: isoDate(22),
+		updatedAt: isoDate(22),
+		publishedAt: isoDate(22),
+	},
 
-- Inline critical CSS
-- Preload fonts with \`font-display: swap\`
-- Lazy-load images below the fold
-- Use \`fetchpriority="high"\` on hero images`,
+	// ── Media (3) ──
+	{
+		id: 'media-book-1',
+		type: 'media',
+		title: 'Designing Data-Intensive Applications',
+		slug: null,
+		content:
+			"The single best technical book I've read on distributed systems. Kleppmann covers everything from B-trees to stream processing with clarity that makes complex topics feel approachable. Every chapter changed how I think about building systems.",
+		summary: "Martin Kleppmann's essential guide to distributed systems.",
+		tags: JSON.stringify(['reading', 'tech']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(8),
+		updatedAt: isoDate(8),
+		publishedAt: isoDate(8),
 	},
 	{
-		slug: 'typescript-strict-mode',
-		title: 'Why TypeScript Strict Mode Matters',
-		content: `# TypeScript Strict Mode
+		id: 'media-movie-1',
+		type: 'media',
+		title: 'Perfect Days',
+		slug: null,
+		content:
+			'Wim Wenders captures the beauty of routine. A Tokyo toilet cleaner finds profound joy in trees, music, and the patterns of light. Slow, meditative, and deeply human. Left the theater wanting to simplify everything.',
+		summary: "Wim Wenders' meditation on finding beauty in routine.",
+		tags: JSON.stringify(['film', 'life']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(15),
+		updatedAt: isoDate(15),
+		publishedAt: isoDate(15),
+	},
+	{
+		id: 'media-music-1',
+		type: 'media',
+		title: 'Blonde',
+		slug: null,
+		content:
+			'Frank Ocean built something that doesn\'t fit any genre. Channel Orange was brilliant, but Blonde is art. "Self Control" still hits differently every listen. The kind of album where silence between tracks carries meaning.',
+		summary: "Frank Ocean's genre-defying masterpiece.",
+		tags: JSON.stringify(['music']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(35),
+		updatedAt: isoDate(35),
+		publishedAt: isoDate(35),
+	},
 
-Strict mode enables a set of type-checking options that catch more bugs at compile time.
+	// ── Milestone (1) ──
+	{
+		id: uuid(),
+		type: 'milestone',
+		title: 'taki v0 launched',
+		slug: null,
+		content:
+			"First version of the site is live. Timeline, projects, bookshelf, guestbook -- all running on a single Cloudflare Worker. It's rough around the edges, but it's *mine*.",
+		summary: 'The first public version of this site.',
+		tags: JSON.stringify(['milestone', 'taki']),
+		coverImage: 'https://images.unsplash.com/photo-1504805572947-34fad45aed93?w=800&h=400&fit=crop',
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(0),
+		updatedAt: isoDate(0),
+		publishedAt: isoDate(0),
+	},
 
-## What Strict Enables
+	// ── Statuses (2) ──
+	{
+		id: uuid(),
+		type: 'status',
+		title: null,
+		slug: null,
+		content: 'Refactoring the database schema. Again.',
+		summary: null,
+		tags: JSON.stringify(['code']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(1),
+		updatedAt: isoDate(1),
+		publishedAt: isoDate(1),
+	},
+	{
+		id: uuid(),
+		type: 'status',
+		title: null,
+		slug: null,
+		content: 'Dark mode looks perfect. Light mode needs work.',
+		summary: null,
+		tags: JSON.stringify(['design']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: '{}',
+		createdAt: isoDate(10),
+		updatedAt: isoDate(10),
+		publishedAt: isoDate(10),
+	},
 
-\`\`\`jsonc
-// tsconfig.json
-{
-  "compilerOptions": {
-    "strict": true
-    // Equivalent to enabling all of:
-    // strictNullChecks
-    // strictFunctionTypes
-    // strictBindCallApply
-    // strictPropertyInitialization
-    // noImplicitAny
-    // noImplicitThis
-    // alwaysStrict
-    // useUnknownInCatch
-  }
-}
-\`\`\`
-
-## Real-World Example
-
-Without strict mode:
-
-\`\`\`typescript
-function getPost(slug: string) {
-  const post = posts.find(p => p.slug === slug)
-  return post.title // No error, but crashes if post is undefined!
-}
-\`\`\`
-
-With strict mode:
-
-\`\`\`typescript
-function getPost(slug: string) {
-  const post = posts.find(p => p.slug === slug)
-  return post.title // Error: 'post' is possibly undefined
-}
-\`\`\`
-
-The compiler forces you to handle the \`undefined\` case, preventing runtime crashes.
-
-## The Tradeoff
-
-Strict mode requires more explicit type annotations, but the investment pays off with fewer production bugs and better IDE support.`,
+	// ── Repost (1) ──
+	{
+		id: uuid(),
+		type: 'repost',
+		title: 'The Grug Brained Developer',
+		slug: null,
+		content:
+			'Essential reading for anyone who has over-engineered a system. "Complexity very, very bad." The whole thing is gold.\n\nSource: https://grugbrain.dev',
+		summary: 'A satirical but wise guide to keeping software simple.',
+		tags: JSON.stringify(['code', 'reading']),
+		coverImage: null,
+		isDraft: 0,
+		isPinned: 0,
+		metadata: JSON.stringify({ sourceUrl: 'https://grugbrain.dev' }),
+		createdAt: isoDate(28),
+		updatedAt: isoDate(28),
+		publishedAt: isoDate(28),
 	},
 ]
 
-export async function seedPosts() {
+const seedProjectExtensions = [
+	{
+		id: uuid(),
+		contentId: 'proj-taki',
+		status: 'active',
+		demoUrl: null,
+		repoUrl: 'https://github.com/example/taki',
+		techStack: JSON.stringify([
+			'TanStack Start',
+			'React',
+			'Drizzle',
+			'Cloudflare Workers',
+			'Tailwind CSS',
+		]),
+		screenshots: JSON.stringify([]),
+		role: 'Creator',
+	},
+	{
+		id: uuid(),
+		contentId: 'proj-kaze',
+		status: 'planned',
+		demoUrl: null,
+		repoUrl: 'https://github.com/example/kaze',
+		techStack: JSON.stringify(['TypeScript', 'Bun', 'Commander']),
+		screenshots: JSON.stringify([]),
+		role: 'Creator',
+	},
+]
+
+const seedMediaExtensions = [
+	{
+		id: uuid(),
+		contentId: 'media-book-1',
+		mediaType: 'book',
+		rating: 5,
+		creator: 'Martin Kleppmann',
+		cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=200&h=300&fit=crop',
+		year: 2017,
+		comment: 'Changed how I think about systems design.',
+		finishedAt: isoDate(8),
+	},
+	{
+		id: uuid(),
+		contentId: 'media-movie-1',
+		mediaType: 'movie',
+		rating: 5,
+		creator: 'Wim Wenders',
+		cover: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&h=300&fit=crop',
+		year: 2023,
+		comment: 'A quiet masterpiece about finding beauty in the everyday.',
+		finishedAt: isoDate(15),
+	},
+	{
+		id: uuid(),
+		contentId: 'media-music-1',
+		mediaType: 'music',
+		rating: 5,
+		creator: 'Frank Ocean',
+		cover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=300&fit=crop',
+		year: 2016,
+		comment: 'The kind of album that rewards every re-listen.',
+		finishedAt: isoDate(35),
+	},
+]
+
+const seedLinks = [
+	{
+		id: uuid(),
+		name: 'TanStack',
+		url: 'https://tanstack.com',
+		avatar: null,
+		description: 'High-quality, type-safe libraries for React.',
+		category: 'tools',
+		createdAt: isoDate(30),
+	},
+	{
+		id: uuid(),
+		name: 'Cloudflare Workers Docs',
+		url: 'https://developers.cloudflare.com/workers/',
+		avatar: null,
+		description: 'Official documentation for Cloudflare Workers platform.',
+		category: 'tools',
+		createdAt: isoDate(30),
+	},
+	{
+		id: uuid(),
+		name: 'Drizzle ORM',
+		url: 'https://orm.drizzle.team',
+		avatar: null,
+		description: 'TypeScript ORM that feels like writing SQL.',
+		category: 'tools',
+		createdAt: isoDate(30),
+	},
+	{
+		id: uuid(),
+		name: 'Overreacted',
+		url: 'https://overreacted.io',
+		avatar: null,
+		description: "Dan Abramov's personal blog on React and programming.",
+		category: 'blogs',
+		createdAt: isoDate(30),
+	},
+	{
+		id: uuid(),
+		name: 'Josh W Comeau',
+		url: 'https://www.joshwcomeau.com',
+		avatar: null,
+		description: 'Interactive articles on CSS, React, and web dev.',
+		category: 'blogs',
+		createdAt: isoDate(30),
+	},
+]
+
+const seedGuestbook = [
+	{
+		id: uuid(),
+		nickname: 'wanderer',
+		avatar: null,
+		content: 'Clean design. Love the copper accent color.',
+		website: null,
+		createdAt: isoDate(2),
+	},
+	{
+		id: uuid(),
+		nickname: 'dev_hiro',
+		avatar: null,
+		content: 'TanStack Start + D1 is such a good combo. Bookmarked this for reference.',
+		website: 'https://hiro.dev',
+		createdAt: isoDate(5),
+	},
+	{
+		id: uuid(),
+		nickname: 'moonlight',
+		avatar: null,
+		content: 'The dark mode transition is smooth. How did you do the wipe effect?',
+		website: null,
+		createdAt: isoDate(8),
+	},
+	{
+		id: uuid(),
+		nickname: 'sakura',
+		avatar: null,
+		content: 'Found this through the grugbrain repost. Staying for the vibes.',
+		website: 'https://sakura.page',
+		createdAt: isoDate(12),
+	},
+]
+
+export async function seedDatabase() {
 	const db = getDb()
 
-	const [{ total }] = await db.select({ total: count() }).from(posts)
+	const [{ total }] = await db.select({ total: count() }).from(baseContent)
 	if (total > 0) return
 
-	const now = Date.now()
-	const dayMs = 86_400_000
-
-	await db.insert(posts).values(
-		samplePosts.map((post, i) => ({
-			...post,
-			createdAt: new Date(now - (samplePosts.length - 1 - i) * dayMs),
-			updatedAt: new Date(now - (samplePosts.length - 1 - i) * dayMs),
-		})),
-	)
+	// D1 limits bound parameters per query; batch inserts to stay under the limit
+	const batchSize = 5
+	for (let i = 0; i < seedContent.length; i += batchSize) {
+		await db.insert(baseContent).values(seedContent.slice(i, i + batchSize))
+	}
+	await db.insert(projectExtension).values(seedProjectExtensions)
+	await db.insert(mediaExtension).values(seedMediaExtensions)
+	await db.insert(links).values(seedLinks)
+	await db.insert(guestbookEntries).values(seedGuestbook)
 }

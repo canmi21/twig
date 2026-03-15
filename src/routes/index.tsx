@@ -1,67 +1,52 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { getPostsPaginated, type PaginatedPosts } from '~/server/functions/posts'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { getTimelineItems, type PaginatedTimeline } from '~/server/functions/content'
 import { getPlatformStatus } from '~/server/functions/health'
+import { ContentCard } from '~/components/content-card'
+import { TimelineFilter } from '~/components/timeline-filter'
 
 export const Route = createFileRoute('/')({
 	validateSearch: (search: Record<string, unknown>) => ({
 		page: Number(search.page) || 1,
+		type: (search.type as string) || undefined,
+		tag: (search.tag as string) || undefined,
 	}),
-	loaderDeps: ({ search }) => ({ page: search.page }),
-	loader: async ({ deps }): Promise<PaginatedPosts> => {
-		// Seed database on first load (idempotent)
+	loaderDeps: ({ search }) => search,
+	loader: async ({ deps }): Promise<PaginatedTimeline> => {
 		await getPlatformStatus()
-		return await getPostsPaginated({ data: { page: deps.page } })
+		return await getTimelineItems({ data: { page: deps.page, type: deps.type, tag: deps.tag } })
 	},
-	component: HomePage,
+	component: TimelinePage,
 })
 
-function formatDate(timestamp: number): string {
-	return new Date(timestamp).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-	})
-}
-
-function HomePage() {
-	const { posts, totalPages, currentPage } = Route.useLoaderData()
+function TimelinePage() {
+	const { items, totalPages, currentPage } = Route.useLoaderData()
 	const navigate = useNavigate()
+	const { tag } = Route.useSearch()
 
 	return (
-		<section className="space-y-10">
-			<div className="divide-border divide-y">
-				{posts.map((post) => (
-					<article key={post.slug} className="py-6 first:pt-0 last:pb-0">
-						<Link
-							to="/post/$slug"
-							params={{ slug: post.slug }}
-							className="text-content-heading hover:text-primary text-xl font-semibold no-underline transition-colors"
-						>
-							{post.title}
-						</Link>
-						<p className="text-content-secondary mt-1 text-sm">{formatDate(post.createdAt)}</p>
-						{/* Content is authored by site owner, not user-generated input */}
-						<div
-							className="prose prose-sm mt-3 max-w-none"
-							dangerouslySetInnerHTML={{ __html: post.html }}
-						/>
-						<Link
-							to="/post/$slug"
-							params={{ slug: post.slug }}
-							className="text-primary hover:text-accent-hover mt-3 inline-block text-sm no-underline transition-colors hover:underline"
-						>
-							Read more
-						</Link>
-					</article>
+		<section>
+			<TimelineFilter />
+			{tag && (
+				<p className="text-content-secondary mb-4 text-sm">
+					Filtered by tag: <span className="text-primary font-medium">#{tag}</span>
+				</p>
+			)}
+			<div className="space-y-4">
+				{items.map((item) => (
+					<ContentCard key={item.id} item={item} />
 				))}
 			</div>
-
+			{items.length === 0 && (
+				<p className="text-content-secondary py-12 text-center">No content found.</p>
+			)}
 			{totalPages > 1 && (
-				<nav className="flex items-center justify-center gap-4" aria-label="Pagination">
+				<nav className="mt-8 flex items-center justify-center gap-4" aria-label="Pagination">
 					<button
 						type="button"
 						disabled={currentPage <= 1}
-						onClick={() => void navigate({ search: { page: currentPage - 1 } })}
+						onClick={() =>
+							void navigate({ search: (prev) => ({ ...prev, page: currentPage - 1 }) })
+						}
 						className="border-border-default text-content-primary hover:bg-elevated disabled:text-content-disabled rounded-md border px-4 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Previous
@@ -72,7 +57,9 @@ function HomePage() {
 					<button
 						type="button"
 						disabled={currentPage >= totalPages}
-						onClick={() => void navigate({ search: { page: currentPage + 1 } })}
+						onClick={() =>
+							void navigate({ search: (prev) => ({ ...prev, page: currentPage + 1 }) })
+						}
 						className="border-border-default text-content-primary hover:bg-elevated disabled:text-content-disabled rounded-md border px-4 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						Next
