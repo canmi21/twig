@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { useState, useEffect, useRef } from 'react'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import {
 	getTimelineCursor,
 	type CursorTimeline,
@@ -13,7 +13,6 @@ export const Route = createFileRoute('/')({
 	validateSearch: (search: Record<string, unknown>) => ({
 		at: typeof search.at === 'string' ? search.at : undefined,
 	}),
-	// empty loaderDeps -- search param changes keep the same match ID
 	loaderDeps: () => ({}),
 	shouldReload: false,
 	loader: async ({ location }): Promise<CursorTimeline> => {
@@ -26,14 +25,28 @@ export const Route = createFileRoute('/')({
 	component: TimelinePage,
 })
 
+function silentReplaceUrl(routerHistory: { _ignoreSubscribers?: boolean }, url: string) {
+	const h = routerHistory as { _ignoreSubscribers?: boolean }
+	h._ignoreSubscribers = true
+	window.history.replaceState(null, '', url)
+	h._ignoreSubscribers = false
+}
+
+function anchorToUrl(anchor: string): string {
+	const [dateKey, idx] = anchor.split('#')
+	return idx === '1' ? `/?at=${dateKey}` : `/?at=${dateKey}#${idx}`
+}
+
 function TimelinePage() {
 	const initial = Route.useLoaderData()
 	const { at } = Route.useSearch()
+	const router = useRouter()
 	const [items, setItems] = useState<TimelineItem[]>(initial.items)
 	const [cursor, setCursor] = useState<string | null>(initial.nextCursor)
 	const [loading, setLoading] = useState(false)
-	const observerRef = useRef<IntersectionObserver | null>(null)
 	const currentAnchorRef = useRef<string>('')
+	const routerHistoryRef = useRef(router.history)
+	routerHistoryRef.current = router.history
 
 	const anchorMap = buildAnchorMap(items)
 
@@ -58,16 +71,13 @@ function TimelinePage() {
 		}
 	}, [at, items])
 
-	// intersection observer -- tracks topmost visible entry in a ref
-	const entryRefCallback = useCallback((node: HTMLDivElement | null) => {
-		if (!node || !observerRef.current) return
-		observerRef.current.observe(node)
-	}, [])
-
+	// observe all [data-anchor] elements, update URL silently on scroll
 	useEffect(() => {
 		if (typeof window === 'undefined') return
 
-		observerRef.current = new IntersectionObserver(
+		let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+		const observer = new IntersectionObserver(
 			(entries) => {
 				let topEntry: IntersectionObserverEntry | null = null
 				for (const entry of entries) {
@@ -81,14 +91,24 @@ function TimelinePage() {
 				const anchor = topEntry.target.getAttribute('data-anchor')
 				if (!anchor || anchor === currentAnchorRef.current) return
 				currentAnchorRef.current = anchor
+
+				if (debounceTimer) clearTimeout(debounceTimer)
+				debounceTimer = setTimeout(() => {
+					silentReplaceUrl(routerHistoryRef.current, anchorToUrl(anchor))
+				}, 210)
 			},
 			{ rootMargin: '-80px 0px -70% 0px' },
 		)
 
-		return () => {
-			observerRef.current?.disconnect()
+		for (const el of document.querySelectorAll('[data-anchor]')) {
+			observer.observe(el)
 		}
-	}, [])
+
+		return () => {
+			observer.disconnect()
+			if (debounceTimer) clearTimeout(debounceTimer)
+		}
+	}, [items]) // re-observe when items change (Load more)
 
 	async function loadMore() {
 		if (!cursor || loading) return
@@ -99,9 +119,7 @@ function TimelinePage() {
 			setCursor(result.nextCursor)
 
 			if (currentAnchorRef.current) {
-				const [dateKey, idx] = currentAnchorRef.current.split('#')
-				const url = idx === '1' ? `/?at=${dateKey}` : `/?at=${dateKey}#${idx}`
-				history.replaceState(null, '', url)
+				silentReplaceUrl(router.history, anchorToUrl(currentAnchorRef.current))
 			}
 		} finally {
 			setLoading(false)
@@ -124,7 +142,6 @@ function TimelinePage() {
 								yearLabel={mi === 0 && yi > 0 ? yearGroup.year : undefined}
 								anchorMap={anchorMap}
 								atDate={at}
-								entryRef={entryRefCallback}
 							/>
 						))}
 					</div>

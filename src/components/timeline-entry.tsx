@@ -32,23 +32,16 @@ export function TimelineEntry({
 	layout = 'full',
 	anchorId,
 	dataAnchor,
-	entryRef,
 }: {
 	item: TimelineItem
 	layout?: 'full' | 'card-only'
 	anchorId?: string
 	dataAnchor?: string
-	entryRef?: (node: HTMLDivElement | null) => void
 }) {
 	const hasCover = !!item.coverImage
 
 	return (
-		<div
-			id={anchorId ?? `item-${item.id}`}
-			className="scroll-mt-24"
-			data-anchor={dataAnchor}
-			ref={entryRef}
-		>
+		<div id={anchorId ?? `item-${item.id}`} className="scroll-mt-24" data-anchor={dataAnchor}>
 			{layout === 'full' && (
 				<p className="text-content-tertiary mb-1 text-xs sm:hidden">
 					{formatDayLabel(item.publishedAt ?? item.createdAt)}

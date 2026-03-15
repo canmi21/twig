@@ -23,7 +23,6 @@ export function TimelineMonth({
 	yearLabel,
 	anchorMap,
 	atDate,
-	entryRef,
 }: {
 	monthKey: string
 	items: TimelineItem[]
@@ -31,7 +30,6 @@ export function TimelineMonth({
 	yearLabel?: string
 	anchorMap: Map<string, { dateKey: string; index: number }>
 	atDate?: string
-	entryRef: (node: HTMLDivElement | null) => void
 }) {
 	const monthName = formatMonthName(monthKey)
 
@@ -75,7 +73,6 @@ export function TimelineMonth({
 									layout="card-only"
 									anchorId={anchorId}
 									dataAnchor={anchor ? `${anchor.dateKey}#${anchor.index}` : undefined}
-									entryRef={entryRef}
 								/>
 							</div>
 						</Fragment>
@@ -96,7 +93,6 @@ export function TimelineMonth({
 							layout="full"
 							anchorId={anchorId}
 							dataAnchor={anchor ? `${anchor.dateKey}#${anchor.index}` : undefined}
-							entryRef={entryRef}
 						/>
 					)
 				})}
