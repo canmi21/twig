@@ -1,0 +1,204 @@
+@custom-variant dark (&.dark);
+
+:root {
+	/* ── Neutral H90 ── */
+	--p-neutral-50: oklch(0.97 0.005 90);
+	--p-neutral-100: oklch(0.96 0.008 90);
+	--p-neutral-200: oklch(0.88 0.005 90);
+	--p-neutral-300: oklch(0.82 0.005 90);
+	--p-neutral-400: oklch(0.75 0.005 90);
+	--p-neutral-500: oklch(0.68 0.01 90);
+	--p-neutral-600: oklch(0.55 0.01 90);
+	--p-neutral-700: oklch(0.43 0.005 90);
+	--p-neutral-800: oklch(0.36 0.005 90);
+	--p-neutral-850: oklch(0.3 0.005 90);
+	--p-neutral-900: oklch(0.26 0.005 90);
+	--p-neutral-950: oklch(0.21 0.005 90);
+	--p-white: oklch(1 0 0);
+	--p-black: oklch(0.2 0.005 90);
+
+	/* ── Copper H55 theme color ── */
+	--p-copper-100: oklch(0.92 0.04 55);
+	--p-copper-200: oklch(0.82 0.06 55);
+	--p-copper-300: oklch(0.72 0.11 55);
+	--p-copper-400: oklch(0.68 0.12 55);
+	--p-copper-500: oklch(0.58 0.12 55);
+	--p-copper-600: oklch(0.52 0.12 55);
+	--p-copper-700: oklch(0.44 0.1 55);
+	--p-copper-800: oklch(0.36 0.08 55);
+	--p-copper-900: oklch(0.6 0.11 55);
+
+	/* ── Danger H25 functional only ── */
+	--p-red-light: oklch(0.92 0.04 25);
+	--p-red: oklch(0.55 0.18 25);
+	--p-red-dark: oklch(0.4 0.14 25);
+	--p-red-bright: oklch(0.7 0.16 25);
+
+	/* ── Warning H75 functional only ── */
+	--p-amber-light: oklch(0.94 0.05 75);
+	--p-amber: oklch(0.62 0.12 75);
+	--p-amber-dark: oklch(0.42 0.08 75);
+	--p-amber-bright: oklch(0.78 0.14 75);
+}
+
+:root {
+	/* ── Surfaces ── */
+	--bg-base: var(--p-neutral-50);
+	--bg-surface: var(--p-white);
+	--bg-elevated: var(--p-neutral-100);
+	--bg-sunken: oklch(0.94 0.006 90);
+	--bg-overlay: oklch(0.2 0.005 90 / 0.45);
+
+	/* ── Borders ── */
+	--border-default: var(--p-neutral-200);
+	--border-strong: var(--p-neutral-400);
+	--border-subtle: oklch(0.88 0.005 90 / 0.6);
+
+	/* ── Text ── */
+	--text-heading: var(--p-black);
+	--text-primary: oklch(0.35 0.01 90);
+	--text-secondary: var(--p-neutral-600);
+	--text-tertiary: var(--p-neutral-500);
+	--text-disabled: oklch(0.68 0.005 90);
+	--text-inverse: var(--p-white);
+	--text-on-accent: var(--p-white);
+
+	/* ── Accent ── */
+	--accent: var(--p-copper-600);
+	--accent-hover: var(--p-copper-700);
+	--accent-active: var(--p-copper-800);
+	--accent-subtle: var(--p-copper-100);
+	--accent-muted: var(--p-copper-200);
+	--accent-on-subtle: var(--p-copper-700);
+
+	/* ── Danger ── */
+	--danger: var(--p-red);
+	--danger-subtle: var(--p-red-light);
+	--danger-text: var(--p-red-dark);
+
+	/* ── Warning ── */
+	--warning: var(--p-amber);
+	--warning-subtle: var(--p-amber-light);
+	--warning-text: var(--p-amber-dark);
+
+	/* ── Utility ── */
+	--shadow-color: oklch(0.2 0.005 90 / 0.08);
+	--shadow-md: 0 2px 8px -2px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
+	--shadow-lg: 0 8px 24px -6px var(--shadow-color), 0 2px 6px -2px var(--shadow-color);
+	--selection: color-mix(in oklch, var(--accent-muted) 36%, transparent);
+	--focus-ring: var(--accent-muted);
+	--inline-code-bg: color-mix(in oklch, var(--bg-elevated) 75%, var(--bg-surface));
+	--blockquote-border: var(--accent-muted);
+	--blockquote-bg: color-mix(in oklch, var(--bg-elevated) 82%, transparent);
+
+	/* ── Radius ── */
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.625rem;
+	--radius-xl: 0.875rem;
+	--radius-full: 9999px;
+}
+
+.dark {
+	/* ── Surfaces ── */
+	--bg-base: var(--p-neutral-950);
+	--bg-surface: var(--p-neutral-900);
+	--bg-elevated: var(--p-neutral-850);
+	--bg-sunken: oklch(0.18 0.004 90);
+	--bg-overlay: oklch(0.1 0.003 90 / 0.65);
+
+	/* ── Borders ── */
+	--border-default: var(--p-neutral-800);
+	--border-strong: var(--p-neutral-700);
+	--border-subtle: oklch(0.36 0.005 90 / 0.5);
+
+	/* ── Text ── */
+	--text-heading: oklch(0.96 0.002 90);
+	--text-primary: oklch(0.88 0.005 90);
+	--text-secondary: var(--p-neutral-500);
+	--text-tertiary: oklch(0.52 0.008 90);
+	--text-disabled: oklch(0.44 0.005 90);
+	--text-inverse: var(--p-neutral-950);
+	--text-on-accent: var(--p-neutral-950);
+
+	/* ── Accent ── */
+	--accent: var(--p-copper-300);
+	--accent-hover: var(--p-copper-200);
+	--accent-active: var(--p-copper-400);
+	--accent-subtle: oklch(0.28 0.04 55);
+	--accent-muted: oklch(0.34 0.06 55);
+	--accent-on-subtle: var(--p-copper-200);
+
+	/* ── Danger ── */
+	--danger: var(--p-red-bright);
+	--danger-subtle: oklch(0.26 0.06 25);
+	--danger-text: var(--p-red-bright);
+
+	/* ── Warning  ── */
+	--warning: var(--p-amber-bright);
+	--warning-subtle: oklch(0.28 0.06 75);
+	--warning-text: var(--p-amber-bright);
+
+	/* ── Utility ── */
+	--shadow-color: oklch(0.05 0.003 90 / 0.5);
+	--selection: color-mix(in oklch, var(--accent) 24%, transparent);
+	--focus-ring: var(--accent-muted);
+	--inline-code-bg: color-mix(in oklch, var(--bg-elevated) 86%, var(--bg-surface));
+	--blockquote-bg: color-mix(in oklch, var(--bg-elevated) 88%, transparent);
+}
+
+:root,
+.dark {
+	--background: var(--bg-base);
+	--foreground: var(--text-primary);
+	--card: var(--bg-surface);
+	--card-foreground: var(--text-primary);
+	--popover: var(--bg-surface);
+	--popover-foreground: var(--text-primary);
+	--primary: var(--accent);
+	--primary-foreground: var(--text-on-accent);
+	--secondary: var(--bg-elevated);
+	--secondary-foreground: var(--text-primary);
+	--muted: var(--bg-elevated);
+	--muted-foreground: var(--text-secondary);
+	--accent-foreground: var(--text-on-accent);
+	--destructive: var(--danger);
+	--destructive-foreground: var(--text-on-accent);
+	--border: var(--border-default);
+	--input: var(--border-default);
+	--ring: var(--focus-ring);
+	--ring-offset: var(--bg-base);
+
+	--chart-1: var(--accent);
+	--chart-2: var(--accent-muted);
+	--chart-3: var(--p-neutral-500);
+	--chart-4: var(--p-neutral-700);
+	--chart-5: var(--p-neutral-300);
+
+	--sidebar-background: var(--bg-sunken);
+	--sidebar-foreground: var(--text-primary);
+	--sidebar-border: var(--border-default);
+	--sidebar-accent: var(--accent-subtle);
+	--sidebar-accent-foreground: var(--accent-on-subtle);
+	--sidebar-ring: var(--focus-ring);
+
+	--radius: var(--radius-lg);
+}
+
+:root,
+.dark {
+	--prose-body: var(--text-primary);
+	--prose-headings: var(--text-heading);
+	--prose-links: var(--accent);
+	--prose-links-hover: var(--accent-hover);
+	--prose-bold: var(--text-heading);
+	--prose-code: var(--text-heading);
+	--prose-pre-bg: var(--bg-elevated);
+	--prose-pre-border: var(--border-strong);
+	--prose-quote-border: var(--blockquote-border);
+	--prose-quote-text: var(--text-primary);
+	--prose-quote-bg: var(--blockquote-bg);
+	--prose-hr: var(--border-default);
+	--prose-th: var(--text-heading);
+	--prose-td-border: var(--border-default);
+}

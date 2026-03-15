@@ -7,9 +7,12 @@ export const Route = createFileRoute('/post/$slug')({
 		await getPostBySlug({ data: { slug: params.slug } }),
 	notFoundComponent: () => (
 		<section className="py-16 text-center">
-			<h1 className="text-foreground text-2xl font-semibold">Post not found</h1>
-			<p className="text-muted-foreground mt-2">The post you are looking for does not exist.</p>
-			<Link to="/" className="text-primary mt-4 inline-block text-sm font-medium hover:underline">
+			<h1 className="text-content-heading text-2xl font-semibold">Post not found</h1>
+			<p className="text-content-secondary mt-2">The post you are looking for does not exist.</p>
+			<Link
+				to="/"
+				className="text-primary hover:text-accent-hover mt-4 inline-block text-sm font-medium transition-colors hover:underline"
+			>
 				Back to home
 			</Link>
 		</section>
@@ -31,9 +34,12 @@ function PostPage() {
 	if (!post) {
 		return (
 			<section className="py-16 text-center">
-				<h1 className="text-foreground text-2xl font-semibold">Post not found</h1>
-				<p className="text-muted-foreground mt-2">The post you are looking for does not exist.</p>
-				<Link to="/" className="text-primary mt-4 inline-block text-sm font-medium hover:underline">
+				<h1 className="text-content-heading text-2xl font-semibold">Post not found</h1>
+				<p className="text-content-secondary mt-2">The post you are looking for does not exist.</p>
+				<Link
+					to="/"
+					className="text-primary hover:text-accent-hover mt-4 inline-block text-sm font-medium transition-colors hover:underline"
+				>
 					Back to home
 				</Link>
 			</section>
@@ -41,18 +47,18 @@ function PostPage() {
 	}
 
 	return (
-		<article className="mx-auto max-w-3xl rounded-[1.75rem]">
+		<article className="mx-auto max-w-3xl">
 			<Link
 				to="/"
-				className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-1 text-sm no-underline transition-colors"
+				className="text-content-secondary hover:text-content-heading mb-6 inline-flex items-center gap-1 text-sm no-underline transition-colors"
 			>
 				&larr; Back to posts
 			</Link>
-			<header className="border-border/80 mb-8 border-b pb-6">
-				<h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">
+			<header className="border-border-default mb-8 border-b pb-6">
+				<h1 className="text-content-heading text-3xl font-semibold tracking-tight sm:text-4xl">
 					{post.title}
 				</h1>
-				<p className="text-muted-foreground mt-2 text-sm">{formatDate(post.createdAt)}</p>
+				<p className="text-content-secondary mt-2 text-sm">{formatDate(post.createdAt)}</p>
 			</header>
 			{/* Content is authored by site owner, not user-generated input */}
 			<div

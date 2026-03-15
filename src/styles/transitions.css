@@ -2,7 +2,7 @@
 	animation-duration: 800ms;
 	animation-timing-function: ease-in-out;
 	animation-fill-mode: forwards;
-	z-index: 13;
+	z-index: 99;
 	isolation: isolate;
 }
 

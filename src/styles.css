@@ -1,51 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
+@import './styles/tokens.css';
 @import './styles/transitions.css';
 
-@custom-variant dark (&.dark);
-
-:root {
-	--background: #e9eef6;
-	--foreground: #2e3440;
-	--card: #f7f9fc;
-	--card-foreground: #2e3440;
-	--popover: #fbfcfe;
-	--popover-foreground: #2e3440;
-	--primary: #5e81ac;
-	--primary-foreground: #f7f9fc;
-	--secondary: #dce4ef;
-	--secondary-foreground: #3b4252;
-	--muted: #e3eaf3;
-	--muted-foreground: #5b687d;
-	--accent: #88c0d0;
-	--accent-foreground: #23303f;
-	--destructive: #bf616a;
-	--destructive-foreground: #f7f9fc;
-	--border: #cad5e3;
-	--input: #d7e0eb;
-	--ring: #81a1c1;
-	--surface-0: #f3f7fc;
-	--surface-1: #eaf0f7;
-	--surface-2: #dce5f0;
-	--shadow-color: rgb(94 129 172 / 16%);
-	--selection: rgb(129 161 193 / 22%);
-	--prose-body: #435065;
-	--prose-headings: #2e3440;
-	--prose-links: #5e81ac;
-	--prose-bold: #2e3440;
-	--prose-code: #3b4252;
-	--prose-pre-bg: #dfe8f2;
-	--prose-pre-border: #c8d3e1;
-	--prose-quote-border: #81a1c1;
-	--prose-quote-text: #3f4d61;
-	--radius: 0.625rem;
-}
-
 @theme inline {
-	--font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-	--font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--font-serif: var(--font-sans);
+	--color-surface: var(--bg-surface);
+	--color-elevated: var(--bg-elevated);
+	--color-sunken: var(--bg-sunken);
+	--color-overlay: var(--bg-overlay);
+	--color-border-default: var(--border-default);
+	--color-border-strong: var(--border-strong);
+	--color-border-subtle: var(--border-subtle);
+	--color-content-heading: var(--text-heading);
+	--color-content-primary: var(--text-primary);
+	--color-content-secondary: var(--text-secondary);
+	--color-content-tertiary: var(--text-tertiary);
+	--color-content-disabled: var(--text-disabled);
+	--color-accent-hover: var(--accent-hover);
+	--color-accent-active: var(--accent-active);
+	--color-accent-subtle: var(--accent-subtle);
+	--color-accent-muted: var(--accent-muted);
+	--color-accent-on-subtle: var(--accent-on-subtle);
+	--color-danger-subtle: var(--danger-subtle);
+	--color-danger-text: var(--danger-text);
+	--color-warning-subtle: var(--warning-subtle);
+	--color-warning-text: var(--warning-text);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -68,64 +50,19 @@
 	--color-surface-0: var(--surface-0);
 	--color-surface-1: var(--surface-1);
 	--color-surface-2: var(--surface-2);
-	--color-nord-frost-0: #8fbcbb;
-	--color-nord-frost-1: #88c0d0;
-	--color-nord-frost-2: #81a1c1;
-	--color-nord-frost-3: #5e81ac;
-	--color-nord-aurora-red: #bf616a;
-	--color-nord-aurora-orange: #d08770;
-	--color-nord-aurora-yellow: #ebcb8b;
-	--color-nord-aurora-green: #a3be8c;
-	--color-nord-aurora-purple: #b48ead;
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 }
 
-.dark {
-	--background: #191f2b;
-	--foreground: #e6edf5;
-	--card: #232b39;
-	--card-foreground: #edf3fb;
-	--popover: #1f2735;
-	--popover-foreground: #edf3fb;
-	--primary: #88c0d0;
-	--primary-foreground: #14202a;
-	--secondary: #2a3445;
-	--secondary-foreground: #d9e4f3;
-	--muted: #253042;
-	--muted-foreground: #9baac0;
-	--accent: #8fbcbb;
-	--accent-foreground: #112125;
-	--destructive: #bf616a;
-	--destructive-foreground: #edf3fb;
-	--border: #374255;
-	--input: #303a4d;
-	--ring: #81a1c1;
-	--surface-0: #171d29;
-	--surface-1: #1d2533;
-	--surface-2: #273143;
-	--shadow-color: rgb(7 10 18 / 48%);
-	--selection: rgb(136 192 208 / 28%);
-	--prose-body: #c4d1e3;
-	--prose-headings: #edf3fb;
-	--prose-links: #88c0d0;
-	--prose-bold: #edf3fb;
-	--prose-code: #d8e2f1;
-	--prose-pre-bg: #202938;
-	--prose-pre-border: #344056;
-	--prose-quote-border: #5e81ac;
-	--prose-quote-text: #cfdaeb;
-	color-scheme: dark;
-}
-
 html {
-	background:
-		radial-gradient(circle at top, rgb(136 192 208 / 10%), transparent 38%),
-		linear-gradient(180deg, var(--surface-0), var(--background) 28%, var(--surface-1) 100%);
 	background-color: var(--background);
 	color-scheme: light;
+}
+
+.dark {
+	color-scheme: dark;
 }
 
 * {
@@ -142,10 +79,7 @@ body {
 	margin: 0;
 	color: var(--foreground);
 	font-family: var(--font-sans);
-	background:
-		radial-gradient(circle at top, rgb(129 161 193 / 10%), transparent 32%),
-		linear-gradient(180deg, transparent, rgb(255 255 255 / 0%));
-	background-color: transparent;
+	background-color: var(--background);
 	overflow-x: hidden;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
@@ -188,29 +122,34 @@ code {
 	--tw-prose-code: var(--prose-code);
 	--tw-prose-pre-code: var(--foreground);
 	--tw-prose-pre-bg: var(--prose-pre-bg);
+	--tw-prose-th: var(--prose-th);
 	--tw-prose-th-borders: var(--border);
-	--tw-prose-td-borders: var(--border);
+	--tw-prose-td-borders: var(--prose-td-border);
 }
 
 .prose :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
 	border: 1px solid var(--prose-pre-border);
-	box-shadow: 0 18px 40px var(--shadow-color);
+	box-shadow: none;
 }
 
 .prose :where(code):not(:where(pre code, [class~='not-prose'], [class~='not-prose'] *)) {
 	border-radius: 0.45rem;
-	background: color-mix(in srgb, var(--card) 78%, var(--secondary));
+	background: var(--inline-code-bg);
 	padding: 0.18rem 0.4rem;
 }
 
 .prose :where(blockquote):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
 	font-style: normal;
-	background: color-mix(in srgb, var(--card) 72%, transparent);
-	border-radius: 1rem;
-	padding: 1rem 1.25rem;
+	background: transparent;
+	border-radius: 0;
+	padding: 0 0 0 1rem;
 }
 
 .prose :where(a):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
 	text-decoration-thickness: 0.08em;
 	text-underline-offset: 0.18em;
+}
+
+.prose :where(a:hover):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	color: var(--prose-links-hover);
 }
