@@ -23,6 +23,7 @@ export function TimelineMonth({
 	yearLabel,
 	anchorMap,
 	atDate,
+	itemIndexOffset = 0,
 }: {
 	monthKey: string
 	items: TimelineItem[]
@@ -30,6 +31,7 @@ export function TimelineMonth({
 	yearLabel?: string
 	anchorMap: Map<string, { dateKey: string; index: number }>
 	atDate?: string
+	itemIndexOffset?: number
 }) {
 	const monthName = formatMonthName(monthKey)
 
@@ -73,6 +75,7 @@ export function TimelineMonth({
 									layout="card-only"
 									anchorId={anchorId}
 									dataAnchor={anchor ? `${anchor.dateKey}#${anchor.index}` : undefined}
+									itemIndex={itemIndexOffset + i}
 								/>
 							</div>
 						</Fragment>
@@ -80,9 +83,9 @@ export function TimelineMonth({
 				})}
 			</div>
 
-			{/* mobile: stacked entries */}
+			{/* mobile */}
 			<div className="space-y-4 sm:hidden">
-				{items.map((item) => {
+				{items.map((item, i) => {
 					const anchor = anchorMap.get(item.id)
 					const anchorId = anchor && anchor.dateKey === atDate ? `at-${anchor.index}` : undefined
 
@@ -93,6 +96,7 @@ export function TimelineMonth({
 							layout="full"
 							anchorId={anchorId}
 							dataAnchor={anchor ? `${anchor.dateKey}#${anchor.index}` : undefined}
+							itemIndex={itemIndexOffset + i}
 						/>
 					)
 				})}
