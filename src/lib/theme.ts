@@ -8,15 +8,15 @@ export function setThemeCookie(preference: ThemePreference) {
 	document.cookie = `${THEME_COOKIE_KEY}=${preference};path=/;max-age=${THEME_MAX_AGE};samesite=lax`
 }
 
-export function getSystemTheme(): ResolvedTheme {
+function getSystemTheme(): ResolvedTheme {
 	return window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'
 }
 
-export function resolveTheme(preference?: ThemePreference | null): ResolvedTheme {
+function resolveTheme(preference?: ThemePreference | null): ResolvedTheme {
 	return preference ?? getSystemTheme()
 }
 
-export function applyResolvedTheme(resolved: ResolvedTheme) {
+function applyResolvedTheme(resolved: ResolvedTheme) {
 	document.documentElement.classList.toggle('dark', resolved === 'dark')
 	document.documentElement.style.colorScheme = resolved
 }
@@ -27,12 +27,12 @@ export function applyResolvedTheme(resolved: ResolvedTheme) {
  */
 export function applyResolvedThemeWithTransition(resolved: ResolvedTheme) {
 	if (!document.startViewTransition) {
-		applyResolvedTheme(resolved)
+		applyResolvedTheme(resolveTheme(resolved))
 		return
 	}
 
 	void document.startViewTransition(() => {
-		applyResolvedTheme(resolved)
+		applyResolvedTheme(resolveTheme(resolved))
 	})
 }
 

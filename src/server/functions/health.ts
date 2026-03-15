@@ -1,17 +1,15 @@
-import { env } from 'cloudflare:workers'
 import { createServerFn } from '@tanstack/react-start'
+import { seedPosts } from '~/server/database/seed'
 import { getDb } from '~/server/database'
 
-export const getPlatformStatus = createServerFn({ method: 'GET' }).handler(() => {
-	const db = typeof env.DB !== 'undefined' ? getDb() : null
+export const getPlatformStatus = createServerFn({ method: 'GET' }).handler(async () => {
+	const db = getDb()
+
+	// Seed posts on first request (idempotent)
+	await seedPosts()
 
 	return {
-		ok: true,
+		ok: db !== null,
 		generatedAt: new Date().toISOString(),
-		bindings: {
-			DB: db !== null,
-			ASSETS: typeof env.ASSETS !== 'undefined',
-			CACHE: typeof env.CACHE !== 'undefined',
-		},
 	}
 })

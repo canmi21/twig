@@ -1,6 +1,12 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "ignoreDependencies": ["cloudflare", "entities", "tailwindcss", "tw-animate-css"],
+  "ignoreDependencies": [
+    "@tailwindcss/typography",
+    "cloudflare",
+    "entities",
+    "tailwindcss",
+    "tw-animate-css"
+  ],
   "workspaces": {
     ".": {
       "entry": ["src/router.tsx"],
