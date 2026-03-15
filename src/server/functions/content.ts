@@ -223,7 +223,7 @@ export const getTimelineItems = createServerFn({ method: 'GET' }).handler(
 
 export const getTimelineCursor = createServerFn({ method: 'GET' }).handler(
 	async ({ data }): Promise<CursorTimeline> => {
-		const input = data as { cursor?: string; limit?: number } | undefined
+		const input = data as { cursor?: string; limit?: number; until?: string } | undefined
 		const limit = input?.limit ?? CURSOR_LIMIT
 		const db = getDb()
 		const { renderMarkdown } = await import('~/server/markdown')
@@ -252,6 +252,31 @@ export const getTimelineCursor = createServerFn({ method: 'GET' }).handler(
 			unpinnedConditions.push(
 				sql`(${effectiveDate} < ${cursorDate} OR (${effectiveDate} = ${cursorDate} AND ${baseContent.id} < ${cursorId}))`,
 			)
+		}
+
+		// "until" mode: load all items from newest down to (and including) the target date
+		if (input?.until && !input.cursor) {
+			const untilDate = `${input.until}T00:00:00.000Z`
+			const unpinnedRows = await db
+				.select()
+				.from(baseContent)
+				.where(and(...unpinnedConditions, sql`${effectiveDate} >= ${untilDate}`))
+				.orderBy(desc(effectiveDate), desc(baseContent.id))
+
+			const unpinnedItems = await buildTimelineItems(unpinnedRows, db, renderMarkdown)
+
+			// cursor for "load more" starts after the last item we fetched
+			let nextCursor: string | null = null
+			if (unpinnedRows.length > 0) {
+				const last = unpinnedRows[unpinnedRows.length - 1]
+				const lastDate = last.publishedAt ?? last.createdAt
+				nextCursor = `${lastDate}__${last.id}`
+			}
+
+			return {
+				items: [...pinnedItems, ...unpinnedItems],
+				nextCursor,
+			}
 		}
 
 		const unpinnedRows = await db

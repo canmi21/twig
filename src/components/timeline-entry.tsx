@@ -27,29 +27,34 @@ function EntryLink({ item, children }: { item: TimelineItem; children: React.Rea
 	return <>{children}</>
 }
 
-/**
- * layout="card-only": desktop mode, date is handled by parent grid
- * layout="full": mobile mode, includes inline date
- */
 export function TimelineEntry({
 	item,
 	layout = 'full',
+	anchorId,
+	dataAnchor,
+	entryRef,
 }: {
 	item: TimelineItem
 	layout?: 'full' | 'card-only'
+	anchorId?: string
+	dataAnchor?: string
+	entryRef?: (node: HTMLDivElement | null) => void
 }) {
 	const hasCover = !!item.coverImage
 
 	return (
-		<div id={`item-${item.id}`} className="scroll-mt-24">
-			{/* mobile inline date */}
+		<div
+			id={anchorId ?? `item-${item.id}`}
+			className="scroll-mt-24"
+			data-anchor={dataAnchor}
+			ref={entryRef}
+		>
 			{layout === 'full' && (
 				<p className="text-content-tertiary mb-1 text-xs sm:hidden">
 					{formatDayLabel(item.publishedAt ?? item.createdAt)}
 				</p>
 			)}
 
-			{/* card */}
 			<article className="border-border-default bg-surface overflow-hidden rounded-md border shadow-[var(--shadow-md)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]">
 				{hasCover && (
 					<EntryLink item={item}>

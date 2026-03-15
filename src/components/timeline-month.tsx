@@ -21,12 +21,17 @@ export function TimelineMonth({
 	items,
 	hideHeader = false,
 	yearLabel,
+	anchorMap,
+	atDate,
+	entryRef,
 }: {
 	monthKey: string
 	items: TimelineItem[]
 	hideHeader?: boolean
-	/** When set, this month is the first in a new year -- merge year + month into one divider */
 	yearLabel?: string
+	anchorMap: Map<string, { dateKey: string; index: number }>
+	atDate?: string
+	entryRef: (node: HTMLDivElement | null) => void
 }) {
 	const monthName = formatMonthName(monthKey)
 
@@ -34,15 +39,13 @@ export function TimelineMonth({
 		<section>
 			{!hideHeader &&
 				(yearLabel ? (
-					/* combined year + month divider -- year-level prominence */
 					<div className="mb-6 flex items-center gap-4 pt-6">
 						<span className="text-content-heading text-base font-bold tracking-wide">
-							{monthName} {yearLabel}
+							{yearLabel}
 						</span>
 						<span className="bg-border-default h-px flex-1" />
 					</div>
 				) : (
-					/* regular month divider -- subtle */
 					<div className="mb-6 flex items-center gap-3">
 						<span className="text-content-tertiary text-xs font-medium tracking-wide">
 							{monthName}
@@ -56,18 +59,24 @@ export function TimelineMonth({
 				{items.map((item, i) => {
 					const dateStr = item.publishedAt ?? item.createdAt
 					const { day, weekday } = formatEntryDate(dateStr)
+					const anchor = anchorMap.get(item.id)
+					const anchorId = anchor && anchor.dateKey === atDate ? `at-${anchor.index}` : undefined
 
 					return (
 						<Fragment key={item.id}>
-							{/* day cell -- sticky within its grid row */}
 							<div className="bg-background sticky top-20 z-10 self-start pt-3 pb-2">
 								<p className="text-content-heading text-xl leading-none font-bold">{day}</p>
 								<p className="text-content-tertiary mt-0.5 text-xs leading-none">{weekday}</p>
 							</div>
 
-							{/* card cell */}
 							<div className={i < items.length - 1 ? 'mb-4 pt-1' : 'pt-1'}>
-								<TimelineEntry item={item} layout="card-only" />
+								<TimelineEntry
+									item={item}
+									layout="card-only"
+									anchorId={anchorId}
+									dataAnchor={anchor ? `${anchor.dateKey}#${anchor.index}` : undefined}
+									entryRef={entryRef}
+								/>
 							</div>
 						</Fragment>
 					)
@@ -76,9 +85,21 @@ export function TimelineMonth({
 
 			{/* mobile: stacked entries */}
 			<div className="space-y-4 sm:hidden">
-				{items.map((item) => (
-					<TimelineEntry key={item.id} item={item} layout="full" />
-				))}
+				{items.map((item) => {
+					const anchor = anchorMap.get(item.id)
+					const anchorId = anchor && anchor.dateKey === atDate ? `at-${anchor.index}` : undefined
+
+					return (
+						<TimelineEntry
+							key={item.id}
+							item={item}
+							layout="full"
+							anchorId={anchorId}
+							dataAnchor={anchor ? `${anchor.dateKey}#${anchor.index}` : undefined}
+							entryRef={entryRef}
+						/>
+					)
+				})}
 			</div>
 		</section>
 	)
