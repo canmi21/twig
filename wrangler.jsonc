@@ -3,7 +3,13 @@
   "name": "taki",
   "compatibility_date": "2026-03-12",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "src/entry-server.ts",
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+  },
   "d1_databases": [
     {
       "binding": "taki_sql",
