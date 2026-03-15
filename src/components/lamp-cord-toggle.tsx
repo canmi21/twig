@@ -1,7 +1,5 @@
-import { useState, useRef, useSyncExternalStore } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { setThemeCookie, type ThemePreference } from '~/lib/theme'
-
-const noopSubscribe = () => () => {}
 
 function readPreference(): ThemePreference {
 	const m = document.cookie.match(/\btheme=(light|dark)\b/)
@@ -15,11 +13,10 @@ function applyTheme(resolved: ThemePreference) {
 }
 
 export function LampCordToggle() {
-	const mounted = useSyncExternalStore(
-		noopSubscribe,
-		() => true,
-		() => false,
-	)
+	const [mounted, setMounted] = useState(false)
+	useEffect(() => {
+		requestAnimationFrame(() => setMounted(true))
+	}, [])
 
 	const [preference, setPreference] = useState<ThemePreference>(() => {
 		if (typeof document === 'undefined') return 'light'
@@ -76,7 +73,15 @@ export function LampCordToggle() {
 		setPreference(next)
 	}
 
-	if (!mounted) return null
+	if (!mounted) {
+		// Placeholder preserves DOM structure to prevent hydration mismatch
+		return (
+			<span className="fixed top-0 right-6 z-50 sm:right-8" aria-hidden="true">
+				<span className="bg-border-strong inline-block w-px" style={{ height: '4rem' }} />
+				<span className="bg-content-tertiary inline-block h-5 w-2 rounded-full" />
+			</span>
+		)
+	}
 
 	return (
 		<button

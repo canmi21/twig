@@ -11,8 +11,8 @@ function formatMonthName(yyyyMm: string): string {
 function formatEntryDate(iso: string): { day: string; weekday: string } {
 	const date = new Date(iso)
 	return {
-		day: date.toLocaleDateString('en-US', { day: 'numeric' }),
-		weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
+		day: date.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'UTC' }),
+		weekday: date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }),
 	}
 }
 

@@ -4,8 +4,8 @@ import { ContentCard } from '~/components/content-card'
 
 function formatDayLabel(iso: string): string {
 	const date = new Date(iso)
-	const day = date.toLocaleDateString('en-US', { day: 'numeric' })
-	const weekday = date.toLocaleDateString('en-US', { weekday: 'short' })
+	const day = date.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'UTC' })
+	const weekday = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })
 	return `${day} ${weekday}`
 }
 
