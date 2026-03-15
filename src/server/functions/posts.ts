@@ -9,7 +9,7 @@ const PREVIEW_LENGTH = 500
 export interface PostPreview {
 	slug: string
 	title: string
-	content: string
+	html: string
 	createdAt: number
 }
 
@@ -23,7 +23,7 @@ export interface PostDetail {
 	id: number
 	slug: string
 	title: string
-	content: string
+	html: string
 	createdAt: number
 	updatedAt: number
 }
@@ -37,6 +37,7 @@ export const getPostsPaginated = createServerFn({ method: 'GET' }).handler(
 		const [{ total }] = await db.select({ total: count() }).from(posts)
 		const totalPages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE))
 		const offset = (page - 1) * POSTS_PER_PAGE
+		const { renderMarkdown } = await import('~/server/markdown')
 
 		const rows = await db
 			.select({
@@ -50,12 +51,21 @@ export const getPostsPaginated = createServerFn({ method: 'GET' }).handler(
 			.limit(POSTS_PER_PAGE)
 			.offset(offset)
 
+		const previews = await Promise.all(
+			rows.map(async (row) => {
+				const content = truncateAtBoundary(row.content, PREVIEW_LENGTH)
+
+				return {
+					slug: row.slug,
+					title: row.title,
+					html: await renderMarkdown(content),
+					createdAt: row.createdAt.getTime(),
+				}
+			}),
+		)
+
 		return {
-			posts: rows.map((row) => ({
-				...row,
-				content: truncateAtBoundary(row.content, PREVIEW_LENGTH),
-				createdAt: row.createdAt.getTime(),
-			})),
+			posts: previews,
 			totalPages,
 			currentPage: page,
 		}
@@ -66,13 +76,17 @@ export const getPostBySlug = createServerFn({ method: 'GET' }).handler(
 	async ({ data }): Promise<PostDetail | null> => {
 		const input = data as { slug: string }
 		const db = getDb()
+		const { renderMarkdown } = await import('~/server/markdown')
 
 		const [post] = await db.select().from(posts).where(eq(posts.slug, input.slug)).limit(1)
 
 		if (!post) return null
 
 		return {
-			...post,
+			id: post.id,
+			slug: post.slug,
+			title: post.title,
+			html: await renderMarkdown(post.content),
 			createdAt: post.createdAt.getTime(),
 			updatedAt: post.updatedAt.getTime(),
 		}

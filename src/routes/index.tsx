@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { marked } from 'marked'
 import { getPostsPaginated, type PaginatedPosts } from '~/server/functions/posts'
 import { getPlatformStatus } from '~/server/functions/health'
 
@@ -44,7 +43,7 @@ function HomePage() {
 						{/* Content is authored by site owner, not user-generated input */}
 						<div
 							className="prose prose-sm mt-3 max-w-none"
-							dangerouslySetInnerHTML={{ __html: marked.parse(post.content) as string }}
+							dangerouslySetInnerHTML={{ __html: post.html }}
 						/>
 						<Link
 							to="/post/$slug"

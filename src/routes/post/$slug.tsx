@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { marked } from 'marked'
 import { getPostBySlug, type PostDetail } from '~/server/functions/posts'
 
 export const Route = createFileRoute('/post/$slug')({
@@ -63,7 +62,7 @@ function PostPage() {
 			{/* Content is authored by site owner, not user-generated input */}
 			<div
 				className="prose prose-sm sm:prose-base max-w-none"
-				dangerouslySetInnerHTML={{ __html: marked.parse(post.content) as string }}
+				dangerouslySetInnerHTML={{ __html: post.html }}
 			/>
 		</article>
 	)

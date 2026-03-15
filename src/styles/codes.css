@@ -1,0 +1,21 @@
+:root {
+	--code-fg: #b1b4b8;
+	--code-fg-muted: #7f8a90;
+	--code-ui-select: #4f636c;
+	--code-ui-border: #61727a;
+	--code-ui-dim: #6e6a86;
+	--code-ui-deep: #26233a;
+	--code-rose: #eb6f92;
+	--code-pine: #31748f;
+	--code-gold: #f6c177;
+	--code-foam: #9ccfd8;
+	--code-iris: #c4a7e7;
+}
+
+pre.shiki {
+	border: 1px solid var(--border-default);
+}
+
+pre.shiki code {
+	color: inherit;
+}

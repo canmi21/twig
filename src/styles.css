@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
+@import './styles/codes.css';
 @import './styles/tokens.css';
 @import './styles/transitions.css';
 
@@ -130,6 +131,10 @@ code {
 .prose :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
 	border: 1px solid var(--prose-pre-border);
 	box-shadow: none;
+}
+
+.prose :where(pre.shiki):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	border-color: var(--border-default);
 }
 
 .prose :where(code):not(:where(pre code, [class~='not-prose'], [class~='not-prose'] *)) {
