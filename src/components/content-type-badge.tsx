@@ -1,6 +1,6 @@
 import {
 	FileText,
-	Lightbulb,
+	Flame,
 	StickyNote,
 	FolderGit2,
 	Code2,
@@ -16,7 +16,7 @@ import type { ContentType } from '~/server/database/constants'
 
 const typeConfig: Record<ContentType, { icon: typeof FileText; label: string }> = {
 	post: { icon: FileText, label: 'Post' },
-	thought: { icon: Lightbulb, label: 'Thought' },
+	thought: { icon: Flame, label: 'Thought' },
 	note: { icon: StickyNote, label: 'Note' },
 	project: { icon: FolderGit2, label: 'Project' },
 	snippet: { icon: Code2, label: 'Snippet' },
@@ -34,9 +34,8 @@ export function ContentTypeBadge({ type }: { type: ContentType }) {
 	const Icon = config.icon
 
 	return (
-		<span className="bg-accent-subtle text-accent-on-subtle inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium">
-			<Icon className="size-3" />
-			{config.label}
+		<span className="text-content-tertiary inline-flex" title={config.label}>
+			<Icon className="size-3.5" />
 		</span>
 	)
 }

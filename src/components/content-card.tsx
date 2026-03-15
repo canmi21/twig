@@ -39,10 +39,15 @@ function ContentLink({ item, children }: { item: TimelineItem; children: React.R
 	return <>{children}</>
 }
 
-function HeavyCard({ item }: { item: TimelineItem }) {
+function HeavyCard({ item, variant }: { item: TimelineItem; variant: 'standalone' | 'embedded' }) {
 	return (
-		<article className="border-border-default overflow-hidden rounded-lg border">
-			{item.coverImage && (
+		<article
+			className={
+				variant === 'standalone' ? 'border-border-default overflow-hidden rounded-lg border' : ''
+			}
+		>
+			{/* standalone renders its own image; embedded skips it (timeline-entry handles it) */}
+			{variant === 'standalone' && item.coverImage && (
 				<ContentLink item={item}>
 					<img
 						src={item.coverImage}
@@ -52,8 +57,8 @@ function HeavyCard({ item }: { item: TimelineItem }) {
 					/>
 				</ContentLink>
 			)}
-			<div className="p-4">
-				<div className="mb-2 flex items-center gap-2">
+			<div className={variant === 'standalone' ? 'p-4' : ''}>
+				<div className="mb-1 flex items-center gap-2">
 					<ContentTypeBadge type={item.type} />
 					{item.isPinned === 1 && <Pin className="text-primary size-3.5" />}
 					<span className="text-content-tertiary text-xs">
@@ -62,12 +67,14 @@ function HeavyCard({ item }: { item: TimelineItem }) {
 				</div>
 				{item.title && (
 					<ContentLink item={item}>
-						<h2 className="text-content-heading hover:text-primary mb-1 text-lg font-semibold transition-colors">
+						<h2 className="text-content-heading hover:text-primary mb-0.5 text-base font-semibold transition-colors">
 							{item.title}
 						</h2>
 					</ContentLink>
 				)}
-				{item.summary && <p className="text-content-secondary mb-3 text-sm">{item.summary}</p>}
+				{item.summary && (
+					<p className="text-content-secondary mb-2 truncate text-sm">{item.summary}</p>
+				)}
 				{item.project && (
 					<div className="text-content-secondary mb-2 flex flex-wrap gap-1.5 text-xs">
 						<span className="bg-elevated rounded px-1.5 py-0.5 font-medium">
@@ -86,10 +93,12 @@ function HeavyCard({ item }: { item: TimelineItem }) {
 	)
 }
 
-function MediumCard({ item }: { item: TimelineItem }) {
+function MediumCard({ item, variant }: { item: TimelineItem; variant: 'standalone' | 'embedded' }) {
 	return (
-		<article className="border-border-default rounded-lg border p-4">
-			<div className="mb-2 flex items-center gap-2">
+		<article
+			className={variant === 'standalone' ? 'border-border-default rounded-lg border p-4' : ''}
+		>
+			<div className="mb-1 flex items-center gap-2">
 				<ContentTypeBadge type={item.type} />
 				<span className="text-content-tertiary text-xs">
 					{formatDate(item.publishedAt ?? item.createdAt)}
@@ -97,13 +106,13 @@ function MediumCard({ item }: { item: TimelineItem }) {
 			</div>
 			{item.title && (
 				<ContentLink item={item}>
-					<h3 className="text-content-heading hover:text-primary mb-1 font-semibold transition-colors">
+					<h3 className="text-content-heading hover:text-primary mb-0.5 text-sm font-semibold transition-colors">
 						{item.title}
 					</h3>
 				</ContentLink>
 			)}
 			{item.media && (
-				<div className="mb-2 flex items-center gap-2 text-sm">
+				<div className="mb-1 flex items-center gap-2 text-sm">
 					{item.media.creator && (
 						<span className="text-content-secondary">{item.media.creator}</span>
 					)}
@@ -111,11 +120,12 @@ function MediumCard({ item }: { item: TimelineItem }) {
 				</div>
 			)}
 			{item.summary ? (
-				<p className="text-content-secondary mb-2 text-sm">{item.summary}</p>
+				<p className="text-content-secondary mb-1 truncate text-sm">{item.summary}</p>
 			) : (
-				/* Content is authored by site owner, not user-generated input */
+				// Content is authored by site owner, not user-generated input
 				<div
-					className="prose prose-sm mb-2 max-w-none"
+					className="prose prose-sm mb-1 line-clamp-2 max-w-none"
+					// biome-ignore lint: owner-authored content, safe to render
 					dangerouslySetInnerHTML={{ __html: item.contentHtml }}
 				/>
 			)}
@@ -124,9 +134,15 @@ function MediumCard({ item }: { item: TimelineItem }) {
 	)
 }
 
-function LightCard({ item }: { item: TimelineItem }) {
+function LightCard({ item, variant }: { item: TimelineItem; variant: 'standalone' | 'embedded' }) {
 	return (
-		<article className="border-border-subtle flex gap-3 border-b py-3 last:border-b-0">
+		<article
+			className={
+				variant === 'standalone'
+					? 'border-border-subtle flex gap-3 border-b py-3 last:border-b-0'
+					: 'flex gap-3'
+			}
+		>
 			<div className="shrink-0 pt-0.5">
 				<ContentTypeBadge type={item.type} />
 			</div>
@@ -136,10 +152,11 @@ function LightCard({ item }: { item: TimelineItem }) {
 				)}
 				{/* Content is authored by site owner, not user-generated input */}
 				<div
-					className="prose prose-sm max-w-none"
+					className="prose prose-sm line-clamp-2 max-w-none"
+					// biome-ignore lint: owner-authored content, safe to render
 					dangerouslySetInnerHTML={{ __html: item.contentHtml }}
 				/>
-				<span className="text-content-tertiary mt-1 block text-xs">
+				<span className="text-content-tertiary mt-0.5 block text-xs">
 					{formatDate(item.publishedAt ?? item.createdAt)}
 				</span>
 			</div>
@@ -147,15 +164,21 @@ function LightCard({ item }: { item: TimelineItem }) {
 	)
 }
 
-export function ContentCard({ item }: { item: TimelineItem }) {
+export function ContentCard({
+	item,
+	variant = 'standalone',
+}: {
+	item: TimelineItem
+	variant?: 'standalone' | 'embedded'
+}) {
 	const weight = getContentWeight(item.type)
 
 	switch (weight) {
 		case 'heavy':
-			return <HeavyCard item={item} />
+			return <HeavyCard item={item} variant={variant} />
 		case 'medium':
-			return <MediumCard item={item} />
+			return <MediumCard item={item} variant={variant} />
 		case 'light':
-			return <LightCard item={item} />
+			return <LightCard item={item} variant={variant} />
 	}
 }
