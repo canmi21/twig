@@ -1,3 +1,8 @@
+/*
+ * View transition defaults for footer theme toggle (wipe animation).
+ * The lamp cord toggle overrides these via WAAPI (radial clip-path).
+ */
+
 ::view-transition-group(root) {
 	animation-duration: 800ms;
 	animation-timing-function: ease-in-out;
@@ -31,6 +36,11 @@
 
 html.dark::view-transition-new(root) {
 	animation-name: wipe-from-top-to-bottom;
+}
+
+/* suppress wipe animation when lamp cord radial transition is active */
+html.radial-transition::view-transition-new(root) {
+	animation-name: none;
 }
 
 @keyframes wipe-from-top-to-bottom {

@@ -1,7 +1,7 @@
 import {
 	FileText,
 	Flame,
-	StickyNote,
+	Scroll,
 	FolderGit2,
 	Code2,
 	Palette,
@@ -22,7 +22,7 @@ import type { ContentType } from '~/server/database/constants'
 const typeConfig: Record<ContentType, { icon: typeof FileText; label: string }> = {
 	post: { icon: FileText, label: 'Post' },
 	thought: { icon: Flame, label: 'Thought' },
-	note: { icon: StickyNote, label: 'Note' },
+	note: { icon: Scroll, label: 'Note' },
 	project: { icon: FolderGit2, label: 'Project' },
 	snippet: { icon: Code2, label: 'Snippet' },
 	design: { icon: Palette, label: 'Design' },

@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useState, useRef, useSyncExternalStore } from 'react'
 import { setThemeCookie, type ThemePreference } from '~/lib/theme'
 
 const noopSubscribe = () => () => {}
@@ -9,8 +9,7 @@ function readPreference(): ThemePreference {
 	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 }
 
-/** Instant theme switch -- no view transition, like a physical pull cord */
-function applyInstant(resolved: ThemePreference) {
+function applyTheme(resolved: ThemePreference) {
 	document.documentElement.classList.toggle('dark', resolved === 'dark')
 	document.documentElement.style.colorScheme = resolved
 }
@@ -28,13 +27,51 @@ export function LampCordToggle() {
 	})
 
 	const [pulled, setPulled] = useState(false)
+	const handleRef = useRef<HTMLDivElement>(null)
 
 	function toggle() {
 		setPulled(true)
 		setTimeout(() => setPulled(false), 250)
 
 		const next = preference === 'dark' ? 'light' : 'dark'
-		applyInstant(next)
+
+		// radial view transition from the handle position
+		if (document.startViewTransition && handleRef.current) {
+			const rect = handleRef.current.getBoundingClientRect()
+			const x = rect.left + rect.width / 2
+			const y = rect.top + rect.height / 2
+			const radius = Math.hypot(
+				Math.max(x, window.innerWidth - x),
+				Math.max(y, window.innerHeight - y),
+			)
+
+			// flag to suppress CSS wipe animation -- only radial WAAPI runs
+			document.documentElement.classList.add('radial-transition')
+
+			const transition = document.startViewTransition(() => {
+				applyTheme(next)
+			})
+
+			void transition.ready.then(() => {
+				document.documentElement.animate(
+					{
+						clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+					},
+					{
+						duration: 500,
+						easing: 'ease-out',
+						pseudoElement: '::view-transition-new(root)',
+					},
+				)
+			})
+
+			void transition.finished.then(() => {
+				document.documentElement.classList.remove('radial-transition')
+			})
+		} else {
+			applyTheme(next)
+		}
+
 		setThemeCookie(next)
 		setPreference(next)
 	}
@@ -53,10 +90,11 @@ export function LampCordToggle() {
 				className="bg-border-strong w-px transition-all duration-250 ease-out"
 				style={{ height: pulled ? '5.5rem' : '4rem' }}
 			/>
-			{/* chain ring */}
-			<div className="border-border-strong -mt-px size-2 rounded-full border" />
-			{/* pendant handle -- capsule shape */}
-			<div className="bg-content-tertiary group-hover:bg-primary mt-0.5 h-5 w-2 rounded-full transition-colors" />
+			{/* handle */}
+			<div
+				ref={handleRef}
+				className="bg-content-tertiary group-hover:bg-primary h-5 w-2 rounded-full transition-colors"
+			/>
 		</button>
 	)
 }

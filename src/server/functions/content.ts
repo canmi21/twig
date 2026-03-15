@@ -17,7 +17,6 @@ export interface TimelineItem {
 	tags: string[]
 	coverImage: string | null
 	slug: string | null
-	isPinned: number
 	metadata: Record<string, unknown>
 	createdAt: string
 	publishedAt: string | null
@@ -59,7 +58,7 @@ export interface ContentDetail {
 	tags: string[]
 	coverImage: string | null
 	slug: string | null
-	isPinned: number
+
 	metadata: Record<string, unknown>
 	createdAt: string
 	updatedAt: string
@@ -132,10 +131,7 @@ export const getTimelineItems = createServerFn({ method: 'GET' }).handler(
 			.select()
 			.from(baseContent)
 			.where(whereClause)
-			.orderBy(
-				desc(baseContent.isPinned),
-				desc(sql`coalesce(${baseContent.publishedAt}, ${baseContent.createdAt})`),
-			)
+			.orderBy(desc(sql`coalesce(${baseContent.publishedAt}, ${baseContent.createdAt})`))
 			.limit(ITEMS_PER_PAGE)
 			.offset(offset)
 
@@ -184,7 +180,7 @@ export const getTimelineItems = createServerFn({ method: 'GET' }).handler(
 					tags: parseTags(row.tags),
 					coverImage: row.coverImage,
 					slug: row.slug,
-					isPinned: row.isPinned,
+
 					metadata: parseJson(row.metadata),
 					createdAt: row.createdAt,
 					publishedAt: row.publishedAt,
@@ -229,80 +225,39 @@ export const getTimelineCursor = createServerFn({ method: 'GET' }).handler(
 		const { renderMarkdown } = await import('~/server/markdown')
 
 		const effectiveDate = sql`coalesce(${baseContent.publishedAt}, ${baseContent.createdAt})`
-		const baseConditions = [eq(baseContent.isDraft, 0)]
-
-		let pinnedItems: TimelineItem[] = []
-
-		if (!input?.cursor) {
-			// first load: fetch pinned items separately
-			const pinnedRows = await db
-				.select()
-				.from(baseContent)
-				.where(and(...baseConditions, eq(baseContent.isPinned, 1)))
-				.orderBy(desc(effectiveDate))
-
-			pinnedItems = await buildTimelineItems(pinnedRows, db, renderMarkdown)
-		}
-
-		// unpinned items with cursor condition
-		const unpinnedConditions = [...baseConditions, eq(baseContent.isPinned, 0)]
+		const conditions = [eq(baseContent.isDraft, 0)]
 
 		if (input?.cursor) {
 			const [cursorDate, cursorId] = input.cursor.split('__')
-			unpinnedConditions.push(
+			conditions.push(
 				sql`(${effectiveDate} < ${cursorDate} OR (${effectiveDate} = ${cursorDate} AND ${baseContent.id} < ${cursorId}))`,
 			)
 		}
 
-		// "until" mode: load CURSOR_LIMIT items starting from the target date going older
+		// "until" mode: load items starting from the target date going older
 		if (input?.until && !input.cursor) {
 			const dayEnd = `${input.until}T23:59:59.999Z`
-
-			const rows = await db
-				.select()
-				.from(baseContent)
-				.where(and(...unpinnedConditions, sql`${effectiveDate} <= ${dayEnd}`))
-				.orderBy(desc(effectiveDate), desc(baseContent.id))
-				.limit(limit + 1)
-
-			const hasMore = rows.length > limit
-			const slicedRows = rows.slice(0, limit)
-			const unpinnedItems = await buildTimelineItems(slicedRows, db, renderMarkdown)
-
-			let nextCursor: string | null = null
-			if (hasMore && slicedRows.length > 0) {
-				const last = slicedRows[slicedRows.length - 1]
-				nextCursor = `${last.publishedAt ?? last.createdAt}__${last.id}`
-			}
-
-			return {
-				items: [...pinnedItems, ...unpinnedItems],
-				nextCursor,
-			}
+			conditions.push(sql`${effectiveDate} <= ${dayEnd}`)
 		}
 
-		const unpinnedRows = await db
+		const rows = await db
 			.select()
 			.from(baseContent)
-			.where(and(...unpinnedConditions))
+			.where(and(...conditions))
 			.orderBy(desc(effectiveDate), desc(baseContent.id))
 			.limit(limit + 1)
 
-		const hasMore = unpinnedRows.length > limit
-		const slicedRows = unpinnedRows.slice(0, limit)
-		const unpinnedItems = await buildTimelineItems(slicedRows, db, renderMarkdown)
+		const hasMore = rows.length > limit
+		const slicedRows = rows.slice(0, limit)
+		const items = await buildTimelineItems(slicedRows, db, renderMarkdown)
 
 		let nextCursor: string | null = null
 		if (hasMore && slicedRows.length > 0) {
 			const last = slicedRows[slicedRows.length - 1]
-			const lastDate = last.publishedAt ?? last.createdAt
-			nextCursor = `${lastDate}__${last.id}`
+			nextCursor = `${last.publishedAt ?? last.createdAt}__${last.id}`
 		}
 
-		return {
-			items: [...pinnedItems, ...unpinnedItems],
-			nextCursor,
-		}
+		return { items, nextCursor }
 	},
 )
 
@@ -316,7 +271,7 @@ async function buildTimelineItems(
 		tags: string
 		coverImage: string | null
 		slug: string | null
-		isPinned: number
+
 		metadata: string
 		createdAt: string
 		updatedAt: string
@@ -367,7 +322,7 @@ async function buildTimelineItems(
 				tags: parseTags(row.tags),
 				coverImage: row.coverImage,
 				slug: row.slug,
-				isPinned: row.isPinned,
+
 				metadata: parseJson(row.metadata),
 				createdAt: row.createdAt,
 				publishedAt: row.publishedAt,
@@ -424,7 +379,7 @@ export const getContentBySlug = createServerFn({ method: 'GET' }).handler(
 			tags: parseTags(row.tags),
 			coverImage: row.coverImage,
 			slug: row.slug,
-			isPinned: row.isPinned,
+
 			metadata: parseJson(row.metadata),
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
@@ -487,7 +442,7 @@ export const getContentById = createServerFn({ method: 'GET' }).handler(
 			tags: parseTags(row.tags),
 			coverImage: row.coverImage,
 			slug: row.slug,
-			isPinned: row.isPinned,
+
 			metadata: parseJson(row.metadata),
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt,
@@ -540,10 +495,7 @@ export const getProjectsList = createServerFn({ method: 'GET' }).handler(
 			.select()
 			.from(baseContent)
 			.where(and(eq(baseContent.type, 'project'), eq(baseContent.isDraft, 0)))
-			.orderBy(
-				desc(baseContent.isPinned),
-				desc(sql`coalesce(${baseContent.publishedAt}, ${baseContent.createdAt})`),
-			)
+			.orderBy(desc(sql`coalesce(${baseContent.publishedAt}, ${baseContent.createdAt})`))
 
 		const items = await Promise.all(
 			rows.map(async (row): Promise<TimelineItem> => {
@@ -565,7 +517,7 @@ export const getProjectsList = createServerFn({ method: 'GET' }).handler(
 					tags: parseTags(row.tags),
 					coverImage: row.coverImage,
 					slug: row.slug,
-					isPinned: row.isPinned,
+
 					metadata: parseJson(row.metadata),
 					createdAt: row.createdAt,
 					publishedAt: row.publishedAt,
@@ -624,7 +576,7 @@ export const getMediaCollection = createServerFn({ method: 'GET' }).handler(
 					tags: parseTags(row.tags),
 					coverImage: row.coverImage,
 					slug: row.slug,
-					isPinned: row.isPinned,
+
 					metadata: parseJson(row.metadata),
 					createdAt: row.createdAt,
 					publishedAt: row.publishedAt,

@@ -29,11 +29,6 @@ function ContentLink({ item, children }: { item: TimelineItem; children: React.R
 	return <>{children}</>
 }
 
-/*
- * Icon positioning: anchored at a fixed offset from the card's bottom-right corner.
- * The offset equals half the height of a minimal single-line card (~10px from content edge),
- * so the icon naturally centers vertically in short cards and sits at the bottom-right in tall ones.
- */
 export function ContentCard({
 	item,
 	variant = 'standalone',
@@ -67,7 +62,6 @@ export function ContentCard({
 				{isShort ? (
 					/* short text: content fills, icon positioned absolutely */
 					<div className="pr-6">
-						{/* owner-authored content */}
 						<div
 							className="prose prose-sm line-clamp-3 max-w-none"
 							// biome-ignore lint: owner-authored content
@@ -79,7 +73,7 @@ export function ContentCard({
 					<>
 						{hasTitle && (
 							<ContentLink item={item}>
-								<h2 className="text-content-heading hover:text-primary mb-0.5 text-base font-semibold transition-colors">
+								<h2 className="text-content-heading hover:text-primary mb-1 text-base font-semibold transition-colors">
 									{item.title}
 								</h2>
 							</ContentLink>
@@ -87,7 +81,7 @@ export function ContentCard({
 
 						{/* media: creator + rating */}
 						{item.media && (
-							<div className="mb-1 flex items-center gap-2 text-sm">
+							<div className="mb-1.5 flex items-center gap-2 text-sm">
 								{item.media.creator && (
 									<span className="text-content-secondary text-xs">{item.media.creator}</span>
 								)}
@@ -97,7 +91,7 @@ export function ContentCard({
 
 						{/* project: status + tech stack */}
 						{item.project && (
-							<div className="text-content-secondary mb-1.5 flex flex-wrap gap-1.5 text-xs">
+							<div className="text-content-secondary mb-2 flex flex-wrap gap-1.5 text-xs">
 								<span className="bg-elevated rounded px-1.5 py-0.5 font-medium">
 									{item.project.status}
 								</span>
@@ -111,27 +105,27 @@ export function ContentCard({
 
 						{/* summary or content preview */}
 						{item.summary ? (
-							<p className="text-content-secondary mb-1.5 truncate text-sm">{item.summary}</p>
+							<p className="text-content-secondary text-sm">{item.summary}</p>
 						) : (
 							item.contentHtml && (
 								<div
-									className="prose prose-sm mb-1.5 line-clamp-2 max-w-none"
+									className="prose prose-sm line-clamp-2 max-w-none"
 									// biome-ignore lint: owner-authored content
 									dangerouslySetInnerHTML={{ __html: item.contentHtml }}
 								/>
 							)
 						)}
 
-						{/* tags: leave right space for icon */}
+						{/* tags: separated from content by more space */}
 						{hasTags && (
-							<div className="pr-6">
+							<div className="mt-2.5 pr-6">
 								<TagList tags={item.tags} />
 							</div>
 						)}
 					</>
 				)}
 
-				{/* type icon: fixed offset from bottom-right corner of content area */}
+				{/* type icon: fixed offset from bottom-right corner */}
 				<span className="text-content-tertiary absolute right-0 bottom-0">
 					<ContentTypeBadge type={item.type} mediaType={item.media?.mediaType} />
 				</span>

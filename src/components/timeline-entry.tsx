@@ -27,6 +27,15 @@ function EntryLink({ item, children }: { item: TimelineItem; children: React.Rea
 	return <>{children}</>
 }
 
+/** Items with a detail page get cursor-pointer on the card */
+function hasDetailPage(item: TimelineItem): boolean {
+	return (
+		(item.type === 'post' && !!item.slug) ||
+		(item.type === 'project' && !!item.slug) ||
+		item.type === 'note'
+	)
+}
+
 export function TimelineEntry({
 	item,
 	layout = 'full',
@@ -41,6 +50,7 @@ export function TimelineEntry({
 	itemIndex?: number
 }) {
 	const hasCover = !!item.coverImage
+	const clickable = hasDetailPage(item)
 
 	return (
 		<div
@@ -55,7 +65,9 @@ export function TimelineEntry({
 				</p>
 			)}
 
-			<article className="border-border-default bg-surface overflow-hidden rounded-md border shadow-[var(--shadow-md)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]">
+			<article
+				className={`border-border-default bg-surface overflow-hidden rounded-md border shadow-[var(--shadow-md)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] ${clickable ? 'cursor-pointer' : ''}`}
+			>
 				{hasCover && (
 					<EntryLink item={item}>
 						<img
