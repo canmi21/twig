@@ -17,10 +17,9 @@ export default tseslint.config(
 			},
 		},
 	},
-	...tseslint.configs.recommendedTypeChecked.map((config) => ({
-		...config,
-		files: ['**/*.{ts,tsx,mts,cts}'],
-	})),
+	...tseslint.configs.recommendedTypeChecked.map((config) =>
+		Object.assign({}, config, { files: ['**/*.{ts,tsx,mts,cts}'] }),
+	),
 	{
 		files: ['**/*.{ts,tsx,mts,cts}'],
 		languageOptions: {
@@ -35,7 +34,28 @@ export default tseslint.config(
 			},
 		},
 		rules: {
+			'@typescript-eslint/consistent-type-imports': [
+				'error',
+				{ prefer: 'type-imports', fixStyle: 'separate-type-imports' },
+			],
 			'@typescript-eslint/no-explicit-any': 'error',
+			'@typescript-eslint/no-import-type-side-effects': 'error',
+			'@typescript-eslint/no-unnecessary-condition': 'error',
+			'@typescript-eslint/prefer-nullish-coalescing': 'error',
+			'@typescript-eslint/prefer-optional-chain': 'error',
+			'no-console': ['error', { allow: ['warn', 'error'] }],
+		},
+	},
+	{
+		// CreateServerFn().validator() chains produce unresolvable generic types
+		// That make typescript-eslint infer `any` throughout the handler body.
+		// The TypeScript compiler still type-checks these files during build.
+		files: ['src/features/*/server/**/*.ts'],
+		rules: {
+			'@typescript-eslint/no-unsafe-argument': 'off',
+			'@typescript-eslint/no-unsafe-assignment': 'off',
+			'@typescript-eslint/no-unsafe-call': 'off',
+			'@typescript-eslint/no-unsafe-member-access': 'off',
 		},
 	},
 	{

@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Moon, Sun } from 'lucide-react'
-import { applyResolvedThemeWithTransition, setThemeCookie, type ThemePreference } from '~/lib/theme'
+import { applyResolvedThemeWithTransition, setThemeCookie } from '~/lib/theme'
+import type { ThemePreference } from '~/lib/theme'
 
 function readPreference(): ThemePreference {
 	const m = document.cookie.match(/\btheme=(light|dark)\b/)
-	if (m?.[1] === 'light' || m?.[1] === 'dark') return m[1]
+	if (m?.[1] === 'light' || m?.[1] === 'dark') {
+		return m[1]
+	}
 	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 }
 
@@ -15,7 +18,9 @@ function FooterThemeToggle() {
 	}, [])
 
 	const [preference, setPreference] = useState<ThemePreference>(() => {
-		if (typeof document === 'undefined') return 'light'
+		if (typeof document === 'undefined') {
+			return 'light'
+		}
 		return readPreference()
 	})
 
@@ -26,7 +31,9 @@ function FooterThemeToggle() {
 		setPreference(next)
 	}
 
-	if (!mounted) return <span className="size-4" />
+	if (!mounted) {
+		return <span className="size-4" />
+	}
 
 	const Icon = preference === 'dark' ? Moon : Sun
 	const label = preference === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
@@ -58,7 +65,7 @@ export function SiteFooter({ settings }: SiteFooterProps) {
 		<footer className="before:bg-border-default relative mt-16 before:absolute before:top-0 before:left-1/2 before:h-px before:w-screen before:-translate-x-1/2">
 			<div className="mx-auto max-w-4xl px-5 py-10">
 				<div className="flex items-start justify-between gap-8">
-					{/* left: content */}
+					{/* Left: content */}
 					<div className="space-y-3">
 						<p className="text-content-heading text-sm font-medium">{settings.siteTitle}</p>
 						<p className="text-content-tertiary max-w-sm text-xs leading-relaxed">
@@ -69,7 +76,7 @@ export function SiteFooter({ settings }: SiteFooterProps) {
 						</p>
 					</div>
 
-					{/* right: theme toggle */}
+					{/* Right: theme toggle */}
 					<div className="shrink-0 pt-1">
 						<FooterThemeToggle />
 					</div>

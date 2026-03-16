@@ -5,7 +5,9 @@ import { env } from 'cloudflare:workers'
  * Requires CF_ZONE_ID and CF_API_TOKEN in Workers Secrets.
  */
 export async function purgeUrls(urls: string[]): Promise<void> {
-	if (urls.length === 0) return
+	if (urls.length === 0) {
+		return
+	}
 
 	const zoneId = (env as Record<string, unknown>).CF_ZONE_ID as string | undefined
 	const apiToken = (env as Record<string, unknown>).CF_API_TOKEN as string | undefined
@@ -15,12 +17,12 @@ export async function purgeUrls(urls: string[]): Promise<void> {
 	}
 
 	const response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
-		method: 'POST',
+		body: JSON.stringify({ files: urls }),
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({ files: urls }),
+		method: 'POST',
 	})
 
 	if (!response.ok) {

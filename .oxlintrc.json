@@ -3,7 +3,9 @@
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "react"],
   "categories": {
     "correctness": "error",
-    "suspicious": "error"
+    "suspicious": "error",
+    "perf": "error",
+    "style": "warn"
   },
   "env": {
     "browser": true,
@@ -17,6 +19,40 @@
   ],
   "rules": {
     "no-explicit-any": "error",
-    "react/react-in-jsx-scope": "off"
-  }
+    "no-console": "error",
+    "react/react-in-jsx-scope": "off",
+    "unicorn/prefer-node-protocol": "error",
+    "unicorn/no-array-for-each": "error",
+    "unicorn/prefer-string-replace-all": "error",
+    "unicorn/filename-case": ["error", { "cases": { "kebabCase": true } }],
+    "import/no-duplicates": "error",
+    "import/no-default-export": "error",
+    "import/no-named-export": "off",
+    "import/group-exports": "off",
+    "import/prefer-default-export": "off",
+    "import/exports-last": "off",
+    "no-ternary": "off",
+    "no-magic-numbers": "off",
+    "unicorn/no-null": "off",
+    "sort-imports": "off",
+    "sort-keys": "off",
+    "max-statements": "off",
+    "func-style": "off",
+    "id-length": ["warn", { "min": 2, "exceptions": ["t", "i", "x", "y", "m", "e", "b", "d"] }],
+    "no-duplicate-imports": "off",
+    "prefer-object-spread": "off",
+    "react/jsx-max-depth": "off",
+    "unicorn/text-encoding-identifier-case": "off",
+    "unicorn/prefer-global-this": "off",
+    "unicorn/numeric-separators-style": "off",
+    "import/no-namespace": "off"
+  },
+  "overrides": [
+    {
+      "files": ["eslint.config.mjs", "vite.config.ts", "drizzle.config.ts", "src/entry-server.ts"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
+  ]
 }

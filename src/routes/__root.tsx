@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 import { lazy } from 'react'
+import { FloatingNav } from '~/components/floating-nav'
+import { ContentWrapper } from '~/components/content-wrapper'
+import { SiteFooter } from '~/components/site-footer'
+import { LampCordToggle } from '~/components/lamp-cord-toggle'
+import { THEME_INIT_SCRIPT } from '~/lib/theme'
+import appCss from '~/styles.css?url'
 
 const TanStackDevtools = import.meta.env.DEV
 	? lazy(() => import('@tanstack/react-devtools').then((m) => ({ default: m.TanStackDevtools })))
@@ -13,12 +19,6 @@ const TanStackRouterDevtoolsPanel = import.meta.env.DEV
 			})),
 		)
 	: () => null
-import { FloatingNav } from '~/components/floating-nav'
-import { ContentWrapper } from '~/components/content-wrapper'
-import { SiteFooter } from '~/components/site-footer'
-import { LampCordToggle } from '~/components/lamp-cord-toggle'
-import { THEME_INIT_SCRIPT } from '~/lib/theme'
-import appCss from '~/styles.css?url'
 
 interface SiteSettings {
 	siteTitle: string
@@ -28,22 +28,23 @@ interface SiteSettings {
 }
 
 const SETTINGS_DEFAULTS: SiteSettings = {
-	siteTitle: 'taki',
-	siteDescription: 'A digital alter ego -- posts, projects, thoughts, and more.',
+	copyright: 'taki',
 	footerText:
 		'A digital alter ego -- posts, projects, thoughts, and more. Built with TanStack Start, deployed on Cloudflare Workers.',
-	copyright: 'taki',
+	siteDescription: 'A digital alter ego -- posts, projects, thoughts, and more.',
+	siteTitle: 'taki',
 }
 
 export const Route = createRootRouteWithContext()({
+	component: RootComponent,
 	head: () => {
-		const s = SETTINGS_DEFAULTS
+		const settings = SETTINGS_DEFAULTS
 		return {
 			meta: [
 				{ charSet: 'utf-8' },
 				{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
-				{ title: s.siteTitle },
-				{ name: 'description', content: s.siteDescription },
+				{ title: settings.siteTitle },
+				{ name: 'description', content: settings.siteDescription },
 				{ httpEquiv: 'Accept-CH', content: 'Sec-CH-Prefers-Color-Scheme' },
 			],
 			links: [
@@ -55,12 +56,11 @@ export const Route = createRootRouteWithContext()({
 			],
 		}
 	},
-	component: RootComponent,
 	shellComponent: rootDocument,
 })
 
 function RootComponent() {
-	const s = SETTINGS_DEFAULTS
+	const settings = SETTINGS_DEFAULTS
 
 	return (
 		<>
@@ -69,7 +69,7 @@ function RootComponent() {
 			<ContentWrapper>
 				<Outlet />
 			</ContentWrapper>
-			<SiteFooter settings={s} />
+			<SiteFooter settings={settings} />
 		</>
 	)
 }
@@ -82,6 +82,7 @@ function rootDocument(props: { children: ReactNode }) {
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
+				{/* Safe: themeScript is a compile-time constant, not user input */}
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">

@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
-import { setThemeCookie, type ThemePreference } from '~/lib/theme'
+import { useEffect, useRef, useState } from 'react'
+import { setThemeCookie } from '~/lib/theme'
+import type { ThemePreference } from '~/lib/theme'
 
 function readPreference(): ThemePreference {
 	const m = document.cookie.match(/\btheme=(light|dark)\b/)
-	if (m?.[1] === 'light' || m?.[1] === 'dark') return m[1]
+	if (m?.[1] === 'light' || m?.[1] === 'dark') {
+		return m[1]
+	}
 	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 }
 
@@ -19,7 +22,9 @@ export function LampCordToggle() {
 	}, [])
 
 	const [preference, setPreference] = useState<ThemePreference>(() => {
-		if (typeof document === 'undefined') return 'light'
+		if (typeof document === 'undefined') {
+			return 'light'
+		}
 		return readPreference()
 	})
 
@@ -32,7 +37,8 @@ export function LampCordToggle() {
 
 		const next = preference === 'dark' ? 'light' : 'dark'
 
-		// radial view transition from the handle position
+		// Radial view transition from the handle position
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- not all browsers implement View Transition API
 		if (document.startViewTransition && handleRef.current) {
 			const rect = handleRef.current.getBoundingClientRect()
 			const x = rect.left + rect.width / 2
@@ -42,7 +48,7 @@ export function LampCordToggle() {
 				Math.max(y, window.innerHeight - y),
 			)
 
-			// flag to suppress CSS wipe animation -- only radial WAAPI runs
+			// Flag to suppress CSS wipe animation -- only radial WAAPI runs
 			document.documentElement.classList.add('radial-transition')
 
 			const transition = document.startViewTransition(() => {
@@ -90,12 +96,12 @@ export function LampCordToggle() {
 			className="group fixed top-0 right-6 z-50 flex cursor-pointer flex-col items-center border-none bg-transparent p-0 sm:right-8"
 			aria-label={preference === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
 		>
-			{/* cord */}
+			{/* Cord */}
 			<div
 				className="bg-border-strong w-px transition-all duration-250 ease-out"
 				style={{ height: pulled ? '5.5rem' : '4rem' }}
 			/>
-			{/* handle */}
+			{/* Handle */}
 			<div
 				ref={handleRef}
 				className="bg-content-tertiary group-hover:bg-primary h-5 w-2 rounded-full transition-colors"

@@ -10,8 +10,10 @@ const CF_ACCESS_JWT_COOKIE = 'CF_Authorization'
  */
 function emailFromAccessJwt(jwt: string): string | undefined {
 	try {
-		const payload = jwt.split('.')[1]
-		if (!payload) return undefined
+		const [, payload] = jwt.split('.')
+		if (!payload) {
+			return undefined
+		}
 		const decoded = JSON.parse(atob(payload)) as { email?: string }
 		return decoded.email
 	} catch {
@@ -20,7 +22,9 @@ function emailFromAccessJwt(jwt: string): string | undefined {
 }
 
 function getCookieValue(cookieHeader: string | undefined, name: string): string | undefined {
-	if (!cookieHeader) return undefined
+	if (!cookieHeader) {
+		return undefined
+	}
 	const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`))
 	return match?.[1]
 }

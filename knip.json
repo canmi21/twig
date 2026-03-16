@@ -1,12 +1,18 @@
 {
   "$schema": "./node_modules/knip/schema.json",
   "ignoreDependencies": [
+    "@shikijs/rehype",
     "@tailwindcss/typography",
     "entities",
-    "uuid",
-    "@types/uuid",
+    "rehype-stringify",
+    "remark-parse",
+    "remark-rehype",
+    "shiki",
     "tailwindcss",
-    "tw-animate-css"
+    "tw-animate-css",
+    "unified",
+    "uuid",
+    "@types/uuid"
   ],
   "workspaces": {
     ".": {
@@ -14,7 +20,7 @@
       "project": ["src/**/*.{ts,tsx}", "*.config.ts", "*.config.mjs"]
     }
   },
-  "ignoreFiles": ["src/server/**", "src/features/platform/server/**"],
+  "ignoreFiles": ["src/server/**", "src/features/*/server/**"],
   "ignoreIssues": {
     "src/entry-server.ts": ["exports"],
     "src/routeTree.gen.ts": ["exports"],

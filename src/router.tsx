@@ -6,11 +6,11 @@ import { routeTree } from './routeTree.gen'
 export function getRouter() {
 	const queryClient = new QueryClient()
 	const router = createTanStackRouter({
-		routeTree,
-
-		scrollRestoration: true,
 		defaultPreload: 'intent',
+
 		defaultPreloadStaleTime: 0,
+		routeTree,
+		scrollRestoration: true,
 	})
 
 	setupRouterSsrQueryIntegration({

@@ -26,6 +26,7 @@ function applyResolvedTheme(resolved: ResolvedTheme) {
  * Falls back to instant swap when the API is unavailable.
  */
 export function applyResolvedThemeWithTransition(resolved: ResolvedTheme) {
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- not all browsers implement View Transition API
 	if (!document.startViewTransition) {
 		applyResolvedTheme(resolveTheme(resolved))
 		return
@@ -45,7 +46,7 @@ export function applyResolvedThemeWithTransition(resolved: ResolvedTheme) {
  */
 export const THEME_INIT_SCRIPT = [
 	'(function(){',
-	'var m=document.cookie.match(/\\btheme=(light|dark)\\b/);',
+	String.raw`var m=document.cookie.match(/\btheme=(light|dark)\b/);`,
 	'var t=m?m[1]:window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";',
 	'if(t==="dark")document.documentElement.classList.add("dark");',
 	'document.documentElement.style.colorScheme=t;',
