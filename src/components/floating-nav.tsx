@@ -1,13 +1,6 @@
 import { Link } from '@tanstack/react-router'
 
-const navItems = [
-	{ to: '/', label: 'Home' },
-	{ to: '/projects', label: 'Projects' },
-	{ to: '/bookshelf', label: 'Bookshelf' },
-	{ to: '/links', label: 'Links' },
-	{ to: '/guestbook', label: 'Guestbook' },
-	{ to: '/about', label: 'About' },
-] as const
+const navItems = [{ to: '/', label: 'Home' }] as const
 
 export function FloatingNav() {
 	return (

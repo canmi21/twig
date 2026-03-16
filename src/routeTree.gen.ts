@@ -9,280 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TimelineRouteImport } from './routes/timeline'
-import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as LinksRouteImport } from './routes/links'
-import { Route as GuestbookRouteImport } from './routes/guestbook'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as BookshelfRouteImport } from './routes/bookshelf'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as ProjectSlugRouteImport } from './routes/project/$slug'
-import { Route as PostSlugRouteImport } from './routes/post/$slug'
-import { Route as NoteIdRouteImport } from './routes/note/$id'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
-import { Route as DashboardEditorRouteImport } from './routes/dashboard/editor'
-import { Route as AlbumSlugRouteImport } from './routes/album/$slug'
-import { Route as DashboardEditIdRouteImport } from './routes/dashboard/edit.$id'
 
-const TimelineRoute = TimelineRouteImport.update({
-  id: '/timeline',
-  path: '/timeline',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LinksRoute = LinksRouteImport.update({
-  id: '/links',
-  path: '/links',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GuestbookRoute = GuestbookRouteImport.update({
-  id: '/guestbook',
-  path: '/guestbook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookshelfRoute = BookshelfRouteImport.update({
-  id: '/bookshelf',
-  path: '/bookshelf',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const ProjectSlugRoute = ProjectSlugRouteImport.update({
-  id: '/project/$slug',
-  path: '/project/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PostSlugRoute = PostSlugRouteImport.update({
-  id: '/post/$slug',
-  path: '/post/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NoteIdRoute = NoteIdRouteImport.update({
-  id: '/note/$id',
-  path: '/note/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardEditorRoute = DashboardEditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const AlbumSlugRoute = AlbumSlugRouteImport.update({
-  id: '/album/$slug',
-  path: '/album/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardEditIdRoute = DashboardEditIdRouteImport.update({
-  id: '/edit/$id',
-  path: '/edit/$id',
-  getParentRoute: () => DashboardRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/bookshelf': typeof BookshelfRoute
-  '/dashboard': typeof DashboardRouteWithChildren
-  '/guestbook': typeof GuestbookRoute
-  '/links': typeof LinksRoute
-  '/projects': typeof ProjectsRoute
-  '/timeline': typeof TimelineRoute
-  '/album/$slug': typeof AlbumSlugRoute
-  '/dashboard/editor': typeof DashboardEditorRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/note/$id': typeof NoteIdRoute
-  '/post/$slug': typeof PostSlugRoute
-  '/project/$slug': typeof ProjectSlugRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/edit/$id': typeof DashboardEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/bookshelf': typeof BookshelfRoute
-  '/guestbook': typeof GuestbookRoute
-  '/links': typeof LinksRoute
-  '/projects': typeof ProjectsRoute
-  '/timeline': typeof TimelineRoute
-  '/album/$slug': typeof AlbumSlugRoute
-  '/dashboard/editor': typeof DashboardEditorRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/note/$id': typeof NoteIdRoute
-  '/post/$slug': typeof PostSlugRoute
-  '/project/$slug': typeof ProjectSlugRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/edit/$id': typeof DashboardEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/bookshelf': typeof BookshelfRoute
-  '/dashboard': typeof DashboardRouteWithChildren
-  '/guestbook': typeof GuestbookRoute
-  '/links': typeof LinksRoute
-  '/projects': typeof ProjectsRoute
-  '/timeline': typeof TimelineRoute
-  '/album/$slug': typeof AlbumSlugRoute
-  '/dashboard/editor': typeof DashboardEditorRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/note/$id': typeof NoteIdRoute
-  '/post/$slug': typeof PostSlugRoute
-  '/project/$slug': typeof ProjectSlugRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/edit/$id': typeof DashboardEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/about'
-    | '/bookshelf'
-    | '/dashboard'
-    | '/guestbook'
-    | '/links'
-    | '/projects'
-    | '/timeline'
-    | '/album/$slug'
-    | '/dashboard/editor'
-    | '/dashboard/settings'
-    | '/note/$id'
-    | '/post/$slug'
-    | '/project/$slug'
-    | '/dashboard/'
-    | '/dashboard/edit/$id'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/about'
-    | '/bookshelf'
-    | '/guestbook'
-    | '/links'
-    | '/projects'
-    | '/timeline'
-    | '/album/$slug'
-    | '/dashboard/editor'
-    | '/dashboard/settings'
-    | '/note/$id'
-    | '/post/$slug'
-    | '/project/$slug'
-    | '/dashboard'
-    | '/dashboard/edit/$id'
-  id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/bookshelf'
-    | '/dashboard'
-    | '/guestbook'
-    | '/links'
-    | '/projects'
-    | '/timeline'
-    | '/album/$slug'
-    | '/dashboard/editor'
-    | '/dashboard/settings'
-    | '/note/$id'
-    | '/post/$slug'
-    | '/project/$slug'
-    | '/dashboard/'
-    | '/dashboard/edit/$id'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  BookshelfRoute: typeof BookshelfRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
-  GuestbookRoute: typeof GuestbookRoute
-  LinksRoute: typeof LinksRoute
-  ProjectsRoute: typeof ProjectsRoute
-  TimelineRoute: typeof TimelineRoute
-  AlbumSlugRoute: typeof AlbumSlugRoute
-  NoteIdRoute: typeof NoteIdRoute
-  PostSlugRoute: typeof PostSlugRoute
-  ProjectSlugRoute: typeof ProjectSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/timeline': {
-      id: '/timeline'
-      path: '/timeline'
-      fullPath: '/timeline'
-      preLoaderRoute: typeof TimelineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/links': {
-      id: '/links'
-      path: '/links'
-      fullPath: '/links'
-      preLoaderRoute: typeof LinksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/guestbook': {
-      id: '/guestbook'
-      path: '/guestbook'
-      fullPath: '/guestbook'
-      preLoaderRoute: typeof GuestbookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bookshelf': {
-      id: '/bookshelf'
-      path: '/bookshelf'
-      fullPath: '/bookshelf'
-      preLoaderRoute: typeof BookshelfRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -290,96 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/project/$slug': {
-      id: '/project/$slug'
-      path: '/project/$slug'
-      fullPath: '/project/$slug'
-      preLoaderRoute: typeof ProjectSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/post/$slug': {
-      id: '/post/$slug'
-      path: '/post/$slug'
-      fullPath: '/post/$slug'
-      preLoaderRoute: typeof PostSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/note/$id': {
-      id: '/note/$id'
-      path: '/note/$id'
-      fullPath: '/note/$id'
-      preLoaderRoute: typeof NoteIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/settings': {
-      id: '/dashboard/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardSettingsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/editor': {
-      id: '/dashboard/editor'
-      path: '/editor'
-      fullPath: '/dashboard/editor'
-      preLoaderRoute: typeof DashboardEditorRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/album/$slug': {
-      id: '/album/$slug'
-      path: '/album/$slug'
-      fullPath: '/album/$slug'
-      preLoaderRoute: typeof AlbumSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/edit/$id': {
-      id: '/dashboard/edit/$id'
-      path: '/edit/$id'
-      fullPath: '/dashboard/edit/$id'
-      preLoaderRoute: typeof DashboardEditIdRouteImport
-      parentRoute: typeof DashboardRoute
-    }
   }
 }
 
-interface DashboardRouteChildren {
-  DashboardEditorRoute: typeof DashboardEditorRoute
-  DashboardSettingsRoute: typeof DashboardSettingsRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  DashboardEditIdRoute: typeof DashboardEditIdRoute
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardEditorRoute: DashboardEditorRoute,
-  DashboardSettingsRoute: DashboardSettingsRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-  DashboardEditIdRoute: DashboardEditIdRoute,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  BookshelfRoute: BookshelfRoute,
-  DashboardRoute: DashboardRouteWithChildren,
-  GuestbookRoute: GuestbookRoute,
-  LinksRoute: LinksRoute,
-  ProjectsRoute: ProjectsRoute,
-  TimelineRoute: TimelineRoute,
-  AlbumSlugRoute: AlbumSlugRoute,
-  NoteIdRoute: NoteIdRoute,
-  PostSlugRoute: PostSlugRoute,
-  ProjectSlugRoute: ProjectSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
