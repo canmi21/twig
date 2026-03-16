@@ -5,8 +5,6 @@ import {
 	renderPreview,
 	saveContent,
 	uploadImage,
-	type ContentForEdit,
-	type SaveContentInput,
 } from '~/features/dashboard/server/dashboard'
 import {
 	buildSaveContentInput,
@@ -15,6 +13,7 @@ import {
 	PREVIEW_DEBOUNCE_MS,
 	slugFromTitle,
 } from '~/features/dashboard/lib/content-editor'
+import type { ContentForEdit, SaveContentInput } from '~/features/dashboard/server/types'
 import type { ContentType } from '~/server/database/constants'
 
 interface UseContentEditorOptions {

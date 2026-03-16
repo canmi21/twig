@@ -1,4 +1,4 @@
-import type { SaveContentInput } from '~/features/dashboard/server/dashboard'
+import type { SaveContentInput } from '~/features/dashboard/server/types'
 import type { ContentType } from '~/server/database/constants'
 
 export const PREVIEW_DEBOUNCE_MS = 500

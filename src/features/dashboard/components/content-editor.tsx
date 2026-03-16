@@ -1,4 +1,4 @@
-import type { ContentForEdit } from '~/features/dashboard/server/dashboard'
+import type { ContentForEdit } from '~/features/dashboard/server/types'
 import { useContentEditor } from '~/features/dashboard/hooks/use-content-editor'
 import { ContentEditorActions } from './content-editor-actions'
 import { ContentEditorFields } from './content-editor-fields'
