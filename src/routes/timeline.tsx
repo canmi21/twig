@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
 import { createFileRoute, getRouteApi, useRouter } from '@tanstack/react-router'
-import {
-	getTimelineCursor,
-	type CursorTimeline,
-	type TimelineItem,
-} from '~/features/content/server/content'
+import { getTimelineCursor } from '~/features/content/server/content'
+import type { CursorTimeline, TimelineItem } from '~/features/content/server/types'
 import { SiteFooter } from '~/features/site/components/site-footer'
 import { getPlatformStatus } from '~/features/platform/server/health'
-import { TimelineMonth } from '~/features/timeline/components/timeline-month'
-import { groupByYearMonth, buildAnchorMap, itemDateKey } from '~/features/timeline/lib/timeline'
+import { TimelineFeed } from '~/features/timeline/components/timeline-feed'
+import {
+	anchorToTimelineUrl,
+	buildTimelineViewModel,
+	getTimelineHashTarget,
+} from '~/features/timeline/lib/view-model'
+import { itemDateKey } from '~/features/timeline/lib/timeline'
 
 export const Route = createFileRoute('/timeline')({
 	validateSearch: (search: Record<string, unknown>) => ({
@@ -33,11 +35,6 @@ function silentReplaceUrl(routerHistory: { _ignoreSubscribers?: boolean }, url: 
 	h._ignoreSubscribers = false
 }
 
-function anchorToUrl(anchor: string): string {
-	const [dateKey, idx] = anchor.split('#')
-	return idx === '1' ? `/timeline?at=${dateKey}` : `/timeline?at=${dateKey}#${idx}`
-}
-
 const rootApi = getRouteApi('__root__')
 
 function FullTimelinePage() {
@@ -51,8 +48,7 @@ function FullTimelinePage() {
 	const currentAnchorRef = useRef<string>('')
 	const routerHistoryRef = useRef(router.history)
 	routerHistoryRef.current = router.history
-
-	const anchorMap = buildAnchorMap(items)
+	const viewModel = buildTimelineViewModel(items)
 
 	// scroll to fragment on mount (once)
 	const scrolledRef = useRef(false)
@@ -61,7 +57,7 @@ function FullTimelinePage() {
 		scrolledRef.current = true
 
 		const hash = typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
-		const targetIndex = Math.max(1, Number.parseInt(hash, 10) || 1)
+		const targetIndex = getTimelineHashTarget(hash)
 		const dayItems = items.filter((item) => itemDateKey(item) === at)
 		if (dayItems.length === 0) return
 
@@ -94,7 +90,7 @@ function FullTimelinePage() {
 
 				if (debounceTimer) clearTimeout(debounceTimer)
 				debounceTimer = setTimeout(() => {
-					silentReplaceUrl(routerHistoryRef.current, anchorToUrl(anchor))
+					silentReplaceUrl(routerHistoryRef.current, anchorToTimelineUrl(anchor))
 				}, 210)
 			},
 			{ rootMargin: '-80px 0px -70% 0px' },
@@ -147,31 +143,9 @@ function FullTimelinePage() {
 		}
 	}
 
-	const yearGroups = groupByYearMonth(items)
-
 	return (
 		<section>
-			{yearGroups.map((yearGroup, yi) => (
-				<div key={yearGroup.year}>
-					<div className="space-y-10">
-						{yearGroup.months.map((mg, mi) => (
-							<TimelineMonth
-								key={mg.monthKey}
-								monthKey={mg.monthKey}
-								items={mg.items}
-								hideHeader={yi === 0 && mi === 0}
-								yearLabel={mi === 0 && yi > 0 ? yearGroup.year : undefined}
-								anchorMap={anchorMap}
-								atDate={at}
-							/>
-						))}
-					</div>
-				</div>
-			))}
-
-			{items.length === 0 && (
-				<p className="text-content-secondary py-12 text-center">No content found.</p>
-			)}
+			<TimelineFeed viewModel={viewModel} atDate={at} />
 
 			{cursor && <div ref={sentinelRef} className="h-px" />}
 

@@ -1,4 +1,4 @@
-import type { TimelineItem } from '~/features/content/server/content'
+import type { TimelineItem } from '~/features/content/server/types'
 
 /** Extract YYYY-MM-DD from an item's effective date */
 export function itemDateKey(item: TimelineItem): string {
@@ -9,10 +9,10 @@ export function itemDateKey(item: TimelineItem): string {
  * Assign anchor indices (1-based) to items sharing the same day.
  * Returns a Map from item id to { dateKey, index }.
  */
-export function buildAnchorMap(
-	items: TimelineItem[],
-): Map<string, { dateKey: string; index: number }> {
-	const map = new Map<string, { dateKey: string; index: number }>()
+export type TimelineAnchorMap = Map<string, { dateKey: string; index: number }>
+
+export function buildAnchorMap(items: TimelineItem[]): TimelineAnchorMap {
+	const map: TimelineAnchorMap = new Map()
 	const dayCounts = new Map<string, number>()
 
 	for (const item of items) {
@@ -25,12 +25,12 @@ export function buildAnchorMap(
 	return map
 }
 
-interface MonthGroup {
+export interface MonthGroup {
 	monthKey: string
 	items: TimelineItem[]
 }
 
-interface YearGroup {
+export interface YearGroup {
 	year: string
 	months: MonthGroup[]
 }

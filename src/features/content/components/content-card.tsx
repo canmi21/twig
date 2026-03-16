@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { ContentTypeBadge } from '~/features/content/components/content-type-badge'
 import { RatingStars } from '~/features/content/components/rating-stars'
 import { TagList } from '~/features/content/components/tag-list'
-import type { TimelineItem } from '~/features/content/server/content'
+import type { TimelineItem } from '~/features/content/server/types'
 
 function ContentLink({ item, children }: { item: TimelineItem; children: React.ReactNode }) {
 	if (item.type === 'post' && item.slug) {
