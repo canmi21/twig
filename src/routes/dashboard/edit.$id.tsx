@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ContentEditor } from '~/components/dashboard/content-editor'
-import { getContentForEdit, type ContentForEdit } from '~/server/functions/dashboard'
+import { ContentEditor } from '~/features/dashboard/components/content-editor'
+import { getContentForEdit, type ContentForEdit } from '~/features/dashboard/server/dashboard'
 
 export const Route = createFileRoute('/dashboard/edit/$id')({
 	loader: async ({ params }): Promise<ContentForEdit | null> => {

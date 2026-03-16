@@ -8,7 +8,7 @@ import {
 	uploadImage,
 	type ContentForEdit,
 	type SaveContentInput,
-} from '~/server/functions/dashboard'
+} from '~/features/dashboard/server/dashboard'
 import type { ContentType } from '~/server/database/constants'
 
 const DEBOUNCE_MS = 500

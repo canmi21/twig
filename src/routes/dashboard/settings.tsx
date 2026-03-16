@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Save } from 'lucide-react'
-import { getSiteSettings, saveSiteSettings, type SiteSettings } from '~/server/functions/settings'
+import {
+	getSiteSettings,
+	saveSiteSettings,
+	type SiteSettings,
+} from '~/features/site/server/settings'
 
 export const Route = createFileRoute('/dashboard/settings')({
 	loader: async (): Promise<SiteSettings> => {

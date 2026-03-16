@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { getContentBySlug, type ContentDetail } from '~/server/functions/content'
-import { TagList } from '~/components/tag-list'
+import { TagList } from '~/features/content/components/tag-list'
+import { getContentBySlug, type ContentDetail } from '~/features/content/server/content'
 
 export const Route = createFileRoute('/post/$slug')({
 	loader: async ({ params }): Promise<ContentDetail | null> =>

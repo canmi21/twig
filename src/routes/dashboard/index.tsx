@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { FilePlus, StickyNote } from 'lucide-react'
-import { getDashboardStats, type DashboardStats } from '~/server/functions/dashboard'
+import { getDashboardStats, type DashboardStats } from '~/features/dashboard/server/dashboard'
 
 export const Route = createFileRoute('/dashboard/')({
 	loader: async (): Promise<DashboardStats> => {

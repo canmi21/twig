@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ContentEditor } from '~/components/dashboard/content-editor'
+import { ContentEditor } from '~/features/dashboard/components/content-editor'
 
 export const Route = createFileRoute('/dashboard/editor')({
 	validateSearch: (search: Record<string, unknown>) => ({

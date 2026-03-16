@@ -1,6 +1,6 @@
 import { createFileRoute, getRouteApi, Link, Outlet, redirect } from '@tanstack/react-router'
 import { LayoutDashboard, FilePlus, StickyNote, Settings, ArrowLeft } from 'lucide-react'
-import { checkDashboardAuth } from '~/server/functions/auth'
+import { checkDashboardAuth } from '~/features/dashboard/server/auth'
 
 export const Route = createFileRoute('/dashboard')({
 	beforeLoad: async () => {

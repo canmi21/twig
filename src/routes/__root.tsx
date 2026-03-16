@@ -19,12 +19,12 @@ const TanStackRouterDevtoolsPanel = import.meta.env.DEV
 			})),
 		)
 	: () => null
-import { FloatingNav } from '~/components/floating-nav'
-import { LampCordToggle } from '~/components/lamp-cord-toggle'
-import { ContentWrapper } from '~/components/content-wrapper'
-import { SiteFooter } from '~/components/site-footer'
-import { THEME_INIT_SCRIPT } from '~/lib/theme'
-import { getSiteSettings, type SiteSettings } from '~/server/functions/settings'
+import { FloatingNav } from '~/features/site/components/floating-nav'
+import { ContentWrapper } from '~/features/site/components/content-wrapper'
+import { SiteFooter } from '~/features/site/components/site-footer'
+import { getSiteSettings, type SiteSettings } from '~/features/site/server/settings'
+import { LampCordToggle } from '~/features/theme/components/lamp-cord-toggle'
+import { THEME_INIT_SCRIPT } from '~/features/theme/lib/theme'
 import appCss from '~/styles.css?url'
 
 const SETTINGS_DEFAULTS: SiteSettings = {
@@ -90,7 +90,7 @@ function RootComponent() {
 }
 
 function rootDocument(props: { children: ReactNode }) {
-	// THEME_INIT_SCRIPT is a compile-time constant defined in ~/lib/theme, not user input
+	// THEME_INIT_SCRIPT is a compile-time constant defined in ~/features/theme/lib/theme
 	const themeScript = THEME_INIT_SCRIPT
 
 	return (

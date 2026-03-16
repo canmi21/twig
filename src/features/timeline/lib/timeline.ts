@@ -1,4 +1,4 @@
-import type { TimelineItem } from '~/server/functions/content'
+import type { TimelineItem } from '~/features/content/server/content'
 
 /** Extract YYYY-MM-DD from an item's effective date */
 export function itemDateKey(item: TimelineItem): string {
@@ -25,12 +25,12 @@ export function buildAnchorMap(
 	return map
 }
 
-export interface MonthGroup {
+interface MonthGroup {
 	monthKey: string
 	items: TimelineItem[]
 }
 
-export interface YearGroup {
+interface YearGroup {
 	year: string
 	months: MonthGroup[]
 }

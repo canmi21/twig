@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
-import type { TimelineItem } from '~/server/functions/content'
-import { TimelineEntry } from '~/components/timeline-entry'
+import type { TimelineItem } from '~/features/content/server/content'
+import { TimelineEntry } from '~/features/timeline/components/timeline-entry'
 
 function formatMonthName(yyyyMm: string): string {
 	const [, m] = yyyyMm.split('-')

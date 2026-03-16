@@ -4,11 +4,11 @@ import {
 	getTimelineCursor,
 	type CursorTimeline,
 	type TimelineItem,
-} from '~/server/functions/content'
-import { getPlatformStatus } from '~/server/functions/health'
-import { groupByYearMonth, buildAnchorMap, itemDateKey } from '~/lib/timeline'
-import { TimelineMonth } from '~/components/timeline-month'
-import { SiteFooter } from '~/components/site-footer'
+} from '~/features/content/server/content'
+import { SiteFooter } from '~/features/site/components/site-footer'
+import { getPlatformStatus } from '~/features/platform/server/health'
+import { TimelineMonth } from '~/features/timeline/components/timeline-month'
+import { groupByYearMonth, buildAnchorMap, itemDateKey } from '~/features/timeline/lib/timeline'
 
 export const Route = createFileRoute('/timeline')({
 	validateSearch: (search: Record<string, unknown>) => ({

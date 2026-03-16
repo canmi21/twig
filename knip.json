@@ -7,6 +7,7 @@
     "tailwindcss",
     "tw-animate-css"
   ],
+  "ignoreFiles": ["src/features/guestbook/**", "src/features/links/**"],
   "workspaces": {
     ".": {
       "entry": ["src/router.tsx"],
@@ -14,6 +15,9 @@
     }
   },
   "ignoreIssues": {
+    "src/entry-server.ts": ["exports"],
+    "src/features/content/server/content.ts": ["exports", "types"],
+    "src/server/markdown.ts": ["unlisted"],
     "src/routeTree.gen.ts": ["exports"],
     "worker-configuration.d.ts": ["exports", "types", "unlisted"]
   }

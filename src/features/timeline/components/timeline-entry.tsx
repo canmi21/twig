@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import type { TimelineItem } from '~/server/functions/content'
-import { ContentCard } from '~/components/content-card'
+import { ContentCard } from '~/features/content/components/content-card'
+import type { TimelineItem } from '~/features/content/server/content'
 
 function formatDayLabel(iso: string): string {
 	const date = new Date(iso)

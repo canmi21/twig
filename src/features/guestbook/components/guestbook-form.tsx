@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
-import { createGuestbookEntry } from '~/server/functions/guestbook'
+import { createGuestbookEntry } from '~/features/guestbook/server/guestbook'
 
 export function GuestbookForm() {
 	const router = useRouter()

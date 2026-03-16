@@ -14,8 +14,8 @@ bun run lint
 ## Project Structure
 
 - `src/routes`: app routes and route-level UI
-- `src/components`: shared UI components
-- `src/lib`: shared utilities
+- `src/features`: feature-scoped UI, utilities, and server functions
+- `src/shared`: truly shared primitives and helpers
 - `src/server`: server-side code
 - `src/server/database`: Drizzle schema and database access
 - `src/server/functions`: server functions
