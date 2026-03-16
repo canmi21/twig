@@ -2,7 +2,6 @@
   "$schema": "./node_modules/knip/schema.json",
   "ignoreDependencies": [
     "@tailwindcss/typography",
-    "drizzle-orm",
     "entities",
     "uuid",
     "@types/uuid",
