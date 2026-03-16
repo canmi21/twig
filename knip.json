@@ -4,6 +4,8 @@
     "@tailwindcss/typography",
     "drizzle-orm",
     "entities",
+    "uuid",
+    "@types/uuid",
     "tailwindcss",
     "tw-animate-css"
   ],
@@ -13,7 +15,7 @@
       "project": ["src/**/*.{ts,tsx}", "*.config.ts", "*.config.mjs"]
     }
   },
-  "ignoreFiles": ["src/server/**"],
+  "ignoreFiles": ["src/server/**", "src/features/platform/server/**"],
   "ignoreIssues": {
     "src/entry-server.ts": ["exports"],
     "src/routeTree.gen.ts": ["exports"],
