@@ -1,17 +1,16 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "ignoreDependencies": [
-    "@tailwindcss/typography",
-    "@types/uuid",
-    "cloudflare",
-    "entities",
-    "tailwindcss",
-    "tw-animate-css"
-  ],
+  "ignoreDependencies": ["bun-types", "cloudflare", "entities"],
   "workspaces": {
     ".": {
       "entry": ["src/router.tsx"],
-      "project": ["src/**/*.{ts,tsx}", "*.config.ts", "*.config.mjs"]
+      "project": [
+        "src/**/*.{ts,tsx}",
+        "src/**/*.css",
+        "drizzle/**/*.ts",
+        "*.config.ts",
+        "*.config.mjs"
+      ]
     }
   }
 }
