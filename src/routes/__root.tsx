@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
-import { lazy } from 'react'
+import { lazy, useEffect, version as reactVersion } from 'react'
 import { FloatingNav } from '~/components/floating-nav'
 import { ContentWrapper } from '~/components/content-wrapper'
 import { SiteFooter } from '~/components/site-footer'
@@ -59,6 +59,14 @@ export const Route = createRootRouteWithContext()({
 
 function RootComponent() {
 	const settings = SETTINGS_DEFAULTS
+
+	useEffect(() => {
+		Object.defineProperty(window, 'React', {
+			value: Object.freeze({ version: reactVersion }),
+			writable: false,
+			configurable: false,
+		})
+	}, [])
 
 	return (
 		<>
