@@ -28,11 +28,10 @@ interface SiteSettings {
 }
 
 const SETTINGS_DEFAULTS: SiteSettings = {
-	copyright: 'taki',
-	footerText:
-		'A digital alter ego -- posts, projects, thoughts, and more. Built with TanStack Start, deployed on Cloudflare Workers.',
-	siteDescription: 'A digital alter ego -- posts, projects, thoughts, and more.',
-	siteTitle: 'taki',
+	copyright: 'Name',
+	footerText: 'This is a footer text.',
+	siteDescription: 'This is a site description.',
+	siteTitle: 'Site Name',
 }
 
 export const Route = createRootRouteWithContext()({
@@ -49,9 +48,9 @@ export const Route = createRootRouteWithContext()({
 			],
 			links: [
 				{ rel: 'stylesheet', href: appCss },
-				{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+				{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg' },
 				{ rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
-				{ rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+				{ rel: 'apple-touch-icon', sizes: '96x96', href: '/apple-touch-icon.png' },
 			],
 		}
 	},
@@ -74,14 +73,12 @@ function RootComponent() {
 }
 
 function rootDocument(props: { children: ReactNode }) {
-	// THEME_INIT_SCRIPT is a compile-time constant, safe for inline use
 	const themeScript = THEME_INIT_SCRIPT
 
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
-				{/* Safe: themeScript is a compile-time constant, not user input */}
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">
