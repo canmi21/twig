@@ -5,13 +5,12 @@
     "@types/uuid",
     "cloudflare",
     "entities",
-    "shiki",
     "tailwindcss",
     "tw-animate-css"
   ],
   "workspaces": {
     ".": {
-      "entry": ["src/router.tsx", "src/entry-server.ts"],
+      "entry": ["src/router.tsx"],
       "project": ["src/**/*.{ts,tsx}", "*.config.ts", "*.config.mjs"]
     }
   }
