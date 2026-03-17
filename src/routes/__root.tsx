@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react'
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
+import {
+	HeadContent,
+	Outlet,
+	Scripts,
+	createRootRouteWithContext,
+	useRouterState,
+} from '@tanstack/react-router'
 import { lazy, useEffect, version as reactVersion } from 'react'
 import { FloatingNav } from '~/components/floating-nav'
 import { ContentWrapper } from '~/components/content-wrapper'
@@ -59,6 +65,9 @@ export const Route = createRootRouteWithContext()({
 
 function RootComponent() {
 	const settings = SETTINGS_DEFAULTS
+	const isDashboard = useRouterState({
+		select: (state) => state.location.pathname.startsWith('/~'),
+	})
 
 	useEffect(() => {
 		Object.defineProperty(window, 'React', {
@@ -67,6 +76,23 @@ function RootComponent() {
 			configurable: false,
 		})
 	}, [])
+
+	if (isDashboard) {
+		return (
+			<>
+				<Outlet />
+				<TanStackDevtools
+					config={{ position: 'bottom-right' }}
+					plugins={[
+						{
+							name: 'Tanstack Router',
+							render: <TanStackRouterDevtoolsPanel />,
+						},
+					]}
+				/>
+			</>
+		)
+	}
 
 	return (
 		<>

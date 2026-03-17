@@ -1,32 +1,69 @@
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import { ArrowLeft, FileText, Notebook } from 'lucide-react'
+import { LampCordToggle } from '~/components/lamp-cord-toggle'
 
 export const Route = createFileRoute('/~/dashboard')({
 	component: DashboardLayout,
 })
 
 const navItems = [
-	{ to: '/~/dashboard', label: 'Posts', exact: true },
-	{ to: '/~/dashboard/notes', label: 'Notes', exact: false },
-] as const
+	{ to: '/~/dashboard' as const, label: 'Posts', icon: FileText, exact: true },
+	{ to: '/~/dashboard/notes' as const, label: 'Notes', icon: Notebook, exact: false },
+]
 
 function DashboardLayout() {
 	return (
-		<div className="mx-auto max-w-5xl px-6 py-8">
-			<h1 className="text-content-heading text-2xl font-bold">Dashboard</h1>
-			<nav className="border-border-subtle mt-4 flex gap-4 border-b pb-2">
-				{navItems.map(({ to, label, exact }) => (
+		<div className="bg-background flex min-h-screen">
+			<LampCordToggle />
+
+			{/* Sidebar */}
+			<aside className="border-border-default bg-sunken flex w-60 shrink-0 flex-col border-r">
+				{/* Brand */}
+				<div className="border-border-default flex h-14 items-center border-b px-5">
+					<span className="text-content-heading text-sm font-bold tracking-widest uppercase">
+						taki
+					</span>
+				</div>
+
+				{/* Navigation */}
+				<nav className="flex-1 px-3 pt-4">
+					<ul className="m-0 list-none space-y-1 p-0">
+						{navItems.map(({ to, label, icon: Icon, exact }) => (
+							<li key={to}>
+								<Link
+									to={to}
+									activeOptions={{ exact }}
+									className="text-content-secondary hover:bg-elevated hover:text-content-heading [&.active]:bg-accent-subtle [&.active]:text-accent-on-subtle flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium no-underline transition-colors"
+								>
+									<Icon size={18} />
+									{label}
+								</Link>
+							</li>
+						))}
+					</ul>
+				</nav>
+
+				{/* Back to site */}
+				<div className="border-border-default border-t px-3 py-3">
 					<Link
-						key={to}
-						to={to}
-						activeOptions={{ exact }}
-						className="text-content-secondary hover:text-content-heading [&.active]:text-content-heading [&.active]:border-primary border-b-2 border-transparent pb-1 text-sm font-medium no-underline transition-colors"
+						to="/"
+						className="text-content-secondary hover:bg-elevated hover:text-content-heading flex items-center gap-3 rounded-lg px-3 py-2 text-sm no-underline transition-colors"
 					>
-						{label}
+						<ArrowLeft size={18} />
+						Back to site
 					</Link>
-				))}
-			</nav>
-			<div className="mt-6">
-				<Outlet />
+				</div>
+			</aside>
+
+			{/* Main */}
+			<div className="flex flex-1 flex-col">
+				{/* Header bar — placeholder for breadcrumbs / page title */}
+				<header className="border-border-default flex h-14 shrink-0 items-center border-b px-6" />
+
+				{/* Content */}
+				<main className="flex-1 overflow-y-auto p-6">
+					<Outlet />
+				</main>
 			</div>
 		</div>
 	)

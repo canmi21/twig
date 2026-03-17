@@ -82,7 +82,10 @@ export function LampCordToggle() {
 	if (!mounted) {
 		// Placeholder preserves DOM structure to prevent hydration mismatch
 		return (
-			<span className="fixed top-0 right-6 z-50 sm:right-8" aria-hidden="true">
+			<span
+				className="fixed top-0 right-6 z-50 flex flex-col items-center sm:right-8"
+				aria-hidden="true"
+			>
 				<span className="bg-border-strong inline-block w-px" style={{ height: '4rem' }} />
 				<span className="bg-content-tertiary inline-block h-5 w-2 rounded-full" />
 			</span>
