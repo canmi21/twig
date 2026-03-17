@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { getTimelineItems } from '~/features/content/server'
 import type { TimelineItem } from '~/features/content/server'
+import { resolveImageUrl } from '~/lib/image'
 
 export const Route = createFileRoute('/')({
 	loader: () => getTimelineItems(),
@@ -42,7 +43,12 @@ function NoteCard({ item }: { item: TimelineItem & { type: 'note' } }) {
 			{images.length > 0 && (
 				<div className="mt-3 flex flex-wrap gap-2">
 					{images.map((src) => (
-						<img key={src} src={src} alt="" className="h-32 rounded-md object-cover" />
+						<img
+							key={src}
+							src={resolveImageUrl(src)}
+							alt=""
+							className="h-32 rounded-md object-cover"
+						/>
 					))}
 				</div>
 			)}

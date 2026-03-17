@@ -1,5 +1,6 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
+import { resolveImageUrl } from '~/lib/image'
 import {
 	createNote,
 	deleteNote,
@@ -115,7 +116,11 @@ function NoteComposer({ onCreated }: { onCreated: () => void }) {
 				<div className="mt-2 flex flex-wrap gap-2">
 					{images.map((path, idx) => (
 						<div key={path} className="group relative">
-							<img src={`/api/file/${path}`} alt="" className="h-20 w-20 rounded-md object-cover" />
+							<img
+								src={resolveImageUrl(path)}
+								alt=""
+								className="h-20 w-20 rounded-md object-cover"
+							/>
 							<button
 								type="button"
 								onClick={() => removeImage(idx)}
@@ -223,7 +228,7 @@ function NotesPage() {
 											{imgs.map((path) => (
 												<img
 													key={path}
-													src={`/api/file/${path}`}
+													src={resolveImageUrl(path)}
 													alt=""
 													className="h-20 w-20 rounded-md object-cover"
 												/>
