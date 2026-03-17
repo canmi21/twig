@@ -1,4 +1,4 @@
-import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
+import { Link, Outlet, createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { ArrowLeft, FileText, Notebook } from 'lucide-react'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 
@@ -6,15 +6,18 @@ export const Route = createFileRoute('/~/dashboard')({
 	component: DashboardLayout,
 })
 
+const rootRoute = getRouteApi('__root__')
+
 const navItems = [
 	{ to: '/~/dashboard' as const, label: 'Posts', icon: FileText, exact: true },
 	{ to: '/~/dashboard/notes' as const, label: 'Notes', icon: Notebook, exact: false },
 ]
 
 function DashboardLayout() {
+	const { theme } = rootRoute.useRouteContext()
 	return (
 		<div className="bg-background flex min-h-screen">
-			<LampCordToggle />
+			<LampCordToggle initialTheme={theme} />
 
 			{/* Sidebar */}
 			<aside className="border-border-default bg-sunken flex w-60 shrink-0 flex-col border-r">

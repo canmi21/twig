@@ -12,6 +12,8 @@ import { ContentWrapper } from '~/components/content-wrapper'
 import { SiteFooter } from '~/components/site-footer'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 import { THEME_INIT_SCRIPT } from '~/lib/theme'
+import type { ThemePreference } from '~/lib/theme'
+import { getThemeCookie } from '~/server/theme'
 import appCss from '~/styles/index.css?url'
 
 const TanStackDevtools = import.meta.env.DEV
@@ -42,6 +44,14 @@ const SETTINGS_DEFAULTS: SiteSettings = {
 
 export const Route = createRootRouteWithContext()({
 	component: RootComponent,
+	beforeLoad: async () => {
+		const theme: ThemePreference =
+			typeof document !== 'undefined'
+				? ((document.cookie.match(/\btheme=(light|dark)\b/)?.[1] as ThemePreference | undefined) ??
+					'light')
+				: ((await getThemeCookie()) ?? 'light')
+		return { theme }
+	},
 	head: () => {
 		const settings = SETTINGS_DEFAULTS
 		return {
@@ -65,6 +75,7 @@ export const Route = createRootRouteWithContext()({
 
 function RootComponent() {
 	const settings = SETTINGS_DEFAULTS
+	const { theme } = Route.useRouteContext()
 	const isDashboard = useRouterState({
 		select: (state) => state.location.pathname.startsWith('/~'),
 	})
@@ -97,11 +108,11 @@ function RootComponent() {
 	return (
 		<>
 			<FloatingNav />
-			<LampCordToggle />
+			<LampCordToggle initialTheme={theme} />
 			<ContentWrapper>
 				<Outlet />
 			</ContentWrapper>
-			<SiteFooter settings={settings} />
+			<SiteFooter settings={settings} initialTheme={theme} />
 			<TanStackDevtools
 				config={{ position: 'bottom-right' }}
 				plugins={[

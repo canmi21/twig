@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { applyResolvedThemeWithTransition, setThemeCookie } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'
@@ -11,15 +11,10 @@ function readPreference(): ThemePreference {
 	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
 }
 
-function FooterThemeToggle() {
-	const [mounted, setMounted] = useState(false)
-	useEffect(() => {
-		requestAnimationFrame(() => setMounted(true))
-	}, [])
-
+function FooterThemeToggle({ initialTheme }: { initialTheme: ThemePreference }) {
 	const [preference, setPreference] = useState<ThemePreference>(() => {
 		if (typeof document === 'undefined') {
-			return 'light'
+			return initialTheme
 		}
 		return readPreference()
 	})
@@ -29,10 +24,6 @@ function FooterThemeToggle() {
 		applyResolvedThemeWithTransition(next)
 		setThemeCookie(next)
 		setPreference(next)
-	}
-
-	if (!mounted) {
-		return <span className="size-4" />
 	}
 
 	const Icon = preference === 'dark' ? Moon : Sun
@@ -51,6 +42,7 @@ function FooterThemeToggle() {
 }
 
 interface SiteFooterProps {
+	initialTheme: ThemePreference
 	settings: {
 		siteTitle: string
 		footerText: string
@@ -58,7 +50,7 @@ interface SiteFooterProps {
 	}
 }
 
-export function SiteFooter({ settings }: SiteFooterProps) {
+export function SiteFooter({ settings, initialTheme }: SiteFooterProps) {
 	const year = new Date().getFullYear()
 
 	return (
@@ -78,7 +70,7 @@ export function SiteFooter({ settings }: SiteFooterProps) {
 
 					{/* Right: theme toggle */}
 					<div className="shrink-0 pt-1">
-						<FooterThemeToggle />
+						<FooterThemeToggle initialTheme={initialTheme} />
 					</div>
 				</div>
 			</div>

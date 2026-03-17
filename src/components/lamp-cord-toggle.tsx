@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { setThemeCookie } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'
 
@@ -15,15 +15,10 @@ function applyTheme(resolved: ThemePreference) {
 	document.documentElement.style.colorScheme = resolved
 }
 
-export function LampCordToggle() {
-	const [mounted, setMounted] = useState(false)
-	useEffect(() => {
-		requestAnimationFrame(() => setMounted(true))
-	}, [])
-
+export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference }) {
 	const [preference, setPreference] = useState<ThemePreference>(() => {
 		if (typeof document === 'undefined') {
-			return 'light'
+			return initialTheme
 		}
 		return readPreference()
 	})
@@ -77,19 +72,6 @@ export function LampCordToggle() {
 
 		setThemeCookie(next)
 		setPreference(next)
-	}
-
-	if (!mounted) {
-		// Placeholder preserves DOM structure to prevent hydration mismatch
-		return (
-			<span
-				className="fixed top-0 right-6 z-50 flex flex-col items-center sm:right-8"
-				aria-hidden="true"
-			>
-				<span className="bg-border-strong inline-block w-px" style={{ height: '4rem' }} />
-				<span className="bg-content-tertiary inline-block h-5 w-2 rounded-full" />
-			</span>
-		)
 	}
 
 	return (
