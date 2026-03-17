@@ -6,7 +6,7 @@ import { ContentWrapper } from '~/components/content-wrapper'
 import { SiteFooter } from '~/components/site-footer'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 import { THEME_INIT_SCRIPT } from '~/lib/theme'
-import appCss from '~/styles.css?url'
+import appCss from '~/styles/index.css?url'
 
 const TanStackDevtools = import.meta.env.DEV
 	? lazy(() => import('@tanstack/react-devtools').then((m) => ({ default: m.TanStackDevtools })))
@@ -68,6 +68,15 @@ function RootComponent() {
 				<Outlet />
 			</ContentWrapper>
 			<SiteFooter settings={settings} />
+			<TanStackDevtools
+				config={{ position: 'bottom-right' }}
+				plugins={[
+					{
+						name: 'Tanstack Router',
+						render: <TanStackRouterDevtoolsPanel />,
+					},
+				]}
+			/>
 		</>
 	)
 }
@@ -83,17 +92,6 @@ function rootDocument(props: { children: ReactNode }) {
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">
 				{props.children}
-				<TanStackDevtools
-					config={{
-						position: 'bottom-right',
-					}}
-					plugins={[
-						{
-							name: 'Tanstack Router',
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-					]}
-				/>
 				<Scripts />
 			</body>
 		</html>

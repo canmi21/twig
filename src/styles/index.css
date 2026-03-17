@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
-@import './styles/codes.css';
-@import './styles/tokens.css';
-@import './styles/transitions.css';
+@import './codes.css';
+@import './tokens.css';
+@import './transitions.css';
 
 @theme inline {
 	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
