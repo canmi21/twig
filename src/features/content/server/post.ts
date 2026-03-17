@@ -7,6 +7,7 @@ import {
 	purgeUrls,
 	setPostHtml,
 } from '~/features/platform/server'
+import { requireAuth } from '~/server/auth'
 import { ContentStatus, ContentType, contents, posts } from '~/server/database'
 import { renderMarkdown } from '~/server/markdown'
 
@@ -112,6 +113,7 @@ export const createPost = createServerFn({ method: 'POST' })
 		},
 	)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const cid = generateCid()
 		const now = new Date().toISOString()
@@ -167,6 +169,7 @@ export const updatePost = createServerFn({ method: 'POST' })
 		},
 	)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const now = new Date().toISOString()
 
@@ -243,6 +246,7 @@ export const updatePost = createServerFn({ method: 'POST' })
 export const publishPost = createServerFn({ method: 'POST' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const now = new Date().toISOString()
 
@@ -275,6 +279,7 @@ export const publishPost = createServerFn({ method: 'POST' })
 export const unpublishPost = createServerFn({ method: 'POST' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const now = new Date().toISOString()
 
@@ -305,6 +310,7 @@ export const unpublishPost = createServerFn({ method: 'POST' })
 export const deletePost = createServerFn({ method: 'POST' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 
 		const rows = await db

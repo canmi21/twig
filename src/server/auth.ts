@@ -29,32 +29,41 @@ function getCookieValue(cookieHeader: string | undefined, name: string): string 
 	return match?.[1]
 }
 
-export const checkDashboardAuth = createServerFn({ method: 'GET' }).handler(
-	async (): Promise<{ authenticated: boolean; email?: string }> => {
-		const { getRequestHeader } = await import('@tanstack/react-start/server')
+/** Resolve auth state from request headers/cookies. */
+async function resolveAuth(): Promise<{ authenticated: boolean; email?: string }> {
+	const { getRequestHeader } = await import('@tanstack/react-start/server')
 
-		// Dev mode: bypass auth when running locally
-		if (import.meta.env.DEV) {
-			return { authenticated: true, email: 'dev@localhost' }
+	if (import.meta.env.DEV) {
+		return { authenticated: true, email: 'dev@localhost' }
+	}
+
+	const headerEmail = getRequestHeader(CF_ACCESS_HEADER)
+	if (headerEmail) {
+		return { authenticated: true, email: headerEmail }
+	}
+
+	const cookie = getRequestHeader('cookie')
+	const jwt = getCookieValue(cookie, CF_ACCESS_JWT_COOKIE)
+	if (jwt) {
+		const jwtEmail = emailFromAccessJwt(jwt)
+		if (jwtEmail) {
+			return { authenticated: true, email: jwtEmail }
 		}
+	}
 
-		// Primary: Cloudflare Access injects this header on matched paths
-		const headerEmail = getRequestHeader(CF_ACCESS_HEADER)
-		if (headerEmail) {
-			return { authenticated: true, email: headerEmail }
-		}
+	return { authenticated: false }
+}
 
-		// Fallback: read CF_Authorization JWT cookie (set on entire domain after Access login).
-		// Needed for server function RPC requests that don't match the Access application path.
-		const cookie = getRequestHeader('cookie')
-		const jwt = getCookieValue(cookie, CF_ACCESS_JWT_COOKIE)
-		if (jwt) {
-			const jwtEmail = emailFromAccessJwt(jwt)
-			if (jwtEmail) {
-				return { authenticated: true, email: jwtEmail }
-			}
-		}
+/**
+ * Guard for write operations. Call at the top of any server function handler
+ * that mutates data. Throws 401 if not authenticated.
+ */
+export async function requireAuth(): Promise<string> {
+	const auth = await resolveAuth()
+	if (!auth.authenticated) {
+		throw new Error('Unauthorized')
+	}
+	return auth.email!
+}
 
-		return { authenticated: false }
-	},
-)
+export const checkDashboardAuth = createServerFn({ method: 'GET' }).handler(() => resolveAuth())

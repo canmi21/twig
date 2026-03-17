@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { uploadFile } from '~/features/platform/server'
+import { requireAuth } from '~/server/auth'
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
@@ -29,6 +30,7 @@ export const uploadImage = createServerFn({ method: 'POST' })
 		return d
 	})
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const ext = EXT_MAP[data.type] ?? 'bin'
 		const binaryString = atob(data.base64)
 		const bytes = new Uint8Array(binaryString.length)

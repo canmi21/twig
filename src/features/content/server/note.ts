@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { generateCid, getDb } from '~/features/platform/server'
+import { requireAuth } from '~/server/auth'
 import { ContentStatus, ContentType, contents, notes } from '~/server/database'
 
 const TEXT_MAX_BYTES = 4096
@@ -66,6 +67,7 @@ export const createNote = createServerFn({ method: 'POST' })
 		return d
 	})
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const cid = generateCid()
 		const now = new Date().toISOString()
@@ -105,6 +107,7 @@ export const updateNote = createServerFn({ method: 'POST' })
 		return d
 	})
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const now = new Date().toISOString()
 
@@ -130,6 +133,7 @@ export const updateNote = createServerFn({ method: 'POST' })
 export const publishNote = createServerFn({ method: 'POST' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const now = new Date().toISOString()
 
@@ -146,6 +150,7 @@ export const publishNote = createServerFn({ method: 'POST' })
 export const unpublishNote = createServerFn({ method: 'POST' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const now = new Date().toISOString()
 
@@ -162,6 +167,7 @@ export const unpublishNote = createServerFn({ method: 'POST' })
 export const deleteNote = createServerFn({ method: 'POST' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 
 		// FK order: notes → contents
