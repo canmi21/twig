@@ -24,6 +24,7 @@ const sections: { title: string; fields: FieldDef[] }[] = [
 			{ key: 'language', label: 'Language', placeholder: 'en' },
 			{ key: 'copyright', label: 'Copyright', placeholder: 'Site Name' },
 			{ key: 'icp', label: 'ICP', placeholder: '' },
+			{ key: 'icpLink', label: 'ICP Link', placeholder: 'https://beian.miit.gov.cn' },
 		],
 	},
 	{
@@ -40,6 +41,10 @@ const sections: { title: string; fields: FieldDef[] }[] = [
 			{ key: 'footerName', label: 'Name', placeholder: 'Site Name' },
 			{ key: 'footerDescription', label: 'Description', placeholder: 'A short footer text' },
 		],
+	},
+	{
+		title: 'Footer Navigation',
+		fields: [{ key: 'footerNav', label: 'Navigation (JSON)', placeholder: '[]' }],
 	},
 ]
 
@@ -79,14 +84,25 @@ function SettingsPage() {
 								>
 									{label}
 								</label>
-								<input
-									id={key}
-									type="text"
-									value={form[key]}
-									onChange={(ev) => handleChange(key, ev.target.value)}
-									placeholder={placeholder}
-									className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
-								/>
+								{key === 'footerNav' ? (
+									<textarea
+										id={key}
+										value={form[key]}
+										onChange={(ev) => handleChange(key, ev.target.value)}
+										placeholder={placeholder}
+										rows={10}
+										className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 font-mono text-sm focus:outline-none"
+									/>
+								) : (
+									<input
+										id={key}
+										type="text"
+										value={form[key]}
+										onChange={(ev) => handleChange(key, ev.target.value)}
+										placeholder={placeholder}
+										className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+									/>
+								)}
 							</div>
 						))}
 					</fieldset>
