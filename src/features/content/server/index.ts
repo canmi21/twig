@@ -1,3 +1,5 @@
+/* src/features/content/server/index.ts */
+
 export {
 	listPosts,
 	getPost,

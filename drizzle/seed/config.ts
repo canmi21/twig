@@ -1,3 +1,5 @@
+/* drizzle/seed/config.ts */
+
 import type { RunSql } from './types'
 
 const FOOTER_NAV = JSON.stringify([

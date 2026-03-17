@@ -1,3 +1,5 @@
+/* src/server/markdown.ts */
+
 // oxlint-disable-next-line import/no-unassigned-import -- side-effect guard: throws at compile time if bundled for client
 import '@tanstack/react-start/server-only'
 

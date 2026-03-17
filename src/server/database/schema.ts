@@ -1,3 +1,5 @@
+/* src/server/database/schema.ts */
+
 import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const config = sqliteTable('config', {

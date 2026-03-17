@@ -1,3 +1,5 @@
+/* src/server/database/constants.ts */
+
 export const ContentType = {
 	NOTE: 'note',
 	POST: 'post',

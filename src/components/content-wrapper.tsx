@@ -1,3 +1,5 @@
+/* src/components/content-wrapper.tsx */
+
 import type { ReactNode } from 'react'
 
 export function ContentWrapper({ children }: { children: ReactNode }) {

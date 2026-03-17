@@ -1,3 +1,5 @@
+/* src/routes/index.tsx */
+
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { getTimelineItems } from '~/features/content/server'
 import type { TimelineItem } from '~/features/content/server'

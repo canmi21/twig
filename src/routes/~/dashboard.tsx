@@ -1,3 +1,5 @@
+/* src/routes/~/dashboard.tsx */
+
 import { Link, Outlet, createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { ArrowLeft, FileText, Notebook, Settings } from 'lucide-react'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'

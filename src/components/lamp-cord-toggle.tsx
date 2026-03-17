@@ -1,3 +1,5 @@
+/* src/components/lamp-cord-toggle.tsx */
+
 import { useRef, useState } from 'react'
 import { setThemeCookie } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'

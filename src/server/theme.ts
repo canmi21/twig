@@ -1,3 +1,5 @@
+/* src/server/theme.ts */
+
 import { createServerFn } from '@tanstack/react-start'
 
 export const getThemeCookie = createServerFn({ method: 'GET' }).handler(async () => {

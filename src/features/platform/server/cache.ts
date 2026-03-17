@@ -1,3 +1,5 @@
+/* src/features/platform/server/cache.ts */
+
 import { env } from 'cloudflare:workers'
 
 function postHtmlKey(slug: string): string {

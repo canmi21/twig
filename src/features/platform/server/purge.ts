@@ -1,3 +1,5 @@
+/* src/features/platform/server/purge.ts */
+
 import { env } from 'cloudflare:workers'
 
 /**

@@ -1,3 +1,5 @@
+/* src/routes/__root.tsx */
+
 import type { ReactNode } from 'react'
 import {
 	HeadContent,

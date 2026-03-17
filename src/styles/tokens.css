@@ -1,3 +1,5 @@
+/* src/styles/tokens.css */
+
 @custom-variant dark (&.dark);
 
 :root {

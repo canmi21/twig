@@ -1,3 +1,5 @@
+/* drizzle/seed/notes.ts */
+
 import type { RunSql } from './types'
 
 export async function seedNotes(runSql: RunSql) {

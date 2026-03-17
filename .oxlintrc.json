@@ -45,7 +45,8 @@
     "unicorn/text-encoding-identifier-case": "off",
     "unicorn/prefer-global-this": "off",
     "unicorn/numeric-separators-style": "off",
-    "import/no-namespace": "off"
+    "import/no-namespace": "off",
+    "capitalized-comments": "off"
   },
   "overrides": [
     {

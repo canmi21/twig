@@ -14,7 +14,7 @@
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "eslint . --fix",
     "lint:fix": "bun run lint:oxlint:fix && bun run lint:eslint:fix",
-    "fmt": "oxfmt --write .",
+    "fmt": "oxfmt --write . && chore .",
     "fmt:check": "oxfmt --check .",
     "knip": "knip",
     "typecheck": "tsc --noEmit && tsc --noEmit -p drizzle/tsconfig.json",

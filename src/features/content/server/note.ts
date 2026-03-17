@@ -1,3 +1,5 @@
+/* src/features/content/server/note.ts */
+
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { generateCid, getDb } from '~/features/platform/server'

@@ -1,3 +1,5 @@
+/* src/routes/~/dashboard/post/new.tsx */
+
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'

@@ -1,3 +1,5 @@
+/* src/components/floating-nav.tsx */
+
 import { Link } from '@tanstack/react-router'
 
 const navItems = [{ exact: true, label: 'Home', to: '/' }] as const

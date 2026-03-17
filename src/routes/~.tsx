@@ -1,3 +1,5 @@
+/* src/routes/~.tsx */
+
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { checkDashboardAuth } from '~/server/auth'
 

@@ -1,3 +1,5 @@
+/* src/lib/theme.ts */
+
 export type ResolvedTheme = 'light' | 'dark'
 export type ThemePreference = ResolvedTheme
 

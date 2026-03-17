@@ -1,3 +1,5 @@
+/* src/entry-server.ts */
+
 import { createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
 import { env } from 'cloudflare:workers'
 

@@ -1,3 +1,5 @@
+/* src/lib/image.ts */
+
 /**
  * Resolve an R2 object path to a full image URL.
  *

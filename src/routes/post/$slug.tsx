@@ -1,3 +1,5 @@
+/* src/routes/post/$slug.tsx */
+
 import { createFileRoute } from '@tanstack/react-router'
 import { getPublishedPostBySlug } from '~/features/content/server'
 

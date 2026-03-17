@@ -1,3 +1,5 @@
+/* src/server/auth.server.ts */
+
 import { getRequestHeader } from '@tanstack/react-start/server'
 import { createRemoteJWKSet, jwtVerify } from 'jose'
 

@@ -1,3 +1,5 @@
+/* src/components/site-footer.tsx */
+
 import { useState } from 'react'
 import { ArrowUpRight, Moon, Sun } from 'lucide-react'
 import { applyResolvedThemeWithTransition, setThemeCookie } from '~/lib/theme'

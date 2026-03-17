@@ -1,3 +1,5 @@
+/* src/features/platform/server/storage.ts */
+
 import { env } from 'cloudflare:workers'
 
 type FileCategory = 'image' | 'video' | 'audio' | 'asset'

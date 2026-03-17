@@ -1,3 +1,5 @@
+/* drizzle/seed.ts */
+
 import { $ } from 'bun'
 import { seedConfig } from './seed/config'
 import { seedNotes } from './seed/notes'

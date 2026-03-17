@@ -1,3 +1,5 @@
+/* src/server/config.ts */
+
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import { getDb } from '~/features/platform/server'

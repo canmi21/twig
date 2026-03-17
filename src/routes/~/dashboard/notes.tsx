@@ -1,3 +1,5 @@
+/* src/routes/~/dashboard/notes.tsx */
+
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { resolveImageUrl } from '~/lib/image'

@@ -1,3 +1,5 @@
+/* src/routes/~/dashboard/index.tsx */
+
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { deletePost, listPosts, publishPost, unpublishPost } from '~/features/content/server'
 
