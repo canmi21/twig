@@ -17,7 +17,7 @@ async function postPageUrl(slug: string): Promise<string> {
 	const { getRequestHeader } = await import('@tanstack/react-start/server')
 	const host = getRequestHeader('host') ?? 'localhost'
 	const proto = import.meta.env.DEV ? 'http' : 'https'
-	return `${proto}://${host}/posts/${slug}`
+	return `${proto}://${host}/post/${slug}`
 }
 
 // ---------------------------------------------------------------------------

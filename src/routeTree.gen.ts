@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char126RouteImport } from './routes/~'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Char126DashboardRouteImport } from './routes/~/dashboard'
+import { Route as PostSlugRouteImport } from './routes/post/$slug'
 import { Route as Char126DashboardIndexRouteImport } from './routes/~/dashboard/index'
 import { Route as Char126DashboardPostNewRouteImport } from './routes/~/dashboard/post/new'
 import { Route as Char126DashboardPostCidRouteImport } from './routes/~/dashboard/post/$cid'
@@ -30,6 +31,11 @@ const Char126DashboardRoute = Char126DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => Char126Route,
+} as any)
+const PostSlugRoute = PostSlugRouteImport.update({
+  id: '/post/$slug',
+  path: '/post/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Char126DashboardIndexRoute = Char126DashboardIndexRouteImport.update({
   id: '/',
@@ -50,6 +56,7 @@ const Char126DashboardPostCidRoute = Char126DashboardPostCidRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/~': typeof Char126RouteWithChildren
+  '/post/$slug': typeof PostSlugRoute
   '/~/dashboard': typeof Char126DashboardRouteWithChildren
   '/~/dashboard/': typeof Char126DashboardIndexRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/~': typeof Char126RouteWithChildren
+  '/post/$slug': typeof PostSlugRoute
   '/~/dashboard': typeof Char126DashboardIndexRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
   '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
@@ -66,6 +74,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/~': typeof Char126RouteWithChildren
+  '/post/$slug': typeof PostSlugRoute
   '/~/dashboard': typeof Char126DashboardRouteWithChildren
   '/~/dashboard/': typeof Char126DashboardIndexRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
@@ -76,6 +85,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/~'
+    | '/post/$slug'
     | '/~/dashboard'
     | '/~/dashboard/'
     | '/~/dashboard/post/$cid'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/~'
+    | '/post/$slug'
     | '/~/dashboard'
     | '/~/dashboard/post/$cid'
     | '/~/dashboard/post/new'
@@ -91,6 +102,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/~'
+    | '/post/$slug'
     | '/~/dashboard'
     | '/~/dashboard/'
     | '/~/dashboard/post/$cid'
@@ -100,6 +112,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   Char126Route: typeof Char126RouteWithChildren
+  PostSlugRoute: typeof PostSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -124,6 +137,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/~/dashboard'
       preLoaderRoute: typeof Char126DashboardRouteImport
       parentRoute: typeof Char126Route
+    }
+    '/post/$slug': {
+      id: '/post/$slug'
+      path: '/post/$slug'
+      fullPath: '/post/$slug'
+      preLoaderRoute: typeof PostSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/~/dashboard/': {
       id: '/~/dashboard/'
@@ -178,6 +198,7 @@ const Char126RouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   Char126Route: Char126RouteWithChildren,
+  PostSlugRoute: PostSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
