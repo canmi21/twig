@@ -24,6 +24,10 @@
       "id": "e823da6d6efe4ebfa7a33945530c2602",
     },
   ],
+  "vars": {
+    "CF_ACCESS_TEAM_DOMAIN": "https://canmi.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "72884251705292d1d1afbe7ad595c3d20dbf83f80be6c18bd699dcde2d0f6b16",
+  },
   "r2_buckets": [
     {
       "bucket_name": "taki-bucket",

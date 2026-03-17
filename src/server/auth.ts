@@ -1,24 +1,17 @@
 import { createServerFn } from '@tanstack/react-start'
+import { createRemoteJWKSet, jwtVerify } from 'jose'
 
-const CF_ACCESS_HEADER = 'cf-access-authenticated-user-email'
+import type { JWTVerifyGetKey } from 'jose'
+
+const CF_ACCESS_JWT_HEADER = 'cf-access-jwt-assertion'
 const CF_ACCESS_JWT_COOKIE = 'CF_Authorization'
 
-/**
- * Decode the email from a Cloudflare Access JWT without crypto verification.
- * The JWT is already verified by Cloudflare at the edge before reaching the Worker,
- * so we only need to extract the payload.
- */
-function emailFromAccessJwt(jwt: string): string | undefined {
-	try {
-		const [, payload] = jwt.split('.')
-		if (!payload) {
-			return undefined
-		}
-		const decoded = JSON.parse(atob(payload)) as { email?: string }
-		return decoded.email
-	} catch {
-		return undefined
-	}
+let jwks: JWTVerifyGetKey | undefined = undefined
+
+/** Lazily create and cache the JWKS fetcher for the configured team domain. */
+function getJwks(teamDomain: string): JWTVerifyGetKey {
+	jwks ??= createRemoteJWKSet(new URL(`${teamDomain}/cdn-cgi/access/certs`))
+	return jwks
 }
 
 function getCookieValue(cookieHeader: string | undefined, name: string): string | undefined {
@@ -29,6 +22,26 @@ function getCookieValue(cookieHeader: string | undefined, name: string): string 
 	return match?.[1]
 }
 
+/**
+ * Verify a Cloudflare Access JWT with full signature + claims validation.
+ * Returns the email on success, undefined on any failure.
+ */
+async function verifyAccessJwt(
+	token: string,
+	teamDomain: string,
+	aud: string,
+): Promise<string | undefined> {
+	try {
+		const { payload } = await jwtVerify(token, getJwks(teamDomain), {
+			audience: aud,
+			issuer: `${teamDomain}`,
+		})
+		return (payload as { email?: string }).email
+	} catch {
+		return undefined
+	}
+}
+
 /** Resolve auth state from request headers/cookies. */
 async function resolveAuth(): Promise<{ authenticated: boolean; email?: string }> {
 	const { getRequestHeader } = await import('@tanstack/react-start/server')
@@ -37,26 +50,29 @@ async function resolveAuth(): Promise<{ authenticated: boolean; email?: string }
 		return { authenticated: true, email: 'dev@localhost' }
 	}
 
-	const headerEmail = getRequestHeader(CF_ACCESS_HEADER)
-	if (headerEmail) {
-		return { authenticated: true, email: headerEmail }
+	const teamDomain = process.env.CF_ACCESS_TEAM_DOMAIN
+	const aud = process.env.CF_ACCESS_AUD
+
+	// Prefer Cf-Access-Jwt-Assertion header, fall back to cookie
+	const token =
+		getRequestHeader(CF_ACCESS_JWT_HEADER) ??
+		getCookieValue(getRequestHeader('cookie'), CF_ACCESS_JWT_COOKIE)
+
+	if (!token) {
+		return { authenticated: false }
 	}
 
-	const cookie = getRequestHeader('cookie')
-	const jwt = getCookieValue(cookie, CF_ACCESS_JWT_COOKIE)
-	if (jwt) {
-		const jwtEmail = emailFromAccessJwt(jwt)
-		if (jwtEmail) {
-			return { authenticated: true, email: jwtEmail }
-		}
+	const email = await verifyAccessJwt(token, teamDomain, aud)
+	if (email) {
+		return { authenticated: true, email }
 	}
 
 	return { authenticated: false }
 }
 
 /**
- * Guard for write operations. Call at the top of any server function handler
- * that mutates data. Throws 401 if not authenticated.
+ * Guard for protected operations. Call at the top of any server function handler
+ * that requires authentication. Throws 401 if not authenticated.
  */
 export async function requireAuth(): Promise<string> {
 	const auth = await resolveAuth()

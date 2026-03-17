@@ -28,6 +28,7 @@ async function postPageUrl(slug: string): Promise<string> {
 export const listPosts = createServerFn({ method: 'GET' })
 	.inputValidator((d: { status?: ContentStatus }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const where = data.status
 			? and(eq(contents.type, ContentType.POST), eq(contents.status, data.status))
@@ -56,6 +57,7 @@ export const listPosts = createServerFn({ method: 'GET' })
 export const getPost = createServerFn({ method: 'GET' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const rows = await db
 			.select({

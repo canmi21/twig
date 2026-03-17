@@ -34,6 +34,7 @@
     "@tanstack/react-router-ssr-query": "^1.166.7",
     "@tanstack/react-start": "^1.166.11",
     "drizzle-orm": "^0.45.1",
+    "jose": "^6.2.1",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

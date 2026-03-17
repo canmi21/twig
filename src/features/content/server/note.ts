@@ -30,6 +30,7 @@ function validateImages(images?: string[]): string[] {
 export const getNote = createServerFn({ method: 'GET' })
 	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
+		await requireAuth()
 		const db = getDb()
 		const rows = await db
 			.select({
@@ -180,6 +181,7 @@ export const deleteNote = createServerFn({ method: 'POST' })
 // ---------------------------------------------------------------------------
 
 export const listNotes = createServerFn({ method: 'GET' }).handler(async () => {
+	await requireAuth()
 	const db = getDb()
 
 	return db
