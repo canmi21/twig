@@ -53,6 +53,12 @@
       "rules": {
         "import/no-default-export": "off"
       }
+    },
+    {
+      "files": ["drizzle/seed.ts", "drizzle/seed/**/*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
     }
   ]
 }

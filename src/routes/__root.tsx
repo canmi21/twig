@@ -6,13 +6,14 @@ import {
 	createRootRouteWithContext,
 	useRouterState,
 } from '@tanstack/react-router'
-import { lazy, useEffect, version as reactVersion } from 'react'
+import { lazy, useEffect, useState, version as reactVersion } from 'react'
 import { FloatingNav } from '~/components/floating-nav'
 import { ContentWrapper } from '~/components/content-wrapper'
 import { SiteFooter } from '~/components/site-footer'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 import { THEME_INIT_SCRIPT } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'
+import { getSiteConfig } from '~/server/config'
 import { getThemeCookie } from '~/server/theme'
 import appCss from '~/styles/index.css?url'
 
@@ -28,54 +29,38 @@ const TanStackRouterDevtoolsPanel = import.meta.env.DEV
 		)
 	: () => null
 
-interface SiteSettings {
-	siteTitle: string
-	siteDescription: string
-	footerText: string
-	copyright: string
-}
-
-const SETTINGS_DEFAULTS: SiteSettings = {
-	copyright: 'Name',
-	footerText: 'This is a footer text.',
-	siteDescription: 'This is a site description.',
-	siteTitle: 'Site Name',
-}
-
 export const Route = createRootRouteWithContext()({
 	component: RootComponent,
+	loader: () => getSiteConfig(),
 	beforeLoad: async () => {
 		const theme: ThemePreference =
 			typeof document !== 'undefined'
 				? ((document.cookie.match(/\btheme=(light|dark)\b/)?.[1] as ThemePreference | undefined) ??
 					'light')
 				: ((await getThemeCookie()) ?? 'light')
-		return { theme }
+		const siteConfig = await getSiteConfig()
+		return { theme, siteConfig }
 	},
-	head: () => {
-		const settings = SETTINGS_DEFAULTS
-		return {
-			meta: [
-				{ charSet: 'utf-8' },
-				{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
-				{ title: settings.siteTitle },
-				{ name: 'description', content: settings.siteDescription },
-				{ httpEquiv: 'Accept-CH', content: 'Sec-CH-Prefers-Color-Scheme' },
-			],
-			links: [
-				{ rel: 'stylesheet', href: appCss },
-				{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg' },
-				{ rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
-				{ rel: 'apple-touch-icon', sizes: '96x96', href: '/apple-touch-icon.png' },
-			],
-		}
-	},
-	shellComponent: rootDocument,
+	head: ({ loaderData }) => ({
+		meta: [
+			{ charSet: 'utf-8' },
+			{ name: 'viewport', content: 'width=device-width, initial-scale=1' },
+			{ title: loaderData.title },
+			{ name: 'description', content: loaderData.description },
+			{ httpEquiv: 'Accept-CH', content: 'Sec-CH-Prefers-Color-Scheme' },
+		],
+		links: [
+			{ rel: 'stylesheet', href: appCss },
+			{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg' },
+			{ rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
+			{ rel: 'apple-touch-icon', sizes: '96x96', href: '/apple-touch-icon.png' },
+		],
+	}),
+	shellComponent: RootDocument,
 })
 
 function RootComponent() {
-	const settings = SETTINGS_DEFAULTS
-	const { theme } = Route.useRouteContext()
+	const { theme, siteConfig } = Route.useRouteContext()
 	const isDashboard = useRouterState({
 		select: (state) => state.location.pathname.startsWith('/~'),
 	})
@@ -112,7 +97,7 @@ function RootComponent() {
 			<ContentWrapper>
 				<Outlet />
 			</ContentWrapper>
-			<SiteFooter settings={settings} initialTheme={theme} />
+			<SiteFooter siteConfig={siteConfig} initialTheme={theme} />
 			<TanStackDevtools
 				config={{ position: 'bottom-right' }}
 				plugins={[
@@ -126,11 +111,20 @@ function RootComponent() {
 	)
 }
 
-function rootDocument(props: { children: ReactNode }) {
+function RootDocument(props: { children: ReactNode }) {
 	const themeScript = THEME_INIT_SCRIPT
+	// Shell has no route context; fetch language from server fn on mount.
+	const [lang, setLang] = useState('en')
+
+	useEffect(() => {
+		void getSiteConfig().then((cfg) => {
+			setLang(cfg.language)
+			document.documentElement.lang = cfg.language
+		})
+	}, [])
 
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang={lang} suppressHydrationWarning>
 			<head>
 				<HeadContent />
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />

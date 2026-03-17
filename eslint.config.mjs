@@ -60,6 +60,15 @@ export default tseslint.config(
 		},
 	},
 	{
+		// Seed scripts use Bun shell (unresolvable types) and console for progress output.
+		files: ['drizzle/**/*.ts'],
+		rules: {
+			'@typescript-eslint/no-unsafe-call': 'off',
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+			'no-console': 'off',
+		},
+	},
+	{
 		files: ['**/*.{ts,tsx}'],
 		...reactHooks.configs.flat['recommended-latest'],
 	},

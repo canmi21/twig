@@ -43,14 +43,13 @@ function FooterThemeToggle({ initialTheme }: { initialTheme: ThemePreference }) 
 
 interface SiteFooterProps {
 	initialTheme: ThemePreference
-	settings: {
-		siteTitle: string
-		footerText: string
-		copyright: string
+	siteConfig: {
+		title: string
+		description: string
 	}
 }
 
-export function SiteFooter({ settings, initialTheme }: SiteFooterProps) {
+export function SiteFooter({ siteConfig, initialTheme }: SiteFooterProps) {
 	const year = new Date().getFullYear()
 
 	return (
@@ -59,12 +58,12 @@ export function SiteFooter({ settings, initialTheme }: SiteFooterProps) {
 				<div className="flex items-start justify-between gap-8">
 					{/* Left: content */}
 					<div className="space-y-3">
-						<p className="text-content-heading text-sm font-medium">{settings.siteTitle}</p>
+						<p className="text-content-heading text-sm font-medium">{siteConfig.title}</p>
 						<p className="text-content-tertiary max-w-sm text-xs leading-relaxed">
-							{settings.footerText}
+							{siteConfig.description}
 						</p>
 						<p className="text-content-tertiary text-xs">
-							&copy; {year} {settings.copyright}. All rights reserved.
+							&copy; {year} {siteConfig.title}. All rights reserved.
 						</p>
 					</div>
 

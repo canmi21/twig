@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as Char126DashboardRouteImport } from './routes/~/dashboard'
 import { Route as PostSlugRouteImport } from './routes/post/$slug'
 import { Route as Char126DashboardIndexRouteImport } from './routes/~/dashboard/index'
+import { Route as Char126DashboardSettingsRouteImport } from './routes/~/dashboard/settings'
 import { Route as Char126DashboardNotesRouteImport } from './routes/~/dashboard/notes'
 import { Route as Char126DashboardPostNewRouteImport } from './routes/~/dashboard/post/new'
 import { Route as Char126DashboardPostCidRouteImport } from './routes/~/dashboard/post/$cid'
@@ -44,6 +45,12 @@ const Char126DashboardIndexRoute = Char126DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => Char126DashboardRoute,
 } as any)
+const Char126DashboardSettingsRoute =
+  Char126DashboardSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => Char126DashboardRoute,
+  } as any)
 const Char126DashboardNotesRoute = Char126DashboardNotesRouteImport.update({
   id: '/notes',
   path: '/notes',
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/post/$slug': typeof PostSlugRoute
   '/~/dashboard': typeof Char126DashboardRouteWithChildren
   '/~/dashboard/notes': typeof Char126DashboardNotesRoute
+  '/~/dashboard/settings': typeof Char126DashboardSettingsRoute
   '/~/dashboard/': typeof Char126DashboardIndexRoute
   '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
@@ -81,6 +89,7 @@ export interface FileRoutesByTo {
   '/~': typeof Char126RouteWithChildren
   '/post/$slug': typeof PostSlugRoute
   '/~/dashboard/notes': typeof Char126DashboardNotesRoute
+  '/~/dashboard/settings': typeof Char126DashboardSettingsRoute
   '/~/dashboard': typeof Char126DashboardIndexRoute
   '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
@@ -93,6 +102,7 @@ export interface FileRoutesById {
   '/post/$slug': typeof PostSlugRoute
   '/~/dashboard': typeof Char126DashboardRouteWithChildren
   '/~/dashboard/notes': typeof Char126DashboardNotesRoute
+  '/~/dashboard/settings': typeof Char126DashboardSettingsRoute
   '/~/dashboard/': typeof Char126DashboardIndexRoute
   '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/post/$slug'
     | '/~/dashboard'
     | '/~/dashboard/notes'
+    | '/~/dashboard/settings'
     | '/~/dashboard/'
     | '/~/dashboard/note/$cid'
     | '/~/dashboard/post/$cid'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/~'
     | '/post/$slug'
     | '/~/dashboard/notes'
+    | '/~/dashboard/settings'
     | '/~/dashboard'
     | '/~/dashboard/note/$cid'
     | '/~/dashboard/post/$cid'
@@ -127,6 +139,7 @@ export interface FileRouteTypes {
     | '/post/$slug'
     | '/~/dashboard'
     | '/~/dashboard/notes'
+    | '/~/dashboard/settings'
     | '/~/dashboard/'
     | '/~/dashboard/note/$cid'
     | '/~/dashboard/post/$cid'
@@ -176,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char126DashboardIndexRouteImport
       parentRoute: typeof Char126DashboardRoute
     }
+    '/~/dashboard/settings': {
+      id: '/~/dashboard/settings'
+      path: '/settings'
+      fullPath: '/~/dashboard/settings'
+      preLoaderRoute: typeof Char126DashboardSettingsRouteImport
+      parentRoute: typeof Char126DashboardRoute
+    }
     '/~/dashboard/notes': {
       id: '/~/dashboard/notes'
       path: '/notes'
@@ -209,6 +229,7 @@ declare module '@tanstack/react-router' {
 
 interface Char126DashboardRouteChildren {
   Char126DashboardNotesRoute: typeof Char126DashboardNotesRoute
+  Char126DashboardSettingsRoute: typeof Char126DashboardSettingsRoute
   Char126DashboardIndexRoute: typeof Char126DashboardIndexRoute
   Char126DashboardNoteCidRoute: typeof Char126DashboardNoteCidRoute
   Char126DashboardPostCidRoute: typeof Char126DashboardPostCidRoute
@@ -217,6 +238,7 @@ interface Char126DashboardRouteChildren {
 
 const Char126DashboardRouteChildren: Char126DashboardRouteChildren = {
   Char126DashboardNotesRoute: Char126DashboardNotesRoute,
+  Char126DashboardSettingsRoute: Char126DashboardSettingsRoute,
   Char126DashboardIndexRoute: Char126DashboardIndexRoute,
   Char126DashboardNoteCidRoute: Char126DashboardNoteCidRoute,
   Char126DashboardPostCidRoute: Char126DashboardPostCidRoute,

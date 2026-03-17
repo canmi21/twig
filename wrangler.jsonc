@@ -10,6 +10,9 @@
       "invocation_logs": true,
     },
   },
+  "placement": {
+    "mode": "smart",
+  },
   "d1_databases": [
     {
       "binding": "taki_sql",

@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute, getRouteApi } from '@tanstack/react-router'
-import { ArrowLeft, FileText, Notebook } from 'lucide-react'
+import { ArrowLeft, FileText, Notebook, Settings } from 'lucide-react'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 
 export const Route = createFileRoute('/~/dashboard')({
@@ -11,6 +11,7 @@ const rootRoute = getRouteApi('__root__')
 const navItems = [
 	{ to: '/~/dashboard' as const, label: 'Posts', icon: FileText, exact: true },
 	{ to: '/~/dashboard/notes' as const, label: 'Notes', icon: Notebook, exact: false },
+	{ to: '/~/dashboard/settings' as const, label: 'Settings', icon: Settings, exact: true },
 ]
 
 function DashboardLayout() {

@@ -18,8 +18,12 @@
     "fmt:check": "oxfmt --check .",
     "knip": "knip",
     "cf:typegen": "wrangler types worker-configuration.d.ts --env-interface CloudflareEnv",
-    "db:generate": "drizzle-kit generate",
-    "deploy": "bun run build && wrangler deploy"
+    "db:gen": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply taki-sql --local",
+    "db:migrate:remote": "wrangler d1 migrations apply taki-sql --remote",
+    "db:seed": "bun drizzle/seed.ts",
+    "db:fresh": "rm -rf .wrangler/state && bun run db:migrate && bun run db:seed",
+    "deploy": "bun run build && wrangler d1 migrations apply taki-sql --remote && wrangler deploy"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.28.0",
