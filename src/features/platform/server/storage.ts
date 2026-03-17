@@ -27,11 +27,3 @@ export async function uploadFile(
 	await env.taki_bucket.put(path, buffer)
 	return path
 }
-
-export async function getFile(path: string): Promise<R2ObjectBody | null> {
-	return await env.taki_bucket.get(path)
-}
-
-export async function deleteFile(path: string): Promise<void> {
-	await env.taki_bucket.delete(path)
-}
