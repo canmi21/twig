@@ -38,5 +38,5 @@ const processor = unified()
 /** Render a markdown string to syntax-highlighted HTML. */
 export async function renderMarkdown(raw: string): Promise<string> {
 	const result = await processor.process(raw)
-	return String(result)
+	return String(result).replaceAll(/\n\s*\n/g, '\n')
 }
