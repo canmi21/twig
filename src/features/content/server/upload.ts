@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { uploadFile } from '~/features/platform/server'
-import { requireAuth } from '~/server/auth'
+import { requireAuth } from '~/server/auth.server'
 
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 const MAX_SIZE_BYTES = 5 * 1024 * 1024

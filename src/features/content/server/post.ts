@@ -7,7 +7,7 @@ import {
 	purgeUrls,
 	setPostHtml,
 } from '~/features/platform/server'
-import { requireAuth } from '~/server/auth'
+import { requireAuth } from '~/server/auth.server'
 import { ContentStatus, ContentType, contents, posts } from '~/server/database'
 import { renderMarkdown } from '~/server/markdown'
 

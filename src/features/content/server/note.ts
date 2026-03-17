@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { generateCid, getDb } from '~/features/platform/server'
-import { requireAuth } from '~/server/auth'
+import { requireAuth } from '~/server/auth.server'
 import { ContentStatus, ContentType, contents, notes } from '~/server/database'
 
 const TEXT_MAX_BYTES = 4096
