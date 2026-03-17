@@ -9,8 +9,8 @@ export async function purgeUrls(urls: string[]): Promise<void> {
 		return
 	}
 
-	const zoneId = (env as Record<string, unknown>).CF_ZONE_ID as string | undefined
-	const apiToken = (env as Record<string, unknown>).CF_API_TOKEN as string | undefined
+	const zoneId = (env as unknown as Record<string, unknown>).CF_ZONE_ID as string | undefined
+	const apiToken = (env as unknown as Record<string, unknown>).CF_API_TOKEN as string | undefined
 
 	if (!zoneId || !apiToken) {
 		// Dev mode: no CF credentials available, skip purge silently

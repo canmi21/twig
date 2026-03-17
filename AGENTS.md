@@ -56,7 +56,7 @@
 - Use a scope only when it materially improves clarity.
 - Do not mention plan phases in commit messages.
 - Do not mention version bumps in commit messages unless the user explicitly asks for that.
-- Before every `git commit`, run `bun run fmt` and `bun run lint`, then fix any failures.
+- Before every `git commit`, run `bun run fmt`, `bun run lint`, and `bun run typecheck`, then fix any failures.
 - When routing, build config, generated files, or dependency wiring change, also run `bun run build` and `bun run knip` before commit.
 - If the user provides a full execution plan and the work completes cleanly, commit directly with the required format when requested.
 - If any issue, ambiguity, or suspected breaking change appears, stop and discuss with the user before committing unless the user explicitly asks otherwise.

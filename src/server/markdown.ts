@@ -6,6 +6,7 @@ import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import rehypeStringify from 'rehype-stringify'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
+import type { HighlighterGeneric } from '@shikijs/types'
 import { createHighlighterCore } from 'shiki/core'
 import { unified } from 'unified'
 
@@ -27,7 +28,8 @@ const highlighter = await createHighlighterCore({
 const processor = unified()
 	.use(remarkParse)
 	.use(remarkRehype)
-	.use(rehypeShikiFromHighlighter, highlighter, {
+	// See shikijs/shiki#985: HighlighterCore is Generic<never,never> but rehype expects <any,any>.
+	.use(rehypeShikiFromHighlighter, highlighter as HighlighterGeneric<string, string>, {
 		themes: {
 			dark: 'github-dark',
 			light: 'github-light',
