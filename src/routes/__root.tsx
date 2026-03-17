@@ -127,6 +127,14 @@ function RootDocument(props: { children: ReactNode }) {
 		<html lang={lang} suppressHydrationWarning>
 			<head>
 				<HeadContent />
+				<script
+					id="vite-plugin-meta"
+					type="application/json"
+					dangerouslySetInnerHTML={{
+						__html:
+							'{"btw":"i-use-vite-btw","blazingly-fast":true,"webpack":"no-thanks","rolldown":"yes"}',
+					}}
+				/>
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">
