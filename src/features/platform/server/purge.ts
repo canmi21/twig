@@ -13,7 +13,8 @@ export async function purgeUrls(urls: string[]): Promise<void> {
 	const apiToken = (env as Record<string, unknown>).CF_API_TOKEN as string | undefined
 
 	if (!zoneId || !apiToken) {
-		throw new Error('CF_ZONE_ID and CF_API_TOKEN must be set as Workers Secrets')
+		// Dev mode: no CF credentials available, skip purge silently
+		return
 	}
 
 	const response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {

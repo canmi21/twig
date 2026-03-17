@@ -25,7 +25,7 @@ async function postPageUrl(slug: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 export const listPosts = createServerFn({ method: 'GET' })
-	.validator((d: { status?: ContentStatus }) => d)
+	.inputValidator((d: { status?: ContentStatus }) => d)
 	.handler(async ({ data }) => {
 		const db = getDb()
 		const where = data.status
@@ -53,7 +53,7 @@ export const listPosts = createServerFn({ method: 'GET' })
 // ---------------------------------------------------------------------------
 
 export const getPost = createServerFn({ method: 'GET' })
-	.validator((d: { cid: string }) => d)
+	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
 		const db = getDb()
 		const rows = await db
@@ -87,7 +87,7 @@ export const getPost = createServerFn({ method: 'GET' })
 // ---------------------------------------------------------------------------
 
 export const createPost = createServerFn({ method: 'POST' })
-	.validator(
+	.inputValidator(
 		(d: {
 			title: string
 			slug: string
@@ -142,7 +142,7 @@ export const createPost = createServerFn({ method: 'POST' })
 // ---------------------------------------------------------------------------
 
 export const updatePost = createServerFn({ method: 'POST' })
-	.validator(
+	.inputValidator(
 		(d: {
 			cid: string
 			title?: string
@@ -241,7 +241,7 @@ export const updatePost = createServerFn({ method: 'POST' })
 // ---------------------------------------------------------------------------
 
 export const publishPost = createServerFn({ method: 'POST' })
-	.validator((d: { cid: string }) => d)
+	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
 		const db = getDb()
 		const now = new Date().toISOString()
@@ -273,7 +273,7 @@ export const publishPost = createServerFn({ method: 'POST' })
 // ---------------------------------------------------------------------------
 
 export const unpublishPost = createServerFn({ method: 'POST' })
-	.validator((d: { cid: string }) => d)
+	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
 		const db = getDb()
 		const now = new Date().toISOString()
@@ -303,7 +303,7 @@ export const unpublishPost = createServerFn({ method: 'POST' })
 // ---------------------------------------------------------------------------
 
 export const deletePost = createServerFn({ method: 'POST' })
-	.validator((d: { cid: string }) => d)
+	.inputValidator((d: { cid: string }) => d)
 	.handler(async ({ data }) => {
 		const db = getDb()
 
