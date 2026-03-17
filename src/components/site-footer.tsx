@@ -72,7 +72,8 @@ function FooterLink({ href, label }: NavLink) {
 	return (
 		<a
 			href={href}
-			{...(opensNew ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+			target={opensNew ? '_blank' : undefined}
+			rel={opensNew ? 'noopener noreferrer' : undefined}
 			className="text-content-tertiary hover:text-content-heading inline-flex items-center gap-1 text-[13px] no-underline transition-colors"
 		>
 			{label}
