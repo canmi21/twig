@@ -23,6 +23,34 @@ function validateImages(images?: string[]): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// GetNote
+// ---------------------------------------------------------------------------
+
+export const getNote = createServerFn({ method: 'GET' })
+	.inputValidator((d: { cid: string }) => d)
+	.handler(async ({ data }) => {
+		const db = getDb()
+		const rows = await db
+			.select({
+				cid: contents.cid,
+				createdAt: contents.createdAt,
+				images: notes.images,
+				status: contents.status,
+				text: notes.text,
+				updatedAt: contents.updatedAt,
+			})
+			.from(contents)
+			.innerJoin(notes, eq(contents.cid, notes.cid))
+			.where(eq(contents.cid, data.cid))
+			.limit(1)
+
+		if (rows.length === 0) {
+			throw new Error('Note not found')
+		}
+		return rows[0]
+	})
+
+// ---------------------------------------------------------------------------
 // CreateNote
 // ---------------------------------------------------------------------------
 

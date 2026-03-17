@@ -17,6 +17,7 @@ import { Route as Char126DashboardIndexRouteImport } from './routes/~/dashboard/
 import { Route as Char126DashboardNotesRouteImport } from './routes/~/dashboard/notes'
 import { Route as Char126DashboardPostNewRouteImport } from './routes/~/dashboard/post/new'
 import { Route as Char126DashboardPostCidRouteImport } from './routes/~/dashboard/post/$cid'
+import { Route as Char126DashboardNoteCidRouteImport } from './routes/~/dashboard/note/$cid'
 
 const Char126Route = Char126RouteImport.update({
   id: '/~',
@@ -58,6 +59,11 @@ const Char126DashboardPostCidRoute = Char126DashboardPostCidRouteImport.update({
   path: '/post/$cid',
   getParentRoute: () => Char126DashboardRoute,
 } as any)
+const Char126DashboardNoteCidRoute = Char126DashboardNoteCidRouteImport.update({
+  id: '/note/$cid',
+  path: '/note/$cid',
+  getParentRoute: () => Char126DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/~/dashboard': typeof Char126DashboardRouteWithChildren
   '/~/dashboard/notes': typeof Char126DashboardNotesRoute
   '/~/dashboard/': typeof Char126DashboardIndexRoute
+  '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
   '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
 }
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/post/$slug': typeof PostSlugRoute
   '/~/dashboard/notes': typeof Char126DashboardNotesRoute
   '/~/dashboard': typeof Char126DashboardIndexRoute
+  '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
   '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
 }
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/~/dashboard': typeof Char126DashboardRouteWithChildren
   '/~/dashboard/notes': typeof Char126DashboardNotesRoute
   '/~/dashboard/': typeof Char126DashboardIndexRoute
+  '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
   '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
   '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
 }
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/~/dashboard'
     | '/~/dashboard/notes'
     | '/~/dashboard/'
+    | '/~/dashboard/note/$cid'
     | '/~/dashboard/post/$cid'
     | '/~/dashboard/post/new'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/post/$slug'
     | '/~/dashboard/notes'
     | '/~/dashboard'
+    | '/~/dashboard/note/$cid'
     | '/~/dashboard/post/$cid'
     | '/~/dashboard/post/new'
   id:
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/~/dashboard'
     | '/~/dashboard/notes'
     | '/~/dashboard/'
+    | '/~/dashboard/note/$cid'
     | '/~/dashboard/post/$cid'
     | '/~/dashboard/post/new'
   fileRoutesById: FileRoutesById
@@ -185,12 +197,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char126DashboardPostCidRouteImport
       parentRoute: typeof Char126DashboardRoute
     }
+    '/~/dashboard/note/$cid': {
+      id: '/~/dashboard/note/$cid'
+      path: '/note/$cid'
+      fullPath: '/~/dashboard/note/$cid'
+      preLoaderRoute: typeof Char126DashboardNoteCidRouteImport
+      parentRoute: typeof Char126DashboardRoute
+    }
   }
 }
 
 interface Char126DashboardRouteChildren {
   Char126DashboardNotesRoute: typeof Char126DashboardNotesRoute
   Char126DashboardIndexRoute: typeof Char126DashboardIndexRoute
+  Char126DashboardNoteCidRoute: typeof Char126DashboardNoteCidRoute
   Char126DashboardPostCidRoute: typeof Char126DashboardPostCidRoute
   Char126DashboardPostNewRoute: typeof Char126DashboardPostNewRoute
 }
@@ -198,6 +218,7 @@ interface Char126DashboardRouteChildren {
 const Char126DashboardRouteChildren: Char126DashboardRouteChildren = {
   Char126DashboardNotesRoute: Char126DashboardNotesRoute,
   Char126DashboardIndexRoute: Char126DashboardIndexRoute,
+  Char126DashboardNoteCidRoute: Char126DashboardNoteCidRoute,
   Char126DashboardPostCidRoute: Char126DashboardPostCidRoute,
   Char126DashboardPostNewRoute: Char126DashboardPostNewRoute,
 }

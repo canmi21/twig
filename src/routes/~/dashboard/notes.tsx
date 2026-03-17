@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { resolveImageUrl } from '~/lib/image'
 import {
@@ -241,6 +241,13 @@ function NotesPage() {
 											{formatDate(note.createdAt)}
 										</time>
 										<div className="ml-auto flex gap-3">
+											<Link
+												to="/~/dashboard/note/$cid"
+												params={{ cid: note.cid }}
+												className="text-primary text-xs hover:underline"
+											>
+												Edit
+											</Link>
 											{note.status === 'published' ? (
 												<button
 													type="button"
