@@ -9,38 +9,108 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as Char126RouteImport } from './routes/~'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as Char126DashboardRouteImport } from './routes/~/dashboard'
+import { Route as Char126DashboardIndexRouteImport } from './routes/~/dashboard/index'
+import { Route as Char126DashboardPostNewRouteImport } from './routes/~/dashboard/post/new'
+import { Route as Char126DashboardPostCidRouteImport } from './routes/~/dashboard/post/$cid'
 
+const Char126Route = Char126RouteImport.update({
+  id: '/~',
+  path: '/~',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char126DashboardRoute = Char126DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => Char126Route,
+} as any)
+const Char126DashboardIndexRoute = Char126DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Char126DashboardRoute,
+} as any)
+const Char126DashboardPostNewRoute = Char126DashboardPostNewRouteImport.update({
+  id: '/post/new',
+  path: '/post/new',
+  getParentRoute: () => Char126DashboardRoute,
+} as any)
+const Char126DashboardPostCidRoute = Char126DashboardPostCidRouteImport.update({
+  id: '/post/$cid',
+  path: '/post/$cid',
+  getParentRoute: () => Char126DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/~': typeof Char126RouteWithChildren
+  '/~/dashboard': typeof Char126DashboardRouteWithChildren
+  '/~/dashboard/': typeof Char126DashboardIndexRoute
+  '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
+  '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/~': typeof Char126RouteWithChildren
+  '/~/dashboard': typeof Char126DashboardIndexRoute
+  '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
+  '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/~': typeof Char126RouteWithChildren
+  '/~/dashboard': typeof Char126DashboardRouteWithChildren
+  '/~/dashboard/': typeof Char126DashboardIndexRoute
+  '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
+  '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/~'
+    | '/~/dashboard'
+    | '/~/dashboard/'
+    | '/~/dashboard/post/$cid'
+    | '/~/dashboard/post/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/~'
+    | '/~/dashboard'
+    | '/~/dashboard/post/$cid'
+    | '/~/dashboard/post/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/~'
+    | '/~/dashboard'
+    | '/~/dashboard/'
+    | '/~/dashboard/post/$cid'
+    | '/~/dashboard/post/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  Char126Route: typeof Char126RouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/~': {
+      id: '/~'
+      path: '/~'
+      fullPath: '/~'
+      preLoaderRoute: typeof Char126RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +118,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/~/dashboard': {
+      id: '/~/dashboard'
+      path: '/dashboard'
+      fullPath: '/~/dashboard'
+      preLoaderRoute: typeof Char126DashboardRouteImport
+      parentRoute: typeof Char126Route
+    }
+    '/~/dashboard/': {
+      id: '/~/dashboard/'
+      path: '/'
+      fullPath: '/~/dashboard/'
+      preLoaderRoute: typeof Char126DashboardIndexRouteImport
+      parentRoute: typeof Char126DashboardRoute
+    }
+    '/~/dashboard/post/new': {
+      id: '/~/dashboard/post/new'
+      path: '/post/new'
+      fullPath: '/~/dashboard/post/new'
+      preLoaderRoute: typeof Char126DashboardPostNewRouteImport
+      parentRoute: typeof Char126DashboardRoute
+    }
+    '/~/dashboard/post/$cid': {
+      id: '/~/dashboard/post/$cid'
+      path: '/post/$cid'
+      fullPath: '/~/dashboard/post/$cid'
+      preLoaderRoute: typeof Char126DashboardPostCidRouteImport
+      parentRoute: typeof Char126DashboardRoute
+    }
   }
 }
 
+interface Char126DashboardRouteChildren {
+  Char126DashboardIndexRoute: typeof Char126DashboardIndexRoute
+  Char126DashboardPostCidRoute: typeof Char126DashboardPostCidRoute
+  Char126DashboardPostNewRoute: typeof Char126DashboardPostNewRoute
+}
+
+const Char126DashboardRouteChildren: Char126DashboardRouteChildren = {
+  Char126DashboardIndexRoute: Char126DashboardIndexRoute,
+  Char126DashboardPostCidRoute: Char126DashboardPostCidRoute,
+  Char126DashboardPostNewRoute: Char126DashboardPostNewRoute,
+}
+
+const Char126DashboardRouteWithChildren =
+  Char126DashboardRoute._addFileChildren(Char126DashboardRouteChildren)
+
+interface Char126RouteChildren {
+  Char126DashboardRoute: typeof Char126DashboardRouteWithChildren
+}
+
+const Char126RouteChildren: Char126RouteChildren = {
+  Char126DashboardRoute: Char126DashboardRouteWithChildren,
+}
+
+const Char126RouteWithChildren =
+  Char126Route._addFileChildren(Char126RouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  Char126Route: Char126RouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,29 +1,18 @@
 {
   "$schema": "./node_modules/knip/schema.json",
   "ignoreDependencies": [
-    "@shikijs/rehype",
     "@tailwindcss/typography",
+    "@types/uuid",
+    "cloudflare",
     "entities",
-    "rehype-stringify",
-    "remark-parse",
-    "remark-rehype",
     "shiki",
     "tailwindcss",
-    "tw-animate-css",
-    "unified",
-    "uuid",
-    "@types/uuid"
+    "tw-animate-css"
   ],
   "workspaces": {
     ".": {
-      "entry": ["src/router.tsx"],
+      "entry": ["src/router.tsx", "src/entry-server.ts"],
       "project": ["src/**/*.{ts,tsx}", "*.config.ts", "*.config.mjs"]
     }
-  },
-  "ignoreFiles": ["src/server/**", "src/features/*/server/**"],
-  "ignoreIssues": {
-    "src/entry-server.ts": ["exports"],
-    "src/routeTree.gen.ts": ["exports"],
-    "worker-configuration.d.ts": ["exports", "types", "unlisted"]
   }
 }

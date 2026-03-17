@@ -50,12 +50,13 @@ export default tseslint.config(
 		// CreateServerFn().validator() chains produce unresolvable generic types
 		// That make typescript-eslint infer `any` throughout the handler body.
 		// The TypeScript compiler still type-checks these files during build.
-		files: ['src/features/*/server/**/*.ts'],
+		files: ['src/features/*/server/**/*.ts', 'src/routes/~/**/*.tsx'],
 		rules: {
 			'@typescript-eslint/no-unsafe-argument': 'off',
 			'@typescript-eslint/no-unsafe-assignment': 'off',
 			'@typescript-eslint/no-unsafe-call': 'off',
 			'@typescript-eslint/no-unsafe-member-access': 'off',
+			'@typescript-eslint/no-unsafe-return': 'off',
 		},
 	},
 	{

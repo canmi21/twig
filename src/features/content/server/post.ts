@@ -7,8 +7,7 @@ import {
 	purgeUrls,
 	setPostHtml,
 } from '~/features/platform/server'
-import { ContentStatus, ContentType } from '~/server/database/constants'
-import { contents, posts } from '~/server/database/schema'
+import { ContentStatus, ContentType, contents, posts } from '~/server/database'
 import { renderMarkdown } from '~/server/markdown'
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
