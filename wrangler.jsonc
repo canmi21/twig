@@ -14,7 +14,7 @@
     {
       "binding": "taki_sql",
       "database_name": "taki-sql",
-      "database_id": "634aa3df-0fdf-4d74-abe9-9d4d277607f1",
+      "database_id": "5a58a081-29e1-4e96-ab6b-1f3f7370d654",
       "migrations_dir": "drizzle/migrations",
     },
   ],
