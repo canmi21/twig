@@ -9,3 +9,5 @@ export {
 } from './post'
 export { getPublishedPostBySlug, getTimelineItems } from './post-read'
 export type { TimelineItem } from './post-read'
+export { createNote, updateNote, publishNote, unpublishNote, deleteNote, listNotes } from './note'
+export { uploadImage } from './upload'
