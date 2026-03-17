@@ -44,27 +44,24 @@ function FooterThemeToggle({ initialTheme }: { initialTheme: ThemePreference }) 
 interface SiteFooterProps {
 	initialTheme: ThemePreference
 	siteConfig: {
-		title: string
-		description: string
+		copyright: string
+		footerDescription: string
+		footerName: string
 	}
 }
 
 export function SiteFooter({ siteConfig, initialTheme }: SiteFooterProps) {
-	const year = new Date().getFullYear()
-
 	return (
 		<footer className="before:bg-border-default relative mt-16 before:absolute before:top-0 before:left-1/2 before:h-px before:w-screen before:-translate-x-1/2">
 			<div className="mx-auto max-w-4xl px-5 py-10">
 				<div className="flex items-start justify-between gap-8">
 					{/* Left: content */}
 					<div className="space-y-3">
-						<p className="text-content-heading text-sm font-medium">{siteConfig.title}</p>
+						<p className="text-content-heading text-sm font-medium">{siteConfig.footerName}</p>
 						<p className="text-content-tertiary max-w-sm text-xs leading-relaxed">
-							{siteConfig.description}
+							{siteConfig.footerDescription}
 						</p>
-						<p className="text-content-tertiary text-xs">
-							&copy; {year} {siteConfig.title}. All rights reserved.
-						</p>
+						<p className="text-content-tertiary text-xs">&copy; {siteConfig.copyright}</p>
 					</div>
 
 					{/* Right: theme toggle */}

@@ -8,6 +8,41 @@ export const Route = createFileRoute('/~/dashboard/settings')({
 	component: SettingsPage,
 })
 
+interface FieldDef {
+	key: keyof SiteConfig
+	label: string
+	placeholder: string
+}
+
+const sections: { title: string; fields: FieldDef[] }[] = [
+	{
+		title: 'Site',
+		fields: [
+			{ key: 'title', label: 'Title', placeholder: 'Site Name' },
+			{ key: 'description', label: 'Description', placeholder: 'A one-sentence description' },
+			{ key: 'url', label: 'URL', placeholder: 'https://example.com' },
+			{ key: 'language', label: 'Language', placeholder: 'en' },
+			{ key: 'copyright', label: 'Copyright', placeholder: 'Site Name' },
+			{ key: 'icp', label: 'ICP', placeholder: '' },
+		],
+	},
+	{
+		title: 'Owner',
+		fields: [
+			{ key: 'ownerName', label: 'Name', placeholder: 'Owner Name' },
+			{ key: 'ownerBio', label: 'Bio', placeholder: 'A short biography' },
+			{ key: 'ownerEmail', label: 'Email', placeholder: 'owner@example.com' },
+		],
+	},
+	{
+		title: 'Footer',
+		fields: [
+			{ key: 'footerName', label: 'Name', placeholder: 'Site Name' },
+			{ key: 'footerDescription', label: 'Description', placeholder: 'A short footer text' },
+		],
+	},
+]
+
 function SettingsPage() {
 	const initial = Route.useLoaderData()
 	const router = useRouter()
@@ -18,8 +53,8 @@ function SettingsPage() {
 		setForm((prev) => ({ ...prev, [field]: value }))
 	}
 
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault()
+	async function handleSubmit(ev: React.FormEvent) {
+		ev.preventDefault()
 		setSaving(true)
 		try {
 			await updateSiteConfig({ data: form })
@@ -29,34 +64,32 @@ function SettingsPage() {
 		}
 	}
 
-	const fields: { key: keyof SiteConfig; label: string; placeholder: string }[] = [
-		{ key: 'title', label: 'Title', placeholder: 'Site Name' },
-		{ key: 'description', label: 'Description', placeholder: 'A short description of the site' },
-		{ key: 'url', label: 'URL', placeholder: 'https://example.com' },
-		{ key: 'language', label: 'Language', placeholder: 'en' },
-	]
-
 	return (
 		<div>
 			<h2 className="text-content-heading mb-6 text-lg font-semibold">Settings</h2>
-			<form onSubmit={(e) => void handleSubmit(e)} className="max-w-lg space-y-5">
-				{fields.map(({ key, label, placeholder }) => (
-					<div key={key}>
-						<label
-							htmlFor={key}
-							className="text-content-secondary mb-1.5 block text-sm font-medium"
-						>
-							{label}
-						</label>
-						<input
-							id={key}
-							type="text"
-							value={form[key]}
-							onChange={(e) => handleChange(key, e.target.value)}
-							placeholder={placeholder}
-							className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
-						/>
-					</div>
+			<form onSubmit={(ev) => void handleSubmit(ev)} className="max-w-lg space-y-8">
+				{sections.map((section) => (
+					<fieldset key={section.title} className="space-y-4">
+						<legend className="text-content-heading text-sm font-semibold">{section.title}</legend>
+						{section.fields.map(({ key, label, placeholder }) => (
+							<div key={key}>
+								<label
+									htmlFor={key}
+									className="text-content-secondary mb-1.5 block text-sm font-medium"
+								>
+									{label}
+								</label>
+								<input
+									id={key}
+									type="text"
+									value={form[key]}
+									onChange={(ev) => handleChange(key, ev.target.value)}
+									placeholder={placeholder}
+									className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+								/>
+							</div>
+						))}
+					</fieldset>
 				))}
 				<button
 					type="submit"
