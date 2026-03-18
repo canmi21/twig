@@ -103,11 +103,11 @@
 
 .dark {
 	/* ── Surfaces ── */
-	--bg-base: var(--p-neutral-950);
-	--bg-surface: var(--p-neutral-900);
+	--bg-base: var(--p-neutral-900);
+	--bg-surface: var(--p-neutral-950);
 	--bg-elevated: var(--p-neutral-850);
 	--bg-sunken: oklch(0.18 0.004 90);
-	--bg-overlay: oklch(0.1 0.003 90 / 0.65);
+	--bg-overlay: oklch(0.1 0.003 90 / 0.72);
 
 	/* ── Borders ── */
 	--border-default: var(--p-neutral-800);
