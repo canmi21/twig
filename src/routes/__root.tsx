@@ -20,7 +20,9 @@ import { getSiteConfig } from '~/server/config'
 import { getThemeCookie } from '~/server/theme'
 import { getTimezoneCookie } from '~/server/timezone'
 import { resolveAssetUrl } from '~/lib/assets'
+import tailwindCss from '~/styles/tailwind.css?url'
 import appCss from '~/styles/index.css?url'
+import noiseCss from '~/styles/noise.css?url'
 
 const TanStackDevtools = import.meta.env.DEV
 	? lazy(() => import('@tanstack/react-devtools').then((m) => ({ default: m.TanStackDevtools })))
@@ -59,7 +61,9 @@ export const Route = createRootRouteWithContext()({
 			{ httpEquiv: 'Accept-CH', content: 'Sec-CH-Prefers-Color-Scheme' },
 		],
 		links: [
+			{ rel: 'stylesheet', href: tailwindCss },
 			{ rel: 'stylesheet', href: appCss },
+			{ rel: 'stylesheet', href: noiseCss },
 			{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: resolveAssetUrl('favicon.svg') },
 			{
 				rel: 'icon',
