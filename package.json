@@ -42,6 +42,7 @@
     "drizzle-orm": "^0.45.1",
     "jose": "^6.2.1",
     "lucide-react": "^0.577.0",
+    "motion": "^12.38.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "rehype-stringify": "^10.0.1",

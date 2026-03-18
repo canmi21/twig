@@ -1,6 +1,7 @@
 /* src/components/lamp-cord-toggle.tsx */
 
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import { motion, useSpring, useTransform } from 'motion/react'
 import { setThemeCookie } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'
 
@@ -17,6 +18,9 @@ function applyTheme(resolved: ThemePreference) {
 	document.documentElement.style.colorScheme = resolved
 }
 
+const CORD_REST = 64
+const CORD_PULLED = 88
+
 export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference }) {
 	const [preference, setPreference] = useState<ThemePreference>(() => {
 		if (typeof document === 'undefined') {
@@ -25,12 +29,51 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		return readPreference()
 	})
 
-	const [pulled, setPulled] = useState(false)
 	const handleRef = useRef<HTMLDivElement>(null)
 
+	// spring-driven cord length
+	const cordLength = useSpring(CORD_REST, { stiffness: 400, damping: 15, mass: 0.5 })
+	const cordHeight = useTransform(cordLength, (px) => `${px}px`)
+
+	// spring-driven swing for entire cord + handle assembly
+	const cordRotate = useSpring(0, { stiffness: 300, damping: 10, mass: 0.3 })
+
+	const buttonRef = useRef<HTMLButtonElement>(null)
+	const isToggling = useRef(false)
+
+	// gentle sway when cursor moves near the cord
+	const onHoverMove = useCallback(
+		(ev: React.MouseEvent) => {
+			if (isToggling.current || !buttonRef.current) {
+				return
+			}
+			const rect = buttonRef.current.getBoundingClientRect()
+			const centerX = rect.left + rect.width / 2
+			const offset = (ev.clientX - centerX) / rect.width // -0.5 to 0.5
+			cordRotate.set(offset * 5) // max ~2.5 degrees
+		},
+		[cordRotate],
+	)
+
+	const onHoverLeave = useCallback(() => {
+		if (!isToggling.current) {
+			cordRotate.set(0)
+		}
+	}, [cordRotate])
+
 	function toggle() {
-		setPulled(true)
-		setTimeout(() => setPulled(false), 250)
+		isToggling.current = true
+		// pull down with spring bounce
+		cordLength.set(CORD_PULLED)
+		setTimeout(() => cordLength.set(CORD_REST), 150)
+
+		// swing the handle
+		cordRotate.set(8)
+		setTimeout(() => cordRotate.set(-5), 120)
+		setTimeout(() => {
+			cordRotate.set(0)
+			isToggling.current = false
+		}, 300)
 
 		const next = preference === 'dark' ? 'light' : 'dark'
 
@@ -77,22 +120,23 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 	}
 
 	return (
-		<button
+		<motion.button
+			ref={buttonRef}
 			type="button"
 			onClick={toggle}
+			onMouseMove={onHoverMove}
+			onMouseLeave={onHoverLeave}
 			className="group fixed top-0 right-6 z-50 flex cursor-pointer flex-col items-center border-none bg-transparent p-0 sm:right-8"
 			aria-label={preference === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+			style={{ rotate: cordRotate, transformOrigin: 'top center' }}
 		>
 			{/* Cord */}
-			<div
-				className="bg-border-strong w-px transition-all duration-250 ease-out"
-				style={{ height: pulled ? '5.5rem' : '4rem' }}
-			/>
+			<motion.div className="bg-border-strong w-px" style={{ height: cordHeight }} />
 			{/* Handle */}
 			<div
 				ref={handleRef}
-				className="bg-content-tertiary group-hover:bg-primary h-5 w-2 rounded-full transition-colors"
+				className="bg-content-tertiary group-hover:bg-primary size-5 w-2 rounded-full transition-colors"
 			/>
-		</button>
+		</motion.button>
 	)
 }

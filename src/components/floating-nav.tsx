@@ -2,7 +2,13 @@
 
 import { Link } from '@tanstack/react-router'
 
-const navItems = [{ exact: true, label: 'Home', to: '/' }] as const
+const navItems: { exact: boolean; label: string; to: string }[] = [
+	{ exact: true, label: 'Home', to: '/' },
+	{ exact: false, label: 'Blog', to: '/blog' },
+	{ exact: false, label: 'Note', to: '/note' },
+	{ exact: false, label: 'Code', to: '/code' },
+	{ exact: false, label: 'More', to: '/more' },
+]
 
 export function FloatingNav() {
 	return (
