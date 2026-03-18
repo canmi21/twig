@@ -20,10 +20,82 @@ function applyTheme(resolved: ThemePreference) {
 
 const CORD_REST = 64
 const CORD_PULLED = 88
-/** Minimum drag distance (px) to trigger theme toggle on release */
 const DRAG_TRIGGER = 120
-/** Movement threshold (px) to distinguish drag from tap */
 const DRAG_DEAD_ZONE = 8
+const BREAK_SPLIT = 0.3
+
+/** Stump: short cord piece snapping back into ceiling after break */
+function BreakStump({
+	stretchedHeight,
+	restHeight,
+	angle,
+}: {
+	stretchedHeight: number
+	restHeight: number
+	angle: number
+}) {
+	return (
+		<motion.div
+			className="bg-border-strong fixed top-0 right-6 z-50 w-px sm:right-8"
+			style={{ transformOrigin: 'top center' }}
+			initial={{ height: stretchedHeight, rotate: angle, opacity: 1 }}
+			animate={{ height: 0, rotate: 0, opacity: 0 }}
+			transition={{
+				height: {
+					type: 'spring',
+					stiffness: 500,
+					damping: 25,
+					mass: 0.3,
+					restDelta: restHeight * 0.05,
+				},
+				rotate: { type: 'spring', stiffness: 400, damping: 15, mass: 0.3 },
+				opacity: { duration: 0.3, delay: 0.3 },
+			}}
+		/>
+	)
+}
+
+/** Falling piece: detached cord + handle tumbling down with gravity */
+function BreakFall({
+	stretchedLength,
+	restLength,
+	angle,
+	startY,
+}: {
+	stretchedLength: number
+	restLength: number
+	angle: number
+	startY: number
+}) {
+	const tumbleTo = angle > 0 ? angle + 120 : angle - 120
+
+	return (
+		<motion.div
+			className="fixed right-6 z-50 flex flex-col items-center sm:right-8"
+			style={{ top: startY, transformOrigin: 'top center' }}
+			initial={{ y: 0, rotate: angle, opacity: 1 }}
+			animate={{
+				y: window.innerHeight + 300,
+				rotate: tumbleTo,
+				opacity: 0,
+			}}
+			transition={{
+				y: { type: 'spring', stiffness: 30, damping: 4, mass: 1.2 },
+				rotate: { type: 'spring', stiffness: 40, damping: 6, mass: 0.8 },
+				opacity: { duration: 0.4, delay: 0.4 },
+			}}
+		>
+			{/* cord shrinks from stretched to rest length during fall */}
+			<motion.div
+				className="bg-border-strong w-px"
+				initial={{ height: stretchedLength }}
+				animate={{ height: restLength }}
+				transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.5 }}
+			/>
+			<div className="bg-content-tertiary size-5 w-2 rounded-full" />
+		</motion.div>
+	)
+}
 
 export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference }) {
 	const [preference, setPreference] = useState<ThemePreference>(() => {
@@ -32,30 +104,23 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		}
 		return readPreference()
 	})
-	const [isBroken, setIsBroken] = useState(false)
+
+	const [breakState, setBreakState] = useState<null | 'breaking' | 'broken'>(null)
+	const [breakSnapshot, setBreakSnapshot] = useState({ angle: 0, length: CORD_REST })
 
 	const handleRef = useRef<HTMLDivElement>(null)
 	const buttonRef = useRef<HTMLButtonElement>(null)
 	const isToggling = useRef(false)
 
-	// pointer state: idle → pressed → dragging
 	const pointerState = useRef<'idle' | 'pressed' | 'dragging'>('idle')
 	const pressOrigin = useRef({ x: 0, y: 0 })
 	const anchorPos = useRef({ x: 0, y: 0 })
 	const lockedAngle = useRef(0)
 
-	// spring-driven cord length
 	const cordLength = useSpring(CORD_REST, { stiffness: 400, damping: 15, mass: 0.5 })
 	const cordHeight = useTransform(cordLength, (px) => `${px}px`)
-
-	// spring-driven swing for entire cord + handle assembly
 	const cordRotate = useSpring(0, { stiffness: 300, damping: 10, mass: 0.3 })
 
-	// break animation: cord flies off screen
-	const breakY = useSpring(0, { stiffness: 80, damping: 8, mass: 0.5 })
-	const breakOpacity = useSpring(1, { stiffness: 200, damping: 20 })
-
-	// --- theme toggle (shared by tap and drag-release) ---
 	const performToggle = useCallback(() => {
 		const next = preference === 'dark' ? 'light' : 'dark'
 
@@ -94,15 +159,21 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		setPreference(next)
 	}, [preference])
 
-	// --- tap toggle: pull along locked angle, then spring back ---
+	function triggerBreak(dragDist: number) {
+		setBreakSnapshot({
+			angle: cordRotate.get(),
+			length: dragDist,
+		})
+		setBreakState('breaking')
+		setTimeout(() => setBreakState('broken'), 1000)
+	}
+
 	function tapToggle() {
 		isToggling.current = true
 
-		// pull downward along the locked angle direction
 		cordLength.set(CORD_PULLED)
 		setTimeout(() => cordLength.set(CORD_REST), 150)
 
-		// small overshoot wobble from the locked angle, then return to center
 		const base = lockedAngle.current
 		cordRotate.set(base + 4)
 		setTimeout(() => cordRotate.set(base - 2), 120)
@@ -114,26 +185,18 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		performToggle()
 	}
 
-	// --- pointer handlers ---
 	const onPointerDown = useCallback(
 		(ev: React.PointerEvent) => {
-			if (isBroken || isToggling.current) {
+			if (breakState !== null || isToggling.current) {
 				return
 			}
 			ev.preventDefault()
-
-			// capture on the button itself so move/up events always fire here
 			buttonRef.current?.setPointerCapture(ev.pointerId)
 
 			pointerState.current = 'pressed'
 			pressOrigin.current = { x: ev.clientX, y: ev.clientY }
-
-			// lock the current sway angle at press time
 			lockedAngle.current = cordRotate.get()
 
-			// anchor = the fixed ceiling attachment point (unrotated top-center)
-			// use the button's CSS-fixed position, not getBoundingClientRect
-			// which reflects the current rotation
 			if (buttonRef.current) {
 				const { style } = buttonRef.current
 				const prevRotate = style.rotate
@@ -143,7 +206,7 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 				anchorPos.current = { x: rect.left + rect.width / 2, y: rect.top }
 			}
 		},
-		[isBroken, cordRotate],
+		[breakState, cordRotate],
 	)
 
 	const onPointerMove = useCallback(
@@ -151,7 +214,6 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 			const state = pointerState.current
 
 			if (state === 'idle') {
-				// hover sway: cord tilts away from cursor
 				if (!isToggling.current && buttonRef.current) {
 					const rect = buttonRef.current.getBoundingClientRect()
 					const centerX = rect.left + rect.width / 2
@@ -162,23 +224,19 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 			}
 
 			if (state === 'pressed') {
-				// check if we've moved enough to start a real drag
 				const movedX = ev.clientX - pressOrigin.current.x
 				const movedY = ev.clientY - pressOrigin.current.y
 				if (Math.sqrt(movedX * movedX + movedY * movedY) < DRAG_DEAD_ZONE) {
-					// still within dead zone: keep angle locked, don't move
 					return
 				}
 				pointerState.current = 'dragging'
 			}
 
-			// dragging: cord follows cursor
 			const dx = ev.clientX - anchorPos.current.x
 			const dy = ev.clientY - anchorPos.current.y
 			const dist = Math.sqrt(dx * dx + dy * dy)
 
 			cordLength.jump(Math.max(dist, CORD_REST))
-
 			const angle = Math.atan2(-dx, Math.max(dy, 1)) * (180 / Math.PI)
 			cordRotate.jump(angle)
 		},
@@ -190,7 +248,6 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		pointerState.current = 'idle'
 		buttonRef.current?.releasePointerCapture(ev.pointerId)
 
-		// tap: pointer was pressed but never moved into drag
 		if (state === 'pressed') {
 			tapToggle()
 			return
@@ -200,17 +257,13 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 			return
 		}
 
-		// compute final drag distance
 		const dx = ev.clientX - anchorPos.current.x
 		const dy = ev.clientY - anchorPos.current.y
 		const dist = Math.sqrt(dx * dx + dy * dy)
 		const halfPage = window.innerHeight / 2
 
 		if (dist >= halfPage) {
-			// easter egg: cord breaks and flies off
-			breakY.set(window.innerHeight + 200)
-			breakOpacity.set(0)
-			setTimeout(() => setIsBroken(true), 600)
+			triggerBreak(dist)
 			return
 		}
 
@@ -218,16 +271,12 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 			performToggle()
 		}
 
-		// spring back to rest position
 		cordLength.set(CORD_REST)
-
-		// wobble back to vertical
 		cordRotate.set(dist > 40 ? -6 : 0)
 		setTimeout(() => cordRotate.set(dist > 40 ? 3 : 0), 150)
 		setTimeout(() => cordRotate.set(0), 350)
 	}
 
-	// reset cord if pointer is lost (leaves window, capture cancelled, etc.)
 	function resetFromDrag() {
 		if (pointerState.current !== 'idle') {
 			pointerState.current = 'idle'
@@ -242,7 +291,6 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		}
 	}, [cordRotate])
 
-	// prevent native drag on the button
 	useEffect(() => {
 		const el = buttonRef.current
 		if (!el) {
@@ -253,8 +301,31 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 		return () => el.removeEventListener('dragstart', prevent)
 	}, [])
 
-	if (isBroken) {
+	if (breakState === 'broken') {
 		return null
+	}
+
+	if (breakState === 'breaking') {
+		const stretchedStump = breakSnapshot.length * BREAK_SPLIT
+		const stretchedFall = breakSnapshot.length * (1 - BREAK_SPLIT)
+		const restStump = CORD_REST * BREAK_SPLIT
+		const restFall = CORD_REST * (1 - BREAK_SPLIT)
+
+		return (
+			<>
+				<BreakStump
+					stretchedHeight={stretchedStump}
+					restHeight={restStump}
+					angle={breakSnapshot.angle}
+				/>
+				<BreakFall
+					stretchedLength={stretchedFall}
+					restLength={restFall}
+					angle={breakSnapshot.angle}
+					startY={stretchedStump}
+				/>
+			</>
+		)
 	}
 
 	return (
@@ -271,14 +342,10 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 			aria-label={preference === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
 			style={{
 				rotate: cordRotate,
-				y: breakY,
-				opacity: breakOpacity,
 				transformOrigin: 'top center',
 			}}
 		>
-			{/* Cord */}
 			<motion.div className="bg-border-strong w-px" style={{ height: cordHeight }} />
-			{/* Handle */}
 			<div
 				ref={handleRef}
 				className="bg-content-tertiary group-hover:bg-primary size-5 w-2 rounded-full transition-colors"
