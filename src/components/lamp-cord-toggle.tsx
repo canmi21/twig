@@ -2,21 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useSpring, useTransform } from 'motion/react'
-import { setThemeCookie } from '~/lib/theme'
-import type { ThemePreference } from '~/lib/theme'
-
-function readPreference(): ThemePreference {
-	const m = document.cookie.match(/\btheme=(light|dark)\b/)
-	if (m?.[1] === 'light' || m?.[1] === 'dark') {
-		return m[1]
-	}
-	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-}
-
-function applyTheme(resolved: ThemePreference) {
-	document.documentElement.classList.toggle('dark', resolved === 'dark')
-	document.documentElement.style.colorScheme = resolved
-}
+import { applyResolvedTheme, setThemeCookie, useTheme } from '~/lib/theme'
 
 const CORD_REST = 64
 const CORD_PULLED = 88
@@ -97,13 +83,8 @@ function BreakFall({
 	)
 }
 
-export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference }) {
-	const [preference, setPreference] = useState<ThemePreference>(() => {
-		if (typeof document === 'undefined') {
-			return initialTheme
-		}
-		return readPreference()
-	})
+export function LampCordToggle() {
+	const preference = useTheme()
 
 	const [breakState, setBreakState] = useState<null | 'breaking' | 'broken'>(null)
 	const [breakSnapshot, setBreakSnapshot] = useState({ angle: 0, length: CORD_REST })
@@ -136,7 +117,7 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 
 			document.documentElement.classList.add('radial-transition')
 			const transition = document.startViewTransition(() => {
-				applyTheme(next)
+				applyResolvedTheme(next)
 			})
 
 			void transition.ready.then(() => {
@@ -152,11 +133,10 @@ export function LampCordToggle({ initialTheme }: { initialTheme: ThemePreference
 				document.documentElement.classList.remove('radial-transition')
 			})
 		} else {
-			applyTheme(next)
+			applyResolvedTheme(next)
 		}
 
 		setThemeCookie(next)
-		setPreference(next)
 	}, [preference])
 
 	function triggerBreak(dragDist: number) {

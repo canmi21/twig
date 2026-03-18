@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext()({
 })
 
 function RootComponent() {
-	const { theme, siteConfig } = Route.useRouteContext()
+	const { siteConfig } = Route.useRouteContext()
 	const isDashboard = useRouterState({
 		select: (state) => state.location.pathname.startsWith('/~'),
 	})
@@ -111,11 +111,11 @@ function RootComponent() {
 	return (
 		<>
 			<FloatingNav />
-			<LampCordToggle initialTheme={theme} />
+			<LampCordToggle />
 			<ContentWrapper>
 				<Outlet />
 			</ContentWrapper>
-			<SiteFooter siteConfig={siteConfig} initialTheme={theme} />
+			<SiteFooter siteConfig={siteConfig} />
 			<TanStackDevtools
 				config={{ position: 'bottom-right' }}
 				plugins={[

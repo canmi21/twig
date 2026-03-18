@@ -1,9 +1,7 @@
 /* src/components/site-footer.tsx */
 
-import { useState } from 'react'
 import { ArrowUpRight, Moon, Sun } from 'lucide-react'
-import { applyResolvedThemeWithTransition, setThemeCookie } from '~/lib/theme'
-import type { ThemePreference } from '~/lib/theme'
+import { applyResolvedThemeWithTransition, setThemeCookie, useTheme } from '~/lib/theme'
 
 interface NavLink {
 	label: string
@@ -26,27 +24,13 @@ function linkType(href: string): 'internal' | 'external' | 'special' {
 	return 'special'
 }
 
-function readPreference(): ThemePreference {
-	const m = document.cookie.match(/\btheme=(light|dark)\b/)
-	if (m?.[1] === 'light' || m?.[1] === 'dark') {
-		return m[1]
-	}
-	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-}
-
-function FooterThemeToggle({ initialTheme }: { initialTheme: ThemePreference }) {
-	const [preference, setPreference] = useState<ThemePreference>(() => {
-		if (typeof document === 'undefined') {
-			return initialTheme
-		}
-		return readPreference()
-	})
+function FooterThemeToggle() {
+	const preference = useTheme()
 
 	function toggle() {
 		const next = preference === 'dark' ? 'light' : 'dark'
 		applyResolvedThemeWithTransition(next)
 		setThemeCookie(next)
-		setPreference(next)
 	}
 
 	const Icon = preference === 'dark' ? Moon : Sun
@@ -91,7 +75,6 @@ function parseNavColumns(json: string): NavColumn[] {
 }
 
 interface SiteFooterProps {
-	initialTheme: ThemePreference
 	siteConfig: {
 		copyright: string
 		footerDescription: string
@@ -103,7 +86,7 @@ interface SiteFooterProps {
 	}
 }
 
-export function SiteFooter({ siteConfig, initialTheme }: SiteFooterProps) {
+export function SiteFooter({ siteConfig }: SiteFooterProps) {
 	const navColumns = parseNavColumns(siteConfig.footerNav)
 
 	return (
@@ -175,7 +158,7 @@ export function SiteFooter({ siteConfig, initialTheme }: SiteFooterProps) {
 						>
 							Sitemap
 						</a>
-						<FooterThemeToggle initialTheme={initialTheme} />
+						<FooterThemeToggle />
 					</div>
 
 					{/* Bottom right: ICP */}

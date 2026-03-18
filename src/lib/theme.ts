@@ -1,5 +1,7 @@
 /* src/lib/theme.ts */
 
+import { useSyncExternalStore } from 'react'
+
 export type ResolvedTheme = 'light' | 'dark'
 export type ThemePreference = ResolvedTheme
 
@@ -18,9 +20,10 @@ function resolveTheme(preference?: ThemePreference | null): ResolvedTheme {
 	return preference ?? getSystemTheme()
 }
 
-function applyResolvedTheme(resolved: ResolvedTheme) {
+export function applyResolvedTheme(resolved: ResolvedTheme) {
 	document.documentElement.classList.toggle('dark', resolved === 'dark')
 	document.documentElement.style.colorScheme = resolved
+	notifyThemeChange()
 }
 
 /**
@@ -37,6 +40,38 @@ export function applyResolvedThemeWithTransition(resolved: ResolvedTheme) {
 	void document.startViewTransition(() => {
 		applyResolvedTheme(resolveTheme(resolved))
 	})
+}
+
+// --- reactive theme hook ---
+// Subscribes to .dark class mutations on <html> so all consumers stay in sync.
+const listeners = new Set<() => void>()
+
+function subscribe(cb: () => void) {
+	listeners.add(cb)
+	return () => listeners.delete(cb)
+}
+
+function getSnapshot(): ThemePreference {
+	if (typeof document === 'undefined') {
+		return 'light'
+	}
+	return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+}
+
+function getServerSnapshot(): ThemePreference {
+	return 'light'
+}
+
+// notify listeners whenever theme changes (called from applyResolvedTheme)
+function notifyThemeChange() {
+	for (const cb of listeners) {
+		cb()
+	}
+}
+
+/** Reactive hook that returns the current theme and stays in sync across all toggle sources. */
+export function useTheme(): ThemePreference {
+	return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
 
 /**
