@@ -14,6 +14,7 @@
   "ignorePatterns": [
     "dist/**",
     "node_modules/**",
+    "scripts/**",
     "src/routeTree.gen.ts",
     "worker-configuration.d.ts"
   ],

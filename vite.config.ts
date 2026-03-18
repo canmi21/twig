@@ -16,9 +16,10 @@ const config = defineConfig({
 		viteReact(),
 	],
 	build: {
+		cssCodeSplit: true,
 		rolldownOptions: {
 			output: {
-				entryFileNames: `${disguise}/chunks/[hash:21].js`,
+				entryFileNames: `${disguise}/static/[hash:21].js`,
 				chunkFileNames: `${disguise}/chunks/[hash:21].js`,
 				assetFileNames: `${disguise}/static/[hash:21].[ext]`,
 				hashCharacters: 'hex',

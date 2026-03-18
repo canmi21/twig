@@ -6,6 +6,7 @@
 @import './codes.css';
 @import './tokens.css';
 @import './transitions.css';
+@import './noise.css';
 
 @theme inline {
 	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

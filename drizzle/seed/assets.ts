@@ -11,7 +11,7 @@ export async function seedAssets() {
 	const files = readdirSync(SEED_DIR)
 	for (const file of files) {
 		const filePath = join(SEED_DIR, file)
-		// eslint-disable-next-line no-await-in-loop -- sequential to avoid R2 local state races
+		// oxlint-disable-next-line no-await-in-loop -- sequential to avoid R2 local state races
 		await $`wrangler r2 object put ${BUCKET_NAME}/${file} --local --file ${filePath}`.quiet()
 	}
 	console.log('Seeded assets')
