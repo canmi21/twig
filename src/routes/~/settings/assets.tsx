@@ -102,7 +102,9 @@ function IconSlot({ slotKey, label, accept }: { slotKey: string; label: string; 
 			<div className="flex-1">
 				<p className="text-content-primary text-sm font-medium">{label}</p>
 				<p className="text-content-tertiary text-xs">
-					{exists === null ? 'Checking...' : exists ? 'Uploaded' : 'Not uploaded'}
+					{exists === null && 'Checking...'}
+					{exists === true && 'Uploaded'}
+					{exists === false && 'Not uploaded'}
 				</p>
 			</div>
 

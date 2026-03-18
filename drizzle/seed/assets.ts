@@ -1,7 +1,9 @@
 /* drizzle/seed/assets.ts */
 
 import { $ } from 'bun'
+// oxlint-disable-next-line no-nodejs-modules -- seed script runs in Bun/Node, not browser
 import { readdirSync } from 'node:fs'
+// oxlint-disable-next-line no-nodejs-modules
 import { join } from 'node:path'
 
 const BUCKET_NAME = 'taki-bucket'
