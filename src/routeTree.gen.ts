@@ -11,14 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char126RouteImport } from './routes/~'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as Char126DashboardRouteImport } from './routes/~/dashboard'
+import { Route as Char126IndexRouteImport } from './routes/~/index'
+import { Route as Char126SettingsRouteImport } from './routes/~/settings'
+import { Route as Char126NotesRouteImport } from './routes/~/notes'
 import { Route as PostSlugRouteImport } from './routes/post/$slug'
-import { Route as Char126DashboardIndexRouteImport } from './routes/~/dashboard/index'
-import { Route as Char126DashboardSettingsRouteImport } from './routes/~/dashboard/settings'
-import { Route as Char126DashboardNotesRouteImport } from './routes/~/dashboard/notes'
-import { Route as Char126DashboardPostNewRouteImport } from './routes/~/dashboard/post/new'
-import { Route as Char126DashboardPostCidRouteImport } from './routes/~/dashboard/post/$cid'
-import { Route as Char126DashboardNoteCidRouteImport } from './routes/~/dashboard/note/$cid'
+import { Route as Char126SettingsIndexRouteImport } from './routes/~/settings/index'
+import { Route as Char126SettingsFooterRouteImport } from './routes/~/settings/footer'
+import { Route as Char126SettingsAssetsRouteImport } from './routes/~/settings/assets'
+import { Route as Char126PostNewRouteImport } from './routes/~/post/new'
+import { Route as Char126PostCidRouteImport } from './routes/~/post/$cid'
+import { Route as Char126NoteCidRouteImport } from './routes/~/note/$cid'
 
 const Char126Route = Char126RouteImport.update({
   id: '/~',
@@ -30,9 +32,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char126DashboardRoute = Char126DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const Char126IndexRoute = Char126IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Char126Route,
+} as any)
+const Char126SettingsRoute = Char126SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => Char126Route,
+} as any)
+const Char126NotesRoute = Char126NotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
   getParentRoute: () => Char126Route,
 } as any)
 const PostSlugRoute = PostSlugRouteImport.update({
@@ -40,73 +52,77 @@ const PostSlugRoute = PostSlugRouteImport.update({
   path: '/post/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char126DashboardIndexRoute = Char126DashboardIndexRouteImport.update({
+const Char126SettingsIndexRoute = Char126SettingsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => Char126DashboardRoute,
+  getParentRoute: () => Char126SettingsRoute,
 } as any)
-const Char126DashboardSettingsRoute =
-  Char126DashboardSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => Char126DashboardRoute,
-  } as any)
-const Char126DashboardNotesRoute = Char126DashboardNotesRouteImport.update({
-  id: '/notes',
-  path: '/notes',
-  getParentRoute: () => Char126DashboardRoute,
+const Char126SettingsFooterRoute = Char126SettingsFooterRouteImport.update({
+  id: '/footer',
+  path: '/footer',
+  getParentRoute: () => Char126SettingsRoute,
 } as any)
-const Char126DashboardPostNewRoute = Char126DashboardPostNewRouteImport.update({
+const Char126SettingsAssetsRoute = Char126SettingsAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => Char126SettingsRoute,
+} as any)
+const Char126PostNewRoute = Char126PostNewRouteImport.update({
   id: '/post/new',
   path: '/post/new',
-  getParentRoute: () => Char126DashboardRoute,
+  getParentRoute: () => Char126Route,
 } as any)
-const Char126DashboardPostCidRoute = Char126DashboardPostCidRouteImport.update({
+const Char126PostCidRoute = Char126PostCidRouteImport.update({
   id: '/post/$cid',
   path: '/post/$cid',
-  getParentRoute: () => Char126DashboardRoute,
+  getParentRoute: () => Char126Route,
 } as any)
-const Char126DashboardNoteCidRoute = Char126DashboardNoteCidRouteImport.update({
+const Char126NoteCidRoute = Char126NoteCidRouteImport.update({
   id: '/note/$cid',
   path: '/note/$cid',
-  getParentRoute: () => Char126DashboardRoute,
+  getParentRoute: () => Char126Route,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/~': typeof Char126RouteWithChildren
   '/post/$slug': typeof PostSlugRoute
-  '/~/dashboard': typeof Char126DashboardRouteWithChildren
-  '/~/dashboard/notes': typeof Char126DashboardNotesRoute
-  '/~/dashboard/settings': typeof Char126DashboardSettingsRoute
-  '/~/dashboard/': typeof Char126DashboardIndexRoute
-  '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
-  '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
-  '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
+  '/~/notes': typeof Char126NotesRoute
+  '/~/settings': typeof Char126SettingsRouteWithChildren
+  '/~/': typeof Char126IndexRoute
+  '/~/note/$cid': typeof Char126NoteCidRoute
+  '/~/post/$cid': typeof Char126PostCidRoute
+  '/~/post/new': typeof Char126PostNewRoute
+  '/~/settings/assets': typeof Char126SettingsAssetsRoute
+  '/~/settings/footer': typeof Char126SettingsFooterRoute
+  '/~/settings/': typeof Char126SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/~': typeof Char126RouteWithChildren
   '/post/$slug': typeof PostSlugRoute
-  '/~/dashboard/notes': typeof Char126DashboardNotesRoute
-  '/~/dashboard/settings': typeof Char126DashboardSettingsRoute
-  '/~/dashboard': typeof Char126DashboardIndexRoute
-  '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
-  '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
-  '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
+  '/~/notes': typeof Char126NotesRoute
+  '/~': typeof Char126IndexRoute
+  '/~/note/$cid': typeof Char126NoteCidRoute
+  '/~/post/$cid': typeof Char126PostCidRoute
+  '/~/post/new': typeof Char126PostNewRoute
+  '/~/settings/assets': typeof Char126SettingsAssetsRoute
+  '/~/settings/footer': typeof Char126SettingsFooterRoute
+  '/~/settings': typeof Char126SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/~': typeof Char126RouteWithChildren
   '/post/$slug': typeof PostSlugRoute
-  '/~/dashboard': typeof Char126DashboardRouteWithChildren
-  '/~/dashboard/notes': typeof Char126DashboardNotesRoute
-  '/~/dashboard/settings': typeof Char126DashboardSettingsRoute
-  '/~/dashboard/': typeof Char126DashboardIndexRoute
-  '/~/dashboard/note/$cid': typeof Char126DashboardNoteCidRoute
-  '/~/dashboard/post/$cid': typeof Char126DashboardPostCidRoute
-  '/~/dashboard/post/new': typeof Char126DashboardPostNewRoute
+  '/~/notes': typeof Char126NotesRoute
+  '/~/settings': typeof Char126SettingsRouteWithChildren
+  '/~/': typeof Char126IndexRoute
+  '/~/note/$cid': typeof Char126NoteCidRoute
+  '/~/post/$cid': typeof Char126PostCidRoute
+  '/~/post/new': typeof Char126PostNewRoute
+  '/~/settings/assets': typeof Char126SettingsAssetsRoute
+  '/~/settings/footer': typeof Char126SettingsFooterRoute
+  '/~/settings/': typeof Char126SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,36 +130,41 @@ export interface FileRouteTypes {
     | '/'
     | '/~'
     | '/post/$slug'
-    | '/~/dashboard'
-    | '/~/dashboard/notes'
-    | '/~/dashboard/settings'
-    | '/~/dashboard/'
-    | '/~/dashboard/note/$cid'
-    | '/~/dashboard/post/$cid'
-    | '/~/dashboard/post/new'
+    | '/~/notes'
+    | '/~/settings'
+    | '/~/'
+    | '/~/note/$cid'
+    | '/~/post/$cid'
+    | '/~/post/new'
+    | '/~/settings/assets'
+    | '/~/settings/footer'
+    | '/~/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/~'
     | '/post/$slug'
-    | '/~/dashboard/notes'
-    | '/~/dashboard/settings'
-    | '/~/dashboard'
-    | '/~/dashboard/note/$cid'
-    | '/~/dashboard/post/$cid'
-    | '/~/dashboard/post/new'
+    | '/~/notes'
+    | '/~'
+    | '/~/note/$cid'
+    | '/~/post/$cid'
+    | '/~/post/new'
+    | '/~/settings/assets'
+    | '/~/settings/footer'
+    | '/~/settings'
   id:
     | '__root__'
     | '/'
     | '/~'
     | '/post/$slug'
-    | '/~/dashboard'
-    | '/~/dashboard/notes'
-    | '/~/dashboard/settings'
-    | '/~/dashboard/'
-    | '/~/dashboard/note/$cid'
-    | '/~/dashboard/post/$cid'
-    | '/~/dashboard/post/new'
+    | '/~/notes'
+    | '/~/settings'
+    | '/~/'
+    | '/~/note/$cid'
+    | '/~/post/$cid'
+    | '/~/post/new'
+    | '/~/settings/assets'
+    | '/~/settings/footer'
+    | '/~/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -168,11 +189,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/~/dashboard': {
-      id: '/~/dashboard'
-      path: '/dashboard'
-      fullPath: '/~/dashboard'
-      preLoaderRoute: typeof Char126DashboardRouteImport
+    '/~/': {
+      id: '/~/'
+      path: '/'
+      fullPath: '/~/'
+      preLoaderRoute: typeof Char126IndexRouteImport
+      parentRoute: typeof Char126Route
+    }
+    '/~/settings': {
+      id: '/~/settings'
+      path: '/settings'
+      fullPath: '/~/settings'
+      preLoaderRoute: typeof Char126SettingsRouteImport
+      parentRoute: typeof Char126Route
+    }
+    '/~/notes': {
+      id: '/~/notes'
+      path: '/notes'
+      fullPath: '/~/notes'
+      preLoaderRoute: typeof Char126NotesRouteImport
       parentRoute: typeof Char126Route
     }
     '/post/$slug': {
@@ -182,78 +217,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/~/dashboard/': {
-      id: '/~/dashboard/'
+    '/~/settings/': {
+      id: '/~/settings/'
       path: '/'
-      fullPath: '/~/dashboard/'
-      preLoaderRoute: typeof Char126DashboardIndexRouteImport
-      parentRoute: typeof Char126DashboardRoute
+      fullPath: '/~/settings/'
+      preLoaderRoute: typeof Char126SettingsIndexRouteImport
+      parentRoute: typeof Char126SettingsRoute
     }
-    '/~/dashboard/settings': {
-      id: '/~/dashboard/settings'
-      path: '/settings'
-      fullPath: '/~/dashboard/settings'
-      preLoaderRoute: typeof Char126DashboardSettingsRouteImport
-      parentRoute: typeof Char126DashboardRoute
+    '/~/settings/footer': {
+      id: '/~/settings/footer'
+      path: '/footer'
+      fullPath: '/~/settings/footer'
+      preLoaderRoute: typeof Char126SettingsFooterRouteImport
+      parentRoute: typeof Char126SettingsRoute
     }
-    '/~/dashboard/notes': {
-      id: '/~/dashboard/notes'
-      path: '/notes'
-      fullPath: '/~/dashboard/notes'
-      preLoaderRoute: typeof Char126DashboardNotesRouteImport
-      parentRoute: typeof Char126DashboardRoute
+    '/~/settings/assets': {
+      id: '/~/settings/assets'
+      path: '/assets'
+      fullPath: '/~/settings/assets'
+      preLoaderRoute: typeof Char126SettingsAssetsRouteImport
+      parentRoute: typeof Char126SettingsRoute
     }
-    '/~/dashboard/post/new': {
-      id: '/~/dashboard/post/new'
+    '/~/post/new': {
+      id: '/~/post/new'
       path: '/post/new'
-      fullPath: '/~/dashboard/post/new'
-      preLoaderRoute: typeof Char126DashboardPostNewRouteImport
-      parentRoute: typeof Char126DashboardRoute
+      fullPath: '/~/post/new'
+      preLoaderRoute: typeof Char126PostNewRouteImport
+      parentRoute: typeof Char126Route
     }
-    '/~/dashboard/post/$cid': {
-      id: '/~/dashboard/post/$cid'
+    '/~/post/$cid': {
+      id: '/~/post/$cid'
       path: '/post/$cid'
-      fullPath: '/~/dashboard/post/$cid'
-      preLoaderRoute: typeof Char126DashboardPostCidRouteImport
-      parentRoute: typeof Char126DashboardRoute
+      fullPath: '/~/post/$cid'
+      preLoaderRoute: typeof Char126PostCidRouteImport
+      parentRoute: typeof Char126Route
     }
-    '/~/dashboard/note/$cid': {
-      id: '/~/dashboard/note/$cid'
+    '/~/note/$cid': {
+      id: '/~/note/$cid'
       path: '/note/$cid'
-      fullPath: '/~/dashboard/note/$cid'
-      preLoaderRoute: typeof Char126DashboardNoteCidRouteImport
-      parentRoute: typeof Char126DashboardRoute
+      fullPath: '/~/note/$cid'
+      preLoaderRoute: typeof Char126NoteCidRouteImport
+      parentRoute: typeof Char126Route
     }
   }
 }
 
-interface Char126DashboardRouteChildren {
-  Char126DashboardNotesRoute: typeof Char126DashboardNotesRoute
-  Char126DashboardSettingsRoute: typeof Char126DashboardSettingsRoute
-  Char126DashboardIndexRoute: typeof Char126DashboardIndexRoute
-  Char126DashboardNoteCidRoute: typeof Char126DashboardNoteCidRoute
-  Char126DashboardPostCidRoute: typeof Char126DashboardPostCidRoute
-  Char126DashboardPostNewRoute: typeof Char126DashboardPostNewRoute
+interface Char126SettingsRouteChildren {
+  Char126SettingsAssetsRoute: typeof Char126SettingsAssetsRoute
+  Char126SettingsFooterRoute: typeof Char126SettingsFooterRoute
+  Char126SettingsIndexRoute: typeof Char126SettingsIndexRoute
 }
 
-const Char126DashboardRouteChildren: Char126DashboardRouteChildren = {
-  Char126DashboardNotesRoute: Char126DashboardNotesRoute,
-  Char126DashboardSettingsRoute: Char126DashboardSettingsRoute,
-  Char126DashboardIndexRoute: Char126DashboardIndexRoute,
-  Char126DashboardNoteCidRoute: Char126DashboardNoteCidRoute,
-  Char126DashboardPostCidRoute: Char126DashboardPostCidRoute,
-  Char126DashboardPostNewRoute: Char126DashboardPostNewRoute,
+const Char126SettingsRouteChildren: Char126SettingsRouteChildren = {
+  Char126SettingsAssetsRoute: Char126SettingsAssetsRoute,
+  Char126SettingsFooterRoute: Char126SettingsFooterRoute,
+  Char126SettingsIndexRoute: Char126SettingsIndexRoute,
 }
 
-const Char126DashboardRouteWithChildren =
-  Char126DashboardRoute._addFileChildren(Char126DashboardRouteChildren)
+const Char126SettingsRouteWithChildren = Char126SettingsRoute._addFileChildren(
+  Char126SettingsRouteChildren,
+)
 
 interface Char126RouteChildren {
-  Char126DashboardRoute: typeof Char126DashboardRouteWithChildren
+  Char126NotesRoute: typeof Char126NotesRoute
+  Char126SettingsRoute: typeof Char126SettingsRouteWithChildren
+  Char126IndexRoute: typeof Char126IndexRoute
+  Char126NoteCidRoute: typeof Char126NoteCidRoute
+  Char126PostCidRoute: typeof Char126PostCidRoute
+  Char126PostNewRoute: typeof Char126PostNewRoute
 }
 
 const Char126RouteChildren: Char126RouteChildren = {
-  Char126DashboardRoute: Char126DashboardRouteWithChildren,
+  Char126NotesRoute: Char126NotesRoute,
+  Char126SettingsRoute: Char126SettingsRouteWithChildren,
+  Char126IndexRoute: Char126IndexRoute,
+  Char126NoteCidRoute: Char126NoteCidRoute,
+  Char126PostCidRoute: Char126PostCidRoute,
+  Char126PostNewRoute: Char126PostNewRoute,
 }
 
 const Char126RouteWithChildren =

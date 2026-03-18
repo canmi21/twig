@@ -1,6 +1,7 @@
 /* drizzle/seed.ts */
 
 import { $ } from 'bun'
+import { seedAssets } from './seed/assets'
 import { seedConfig } from './seed/config'
 import { seedNotes } from './seed/notes'
 import { seedPosts } from './seed/posts'
@@ -15,6 +16,7 @@ async function main() {
 	await seedConfig(runSql)
 	await seedPosts(runSql)
 	await seedNotes(runSql)
+	await seedAssets()
 	console.log('Seed complete')
 }
 

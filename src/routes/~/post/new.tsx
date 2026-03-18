@@ -1,11 +1,11 @@
-/* src/routes/~/dashboard/post/new.tsx */
+/* src/routes/~/post/new.tsx */
 
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { createPost } from '~/features/content/server'
 
-export const Route = createFileRoute('/~/dashboard/post/new')({
+export const Route = createFileRoute('/~/post/new')({
 	component: NewPostPage,
 })
 
@@ -53,7 +53,7 @@ function NewPostPage() {
 			},
 		})
 
-		await navigate({ to: '/~/dashboard' })
+		await navigate({ to: '/~' })
 	}
 
 	return (
@@ -130,7 +130,7 @@ function NewPostPage() {
 					</button>
 					<button
 						type="button"
-						onClick={() => void navigate({ to: '/~/dashboard' })}
+						onClick={() => void navigate({ to: '/~' })}
 						className="text-content-secondary rounded-md px-4 py-2 text-sm hover:underline"
 					>
 						Cancel

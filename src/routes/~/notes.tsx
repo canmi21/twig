@@ -1,4 +1,4 @@
-/* src/routes/~/dashboard/notes.tsx */
+/* src/routes/~/notes.tsx */
 
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -12,7 +12,7 @@ import {
 	uploadImage,
 } from '~/features/content/server'
 
-export const Route = createFileRoute('/~/dashboard/notes')({
+export const Route = createFileRoute('/~/notes')({
 	loader: () => listNotes(),
 	component: NotesPage,
 })
@@ -244,7 +244,7 @@ function NotesPage() {
 										</time>
 										<div className="ml-auto flex gap-3">
 											<Link
-												to="/~/dashboard/note/$cid"
+												to="/~/note/$cid"
 												params={{ cid: note.cid }}
 												className="text-primary text-xs hover:underline"
 											>

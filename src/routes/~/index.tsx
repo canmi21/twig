@@ -1,9 +1,9 @@
-/* src/routes/~/dashboard/index.tsx */
+/* src/routes/~/index.tsx */
 
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { deletePost, listPosts, publishPost, unpublishPost } from '~/features/content/server'
 
-export const Route = createFileRoute('/~/dashboard/')({
+export const Route = createFileRoute('/~/')({
 	loader: () => listPosts({ data: {} }),
 	component: PostListPage,
 })
@@ -43,7 +43,7 @@ function PostListPage() {
 			<div className="mb-6 flex items-center justify-between">
 				<h2 className="text-content-heading text-lg font-semibold">Posts</h2>
 				<Link
-					to="/~/dashboard/post/new"
+					to="/~/post/new"
 					className="bg-primary text-on-primary rounded-md px-4 py-2 text-sm font-medium"
 				>
 					New Post
@@ -83,7 +83,7 @@ function PostListPage() {
 								<td className="py-2">
 									<div className="flex gap-3">
 										<Link
-											to="/~/dashboard/post/$cid"
+											to="/~/post/$cid"
 											params={{ cid: post.cid }}
 											className="text-primary text-xs hover:underline"
 										>

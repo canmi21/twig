@@ -1,4 +1,4 @@
-/* src/routes/~/dashboard/note/$cid.tsx */
+/* src/routes/~/note/$cid.tsx */
 
 import { useState } from 'react'
 import type { FormEvent } from 'react'
@@ -6,7 +6,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { resolveImageUrl } from '~/lib/image'
 import { getNote, updateNote, uploadImage } from '~/features/content/server'
 
-export const Route = createFileRoute('/~/dashboard/note/$cid')({
+export const Route = createFileRoute('/~/note/$cid')({
 	loader: ({ params }) => getNote({ data: { cid: params.cid } }),
 	component: EditNotePage,
 })
@@ -78,7 +78,7 @@ function EditNotePage() {
 					images,
 				},
 			})
-			await navigate({ to: '/~/dashboard/notes' })
+			await navigate({ to: '/~/notes' })
 		} catch (error) {
 			alert(error instanceof Error ? error.message : 'Failed to save')
 			setSubmitting(false)
@@ -152,7 +152,7 @@ function EditNotePage() {
 					</button>
 					<button
 						type="button"
-						onClick={() => void navigate({ to: '/~/dashboard/notes' })}
+						onClick={() => void navigate({ to: '/~/notes' })}
 						className="text-content-secondary cursor-pointer rounded-md px-4 py-2 text-sm hover:underline"
 					>
 						Cancel

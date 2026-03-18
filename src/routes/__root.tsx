@@ -17,6 +17,7 @@ import { THEME_INIT_SCRIPT } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'
 import { getSiteConfig } from '~/server/config'
 import { getThemeCookie } from '~/server/theme'
+import { resolveAssetUrl } from '~/lib/assets'
 import appCss from '~/styles/index.css?url'
 
 const TanStackDevtools = import.meta.env.DEV
@@ -53,9 +54,14 @@ export const Route = createRootRouteWithContext()({
 		],
 		links: [
 			{ rel: 'stylesheet', href: appCss },
-			{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg' },
-			{ rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon-96x96.png' },
-			{ rel: 'apple-touch-icon', sizes: '96x96', href: '/apple-touch-icon.png' },
+			{ rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: resolveAssetUrl('favicon.svg') },
+			{
+				rel: 'icon',
+				type: 'image/png',
+				sizes: '96x96',
+				href: resolveAssetUrl('favicon-96x96.png'),
+			},
+			{ rel: 'apple-touch-icon', sizes: '96x96', href: resolveAssetUrl('apple-touch-icon.png') },
 		],
 	}),
 	shellComponent: RootDocument,

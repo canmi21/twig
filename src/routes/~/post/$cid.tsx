@@ -1,11 +1,11 @@
-/* src/routes/~/dashboard/post/$cid.tsx */
+/* src/routes/~/post/$cid.tsx */
 
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { getPost, updatePost } from '~/features/content/server'
 
-export const Route = createFileRoute('/~/dashboard/post/$cid')({
+export const Route = createFileRoute('/~/post/$cid')({
 	loader: ({ params }) => getPost({ data: { cid: params.cid } }),
 	component: EditPostPage,
 })
@@ -48,7 +48,7 @@ function EditPostPage() {
 			},
 		})
 
-		await navigate({ to: '/~/dashboard' })
+		await navigate({ to: '/~' })
 	}
 
 	return (
@@ -122,7 +122,7 @@ function EditPostPage() {
 					</button>
 					<button
 						type="button"
-						onClick={() => void navigate({ to: '/~/dashboard' })}
+						onClick={() => void navigate({ to: '/~' })}
 						className="text-content-secondary rounded-md px-4 py-2 text-sm hover:underline"
 					>
 						Cancel
