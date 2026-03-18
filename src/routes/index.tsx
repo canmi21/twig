@@ -22,8 +22,8 @@ function PostCard({
 }) {
 	return (
 		<Link to="/post/$slug" params={{ slug: item.slug }} className="group block no-underline">
-			<article className="bg-surface border-border-subtle rounded-lg border p-5 transition-colors hover:border-[var(--border-default)]">
-				<h2 className="text-content-heading text-lg font-semibold group-hover:text-[var(--primary)]">
+			<article className="bg-surface border-border-subtle hover:border-border-default rounded-lg border p-5 transition-colors">
+				<h2 className="text-content-heading group-hover:text-primary text-lg font-semibold">
 					{item.title}
 				</h2>
 				{item.summary && (
