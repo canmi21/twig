@@ -3,6 +3,7 @@
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 import oxlint from 'eslint-plugin-oxlint'
 import tseslint from 'typescript-eslint'
 
@@ -79,6 +80,19 @@ export default tseslint.config(
 	{
 		files: ['**/*.{ts,tsx}'],
 		...reactHooks.configs.flat['recommended-latest'],
+	},
+	{
+		files: ['**/*.{ts,tsx}'],
+		extends: [betterTailwindcss.configs.recommended],
+		settings: {
+			'better-tailwindcss': {
+				entryPoint: 'src/styles/tailwind.css',
+			},
+		},
+		rules: {
+			'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+			'better-tailwindcss/no-unknown-classes': 'warn',
+		},
 	},
 	...oxlint.buildFromOxlintConfigFile('./.oxlintrc.json'),
 )
