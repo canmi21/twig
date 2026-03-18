@@ -19,7 +19,7 @@ const config = defineConfig({
 		cssCodeSplit: true,
 		rolldownOptions: {
 			output: {
-				entryFileNames: `${disguise}/static/[hash:21].js`,
+				entryFileNames: `${disguise}/chunks/[hash:21].js`,
 				chunkFileNames: `${disguise}/chunks/[hash:21].js`,
 				assetFileNames: `${disguise}/static/[hash:21].[ext]`,
 				hashCharacters: 'hex',
