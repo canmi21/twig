@@ -7,7 +7,7 @@ const navItems = [{ exact: true, label: 'Home', to: '/' }] as const
 export function FloatingNav() {
 	return (
 		<nav className="fixed top-4 left-1/2 z-50 -translate-x-1/2" aria-label="Main navigation">
-			<div className="bg-surface/80 ring-border-subtle flex items-center gap-0.5 rounded-full px-2 py-1 shadow-[var(--shadow-md)] ring-1 backdrop-blur-lg">
+			<div className="bg-surface/80 ring-border-subtle flex items-center gap-0.5 rounded-full px-2 py-1 shadow-(--shadow-md) ring-1 backdrop-blur-lg">
 				{navItems.map(({ to, label, exact }) => (
 					<Link
 						key={to}

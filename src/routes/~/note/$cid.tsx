@@ -113,12 +113,12 @@ function EditNotePage() {
 									<img
 										src={resolveImageUrl(path)}
 										alt=""
-										className="h-20 w-20 rounded-md object-cover"
+										className="size-20 rounded-md object-cover"
 									/>
 									<button
 										type="button"
 										onClick={() => removeImage(idx)}
-										className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-600 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+										className="absolute -top-1.5 -right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-full bg-red-600 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
 									>
 										x
 									</button>
@@ -146,7 +146,7 @@ function EditNotePage() {
 					<button
 						type="submit"
 						disabled={submitting || !text.trim()}
-						className="bg-primary text-on-primary cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+						className="bg-primary text-primary-foreground cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
 					>
 						{submitting ? 'Saving...' : 'Save Changes'}
 					</button>

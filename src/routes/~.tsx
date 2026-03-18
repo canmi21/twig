@@ -58,7 +58,7 @@ function DashboardLayout() {
 				</nav>
 
 				{/* Back to site */}
-				<div className="border-border-default border-t px-3 py-3">
+				<div className="border-border-default border-t p-3">
 					<Link
 						to="/"
 						className="text-content-secondary hover:bg-elevated hover:text-content-heading flex items-center gap-3 rounded-lg px-3 py-2 text-sm no-underline transition-colors"

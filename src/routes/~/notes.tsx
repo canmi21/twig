@@ -113,15 +113,11 @@ function NoteComposer({ onCreated }: { onCreated: () => void }) {
 				<div className="mt-2 flex flex-wrap gap-2">
 					{images.map((path, idx) => (
 						<div key={path} className="group relative">
-							<img
-								src={resolveImageUrl(path)}
-								alt=""
-								className="h-20 w-20 rounded-md object-cover"
-							/>
+							<img src={resolveImageUrl(path)} alt="" className="size-20 rounded-md object-cover" />
 							<button
 								type="button"
 								onClick={() => removeImage(idx)}
-								className="absolute -top-1.5 -right-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-600 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+								className="absolute -top-1.5 -right-1.5 flex size-5 cursor-pointer items-center justify-center rounded-full bg-red-600 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
 							>
 								x
 							</button>
@@ -156,7 +152,7 @@ function NoteComposer({ onCreated }: { onCreated: () => void }) {
 						type="button"
 						onClick={() => void handleSave(true)}
 						disabled={saving || !text.trim()}
-						className="bg-primary text-on-primary cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+						className="bg-primary text-primary-foreground cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium disabled:opacity-50"
 					>
 						Publish
 					</button>
@@ -213,8 +209,8 @@ function NotesPage() {
 										<span
 											className={
 												note.status === 'published'
-													? 'shrink-0 rounded bg-green-500/10 px-2 py-0.5 text-xs text-green-700 dark:text-green-400'
-													: 'shrink-0 rounded bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-700 dark:text-yellow-400'
+													? 'shrink-0 rounded-sm bg-green-500/10 px-2 py-0.5 text-xs text-green-700 dark:text-green-400'
+													: 'shrink-0 rounded-sm bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-700 dark:text-yellow-400'
 											}
 										>
 											{note.status}
@@ -228,7 +224,7 @@ function NotesPage() {
 													key={path}
 													src={resolveImageUrl(path)}
 													alt=""
-													className="h-20 w-20 rounded-md object-cover"
+													className="size-20 rounded-md object-cover"
 												/>
 											))}
 										</div>

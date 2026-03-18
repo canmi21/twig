@@ -117,7 +117,7 @@ function FooterSettingsPage() {
 						value={footerName}
 						onChange={(ev) => setFooterName(ev.target.value)}
 						placeholder="Site Name"
-						className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+						className="border-border-default bg-sunken text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
 					/>
 				</div>
 				<div>
@@ -133,7 +133,7 @@ function FooterSettingsPage() {
 						value={footerDescription}
 						onChange={(ev) => setFooterDescription(ev.target.value)}
 						placeholder="A short footer text"
-						className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+						className="border-border-default bg-sunken text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
 					/>
 				</div>
 			</fieldset>
@@ -151,7 +151,7 @@ function FooterSettingsPage() {
 								value={col.title}
 								onChange={(ev) => updateColumn(colIdx, 'title', ev.target.value)}
 								placeholder="Column title"
-								className="bg-sunken border-border-default text-content-primary flex-1 rounded-md border px-3 py-1.5 text-sm focus:outline-none"
+								className="border-border-default bg-sunken text-content-primary flex-1 rounded-md border px-3 py-1.5 text-sm focus:outline-none"
 							/>
 							<button
 								type="button"
@@ -172,14 +172,14 @@ function FooterSettingsPage() {
 										value={link.label}
 										onChange={(ev) => updateLink(colIdx, linkIdx, { label: ev.target.value })}
 										placeholder="Label"
-										className="bg-sunken border-border-default text-content-primary flex-1 rounded-md border px-2 py-1 text-sm focus:outline-none"
+										className="border-border-default bg-sunken text-content-primary flex-1 rounded-md border px-2 py-1 text-sm focus:outline-none"
 									/>
 									<input
 										type="text"
 										value={link.href}
 										onChange={(ev) => updateLink(colIdx, linkIdx, { href: ev.target.value })}
 										placeholder="URL"
-										className="bg-sunken border-border-default text-content-primary flex-1 rounded-md border px-2 py-1 font-mono text-sm focus:outline-none"
+										className="border-border-default bg-sunken text-content-primary flex-1 rounded-md border px-2 py-1 font-mono text-sm focus:outline-none"
 									/>
 									<button
 										type="button"
@@ -217,7 +217,7 @@ function FooterSettingsPage() {
 			<button
 				type="submit"
 				disabled={saving}
-				className="bg-primary text-on-primary cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+				className="bg-primary text-primary-foreground cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
 			>
 				{saving ? 'Saving...' : 'Save'}
 			</button>

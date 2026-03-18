@@ -91,7 +91,7 @@ export default tseslint.config(
 		},
 		rules: {
 			'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
-			'better-tailwindcss/no-unknown-classes': 'warn',
+			'better-tailwindcss/no-unknown-classes': 'error',
 		},
 	},
 	...oxlint.buildFromOxlintConfigFile('./.oxlintrc.json'),

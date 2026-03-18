@@ -116,7 +116,7 @@ function EditPostPage() {
 					<button
 						type="submit"
 						disabled={submitting}
-						className="bg-primary text-on-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+						className="bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
 					>
 						{submitting ? 'Saving...' : 'Save Changes'}
 					</button>

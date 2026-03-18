@@ -79,7 +79,7 @@ function GeneralSettingsPage() {
 								value={form[key]}
 								onChange={(ev) => handleChange(key, ev.target.value)}
 								placeholder={placeholder}
-								className="bg-sunken border-border-default text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
+								className="border-border-default bg-sunken text-content-primary w-full rounded-md border px-3 py-2 text-sm focus:outline-none"
 							/>
 						</div>
 					))}
@@ -88,7 +88,7 @@ function GeneralSettingsPage() {
 			<button
 				type="submit"
 				disabled={saving}
-				className="bg-primary text-on-primary cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+				className="bg-primary text-primary-foreground cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
 			>
 				{saving ? 'Saving...' : 'Save'}
 			</button>

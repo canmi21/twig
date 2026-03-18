@@ -87,12 +87,12 @@ function IconSlot({ slotKey, label, accept }: { slotKey: string; label: string; 
 
 	return (
 		<div className="border-border-subtle flex items-center gap-4 rounded-lg border p-3">
-			<div className="bg-sunken flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
+			<div className="bg-sunken flex size-12 shrink-0 items-center justify-center rounded-md">
 				{exists ? (
 					<img
 						src={`${resolveAssetUrl(slotKey)}?v=${version}`}
 						alt={label}
-						className="h-10 w-10 object-contain"
+						className="size-10 object-contain"
 					/>
 				) : (
 					<span className="text-content-disabled text-xs">--</span>
@@ -261,7 +261,7 @@ function RobotsTxtEditor({ initial, siteUrl }: { initial: string; siteUrl: strin
 							type="text"
 							value={rule.userAgent}
 							onChange={(ev) => updateUserAgent(ruleIdx, ev.target.value)}
-							className="bg-sunken border-border-default text-content-primary flex-1 rounded-md border px-2 py-1 font-mono text-sm focus:outline-none"
+							className="border-border-default bg-sunken text-content-primary flex-1 rounded-md border px-2 py-1 font-mono text-sm focus:outline-none"
 						/>
 						<button
 							type="button"
@@ -283,7 +283,7 @@ function RobotsTxtEditor({ initial, siteUrl }: { initial: string; siteUrl: strin
 									value={disallow}
 									onChange={(ev) => updateDisallow(ruleIdx, disIdx, ev.target.value)}
 									placeholder="/path"
-									className="bg-sunken border-border-default text-content-primary flex-1 rounded-md border px-2 py-1 font-mono text-sm focus:outline-none"
+									className="border-border-default bg-sunken text-content-primary flex-1 rounded-md border px-2 py-1 font-mono text-sm focus:outline-none"
 								/>
 								<button
 									type="button"
@@ -321,7 +321,7 @@ function RobotsTxtEditor({ initial, siteUrl }: { initial: string; siteUrl: strin
 					type="button"
 					onClick={() => void handleSave()}
 					disabled={saving}
-					className="bg-primary text-on-primary cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+					className="bg-primary text-primary-foreground cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
 				>
 					{saving ? 'Saving...' : 'Save robots.txt'}
 				</button>

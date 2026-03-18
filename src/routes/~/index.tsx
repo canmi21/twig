@@ -40,7 +40,7 @@ function PostListPage() {
 				<h2 className="text-content-heading text-lg font-semibold">Posts</h2>
 				<Link
 					to="/~/post/new"
-					className="bg-primary text-on-primary rounded-md px-4 py-2 text-sm font-medium"
+					className="bg-primary text-primary-foreground rounded-md px-4 py-2 text-sm font-medium"
 				>
 					New Post
 				</Link>
@@ -68,8 +68,8 @@ function PostListPage() {
 									<span
 										className={
 											post.status === 'published'
-												? 'rounded bg-green-500/10 px-2 py-0.5 text-xs text-green-700 dark:text-green-400'
-												: 'rounded bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-700 dark:text-yellow-400'
+												? 'rounded-sm bg-green-500/10 px-2 py-0.5 text-xs text-green-700 dark:text-green-400'
+												: 'rounded-sm bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-700 dark:text-yellow-400'
 										}
 									>
 										{post.status}
