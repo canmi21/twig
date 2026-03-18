@@ -22,7 +22,7 @@ function PostCard({
 }) {
 	return (
 		<Link to="/post/$slug" params={{ slug: item.slug }} className="group block no-underline">
-			<article className="border-border-subtle rounded-lg border p-5 transition-colors hover:border-[var(--border-default)]">
+			<article className="bg-surface border-border-subtle rounded-lg border p-5 transition-colors hover:border-[var(--border-default)]">
 				<h2 className="text-content-heading text-lg font-semibold group-hover:text-[var(--primary)]">
 					{item.title}
 				</h2>
@@ -51,7 +51,7 @@ function NoteCard({
 	const images: string[] = item.images ? JSON.parse(item.images) : []
 
 	return (
-		<article className="border-border-subtle rounded-lg border p-5">
+		<article className="bg-surface border-border-subtle rounded-lg border p-5">
 			<p className="text-content-primary text-sm whitespace-pre-wrap">{item.text}</p>
 			{images.length > 0 && (
 				<div className="mt-3 flex flex-wrap gap-2">

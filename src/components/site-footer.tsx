@@ -107,7 +107,7 @@ export function SiteFooter({ siteConfig, initialTheme }: SiteFooterProps) {
 	const navColumns = parseNavColumns(siteConfig.footerNav)
 
 	return (
-		<footer className="before:bg-border-default relative mt-16 before:absolute before:top-0 before:left-1/2 before:h-px before:w-screen before:-translate-x-1/2">
+		<footer className="bg-surface/60 before:bg-border-default relative mt-16 backdrop-blur-md before:absolute before:top-0 before:left-1/2 before:h-px before:w-screen before:-translate-x-1/2">
 			<div className="mx-auto max-w-6xl px-5 py-10">
 				{/* Top section */}
 				<div className="flex flex-col justify-between gap-10 sm:flex-row">
