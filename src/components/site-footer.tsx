@@ -74,7 +74,7 @@ function FooterLink({ href, label }: NavLink) {
 			href={href}
 			target={opensNew ? '_blank' : undefined}
 			rel={opensNew ? 'noopener noreferrer' : undefined}
-			className="text-content-tertiary hover:text-content-heading inline-flex items-center gap-1 text-[13px] no-underline transition-colors"
+			className="text-content-heading after:bg-primary/70 relative inline-flex items-center gap-1 px-1.5 py-0.5 text-[13px] no-underline after:absolute after:inset-x-0 after:bottom-0 after:h-[40%] after:rounded-sm after:opacity-0 after:transition-opacity after:duration-200 hover:after:opacity-100"
 		>
 			{label}
 			{isExternal && <ArrowUpRight className="size-[11px]" />}
@@ -137,8 +137,10 @@ export function SiteFooter({ siteConfig, initialTheme }: SiteFooterProps) {
 					{navColumns.length > 0 && (
 						<div className="flex gap-16">
 							{navColumns.map((col) => (
-								<ul key={col.title} className="m-0 list-none space-y-2 p-0">
-									<li className="text-content-heading text-[13px] font-semibold">{col.title}</li>
+								<ul key={col.title} className="m-0 list-none space-y-1 p-0">
+									<li className="text-content-tertiary px-1.5 py-0.5 text-[13px] font-semibold">
+										{col.title}
+									</li>
 									{col.links.map((link) => (
 										<li key={link.label}>
 											<FooterLink href={link.href} label={link.label} />
