@@ -1,7 +1,8 @@
 /* src/routes/post/$slug.tsx */
 
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { getPublishedPostBySlug } from '~/features/content/server'
+import { formatDate } from '~/lib/date'
 
 export const Route = createFileRoute('/post/$slug')({
 	loader: ({ params }) => getPublishedPostBySlug({ data: { slug: params.slug } }),
@@ -20,16 +21,11 @@ export const Route = createFileRoute('/post/$slug')({
 	component: PostPage,
 })
 
-function formatDate(iso: string): string {
-	return new Date(iso).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-	})
-}
+const rootRoute = getRouteApi('__root__')
 
 function PostPage() {
 	const { html, meta } = Route.useLoaderData()
+	const { timezone } = rootRoute.useRouteContext()
 	const tags: string[] = meta.tags ? JSON.parse(meta.tags) : []
 
 	return (
@@ -39,7 +35,9 @@ function PostPage() {
 					{meta.title}
 				</h1>
 				<div className="text-content-secondary mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-					<time dateTime={meta.createdAt}>{formatDate(meta.createdAt)}</time>
+					<time dateTime={meta.createdAt} suppressHydrationWarning>
+						{formatDate(meta.createdAt, { month: 'long', timeZone: timezone })}
+					</time>
 					{tags.length > 0 && (
 						<div className="flex flex-wrap gap-1.5">
 							{tags.map((tag) => (

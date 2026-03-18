@@ -1,23 +1,19 @@
 /* src/routes/~/index.tsx */
 
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+import { Link, createFileRoute, getRouteApi, useRouter } from '@tanstack/react-router'
 import { deletePost, listPosts, publishPost, unpublishPost } from '~/features/content/server'
+import { formatDate } from '~/lib/date'
 
 export const Route = createFileRoute('/~/')({
 	loader: () => listPosts({ data: {} }),
 	component: PostListPage,
 })
 
-function formatDate(iso: string): string {
-	return new Date(iso).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-	})
-}
+const rootRoute = getRouteApi('__root__')
 
 function PostListPage() {
 	const posts = Route.useLoaderData()
+	const { timezone } = rootRoute.useRouteContext()
 	const router = useRouter()
 
 	async function handlePublish(cid: string) {
@@ -79,7 +75,9 @@ function PostListPage() {
 										{post.status}
 									</span>
 								</td>
-								<td className="text-content-secondary py-2">{formatDate(post.createdAt)}</td>
+								<td className="text-content-secondary py-2">
+									{formatDate(post.createdAt, { timeZone: timezone })}
+								</td>
 								<td className="py-2">
 									<div className="flex gap-3">
 										<Link

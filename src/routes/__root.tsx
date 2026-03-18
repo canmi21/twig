@@ -15,8 +15,10 @@ import { SiteFooter } from '~/components/site-footer'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 import { THEME_INIT_SCRIPT } from '~/lib/theme'
 import type { ThemePreference } from '~/lib/theme'
+import { TIMEZONE_INIT_SCRIPT } from '~/lib/timezone'
 import { getSiteConfig } from '~/server/config'
 import { getThemeCookie } from '~/server/theme'
+import { getTimezoneCookie } from '~/server/timezone'
 import { resolveAssetUrl } from '~/lib/assets'
 import appCss from '~/styles/index.css?url'
 
@@ -41,8 +43,12 @@ export const Route = createRootRouteWithContext()({
 				? ((document.cookie.match(/\btheme=(light|dark)\b/)?.[1] as ThemePreference | undefined) ??
 					'light')
 				: ((await getThemeCookie()) ?? 'light')
+		const timezone: string | undefined =
+			typeof document !== 'undefined'
+				? (document.cookie.match(/\btimezone=([^;]+)/)?.[1] ?? undefined)
+				: ((await getTimezoneCookie()) ?? undefined)
 		const siteConfig = await getSiteConfig()
-		return { theme, siteConfig }
+		return { theme, siteConfig, timezone }
 	},
 	head: ({ loaderData }) => ({
 		meta: [
@@ -121,6 +127,7 @@ function RootComponent() {
 
 function RootDocument(props: { children: ReactNode }) {
 	const themeScript = THEME_INIT_SCRIPT
+	const timezoneScript = TIMEZONE_INIT_SCRIPT
 	// Shell has no route context; fetch language from server fn on mount.
 	const [lang, setLang] = useState('en')
 
@@ -144,6 +151,7 @@ function RootDocument(props: { children: ReactNode }) {
 					}}
 				/>
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
+				<script dangerouslySetInnerHTML={{ __html: timezoneScript }} />
 			</head>
 			<body className="font-sans wrap-anywhere antialiased">
 				{props.children}

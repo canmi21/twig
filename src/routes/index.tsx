@@ -1,8 +1,9 @@
 /* src/routes/index.tsx */
 
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, getRouteApi } from '@tanstack/react-router'
 import { getTimelineItems } from '~/features/content/server'
 import type { TimelineItem } from '~/features/content/server'
+import { formatDate } from '~/lib/date'
 import { resolveImageUrl } from '~/lib/image'
 
 export const Route = createFileRoute('/')({
@@ -10,15 +11,15 @@ export const Route = createFileRoute('/')({
 	component: HomePage,
 })
 
-function formatDate(iso: string): string {
-	return new Date(iso).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-	})
-}
+const rootRoute = getRouteApi('__root__')
 
-function PostCard({ item }: { item: TimelineItem & { type: 'post' } }) {
+function PostCard({
+	item,
+	timeZone,
+}: {
+	item: TimelineItem & { type: 'post' }
+	timeZone?: string
+}) {
 	return (
 		<Link to="/post/$slug" params={{ slug: item.slug }} className="group block no-underline">
 			<article className="border-border-subtle rounded-lg border p-5 transition-colors hover:border-[var(--border-default)]">
@@ -28,15 +29,25 @@ function PostCard({ item }: { item: TimelineItem & { type: 'post' } }) {
 				{item.summary && (
 					<p className="text-content-secondary mt-1.5 line-clamp-2 text-sm">{item.summary}</p>
 				)}
-				<time className="text-content-tertiary mt-3 block text-xs" dateTime={item.createdAt}>
-					{formatDate(item.createdAt)}
+				<time
+					className="text-content-tertiary mt-3 block text-xs"
+					dateTime={item.createdAt}
+					suppressHydrationWarning
+				>
+					{formatDate(item.createdAt, { timeZone })}
 				</time>
 			</article>
 		</Link>
 	)
 }
 
-function NoteCard({ item }: { item: TimelineItem & { type: 'note' } }) {
+function NoteCard({
+	item,
+	timeZone,
+}: {
+	item: TimelineItem & { type: 'note' }
+	timeZone?: string
+}) {
 	const images: string[] = item.images ? JSON.parse(item.images) : []
 
 	return (
@@ -54,8 +65,12 @@ function NoteCard({ item }: { item: TimelineItem & { type: 'note' } }) {
 					))}
 				</div>
 			)}
-			<time className="text-content-tertiary mt-3 block text-xs" dateTime={item.createdAt}>
-				{formatDate(item.createdAt)}
+			<time
+				className="text-content-tertiary mt-3 block text-xs"
+				dateTime={item.createdAt}
+				suppressHydrationWarning
+			>
+				{formatDate(item.createdAt, { timeZone })}
 			</time>
 		</article>
 	)
@@ -63,6 +78,7 @@ function NoteCard({ item }: { item: TimelineItem & { type: 'note' } }) {
 
 function HomePage() {
 	const items = Route.useLoaderData()
+	const { timezone } = rootRoute.useRouteContext()
 
 	return (
 		<section>
@@ -73,10 +89,10 @@ function HomePage() {
 					{items.map((item) => {
 						switch (item.type) {
 							case 'post': {
-								return <PostCard key={item.cid} item={item} />
+								return <PostCard key={item.cid} item={item} timeZone={timezone} />
 							}
 							case 'note': {
-								return <NoteCard key={item.cid} item={item} />
+								return <NoteCard key={item.cid} item={item} timeZone={timezone} />
 							}
 						}
 					})}

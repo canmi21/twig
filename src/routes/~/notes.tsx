@@ -1,7 +1,8 @@
 /* src/routes/~/notes.tsx */
 
-import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
+import { Link, createFileRoute, getRouteApi, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
+import { formatDate } from '~/lib/date'
 import { resolveImageUrl } from '~/lib/image'
 import {
 	createNote,
@@ -17,13 +18,7 @@ export const Route = createFileRoute('/~/notes')({
 	component: NotesPage,
 })
 
-function formatDate(iso: string): string {
-	return new Date(iso).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-	})
-}
+const rootRoute = getRouteApi('__root__')
 
 function fileToBase64(file: File): Promise<string> {
 	return new Promise((resolve, reject) => {
@@ -177,6 +172,7 @@ function NoteComposer({ onCreated }: { onCreated: () => void }) {
 
 function NotesPage() {
 	const noteList = Route.useLoaderData()
+	const { timezone } = rootRoute.useRouteContext()
 	const router = useRouter()
 
 	async function handlePublish(cid: string) {
@@ -240,7 +236,7 @@ function NotesPage() {
 
 									<div className="mt-3 flex items-center gap-3">
 										<time className="text-content-tertiary text-xs">
-											{formatDate(note.createdAt)}
+											{formatDate(note.createdAt, { timeZone: timezone })}
 										</time>
 										<div className="ml-auto flex gap-3">
 											<Link
