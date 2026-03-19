@@ -155,6 +155,7 @@ function RootDocument(props: { children: ReactNode }) {
 					}}
 				/>
 				<script>window.___FONT_AWESOME___ = true;</script>
+				<script>window.__NEXT_DATA__ = true;</script>
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
 				<script dangerouslySetInnerHTML={{ __html: timezoneScript }} />
 			</head>

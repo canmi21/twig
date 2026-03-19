@@ -87,6 +87,11 @@
 	--shadow-color: oklch(0.2 0.005 90 / 0.08);
 	--shadow-md: 0 2px 8px -2px var(--shadow-color), 0 1px 2px -1px var(--shadow-color);
 	--shadow-lg: 0 8px 24px -6px var(--shadow-color), 0 2px 6px -2px var(--shadow-color);
+	--nav-glass-bg: color-mix(in oklch, var(--bg-surface) 12%, transparent);
+	--nav-glass-border: color-mix(in oklch, var(--border-subtle) 88%, transparent);
+	--footer-glass-bg: color-mix(in oklch, var(--bg-surface) 22%, transparent);
+	--footer-glass-border: color-mix(in oklch, var(--border-default) 52%, transparent);
+	--footer-glass-edge: color-mix(in oklch, var(--border-default) 76%, transparent);
 	--selection: color-mix(in oklch, var(--accent-muted) 36%, transparent);
 	--focus-ring: var(--accent-muted);
 	--inline-code-bg: color-mix(in oklch, var(--bg-elevated) 75%, var(--bg-surface));
@@ -145,6 +150,11 @@
 
 	/* ── Utility ── */
 	--shadow-color: oklch(0.05 0.003 90 / 0.35);
+	--nav-glass-bg: color-mix(in oklch, var(--bg-surface) 18%, transparent);
+	--nav-glass-border: color-mix(in oklch, var(--border-subtle) 92%, transparent);
+	--footer-glass-bg: color-mix(in oklch, var(--bg-surface) 26%, transparent);
+	--footer-glass-border: color-mix(in oklch, var(--border-default) 58%, transparent);
+	--footer-glass-edge: color-mix(in oklch, var(--border-default) 82%, transparent);
 	--selection: color-mix(in oklch, var(--accent) 24%, transparent);
 	--focus-ring: var(--accent-muted);
 	--inline-code-bg: color-mix(in oklch, var(--bg-elevated) 86%, var(--bg-surface));

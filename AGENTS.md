@@ -51,7 +51,12 @@
 
 ## Version Control
 
-- Never add AI co-authorship or similar metadata.
+- Do not add AI co-authorship or similar metadata when the assistant did not participate in writing code, when the user only asked for a simple commit, or when the code changes were direct user instructions with no assistant-authored solution work.
+- Add AI co-authorship metadata only when the assistant materially contributed original code or solution design beyond direct user instructions.
+- Use the trailer format `Co-Authored-By: {YOUR_MODEL_NAME} {VERSION} <{YOUR_SHORT_NAME}@canmi.icu>` when AI co-authorship is allowed.
+- Use `codex` or `gemini` for `YOUR_SHORT_NAME`.
+- Claude must use `Co-Authored-By: Claude {VERSION} <noreply@anthropic.com>` instead of the `@canmi.icu` address.
+- Claude must not add AI co-authorship or similar metadata when Claude did not participate in code changes or when Claude only executed direct user instructions without meaningful solution authorship.
 - Use English Conventional Commit messages such as `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `deps:`, `revert:`, and `perf:`.
 - Use a scope only when it materially improves clarity.
 - Do not mention plan phases in commit messages.

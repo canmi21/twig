@@ -142,7 +142,13 @@ export function FloatingNav() {
 					</motion.div>
 
 					{/* Glass surface */}
-					<div className="bg-surface/10 ring-border-subtle pointer-events-none absolute inset-0 rounded-full shadow-(--shadow-md) ring-1 backdrop-blur-md" />
+					<div
+						className="pointer-events-none absolute inset-0 rounded-full border shadow-(--shadow-md) backdrop-blur-md"
+						style={{
+							backgroundColor: 'var(--nav-glass-bg)',
+							borderColor: 'var(--nav-glass-border)',
+						}}
+					/>
 
 					{/* Content layer — sits above the glass surface */}
 					<motion.div
