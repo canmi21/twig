@@ -3,8 +3,8 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import type { LucideIcon } from 'lucide-react'
 import { Calendar, Compass, Hammer, House, ScrollText } from 'lucide-react'
-import { LayoutGroup, motion, useMotionValue, useSpring } from 'motion/react'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { LayoutGroup, motion } from 'motion/react'
+import { useRef, useState } from 'react'
 
 const navItems: { exact: boolean; icon: LucideIcon; label: string; to: string }[] = [
 	{ exact: true, icon: House, label: 'Home', to: '/' },
@@ -26,8 +26,6 @@ const sharedLayoutTransition = { type: 'spring', stiffness: 420, damping: 32, ma
 
 /** Height of the glow spot in pixels. */
 const GLOW_SIZE = 20
-const INDICATOR_HEIGHT = 4
-const INDICATOR_INSET = 13
 
 export function FloatingNav() {
 	const pathname = useRouterState({ select: (state) => state.location.pathname })
@@ -39,37 +37,6 @@ export function FloatingNav() {
 
 	// Refs
 	const wrapperRef = useRef<HTMLDivElement>(null)
-	const contentRef = useRef<HTMLDivElement>(null)
-	const indicatorLeftRaw = useMotionValue(0)
-	const indicatorLeft = useSpring(indicatorLeftRaw, sharedLayoutTransition)
-	const indicatorWidthRaw = useMotionValue(0)
-	const indicatorWidth = useSpring(indicatorWidthRaw, sharedLayoutTransition)
-	const didInitIndicatorRef = useRef(false)
-
-	useLayoutEffect(() => {
-		const wrapper = wrapperRef.current
-		const content = contentRef.current
-		if (!wrapper || !content) {
-			return
-		}
-		const activeLink = content.querySelector<HTMLAnchorElement>('[data-active]')
-		if (!activeLink) {
-			return
-		}
-		const wrapperRect = wrapper.getBoundingClientRect()
-		const activeRect = activeLink.getBoundingClientRect()
-		const left = activeRect.left - wrapperRect.left + INDICATOR_INSET
-		const width = Math.max(activeRect.width - INDICATOR_INSET * 2, 0)
-
-		if (didInitIndicatorRef.current) {
-			indicatorLeftRaw.set(left)
-			indicatorWidthRaw.set(width)
-		} else {
-			indicatorLeftRaw.jump(left)
-			indicatorWidthRaw.jump(width)
-			didInitIndicatorRef.current = true
-		}
-	}, [indicatorLeftRaw, indicatorWidthRaw, pathname])
 
 	function handleHover(to: string, el: HTMLElement) {
 		setHovered(to)
@@ -118,36 +85,62 @@ export function FloatingNav() {
 								opacity: { duration: 0.15 },
 							}}
 						/>
-
-						<motion.div
-							className="pointer-events-none absolute bottom-0"
-							style={{
-								left: indicatorLeft,
-								width: indicatorWidth,
-								height: `${INDICATOR_HEIGHT}px`,
-								y: 1,
-							}}
-						>
-							<div
-								className="absolute bottom-0 h-1 rounded-full opacity-60 blur-xs"
-								style={{
-									left: '1px',
-									right: '1px',
-									background:
-										'linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--accent) 10%, transparent) 16%, color-mix(in oklch, var(--accent) 66%, white 12%) 50%, color-mix(in oklch, var(--accent) 10%, transparent) 84%, transparent 100%)',
-								}}
-							/>
-							<div
-								className="absolute bottom-0 h-px rounded-full"
-								style={{
-									left: '1px',
-									right: '1px',
-									background:
-										'linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--accent) 20%, transparent) 14%, color-mix(in oklch, var(--accent) 100%, white 24%) 50%, color-mix(in oklch, var(--accent) 20%, transparent) 86%, transparent 100%)',
-								}}
-							/>
-						</motion.div>
 					</div>
+
+					{/* Indicator layer — shares the same layout slots as content, but stays below glass */}
+					<motion.div
+						layout="size"
+						aria-hidden="true"
+						className="pointer-events-none absolute inset-0 flex items-center gap-0.5 rounded-full px-2.25 py-1.25"
+						transition={sharedLayoutTransition}
+					>
+						{navItems.map(({ to, label, exact, icon: Icon }) => {
+							const active = isActive(pathname, to, exact)
+
+							return (
+								<motion.div
+									key={`indicator-${to}`}
+									layout="position"
+									className="shrink-0"
+									transition={sharedLayoutTransition}
+								>
+									<div className="relative block rounded-full px-3.25 py-1.75 text-[0.78125rem]/[1.1] font-bold sm:text-[0.90625rem]/[1.1]">
+										<span className="invisible flex items-center">
+											{active ? (
+												<span className="mr-1 flex h-[1em] w-[1em] items-center justify-center">
+													<Icon className="block h-[1em] w-[1em]" />
+												</span>
+											) : null}
+											<span>{label}</span>
+										</span>
+
+										{active ? (
+											<motion.span
+												layoutId="floating-nav-indicator"
+												className="absolute right-3.25 bottom-0 left-3.25 h-1"
+												transition={sharedLayoutTransition}
+											>
+												<span
+													className="absolute inset-x-0 bottom-0 h-1 rounded-full opacity-60 blur-xs"
+													style={{
+														background:
+															'linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--accent) 10%, transparent) 16%, color-mix(in oklch, var(--accent) 66%, white 12%) 50%, color-mix(in oklch, var(--accent) 10%, transparent) 84%, transparent 100%)',
+													}}
+												/>
+												<span
+													className="absolute inset-x-0 bottom-0 h-px rounded-full"
+													style={{
+														background:
+															'linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--accent) 20%, transparent) 14%, color-mix(in oklch, var(--accent) 100%, white 24%) 50%, color-mix(in oklch, var(--accent) 20%, transparent) 86%, transparent 100%)',
+													}}
+												/>
+											</motion.span>
+										) : null}
+									</div>
+								</motion.div>
+							)
+						})}
+					</motion.div>
 
 					{/* Glass surface */}
 					<div className="bg-surface/10 ring-border-subtle pointer-events-none absolute inset-0 rounded-full shadow-(--shadow-md) ring-1 backdrop-blur-md" />
@@ -155,7 +148,6 @@ export function FloatingNav() {
 					{/* Content layer — sits above the glass surface */}
 					<motion.div
 						layout="size"
-						ref={contentRef}
 						className="relative z-10 flex items-center gap-0.5 rounded-full px-2.25 py-1.25"
 						onMouseMove={handleMouseMove}
 						onMouseLeave={() => setHovered(null)}
