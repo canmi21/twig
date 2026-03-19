@@ -80,7 +80,7 @@ function FooterLink({ href, label }: NavLink) {
 					)}
 				</AnimatePresence>
 			</span>
-			{isExternal && <ArrowUpRight className="size-[11px]" />}
+			{isExternal && <ArrowUpRight className="size-2.75" />}
 		</a>
 	)
 }

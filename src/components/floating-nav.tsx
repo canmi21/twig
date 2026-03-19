@@ -3,13 +3,13 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { LayoutGroup, motion } from 'motion/react'
 import { useRef, useState } from 'react'
-import { DotCircle, Hammer, SolidFeatherAlt, SolidHouse, TwotoneSignpost } from '~/components/icons'
+import { DotCircle, SolidHammer, SolidFeatherAlt, House, TwotoneSignpost } from '~/components/icons'
 
 const navItems = [
-	{ exact: true, icon: SolidHouse, label: 'Home', to: '/' },
+	{ exact: true, icon: House, label: 'Home', to: '/' },
 	{ exact: false, icon: TwotoneSignpost, label: 'Blog', to: '/blog' },
 	{ exact: false, icon: SolidFeatherAlt, label: 'Note', to: '/note' },
-	{ exact: false, icon: Hammer, label: 'Code', to: '/code' },
+	{ exact: false, icon: SolidHammer, label: 'Code', to: '/code' },
 	{ exact: false, icon: DotCircle, label: 'More', to: '/more' },
 ]
 

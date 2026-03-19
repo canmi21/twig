@@ -1,7 +1,7 @@
 /* src/components/icons/index.ts */
 
 export { DotCircle } from './dot-circle'
-export { Hammer } from './hammer'
+export { SolidHammer } from './solid-hammer'
 export { SolidFeatherAlt } from './solid-feather-alt'
-export { SolidHouse } from './solid-house'
+export { House } from './house'
 export { TwotoneSignpost } from './twotone-signpost'

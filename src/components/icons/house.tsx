@@ -1,10 +1,15 @@
-/* src/components/icons/solid-house.tsx */
+/* src/components/icons/house.tsx */
 
 import type { SVGProps } from 'react'
 
-export function SolidHouse(props: SVGProps<SVGSVGElement>) {
+export function House(props: SVGProps<SVGSVGElement>) {
 	return (
 		<svg width="1em" height="1em" viewBox="50 50 532 532" {...props}>
+			<path
+				fill="currentColor"
+				opacity={0.1}
+				d="M320 120.2L160 263.7L160 512C160 520.8 167.2 528 176 528L256 528L256 448C256 415.5 282.5 389 315 389L325 389C357.5 389 384 415.5 384 448L384 528L464 528C472.8 528 480 520.8 480 512L480 263.7L320 120.3z"
+			/>
 			<path
 				fill="currentColor"
 				stroke="currentColor"

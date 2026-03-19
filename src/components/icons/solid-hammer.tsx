@@ -1,8 +1,8 @@
-/* src/components/icons/hammer.tsx */
+/* src/components/icons/solid-hammer.tsx */
 
 import type { SVGProps } from 'react'
 
-export function Hammer(props: SVGProps<SVGSVGElement>) {
+export function SolidHammer(props: SVGProps<SVGSVGElement>) {
 	return (
 		<svg width="1em" height="1em" viewBox="36 48 556 532" {...props}>
 			<path
