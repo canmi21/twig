@@ -6,10 +6,35 @@
 html {
 	background-color: var(--background);
 	color-scheme: light;
+	scrollbar-color: var(--border-strong) var(--bg-sunken);
+	scrollbar-width: thin;
 }
 
 .dark {
 	color-scheme: dark;
+}
+
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+	background: var(--bg-sunken);
+}
+
+*::-webkit-scrollbar-thumb {
+	background: var(--border-strong);
+	border: 2px solid var(--bg-sunken);
+	border-radius: var(--radius-full);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background: var(--text-secondary);
+}
+
+*::-webkit-scrollbar-corner {
+	background: var(--bg-sunken);
 }
 
 * {
