@@ -4,7 +4,7 @@ import type { SVGProps } from 'react'
 
 export function TwotoneSignpost(props: SVGProps<SVGSVGElement>) {
 	return (
-		<svg width="1em" height="1em" viewBox="0 0 22 22" {...props}>
+		<svg width="1em" height="1em" viewBox="2 2 20 20" {...props}>
 			<path
 				fill="currentColor"
 				d="M6 6h11.17l1 1l-1 1H6V6zm12 10H6.83l-1-1l1-1H18v2z"
