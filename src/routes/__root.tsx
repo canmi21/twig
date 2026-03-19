@@ -154,6 +154,7 @@ function RootDocument(props: { children: ReactNode }) {
 							'{"btw":"i-use-vite-btw","blazingly-fast":true,"webpack":"no-thanks","rolldown":"yes"}',
 					}}
 				/>
+				<script>window.___FONT_AWESOME___ = true;</script>
 				<script dangerouslySetInnerHTML={{ __html: themeScript }} />
 				<script dangerouslySetInnerHTML={{ __html: timezoneScript }} />
 			</head>

@@ -61,6 +61,12 @@
       "rules": {
         "no-console": "off"
       }
+    },
+    {
+      "files": ["src/components/icons/**/*.tsx"],
+      "rules": {
+        "react/jsx-props-no-spreading": "off"
+      }
     }
   ]
 }

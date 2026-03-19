@@ -95,5 +95,11 @@ export default tseslint.config(
 			'better-tailwindcss/no-unknown-classes': 'error',
 		},
 	},
+	{
+		files: ['src/components/icons/**/*.{ts,tsx}'],
+		rules: {
+			'react/jsx-props-no-spreading': 'off',
+		},
+	},
 	...oxlint.buildFromOxlintConfigFile('./.oxlintrc.json'),
 )

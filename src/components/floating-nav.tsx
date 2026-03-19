@@ -1,17 +1,16 @@
 /* src/components/floating-nav.tsx */
 
 import { Link, useRouterState } from '@tanstack/react-router'
-import type { LucideIcon } from 'lucide-react'
-import { Calendar, Compass, Hammer, House, ScrollText } from 'lucide-react'
 import { LayoutGroup, motion } from 'motion/react'
 import { useRef, useState } from 'react'
+import { DotCircle, Hammer, SolidFeatherAlt, SolidHouse, TwotoneSignpost } from '~/components/icons'
 
-const navItems: { exact: boolean; icon: LucideIcon; label: string; to: string }[] = [
-	{ exact: true, icon: House, label: 'Home', to: '/' },
-	{ exact: false, icon: ScrollText, label: 'Blog', to: '/blog' },
-	{ exact: false, icon: Calendar, label: 'Note', to: '/note' },
+const navItems = [
+	{ exact: true, icon: SolidHouse, label: 'Home', to: '/' },
+	{ exact: false, icon: TwotoneSignpost, label: 'Blog', to: '/blog' },
+	{ exact: false, icon: SolidFeatherAlt, label: 'Note', to: '/note' },
 	{ exact: false, icon: Hammer, label: 'Code', to: '/code' },
-	{ exact: false, icon: Compass, label: 'More', to: '/more' },
+	{ exact: false, icon: DotCircle, label: 'More', to: '/more' },
 ]
 
 function isActive(pathname: string, to: string, exact: boolean): boolean {
