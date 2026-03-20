@@ -1,9 +1,9 @@
 /* src/components/site-footer.tsx */
 
 import { motion } from 'motion/react'
-import { ArrowUpRight, Moon, Sun } from 'lucide-react'
+import { ArrowUpRight, Mail } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { applyResolvedThemeWithTransition, setThemeCookie, useTheme } from '~/lib/theme'
+import { GitHub, Rss, Telegram, Twitter, YouTube } from '~/components/icons'
 
 interface NavLink {
 	label: string
@@ -22,6 +22,15 @@ interface HoverRect {
 	width: number
 }
 
+const FOOTER_SOCIAL_LINKS = [
+	{ color: '#1d9bf0', href: 'https://twitter.com', icon: Twitter, label: 'Twitter' },
+	{ color: '#181717', href: 'https://github.com', icon: GitHub, label: 'GitHub' },
+	{ color: '#ff0033', href: 'https://youtube.com', icon: YouTube, label: 'YouTube' },
+	{ color: '#229ed9', href: 'https://telegram.org', icon: Telegram, label: 'Telegram' },
+	{ color: '#F2A93C', href: 'mailto:owner@example.com', icon: Mail, label: 'Mail' },
+	{ color: '#f97316', href: '/feed.xml', icon: Rss, label: 'RSS' },
+] as const
+
 /** Classify a link href for rendering behavior. */
 function linkType(href: string): 'internal' | 'external' | 'special' {
 	if (href.startsWith('/')) {
@@ -33,73 +42,67 @@ function linkType(href: string): 'internal' | 'external' | 'special' {
 	return 'special'
 }
 
-function FooterThemeToggle() {
-	const preference = useTheme()
-
-	function toggle() {
-		const next = preference === 'dark' ? 'light' : 'dark'
-		applyResolvedThemeWithTransition(next)
-		setThemeCookie(next)
-	}
-
-	const Icon = preference === 'dark' ? Moon : Sun
-	const label = preference === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
-
+function FooterSocialLinks() {
 	return (
-		<button
-			type="button"
-			onClick={toggle}
-			className="text-content-tertiary hover:text-content-heading cursor-pointer rounded-md border-none bg-transparent p-1 transition-colors"
-			aria-label={label}
-		>
-			<Icon className="size-4" />
-		</button>
+		<div className="flex items-center gap-4">
+			{FOOTER_SOCIAL_LINKS.map((item) => (
+				<a
+					key={item.label}
+					href={item.href}
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label={item.label}
+					title={item.label}
+					className="border-border-subtle inline-flex size-9 items-center justify-center rounded-full border"
+					style={{ backgroundColor: item.color }}
+				>
+					{'icon' in item ? (
+						<item.icon
+							className={
+								item.label === 'RSS' || item.label === 'Telegram'
+									? 'size-5 text-white'
+									: 'size-4.5 text-white'
+							}
+						/>
+					) : null}
+				</a>
+			))}
+		</div>
 	)
 }
 
-function FooterLink({
+function FooterGlassMetaItem({
+	compact = false,
 	href,
 	label,
-	tone = 'primary',
-}: NavLink & { tone?: 'primary' | 'secondary' }) {
-	const type = linkType(href)
-	const isExternal = type === 'external'
-	const opensNew = type !== 'internal'
-
-	return (
-		<a
-			href={href}
-			target={opensNew ? '_blank' : undefined}
-			rel={opensNew ? 'noopener noreferrer' : undefined}
-			className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[13px] no-underline transition-colors ${
-				tone === 'primary'
-					? 'text-content-heading hover:text-content-secondary'
-					: 'text-content-tertiary hover:text-content-heading'
-			}`}
-		>
-			<span>{label}</span>
-			{isExternal ? <ArrowUpRight className="size-2.75" /> : null}
-		</a>
-	)
-}
-
-function FooterGlassMetaItem({ href, label }: { href?: string; label: string }) {
+	onHoverChange,
+}: {
+	compact?: boolean
+	href?: string
+	label: string
+	onHoverChange?: (hovered: boolean) => void
+}) {
 	const [hovered, setHovered] = useState(false)
 	const type = href ? linkType(href) : null
 	const opensNew = type !== null && type !== 'internal'
+
+	function updateHovered(next: boolean) {
+		setHovered(next)
+		onHoverChange?.(next)
+	}
 
 	const content = (
 		<>
 			<motion.span
 				className="text-content-tertiary relative z-20 inline-flex items-center whitespace-nowrap"
 				initial={false}
-				animate={{ x: 0 }}
+				animate={{ x: hovered && !compact ? -1.5 : 0 }}
 				transition={{ type: 'spring', stiffness: 420, damping: 30, mass: 0.55 }}
 			>
 				<span>{label}</span>
 				<motion.span
 					aria-hidden="true"
-					className="absolute inset-x-0 -bottom-0.5 h-px origin-left"
+					className="absolute inset-x-0 bottom-px h-px origin-left"
 					initial={false}
 					animate={{
 						opacity: hovered ? 1 : 0,
@@ -142,11 +145,13 @@ function FooterGlassMetaItem({ href, label }: { href?: string; label: string }) 
 				href={href}
 				target={opensNew ? '_blank' : undefined}
 				rel={opensNew ? 'noopener noreferrer' : undefined}
-				className="relative inline-flex items-center rounded-xl px-2 py-1 text-[13px] no-underline"
-				onBlur={() => setHovered(false)}
-				onFocus={() => setHovered(true)}
-				onMouseEnter={() => setHovered(true)}
-				onMouseLeave={() => setHovered(false)}
+				className={`relative inline-flex items-center rounded-xl text-[13px] no-underline ${
+					compact ? 'px-0 py-0.5' : 'px-2 py-1'
+				}`}
+				onBlur={() => updateHovered(false)}
+				onFocus={() => updateHovered(true)}
+				onMouseEnter={() => updateHovered(true)}
+				onMouseLeave={() => updateHovered(false)}
 			>
 				{content}
 			</a>
@@ -155,12 +160,35 @@ function FooterGlassMetaItem({ href, label }: { href?: string; label: string }) 
 
 	return (
 		<span
-			className="relative inline-flex items-center rounded-xl px-2 py-1 text-[13px]"
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
+			className={`relative inline-flex items-center rounded-xl text-[13px] ${
+				compact ? 'px-0 py-0.5' : 'px-2 py-1'
+			}`}
+			onMouseEnter={() => updateHovered(true)}
+			onMouseLeave={() => updateHovered(false)}
 		>
 			{content}
 		</span>
+	)
+}
+
+function FooterPoweredBy() {
+	const [hovered, setHovered] = useState(false)
+
+	return (
+		<motion.div
+			className="text-content-tertiary flex items-center gap-0.5"
+			initial={false}
+			animate={{ x: hovered ? -4 : 0 }}
+			transition={{ type: 'spring', stiffness: 420, damping: 30, mass: 0.55 }}
+		>
+			<span>Powered by</span>
+			<FooterGlassMetaItem
+				compact
+				href="https://github.com/canmi21/taki"
+				label="Taki"
+				onHoverChange={setHovered}
+			/>
+		</motion.div>
 	)
 }
 
@@ -292,7 +320,6 @@ interface SiteFooterProps {
 		footerNav: string
 		icp: string
 		icpLink: string
-		url: string
 	}
 }
 
@@ -317,22 +344,19 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 				/>
 
 				<div className="mx-auto max-w-6xl px-5 py-10">
-					<div className="flex flex-col justify-between gap-10 sm:flex-row">
-						<div className="relative z-20 space-y-2">
-							<p className="text-content-heading text-sm font-medium">{siteConfig.footerName}</p>
-							<p className="text-content-tertiary max-w-xs text-[13px] leading-relaxed">
-								{siteConfig.footerDescription}
-							</p>
-							<div className="space-y-1.5 pt-5">
-								<p className="text-content-tertiary text-[13px]">&copy; {siteConfig.copyright}</p>
-								<p className="text-content-tertiary text-[13px]">
-									Powered by{' '}
-									<FooterLink
-										href="https://github.com/canmi21/taki"
-										label="Taki"
-										tone="secondary"
-									/>
+					<div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-stretch">
+						<div className="relative z-20 flex max-w-sm flex-col">
+							<div className="space-y-2 pt-3">
+								<p className="text-content-heading text-[15px] font-medium">
+									{siteConfig.footerName}
 								</p>
+								<p className="text-content-tertiary max-w-xs text-[14px] leading-relaxed">
+									{siteConfig.footerDescription}
+								</p>
+							</div>
+
+							<div className="flex flex-1 items-center pt-4 sm:max-w-xs">
+								<FooterSocialLinks />
 							</div>
 						</div>
 
@@ -347,15 +371,18 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 
 					<div className="bg-border-subtle relative z-20 my-6 h-px" />
 
-					<div className="flex items-center justify-between">
-						<div className="relative z-20 flex items-center gap-3">
-							<FooterLink href="/feed.xml" label="RSS" tone="secondary" />
-							<FooterLink
-								href={`view-source:${siteConfig.url}/sitemap.xml`}
-								label="Sitemap"
-								tone="secondary"
-							/>
-							<FooterThemeToggle />
+					<div className="flex items-center justify-between gap-4">
+						<div className="relative z-20 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+							<div className="flex items-center gap-2">
+								<span
+									aria-hidden="true"
+									className="inline-flex size-2 rounded-full"
+									style={{ backgroundColor: '#16a34a' }}
+								/>
+								<p className="text-content-heading font-medium">All systems normal.</p>
+							</div>
+							<p className="text-content-heading font-medium">&copy; {siteConfig.copyright}</p>
+							<FooterPoweredBy />
 						</div>
 
 						{siteConfig.icp &&
