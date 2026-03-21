@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char126RouteImport } from './routes/~'
+import { Route as GlassTestRouteImport } from './routes/glass-test'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Char126IndexRouteImport } from './routes/~/index'
 import { Route as Char126SettingsRouteImport } from './routes/~/settings'
@@ -25,6 +26,11 @@ import { Route as Char126NoteCidRouteImport } from './routes/~/note/$cid'
 const Char126Route = Char126RouteImport.update({
   id: '/~',
   path: '/~',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GlassTestRoute = GlassTestRouteImport.update({
+  id: '/glass-test',
+  path: '/glass-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -85,6 +91,7 @@ const Char126NoteCidRoute = Char126NoteCidRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/glass-test': typeof GlassTestRoute
   '/~': typeof Char126RouteWithChildren
   '/post/$slug': typeof PostSlugRoute
   '/~/notes': typeof Char126NotesRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/glass-test': typeof GlassTestRoute
   '/post/$slug': typeof PostSlugRoute
   '/~/notes': typeof Char126NotesRoute
   '/~': typeof Char126IndexRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/glass-test': typeof GlassTestRoute
   '/~': typeof Char126RouteWithChildren
   '/post/$slug': typeof PostSlugRoute
   '/~/notes': typeof Char126NotesRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/glass-test'
     | '/~'
     | '/post/$slug'
     | '/~/notes'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/glass-test'
     | '/post/$slug'
     | '/~/notes'
     | '/~'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/glass-test'
     | '/~'
     | '/post/$slug'
     | '/~/notes'
@@ -169,6 +181,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GlassTestRoute: typeof GlassTestRoute
   Char126Route: typeof Char126RouteWithChildren
   PostSlugRoute: typeof PostSlugRoute
 }
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/~'
       fullPath: '/~'
       preLoaderRoute: typeof Char126RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/glass-test': {
+      id: '/glass-test'
+      path: '/glass-test'
+      fullPath: '/glass-test'
+      preLoaderRoute: typeof GlassTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -301,6 +321,7 @@ const Char126RouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GlassTestRoute: GlassTestRoute,
   Char126Route: Char126RouteWithChildren,
   PostSlugRoute: PostSlugRoute,
 }

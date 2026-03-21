@@ -2,8 +2,13 @@
 
 import { Link, useRouterState } from '@tanstack/react-router'
 import { LayoutGroup, motion } from 'motion/react'
-import { useRef, useState } from 'react'
-import { DotCircle, SolidHammer, SolidFeatherAlt, House, TwotoneSignpost } from '~/components/icons'
+import { useRef } from 'react'
+import type { CSSProperties } from 'react'
+import { DotCircle, House, SolidFeatherAlt, SolidHammer, TwotoneSignpost } from '~/components/icons'
+import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
+import { useTheme } from '~/lib/theme'
+
+/* ── Nav configuration ───────────────────────────────────────── */
 
 const navItems = [
 	{ exact: true, icon: House, label: 'Home', to: '/' },
@@ -13,6 +18,12 @@ const navItems = [
 	{ exact: false, icon: DotCircle, label: 'More', to: '/more' },
 ]
 
+const glassBackgroundOpacity = 0.6
+
+function getGlassBackgroundTint(theme: 'light' | 'dark'): string {
+	return theme === 'dark' ? 'rgb(34 34 34)' : 'rgb(255 255 255)'
+}
+
 function isActive(pathname: string, to: string, exact: boolean): boolean {
 	if (exact) {
 		return pathname === to
@@ -20,41 +31,29 @@ function isActive(pathname: string, to: string, exact: boolean): boolean {
 	return pathname.startsWith(to)
 }
 
-const hoverTransition = { type: 'spring', stiffness: 400, damping: 30 } as const
 const sharedLayoutTransition = { type: 'spring', stiffness: 420, damping: 32, mass: 0.52 } as const
-
-/** Height of the glow spot in pixels. */
-const GLOW_SIZE = 20
 
 export function FloatingNav() {
 	const pathname = useRouterState({ select: (state) => state.location.pathname })
+	const theme = useTheme()
+	const glassFrameRef = useRef<HTMLDivElement>(null)
+	const glassBackgroundTint = getGlassBackgroundTint(theme)
+	const navGlassStyle = {
+		'--nav-glass-bg': `color-mix(in srgb, ${glassBackgroundTint} ${glassBackgroundOpacity * 100}%, transparent)`,
+	} as CSSProperties
 
-	// Hover glow
-	const [hovered, setHovered] = useState<string | null>(null)
-	const [glowPos, setGlowPos] = useState({ left: 0, width: 0 })
-	const [cursorY, setCursorY] = useState(0)
+	const svgGlass = useSvgLiquidGlass(glassFrameRef, {
+		bezelWidth: 29,
+		glassThickness: 90,
+		refractiveIndex: 1.3,
+		blur: 1,
+		scaleRatio: 1,
+		specularOpacity: 0.4,
+		specularSaturation: 6,
+		theme,
+	})
 
-	// Refs
-	const wrapperRef = useRef<HTMLDivElement>(null)
-
-	function handleHover(to: string, el: HTMLElement) {
-		setHovered(to)
-		const wrapper = wrapperRef.current
-		if (!wrapper) {
-			return
-		}
-		const wRect = wrapper.getBoundingClientRect()
-		const iRect = el.getBoundingClientRect()
-		setGlowPos({ left: iRect.left - wRect.left, width: iRect.width })
-	}
-
-	function handleMouseMove(e: React.MouseEvent) {
-		const wrapper = wrapperRef.current
-		if (!wrapper) {
-			return
-		}
-		setCursorY(e.clientY - wrapper.getBoundingClientRect().top)
-	}
+	const glassBackdropFilter = svgGlass.active ? `url(#${svgGlass.filterId})` : 'blur(16px)'
 
 	return (
 		<LayoutGroup id="floating-nav">
@@ -62,100 +61,118 @@ export function FloatingNav() {
 				layout="size"
 				className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
 				aria-label="Main navigation"
+				style={navGlassStyle}
 				transition={sharedLayoutTransition}
 			>
-				<div className="relative" ref={wrapperRef}>
-					{/* Effect layer — sits below the frosted glass surface */}
-					<div className="absolute inset-0 overflow-hidden rounded-full">
-						{/* Hover glow */}
-						<motion.div
-							className="bg-primary/20 absolute h-5 rounded-full"
-							initial={false}
-							animate={{
-								left: glowPos.left,
-								width: glowPos.width,
-								top: cursorY - GLOW_SIZE / 2,
-								opacity: hovered ? 1 : 0,
-							}}
-							transition={{
-								left: hoverTransition,
-								width: hoverTransition,
-								top: { type: 'spring', stiffness: 800, damping: 40 },
-								opacity: { duration: 0.15 },
-							}}
-						/>
-					</div>
+				{svgGlass.displacementMap && svgGlass.specularMap ? (
+					<svg className="absolute h-0 w-0 overflow-hidden" aria-hidden="true" focusable="false">
+						<defs>
+							<filter
+								id={svgGlass.filterId}
+								x="0"
+								y="0"
+								width={svgGlass.width}
+								height={svgGlass.height}
+								filterUnits="userSpaceOnUse"
+								primitiveUnits="userSpaceOnUse"
+								colorInterpolationFilters="sRGB"
+							>
+								{/* 0. Darken source in dark mode (matching kube.io) */}
+								{theme === 'dark' ? (
+									<feColorMatrix
+										in="SourceGraphic"
+										type="matrix"
+										values="0.9 0 0 0 -0.3 0 0.9 0 0 -0.3 0 0 0.9 0 -0.3 0 0 0 1 0"
+										result="adjusted_source"
+									/>
+								) : (
+									<feColorMatrix
+										in="SourceGraphic"
+										type="matrix"
+										values="1.03 0 0 0 0.2 0 1.03 0 0 0.2 0 0 1.03 0 0.2 0 0 0 1 0"
+										result="adjusted_source"
+									/>
+								)}
+								{/* 1. Blur source: frosted glass base */}
+								<feGaussianBlur
+									in="adjusted_source"
+									stdDeviation={svgGlass.blur}
+									result="blurred_source"
+								/>
+								{/* 2. Load displacement map */}
+								<feImage
+									href={svgGlass.displacementMap}
+									x="0"
+									y="0"
+									width={svgGlass.width}
+									height={svgGlass.height}
+									preserveAspectRatio="none"
+									result="displacement_map"
+								/>
+								{/* 3. Refract through glass surface */}
+								<feDisplacementMap
+									in="blurred_source"
+									in2="displacement_map"
+									scale={svgGlass.scale}
+									xChannelSelector="R"
+									yChannelSelector="G"
+									result="displaced"
+								/>
+								{/* 4. Saturate displaced content */}
+								<feColorMatrix
+									in="displaced"
+									type="saturate"
+									values={String(svgGlass.saturation)}
+									result="displaced_saturated"
+								/>
+								{/* 5. Load specular highlight */}
+								<feImage
+									href={svgGlass.specularMap}
+									x="0"
+									y="0"
+									width={svgGlass.width}
+									height={svgGlass.height}
+									preserveAspectRatio="none"
+									result="specular_layer"
+								/>
+								{/* 6. Mask saturated content to specular areas only */}
+								<feComposite
+									in="displaced_saturated"
+									in2="specular_layer"
+									operator="in"
+									result="specular_saturated"
+								/>
+								{/* 7. Fade specular to controlled opacity */}
+								<feComponentTransfer in="specular_layer" result="specular_faded">
+									<feFuncA type="linear" slope={String(svgGlass.specularOpacity)} />
+								</feComponentTransfer>
+								{/* 8. Blend saturated edges over displaced base */}
+								<feBlend
+									in="specular_saturated"
+									in2="displaced"
+									mode="normal"
+									result="with_saturation"
+								/>
+								{/* 9. Blend specular highlight on top */}
+								<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
+							</filter>
+						</defs>
+					</svg>
+				) : null}
 
-					{/* Indicator layer — shares the same layout slots as content, but stays below glass */}
-					<motion.div
-						layout="size"
-						aria-hidden="true"
-						className="pointer-events-none absolute inset-0 flex items-center gap-0.5 rounded-full px-2.25 py-1.25"
-						transition={sharedLayoutTransition}
-					>
-						{navItems.map(({ to, label, exact, icon: Icon }) => {
-							const active = isActive(pathname, to, exact)
-
-							return (
-								<motion.div
-									key={`indicator-${to}`}
-									layout="position"
-									className="shrink-0"
-									transition={sharedLayoutTransition}
-								>
-									<div className="relative block rounded-full px-3.25 py-1.75 text-[0.78125rem]/[1.1] font-bold sm:text-[0.90625rem]/[1.1]">
-										<span className="invisible flex items-center">
-											{active ? (
-												<span className="mr-1 flex h-[1em] w-[1em] items-center justify-center">
-													<Icon className="block h-[1em] w-[1em]" />
-												</span>
-											) : null}
-											<span>{label}</span>
-										</span>
-
-										{active ? (
-											<motion.span
-												layoutId="floating-nav-indicator"
-												className="absolute right-3.25 bottom-0 left-3.25 h-1"
-												transition={sharedLayoutTransition}
-											>
-												<span
-													className="absolute inset-x-0 bottom-0 h-1 rounded-full opacity-60 blur-xs"
-													style={{
-														background:
-															'linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--accent) 10%, transparent) 16%, color-mix(in oklch, var(--accent) 66%, white 12%) 50%, color-mix(in oklch, var(--accent) 10%, transparent) 84%, transparent 100%)',
-													}}
-												/>
-												<span
-													className="absolute inset-x-0 bottom-0 h-px rounded-full"
-													style={{
-														background:
-															'linear-gradient(90deg, transparent 0%, color-mix(in oklch, var(--accent) 20%, transparent) 14%, color-mix(in oklch, var(--accent) 100%, white 24%) 50%, color-mix(in oklch, var(--accent) 20%, transparent) 86%, transparent 100%)',
-													}}
-												/>
-											</motion.span>
-										) : null}
-									</div>
-								</motion.div>
-							)
-						})}
-					</motion.div>
-
-					{/* Glass surface */}
+				<div ref={glassFrameRef} className="relative rounded-[34px]" data-liquid-ignore="">
 					<div
-						className="pointer-events-none absolute inset-0 rounded-full border shadow-(--shadow-md) backdrop-blur-md"
+						className="pointer-events-none absolute inset-0 rounded-[34px]"
 						style={{
-							backgroundColor: 'var(--nav-glass-bg)',
-							borderColor: 'var(--nav-glass-border)',
+							backdropFilter: glassBackdropFilter,
+							WebkitBackdropFilter: glassBackdropFilter,
+							background: 'var(--nav-glass-bg)',
 						}}
 					/>
 
-					{/* Content layer — sits above the glass surface */}
 					<motion.div
 						layout="size"
-						className="relative z-10 flex items-center gap-0.5 rounded-full px-2.25 py-1.25"
-						onMouseMove={handleMouseMove}
-						onMouseLeave={() => setHovered(null)}
+						className="relative z-10 flex items-center gap-1.5 rounded-[34px] px-5 py-3"
 						transition={sharedLayoutTransition}
 					>
 						{navItems.map(({ to, label, exact, icon: Icon }) => {
@@ -172,18 +189,17 @@ export function FloatingNav() {
 										to={to}
 										activeOptions={{ exact }}
 										data-active={active || undefined}
-										className="group relative block rounded-full px-3.25 py-1.75 text-[0.78125rem]/[1.1] font-bold no-underline transition-colors duration-200 sm:text-[0.90625rem]/[1.1]"
-										onMouseEnter={(e) => handleHover(to, e.currentTarget)}
+										className="group relative block rounded-full px-3.5 py-2.25 text-[0.8125rem]/[1.05] font-bold no-underline transition-colors duration-200 sm:text-[0.9375rem]/[1.05]"
 									>
 										<motion.span
 											layout
-											className="relative z-10 flex items-center"
+											className="relative flex items-center gap-1.5"
 											transition={sharedLayoutTransition}
 										>
 											{active ? (
 												<motion.span
 													layoutId="floating-nav-icon"
-													className="text-accent mr-1 flex h-[1em] w-[1em] items-center justify-center"
+													className="text-accent flex h-[1em] w-[1em] items-center justify-center"
 													transition={sharedLayoutTransition}
 												>
 													<Icon className="block h-[1em] w-[1em]" />
