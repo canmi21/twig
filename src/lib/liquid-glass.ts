@@ -360,8 +360,54 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 	return { displacementDataUrl, specularDataUrl, maxDisplacement }
 }
 
-/** Detect Chromium-based browsers (only Chromium supports SVG backdrop-filter). */
-export function isChromium(): boolean {
-	if (typeof navigator === 'undefined') return false
-	return /Chrome\/\d+/.test(navigator.userAgent)
+/**
+ * Detect whether the browser supports SVG filter references in
+ * backdrop-filter (e.g. `backdrop-filter: url(#filterId)`).
+ *
+ * CSS.supports() cannot reliably distinguish SVG filter refs from
+ * simple blur(), so we probe by creating a temporary DOM element
+ * with an inline SVG filter and checking whether the computed
+ * backdrop-filter retains the url() value.
+ *
+ * The result is cached after the first call.
+ */
+let svgBackdropFilterSupported: boolean | null = null
+
+export function supportsSvgBackdropFilter(): boolean {
+	if (typeof document === 'undefined') return false
+	if (svgBackdropFilterSupported !== null) return svgBackdropFilterSupported
+
+	const ns = 'http://www.w3.org/2000/svg'
+	const svg = document.createElementNS(ns, 'svg')
+	svg.setAttribute('width', '0')
+	svg.setAttribute('height', '0')
+	svg.style.position = 'absolute'
+
+	const defs = document.createElementNS(ns, 'defs')
+	const filter = document.createElementNS(ns, 'filter')
+	filter.setAttribute('id', '__lg_probe')
+	const feFlood = document.createElementNS(ns, 'feFlood')
+	filter.appendChild(feFlood)
+	defs.appendChild(filter)
+	svg.appendChild(defs)
+
+	const probe = document.createElement('div')
+	probe.style.cssText =
+		'position:absolute;width:1px;height:1px;backdrop-filter:url(#__lg_probe);-webkit-backdrop-filter:url(#__lg_probe)'
+
+	document.body.appendChild(svg)
+	document.body.appendChild(probe)
+
+	const computed = getComputedStyle(probe)
+	/* webkit prefix for Safari fallback */
+	const value =
+		computed.backdropFilter ||
+		(computed as unknown as Record<string, string>).webkitBackdropFilter ||
+		''
+	svgBackdropFilterSupported = value.includes('url(')
+
+	document.body.removeChild(probe)
+	document.body.removeChild(svg)
+
+	return svgBackdropFilterSupported
 }

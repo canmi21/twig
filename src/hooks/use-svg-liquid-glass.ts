@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import type { RefObject } from 'react'
-import { createLiquidGlassAsset, isChromium } from '~/lib/liquid-glass'
+import { createLiquidGlassAsset, supportsSvgBackdropFilter } from '~/lib/liquid-glass'
 import type { BezelType } from '~/lib/liquid-glass'
 import type { ResolvedTheme } from '~/lib/theme'
 
@@ -69,10 +69,10 @@ export function useSvgLiquidGlass(
 		return () => observer.disconnect()
 	}, [ref])
 
-	const chromium = isChromium()
+	const supported = supportsSvgBackdropFilter()
 
 	const asset = useMemo(() => {
-		if (!chromium || size.width < 2 || size.height < 2) return null
+		if (!supported || size.width < 2 || size.height < 2) return null
 
 		return createLiquidGlassAsset({
 			width: size.width,
@@ -85,7 +85,7 @@ export function useSvgLiquidGlass(
 			specularAngle: options.specularAngle,
 		})
 	}, [
-		chromium,
+		supported,
 		size.width,
 		size.height,
 		options.radius,
@@ -97,7 +97,7 @@ export function useSvgLiquidGlass(
 	])
 
 	return {
-		active: chromium && !!asset,
+		active: supported && !!asset,
 		filterId,
 		displacementMap: asset?.displacementDataUrl ?? null,
 		specularMap: asset?.specularDataUrl ?? null,
