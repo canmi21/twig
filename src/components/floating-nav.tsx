@@ -3,7 +3,6 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { LayoutGroup, motion } from 'motion/react'
 import { useRef } from 'react'
-import type { CSSProperties } from 'react'
 import { DotCircle, House, SolidFeatherAlt, SolidHammer, TwotoneSignpost } from '~/components/icons'
 import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
 import { useTheme } from '~/lib/theme'
@@ -18,31 +17,103 @@ const navItems = [
 	{ exact: false, icon: DotCircle, label: 'More', to: '/more' },
 ]
 
-const glassBackgroundOpacity = 0.6
-
-function getGlassBackgroundTint(theme: 'light' | 'dark'): string {
-	return theme === 'dark' ? 'rgb(34 34 34)' : 'rgb(255 255 255)'
-}
+const DARK_COLOR_MATRIX = '0.9 0 0 0 -0.3 0 0.9 0 0 -0.3 0 0 0.9 0 -0.3 0 0 0 1 0'
+const LIGHT_COLOR_MATRIX = '1.03 0 0 0 0.2 0 1.03 0 0 0.2 0 0 1.03 0 0.2 0 0 0 1 0'
 
 function isActive(pathname: string, to: string, exact: boolean): boolean {
-	if (exact) {
-		return pathname === to
-	}
-	return pathname.startsWith(to)
+	return exact ? pathname === to : pathname.startsWith(to)
 }
 
 const sharedLayoutTransition = { type: 'spring', stiffness: 420, damping: 32, mass: 0.52 } as const
 
+/* ── SVG filter definition ───────────────────────────────────── */
+
+function LiquidGlassFilter({
+	glass,
+	colorMatrix,
+}: {
+	glass: ReturnType<typeof useSvgLiquidGlass>
+	colorMatrix: string
+}) {
+	if (!glass.displacementMap || !glass.specularMap) return null
+
+	return (
+		<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
+			<defs>
+				<filter
+					id={glass.filterId}
+					x="0"
+					y="0"
+					width={glass.width}
+					height={glass.height}
+					filterUnits="userSpaceOnUse"
+					primitiveUnits="userSpaceOnUse"
+					colorInterpolationFilters="sRGB"
+				>
+					<feColorMatrix
+						in="SourceGraphic"
+						type="matrix"
+						values={colorMatrix}
+						result="adjusted_source"
+					/>
+					<feGaussianBlur in="adjusted_source" stdDeviation={glass.blur} result="blurred_source" />
+					<feImage
+						href={glass.displacementMap}
+						x="0"
+						y="0"
+						width={glass.width}
+						height={glass.height}
+						preserveAspectRatio="none"
+						result="displacement_map"
+					/>
+					<feDisplacementMap
+						in="blurred_source"
+						in2="displacement_map"
+						scale={glass.scale}
+						xChannelSelector="R"
+						yChannelSelector="G"
+						result="displaced"
+					/>
+					<feColorMatrix
+						in="displaced"
+						type="saturate"
+						values={String(glass.saturation)}
+						result="displaced_saturated"
+					/>
+					<feImage
+						href={glass.specularMap}
+						x="0"
+						y="0"
+						width={glass.width}
+						height={glass.height}
+						preserveAspectRatio="none"
+						result="specular_layer"
+					/>
+					<feComposite
+						in="displaced_saturated"
+						in2="specular_layer"
+						operator="in"
+						result="specular_saturated"
+					/>
+					<feComponentTransfer in="specular_layer" result="specular_faded">
+						<feFuncA type="linear" slope={String(glass.specularOpacity)} />
+					</feComponentTransfer>
+					<feBlend in="specular_saturated" in2="displaced" mode="normal" result="with_saturation" />
+					<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
+				</filter>
+			</defs>
+		</svg>
+	)
+}
+
+/* ── Component ───────────────────────────────────────────────── */
+
 export function FloatingNav() {
 	const pathname = useRouterState({ select: (state) => state.location.pathname })
 	const theme = useTheme()
-	const glassFrameRef = useRef<HTMLDivElement>(null)
-	const glassBackgroundTint = getGlassBackgroundTint(theme)
-	const navGlassStyle = {
-		'--nav-glass-bg': `color-mix(in srgb, ${glassBackgroundTint} ${glassBackgroundOpacity * 100}%, transparent)`,
-	} as CSSProperties
+	const glassRef = useRef<HTMLDivElement>(null)
 
-	const svgGlass = useSvgLiquidGlass(glassFrameRef, {
+	const glass = useSvgLiquidGlass(glassRef, {
 		bezelWidth: 29,
 		glassThickness: 90,
 		refractiveIndex: 1.3,
@@ -53,7 +124,8 @@ export function FloatingNav() {
 		theme,
 	})
 
-	const glassBackdropFilter = svgGlass.active ? `url(#${svgGlass.filterId})` : 'blur(16px)'
+	const backdropFilter = glass.active ? `url(#${glass.filterId})` : 'blur(16px)'
+	const glassBg = theme === 'dark' ? 'rgba(34, 34, 34, 0.6)' : 'rgba(255, 255, 255, 0.6)'
 
 	return (
 		<LayoutGroup id="floating-nav">
@@ -61,112 +133,20 @@ export function FloatingNav() {
 				layout="size"
 				className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
 				aria-label="Main navigation"
-				style={navGlassStyle}
 				transition={sharedLayoutTransition}
 			>
-				{svgGlass.displacementMap && svgGlass.specularMap ? (
-					<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
-						<defs>
-							<filter
-								id={svgGlass.filterId}
-								x="0"
-								y="0"
-								width={svgGlass.width}
-								height={svgGlass.height}
-								filterUnits="userSpaceOnUse"
-								primitiveUnits="userSpaceOnUse"
-								colorInterpolationFilters="sRGB"
-							>
-								{/* 0. Darken source in dark mode (matching kube.io) */}
-								{theme === 'dark' ? (
-									<feColorMatrix
-										in="SourceGraphic"
-										type="matrix"
-										values="0.9 0 0 0 -0.3 0 0.9 0 0 -0.3 0 0 0.9 0 -0.3 0 0 0 1 0"
-										result="adjusted_source"
-									/>
-								) : (
-									<feColorMatrix
-										in="SourceGraphic"
-										type="matrix"
-										values="1.03 0 0 0 0.2 0 1.03 0 0 0.2 0 0 1.03 0 0.2 0 0 0 1 0"
-										result="adjusted_source"
-									/>
-								)}
-								{/* 1. Blur source: frosted glass base */}
-								<feGaussianBlur
-									in="adjusted_source"
-									stdDeviation={svgGlass.blur}
-									result="blurred_source"
-								/>
-								{/* 2. Load displacement map */}
-								<feImage
-									href={svgGlass.displacementMap}
-									x="0"
-									y="0"
-									width={svgGlass.width}
-									height={svgGlass.height}
-									preserveAspectRatio="none"
-									result="displacement_map"
-								/>
-								{/* 3. Refract through glass surface */}
-								<feDisplacementMap
-									in="blurred_source"
-									in2="displacement_map"
-									scale={svgGlass.scale}
-									xChannelSelector="R"
-									yChannelSelector="G"
-									result="displaced"
-								/>
-								{/* 4. Saturate displaced content */}
-								<feColorMatrix
-									in="displaced"
-									type="saturate"
-									values={String(svgGlass.saturation)}
-									result="displaced_saturated"
-								/>
-								{/* 5. Load specular highlight */}
-								<feImage
-									href={svgGlass.specularMap}
-									x="0"
-									y="0"
-									width={svgGlass.width}
-									height={svgGlass.height}
-									preserveAspectRatio="none"
-									result="specular_layer"
-								/>
-								{/* 6. Mask saturated content to specular areas only */}
-								<feComposite
-									in="displaced_saturated"
-									in2="specular_layer"
-									operator="in"
-									result="specular_saturated"
-								/>
-								{/* 7. Fade specular to controlled opacity */}
-								<feComponentTransfer in="specular_layer" result="specular_faded">
-									<feFuncA type="linear" slope={String(svgGlass.specularOpacity)} />
-								</feComponentTransfer>
-								{/* 8. Blend saturated edges over displaced base */}
-								<feBlend
-									in="specular_saturated"
-									in2="displaced"
-									mode="normal"
-									result="with_saturation"
-								/>
-								{/* 9. Blend specular highlight on top */}
-								<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
-							</filter>
-						</defs>
-					</svg>
-				) : null}
+				<LiquidGlassFilter
+					glass={glass}
+					colorMatrix={theme === 'dark' ? DARK_COLOR_MATRIX : LIGHT_COLOR_MATRIX}
+				/>
 
-				<div ref={glassFrameRef} className="relative rounded-[34px]" data-liquid-ignore="">
+				<div ref={glassRef} className="relative rounded-[34px]">
 					<div
 						className="pointer-events-none absolute inset-0 rounded-[34px]"
 						style={{
-							backdropFilter: glassBackdropFilter,
-							WebkitBackdropFilter: glassBackdropFilter,
-							background: 'var(--nav-glass-bg)',
+							backdropFilter,
+							WebkitBackdropFilter: backdropFilter,
+							background: glassBg,
 						}}
 					/>
 
@@ -199,10 +179,10 @@ export function FloatingNav() {
 											{active ? (
 												<motion.span
 													layoutId="floating-nav-icon"
-													className="text-accent flex h-[1em] w-[1em] items-center justify-center"
+													className="text-accent flex size-[1em] items-center justify-center"
 													transition={sharedLayoutTransition}
 												>
-													<Icon className="block h-[1em] w-[1em]" />
+													<Icon className="block size-[1em]" />
 												</motion.span>
 											) : null}
 											<motion.span
