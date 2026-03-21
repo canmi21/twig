@@ -23,6 +23,7 @@
 - When writing code (implementing features, fixing bugs, refactoring), `bun run knip` should only gate on unused dependencies. Do not remove or un-export functions/variables/types that knip flags as unused — they may be part of the work in progress or reserved for the next step.
 - When the user asks to review or audit code, report knip's unused exports, unused variables, and dead code as findings for discussion.
 - Use tmux for long-running tasks with unknown completion time, such as dev servers, watch processes, or build previews.
+- The dev server tmux session is named `taki-dev`. When asked to start the dev server, first check if `taki-dev` already exists; only create a new session if it does not. The dev server runs on port 26315.
 
 ## Formatting
 
