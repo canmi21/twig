@@ -381,7 +381,7 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 								/>
 								<p className="text-content-heading font-medium">All systems normal.</p>
 							</div>
-							<p className="text-content-heading font-medium">&copy; {siteConfig.copyright}</p>
+							<p className="text-content-tertiary font-medium">&copy; {siteConfig.copyright}</p>
 							<FooterPoweredBy />
 						</div>
 

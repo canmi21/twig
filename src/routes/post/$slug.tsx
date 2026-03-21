@@ -1,6 +1,7 @@
 /* src/routes/post/$slug.tsx */
 
 import { createFileRoute, getRouteApi } from '@tanstack/react-router'
+import { NotFoundPage } from '~/components/not-found-page'
 import { getPublishedPostBySlug } from '~/features/content/server'
 import { formatDate } from '~/lib/date'
 
@@ -10,14 +11,7 @@ export const Route = createFileRoute('/post/$slug')({
 		'Cache-Control': 'public, max-age=0, must-revalidate',
 		'CDN-Cache-Control': 'max-age=86400, stale-while-revalidate=86400',
 	}),
-	notFoundComponent: () => (
-		<div className="py-20 text-center">
-			<h1 className="text-content-heading text-2xl font-bold">Post not found</h1>
-			<p className="text-content-secondary mt-2">
-				The post you are looking for does not exist or is not published.
-			</p>
-		</div>
-	),
+	notFoundComponent: () => <NotFoundPage />,
 	component: PostPage,
 })
 

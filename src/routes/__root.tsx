@@ -11,6 +11,7 @@ import {
 import { lazy, useEffect, useState, version as reactVersion } from 'react'
 import { FloatingNav } from '~/components/floating-nav'
 import { ContentWrapper } from '~/components/content-wrapper'
+import { NotFoundPage } from '~/components/not-found-page'
 import { SiteFooter } from '~/components/site-footer'
 import { LampCordToggle } from '~/components/lamp-cord-toggle'
 import { THEME_INIT_SCRIPT } from '~/lib/theme'
@@ -39,6 +40,7 @@ const TanStackRouterDevtoolsPanel = import.meta.env.DEV
 export const Route = createRootRouteWithContext()({
 	component: RootComponent,
 	loader: () => getSiteConfig(),
+	notFoundComponent: NotFoundPage,
 	beforeLoad: async () => {
 		const theme: ThemePreference =
 			typeof document !== 'undefined'
@@ -61,6 +63,12 @@ export const Route = createRootRouteWithContext()({
 			{ httpEquiv: 'Accept-CH', content: 'Sec-CH-Prefers-Color-Scheme' },
 		],
 		links: [
+			{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+			{ rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
+			{
+				rel: 'stylesheet',
+				href: 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
+			},
 			{ rel: 'stylesheet', href: tailwindCss },
 			{ rel: 'stylesheet', href: appCss },
 			{ rel: 'stylesheet', href: noiseCss },
