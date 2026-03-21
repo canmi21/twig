@@ -1,6 +1,6 @@
 /* src/hooks/use-svg-liquid-glass.ts */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { RefObject } from 'react'
 import { createLiquidGlassAsset, isChromium } from '~/lib/liquid-glass'
 import type { BezelType } from '~/lib/liquid-glass'
@@ -35,15 +35,12 @@ export interface UseSvgLiquidGlassResult {
 	height: number
 }
 
-function createFilterId(): string {
-	return `liquid-glass-${Math.random().toString(36).slice(2, 10)}`
-}
-
 export function useSvgLiquidGlass(
 	ref: RefObject<HTMLElement | null>,
 	options: SvgLiquidGlassOptions = {},
 ): UseSvgLiquidGlassResult {
-	const filterIdRef = useRef(createFilterId())
+	const reactId = useId()
+	const filterId = `liquid-glass-${reactId.replaceAll(':', '')}`
 	const [size, setSize] = useState({ width: 0, height: 0 })
 
 	useEffect(() => {
@@ -101,7 +98,7 @@ export function useSvgLiquidGlass(
 
 	return {
 		active: chromium && !!asset,
-		filterId: filterIdRef.current,
+		filterId,
 		displacementMap: asset?.displacementDataUrl ?? null,
 		specularMap: asset?.specularDataUrl ?? null,
 		blur: options.blur ?? 1,

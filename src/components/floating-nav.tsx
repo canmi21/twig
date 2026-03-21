@@ -65,7 +65,7 @@ export function FloatingNav() {
 				transition={sharedLayoutTransition}
 			>
 				{svgGlass.displacementMap && svgGlass.specularMap ? (
-					<svg className="absolute h-0 w-0 overflow-hidden" aria-hidden="true" focusable="false">
+					<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
 						<defs>
 							<filter
 								id={svgGlass.filterId}

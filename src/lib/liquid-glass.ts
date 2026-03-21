@@ -1,133 +1,238 @@
 /* src/lib/liquid-glass.ts */
 
+/* ── Types ──────────────────────────────────────────────────── */
 export type BezelType = 'convex_circle' | 'convex_squircle' | 'concave'
 
 export interface LiquidGlassParams {
+	/** Element width in CSS pixels. */
 	width: number
+	/** Element height in CSS pixels. */
 	height: number
+	/** Corner radius in CSS pixels. */
 	radius: number
+	/** Width of the refractive bezel zone in CSS pixels. */
 	bezelWidth: number
+	/** Simulated glass thickness affecting refraction distance. */
 	glassThickness: number
+	/** Index of refraction (default 1.3, realistic glass). */
 	refractiveIndex?: number
+	/** Bezel surface curve type (default 'convex_squircle'). */
 	bezelType?: BezelType
+	/** Specular light angle in radians (default PI/3). */
 	specularAngle?: number
+	/** Device pixel ratio override (default window.devicePixelRatio). */
 	dpr?: number
 }
 
 export interface LiquidGlassAsset {
 	displacementDataUrl: string
 	specularDataUrl: string
+	/** Maximum raw displacement value, used as feDisplacementMap scale. */
 	maxDisplacement: number
 }
 
+/* ── Constants ──────────────────────────────────────────────── */
+
+/** Neutral displacement pixel: R=128 G=128 B=0 A=255 (ABGR little-endian). */
+const NEUTRAL_DISPLACEMENT_PIXEL = 0xff008080
+
+/** Displacement channel midpoint (128 = no displacement). */
+const CHANNEL_MIDPOINT = 128
+
+/** Displacement channel range from midpoint to max (127). */
+const CHANNEL_RANGE = 127
+
+/** Delta for numerical derivative approximation. */
+const DERIVATIVE_DELTA = 0.0001
+
+/** Specular bezel width in CSS pixels (fixed per kube.io reference). */
+const SPECULAR_BEZEL_WIDTH = 50
+
 /* ── Surface equations ──────────────────────────────────────── */
 
-const SURFACE_FNS: Record<BezelType, (x: number) => number> = {
-	convex_circle: (x) => Math.sqrt(1 - (1 - x) ** 2),
-	convex_squircle: (x) => Math.pow(1 - Math.pow(1 - x, 4), 1 / 4),
-	concave: (x) => 1 - Math.sqrt(1 - (1 - x) ** 2),
+const BEZEL_SURFACE_FNS: Record<BezelType, (normalizedPosition: number) => number> = {
+	convex_circle: (t) => Math.sqrt(1 - (1 - t) ** 2),
+	convex_squircle: (t) => Math.pow(1 - Math.pow(1 - t, 4), 1 / 4),
+	concave: (t) => 1 - Math.sqrt(1 - (1 - t) ** 2),
 }
 
-/* ── Stage 1: 1D displacement profile ──────────────────────── */
+/* ── Rounded-rect bezel geometry ────────────────────────────── */
 
-function calculateDisplacementProfile(
+/**
+ * Compute the local coordinate offset from the nearest corner center
+ * for a pixel inside a rounded rectangle.
+ *
+ * Pixels in the straight-edge region return (0, 0).
+ * Pixels in the corner arcs return their offset from the arc center.
+ */
+function cornerOffset(
+	pixelX: number,
+	pixelY: number,
+	bufferWidth: number,
+	bufferHeight: number,
+	cornerRadius: number,
+): { offsetX: number; offsetY: number } {
+	const straightWidth = bufferWidth - cornerRadius * 2
+	const straightHeight = bufferHeight - cornerRadius * 2
+
+	const offsetX =
+		pixelX < cornerRadius
+			? pixelX - cornerRadius
+			: pixelX >= bufferWidth - cornerRadius
+				? pixelX - cornerRadius - straightWidth
+				: 0
+
+	const offsetY =
+		pixelY < cornerRadius
+			? pixelY - cornerRadius
+			: pixelY >= bufferHeight - cornerRadius
+				? pixelY - cornerRadius - straightHeight
+				: 0
+
+	return { offsetX, offsetY }
+}
+
+/**
+ * Compute anti-aliased opacity for a pixel near the outer edge of the
+ * rounded rect, providing a smooth 1px transition at the boundary.
+ */
+function edgeAntiAliasOpacity(
+	distanceFromCornerSq: number,
+	radiusSq: number,
+	outerRadiusSq: number,
+): number {
+	if (distanceFromCornerSq < radiusSq) return 1
+	return (
+		1 -
+		(Math.sqrt(distanceFromCornerSq) - Math.sqrt(radiusSq)) /
+			(Math.sqrt(outerRadiusSq) - Math.sqrt(radiusSq))
+	)
+}
+
+/** Create a canvas and return its 2D context + ImageData at the given buffer size. */
+function createCanvasBuffer(bufferWidth: number, bufferHeight: number) {
+	const canvas = document.createElement('canvas')
+	canvas.width = bufferWidth
+	canvas.height = bufferHeight
+	const ctx = canvas.getContext('2d')!
+	const imageData = ctx.createImageData(bufferWidth, bufferHeight)
+	return { canvas, ctx, imageData }
+}
+
+/* ── Stage 1: 1D refraction profile ─────────────────────────── */
+
+/**
+ * Pre-compute lateral displacement for each sample position along the bezel.
+ *
+ * Uses Snell's law to refract a vertical incident ray through the glass
+ * surface defined by `surfaceHeightFn`. Returns displacement in pixels
+ * for each of `sampleCount` evenly-spaced positions from the outer edge
+ * (index 0) to the inner edge (last index).
+ */
+function computeRefractionProfile(
 	glassThickness: number,
 	bezelWidth: number,
-	bezelHeightFn: (x: number) => number,
+	surfaceHeightFn: (normalizedPosition: number) => number,
 	refractiveIndex: number,
-	samples = 128,
+	sampleCount = 128,
 ): number[] {
-	const eta = 1 / refractiveIndex
+	const inverseIOR = 1 / refractiveIndex
 
-	function refract(normalX: number, normalY: number): [number, number] | null {
-		const dot = normalY
-		const k = 1 - eta * eta * (1 - dot * dot)
-		if (k < 0) return null
-		const kSqrt = Math.sqrt(k)
-		return [-(eta * dot + kSqrt) * normalX, eta - (eta * dot + kSqrt) * normalY]
+	function refractVerticalRay(
+		surfaceNormalX: number,
+		surfaceNormalY: number,
+	): [number, number] | null {
+		const incidentDotNormal = surfaceNormalY
+		const discriminant = 1 - inverseIOR ** 2 * (1 - incidentDotNormal ** 2)
+		if (discriminant < 0) return null
+		const sqrtDiscriminant = Math.sqrt(discriminant)
+		return [
+			-(inverseIOR * incidentDotNormal + sqrtDiscriminant) * surfaceNormalX,
+			inverseIOR - (inverseIOR * incidentDotNormal + sqrtDiscriminant) * surfaceNormalY,
+		]
 	}
 
-	return Array.from({ length: samples }, (_, i) => {
-		const x = i / samples
-		const y = bezelHeightFn(x)
-		const dx = x < 1 ? 0.0001 : -0.0001
-		const y2 = bezelHeightFn(x + dx)
-		const derivative = (y2 - y) / dx
-		const magnitude = Math.sqrt(derivative * derivative + 1)
-		const normal: [number, number] = [-derivative / magnitude, -1 / magnitude]
-		const refracted = refract(normal[0], normal[1])
+	return Array.from({ length: sampleCount }, (_, sampleIndex) => {
+		const normalizedPos = sampleIndex / sampleCount
+		const surfaceHeight = surfaceHeightFn(normalizedPos)
 
-		if (!refracted) return 0
-		const remainingHeightOnBezel = y * bezelWidth
-		const remainingHeight = remainingHeightOnBezel + glassThickness
-		return refracted[0] * (remainingHeight / refracted[1])
+		/* Numerical derivative of the surface height function */
+		const delta = normalizedPos < 1 ? DERIVATIVE_DELTA : -DERIVATIVE_DELTA
+		const neighborHeight = surfaceHeightFn(normalizedPos + delta)
+		const slope = (neighborHeight - surfaceHeight) / delta
+		const slopeMagnitude = Math.sqrt(slope * slope + 1)
+
+		const surfaceNormal: [number, number] = [-slope / slopeMagnitude, -1 / slopeMagnitude]
+		const refractedDirection = refractVerticalRay(surfaceNormal[0], surfaceNormal[1])
+		if (!refractedDirection) return 0
+
+		/* Total glass depth at this bezel position */
+		const bezelDepth = surfaceHeight * bezelWidth
+		const totalDepth = bezelDepth + glassThickness
+
+		/* Lateral displacement = horizontal travel through the remaining glass */
+		return refractedDirection[0] * (totalDepth / refractedDirection[1])
 	})
 }
 
-/* ── Stage 2: 2D displacement map rasterization ────────────── */
+/* ── Stage 2: 2D displacement map ───────────────────────────── */
 
+/**
+ * Rasterize the 1D refraction profile into a 2D displacement map PNG.
+ *
+ * The output encodes displacement as R/G channels (128 = neutral),
+ * suitable for SVG feDisplacementMap consumption.
+ */
 function rasterizeDisplacementMap(
-	width: number,
-	height: number,
-	radius: number,
+	cssWidth: number,
+	cssHeight: number,
+	cornerRadius: number,
 	bezelWidth: number,
-	maximumDisplacement: number,
-	profile: number[],
-	dpr: number,
+	maxDisplacement: number,
+	refractionProfile: number[],
+	devicePixelRatio: number,
 ): string {
-	const bw = Math.round(width * dpr)
-	const bh = Math.round(height * dpr)
-	const canvas = document.createElement('canvas')
-	canvas.width = bw
-	canvas.height = bh
-	const ctx = canvas.getContext('2d')!
-	const imageData = ctx.createImageData(bw, bh)
+	const bufferWidth = Math.round(cssWidth * devicePixelRatio)
+	const bufferHeight = Math.round(cssHeight * devicePixelRatio)
+	const { canvas, ctx, imageData } = createCanvasBuffer(bufferWidth, bufferHeight)
 
-	new Uint32Array(imageData.data.buffer).fill(0xff008080)
+	new Uint32Array(imageData.data.buffer).fill(NEUTRAL_DISPLACEMENT_PIXEL)
 
-	const r = radius * dpr
-	const bz = bezelWidth * dpr
-	const rSq = r ** 2
-	const rPlusOneSq = (r + 1) ** 2
-	const rMinusBzSq = (r - bz) ** 2
-	const objW = bw
-	const objH = bh
-	const wBetween = objW - r * 2
-	const hBetween = objH - r * 2
+	const scaledRadius = cornerRadius * devicePixelRatio
+	const scaledBezelWidth = bezelWidth * devicePixelRatio
+	const radiusSq = scaledRadius ** 2
+	const outerRadiusSq = (scaledRadius + 1) ** 2
+	const innerRadiusSq = (scaledRadius - scaledBezelWidth) ** 2
 
-	for (let y1 = 0; y1 < objH; y1++) {
-		for (let x1 = 0; x1 < objW; x1++) {
-			const idx = (y1 * bw + x1) * 4
+	for (let pixelY = 0; pixelY < bufferHeight; pixelY++) {
+		for (let pixelX = 0; pixelX < bufferWidth; pixelX++) {
+			const { offsetX, offsetY } = cornerOffset(
+				pixelX,
+				pixelY,
+				bufferWidth,
+				bufferHeight,
+				scaledRadius,
+			)
+			const distSq = offsetX * offsetX + offsetY * offsetY
 
-			const isLeft = x1 < r
-			const isRight = x1 >= objW - r
-			const isTop = y1 < r
-			const isBottom = y1 >= objH - r
+			/* Skip pixels outside the bezel zone */
+			if (distSq > outerRadiusSq || distSq < innerRadiusSq) continue
 
-			const x = isLeft ? x1 - r : isRight ? x1 - r - wBetween : 0
-			const y = isTop ? y1 - r : isBottom ? y1 - r - hBetween : 0
+			const opacity = edgeAntiAliasOpacity(distSq, radiusSq, outerRadiusSq)
+			const distFromCorner = Math.sqrt(distSq)
+			const distFromEdge = scaledRadius - distFromCorner
+			const directionX = offsetX / distFromCorner
+			const directionY = offsetY / distFromCorner
 
-			const dSq = x * x + y * y
-			if (dSq > rPlusOneSq || dSq < rMinusBzSq) continue
+			/* Look up the pre-computed displacement for this bezel depth */
+			const profileIndex = ((distFromEdge / scaledBezelWidth) * refractionProfile.length) | 0
+			const displacement = refractionProfile[profileIndex] ?? 0
+			const normalizedDX = (-directionX * displacement) / maxDisplacement
+			const normalizedDY = (-directionY * displacement) / maxDisplacement
 
-			const opacity =
-				dSq < rSq
-					? 1
-					: 1 - (Math.sqrt(dSq) - Math.sqrt(rSq)) / (Math.sqrt(rPlusOneSq) - Math.sqrt(rSq))
-
-			const dist = Math.sqrt(dSq)
-			const fromSide = r - dist
-			const cos = x / dist
-			const sin = y / dist
-
-			const bezelIdx = ((fromSide / bz) * profile.length) | 0
-			const displacement = profile[bezelIdx] ?? 0
-
-			const dX = (-cos * displacement) / maximumDisplacement
-			const dY = (-sin * displacement) / maximumDisplacement
-
-			imageData.data[idx] = 128 + dX * 127 * opacity
-			imageData.data[idx + 1] = 128 + dY * 127 * opacity
+			const idx = (pixelY * bufferWidth + pixelX) * 4
+			imageData.data[idx] = CHANNEL_MIDPOINT + normalizedDX * CHANNEL_RANGE * opacity
+			imageData.data[idx + 1] = CHANNEL_MIDPOINT + normalizedDY * CHANNEL_RANGE * opacity
 			imageData.data[idx + 2] = 0
 			imageData.data[idx + 3] = 255
 		}
@@ -139,65 +244,67 @@ function rasterizeDisplacementMap(
 
 /* ── Specular highlight map ─────────────────────────────────── */
 
+/**
+ * Rasterize a directional specular highlight ring at the outer bezel edge.
+ *
+ * The highlight is a thin (1px) ring whose brightness varies by the dot
+ * product of the edge normal with `lightAngle`, using Math.abs so both
+ * sides of the glass catch the light.
+ */
 function rasterizeSpecularMap(
-	width: number,
-	height: number,
-	radius: number,
+	cssWidth: number,
+	cssHeight: number,
+	cornerRadius: number,
 	bezelWidth: number,
-	specularAngle: number,
-	dpr: number,
+	lightAngle: number,
+	devicePixelRatio: number,
 ): string {
-	const bw = Math.round(width * dpr)
-	const bh = Math.round(height * dpr)
-	const canvas = document.createElement('canvas')
-	canvas.width = bw
-	canvas.height = bh
-	const ctx = canvas.getContext('2d')!
-	const imageData = ctx.createImageData(bw, bh)
+	const bufferWidth = Math.round(cssWidth * devicePixelRatio)
+	const bufferHeight = Math.round(cssHeight * devicePixelRatio)
+	const { canvas, ctx, imageData } = createCanvasBuffer(bufferWidth, bufferHeight)
 
-	const r = radius * dpr
-	const bz = bezelWidth * dpr
-	const specVec = [Math.cos(specularAngle), Math.sin(specularAngle)]
+	const scaledRadius = cornerRadius * devicePixelRatio
+	const scaledBezelWidth = bezelWidth * devicePixelRatio
+	const lightDirectionX = Math.cos(lightAngle)
+	const lightDirectionY = Math.sin(lightAngle)
 
-	const rSq = r ** 2
-	const rPlusOneSq = (r + dpr) ** 2
-	const rMinusBzSq = (r - bz) ** 2
-	const wBetween = bw - r * 2
-	const hBetween = bh - r * 2
+	const radiusSq = scaledRadius ** 2
+	const outerRadiusSq = (scaledRadius + devicePixelRatio) ** 2
+	const innerRadiusSq = (scaledRadius - scaledBezelWidth) ** 2
 
-	for (let y1 = 0; y1 < bh; y1++) {
-		for (let x1 = 0; x1 < bw; x1++) {
-			const idx = (y1 * bw + x1) * 4
+	for (let pixelY = 0; pixelY < bufferHeight; pixelY++) {
+		for (let pixelX = 0; pixelX < bufferWidth; pixelX++) {
+			const { offsetX, offsetY } = cornerOffset(
+				pixelX,
+				pixelY,
+				bufferWidth,
+				bufferHeight,
+				scaledRadius,
+			)
+			const distSq = offsetX * offsetX + offsetY * offsetY
 
-			const isLeft = x1 < r
-			const isRight = x1 >= bw - r
-			const isTop = y1 < r
-			const isBottom = y1 >= bh - r
+			if (distSq > outerRadiusSq || distSq < innerRadiusSq) continue
 
-			const x = isLeft ? x1 - r : isRight ? x1 - r - wBetween : 0
-			const y = isTop ? y1 - r : isBottom ? y1 - r - hBetween : 0
+			const distFromCorner = Math.sqrt(distSq)
+			const distFromEdge = scaledRadius - distFromCorner
+			const opacity = edgeAntiAliasOpacity(distSq, radiusSq, outerRadiusSq)
 
-			const dSq = x * x + y * y
-			if (dSq > rPlusOneSq || dSq < rMinusBzSq) continue
+			/* Edge normal direction (Y flipped for screen coordinates) */
+			const normalX = offsetX / distFromCorner
+			const normalY = -offsetY / distFromCorner
 
-			const dist = Math.sqrt(dSq)
-			const fromSide = r - dist
+			/* Specular intensity: directional dot product with circular falloff */
+			const lightAlignment = Math.abs(normalX * lightDirectionX + normalY * lightDirectionY)
+			const edgeFalloff = Math.sqrt(1 - (1 - distFromEdge / (1 * devicePixelRatio)) ** 2)
+			const intensity = lightAlignment * edgeFalloff
+			const colorValue = 255 * intensity
+			const alphaValue = colorValue * intensity * opacity
 
-			const opacity =
-				dSq < rSq ? 1 : 1 - (dist - Math.sqrt(rSq)) / (Math.sqrt(rPlusOneSq) - Math.sqrt(rSq))
-
-			const cos = x / dist
-			const sin = -y / dist
-
-			const dotProduct = Math.abs(cos * specVec[0] + sin * specVec[1])
-			const coefficient = dotProduct * Math.sqrt(1 - (1 - fromSide / (1 * dpr)) ** 2)
-			const color = 255 * coefficient
-			const finalOpacity = color * coefficient * opacity
-
-			imageData.data[idx] = color
-			imageData.data[idx + 1] = color
-			imageData.data[idx + 2] = color
-			imageData.data[idx + 3] = finalOpacity
+			const idx = (pixelY * bufferWidth + pixelX) * 4
+			imageData.data[idx] = colorValue
+			imageData.data[idx + 1] = colorValue
+			imageData.data[idx + 2] = colorValue
+			imageData.data[idx + 3] = alphaValue
 		}
 	}
 
@@ -207,7 +314,7 @@ function rasterizeSpecularMap(
 
 /* ── Public API ─────────────────────────────────────────────── */
 
-/** Create displacement + specular map assets for a liquid glass element. */
+/** Generate displacement + specular map assets for a liquid glass element. */
 export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAsset {
 	const {
 		width,
@@ -218,17 +325,18 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		refractiveIndex = 1.3,
 		bezelType = 'convex_squircle',
 		specularAngle = Math.PI / 3,
-		dpr = typeof window !== 'undefined' ? (window.devicePixelRatio ?? 1) : 1,
+		dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
 	} = params
 
-	const surfaceFn = SURFACE_FNS[bezelType]
-	const profile = calculateDisplacementProfile(
+	const surfaceFn = BEZEL_SURFACE_FNS[bezelType]
+
+	const refractionProfile = computeRefractionProfile(
 		glassThickness,
 		bezelWidth,
 		surfaceFn,
 		refractiveIndex,
 	)
-	const maxDisplacement = Math.max(...profile.map((v) => Math.abs(v)))
+	const maxDisplacement = Math.max(...refractionProfile.map((v) => Math.abs(v)))
 
 	const displacementDataUrl = rasterizeDisplacementMap(
 		width,
@@ -236,18 +344,24 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		radius,
 		bezelWidth,
 		maxDisplacement,
-		profile,
+		refractionProfile,
 		dpr,
 	)
-	const specularDataUrl = rasterizeSpecularMap(width, height, radius, 50, specularAngle, dpr)
+
+	const specularDataUrl = rasterizeSpecularMap(
+		width,
+		height,
+		radius,
+		SPECULAR_BEZEL_WIDTH,
+		specularAngle,
+		dpr,
+	)
 
 	return { displacementDataUrl, specularDataUrl, maxDisplacement }
 }
 
 /** Detect Chromium-based browsers (only Chromium supports SVG backdrop-filter). */
 export function isChromium(): boolean {
-	if (typeof navigator === 'undefined') {
-		return false
-	}
+	if (typeof navigator === 'undefined') return false
 	return /Chrome\/\d+/.test(navigator.userAgent)
 }
