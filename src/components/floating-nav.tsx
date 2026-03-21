@@ -129,20 +129,15 @@ export function FloatingNav() {
 
 	return (
 		<LayoutGroup id="floating-nav">
-			<motion.nav
-				layout="size"
-				className="fixed top-4 left-1/2 z-50 -translate-x-1/2"
-				aria-label="Main navigation"
-				transition={sharedLayoutTransition}
-			>
+			<nav className="fixed top-4 left-1/2 z-50 -translate-x-1/2" aria-label="Main navigation">
 				<LiquidGlassFilter
 					glass={glass}
 					colorMatrix={theme === 'dark' ? DARK_COLOR_MATRIX : LIGHT_COLOR_MATRIX}
 				/>
 
-				<div ref={glassRef} className="relative rounded-[34px]">
+				<div ref={glassRef} className="relative rounded-[28px]">
 					<div
-						className="pointer-events-none absolute inset-0 rounded-[34px]"
+						className="pointer-events-none absolute inset-0 rounded-[28px]"
 						style={{
 							backdropFilter,
 							WebkitBackdropFilter: backdropFilter,
@@ -152,7 +147,7 @@ export function FloatingNav() {
 
 					<motion.div
 						layout="size"
-						className="relative z-10 flex items-center gap-1.5 rounded-[34px] px-5 py-3"
+						className="relative z-10 flex items-center gap-1.5 rounded-[28px] px-4 py-2.5"
 						transition={sharedLayoutTransition}
 					>
 						{navItems.map(({ to, label, exact, icon: Icon }) => {
@@ -204,7 +199,7 @@ export function FloatingNav() {
 						})}
 					</motion.div>
 				</div>
-			</motion.nav>
+			</nav>
 		</LayoutGroup>
 	)
 }
