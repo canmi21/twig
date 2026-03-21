@@ -1,6 +1,6 @@
 /* src/hooks/use-svg-liquid-glass.ts */
 
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useId, useLayoutEffect, useMemo, useState } from 'react'
 import type { RefObject } from 'react'
 import { createLiquidGlassAsset, supportsSvgBackdropFilter } from '~/lib/liquid-glass'
 import type { BezelType } from '~/lib/liquid-glass'
@@ -43,7 +43,7 @@ export function useSvgLiquidGlass(
 	const filterId = `liquid-glass-${reactId.replaceAll(':', '')}`
 	const [size, setSize] = useState({ width: 0, height: 0 })
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		const element = ref.current
 		if (!element) return
 

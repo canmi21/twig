@@ -147,7 +147,7 @@ export function FloatingNav() {
 
 					<motion.div
 						layout="size"
-						className="relative z-10 flex items-center gap-1.5 rounded-[28px] px-4 py-2.5"
+						className="relative z-10 flex items-center gap-1 rounded-[28px] px-3.5 py-1.5"
 						transition={sharedLayoutTransition}
 					>
 						{navItems.map(({ to, label, exact, icon: Icon }) => {
