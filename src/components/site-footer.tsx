@@ -4,6 +4,8 @@ import { motion } from 'motion/react'
 import { ArrowUpRight, Mail } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { GitHub, Rss, Telegram, Twitter, YouTube } from '~/components/icons'
+import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
+import { useTheme } from '~/lib/theme'
 
 interface NavLink {
 	label: string
@@ -323,25 +325,132 @@ interface SiteFooterProps {
 	}
 }
 
+const FOOTER_COLOR_MATRIX = '0.9 0 0 0 0.05 0 0.9 0 0 0.05 0 0 0.9 0 0.05 0 0 0 1 0'
+const FOOTER_GLASS_OVERFLOW = 40
+
 export function SiteFooter({ siteConfig }: SiteFooterProps) {
 	const navColumns = parseNavColumns(siteConfig.footerNav)
+	const theme = useTheme()
+	const glassRef = useRef<HTMLDivElement>(null)
+	const glass = useSvgLiquidGlass(glassRef, { radius: 30, blur: 0, theme })
+	const svgFilter = glass.active ? `url(#${glass.filterId})` : undefined
 
 	return (
 		<footer className="relative mt-16">
 			<div className="relative isolate overflow-hidden">
+				{/* Liquid glass element: extends past bottom and sides, clipped by overflow:hidden */}
 				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute inset-0 z-10 border shadow-(--shadow-md) backdrop-blur-md"
+					ref={glassRef}
+					className="pointer-events-none absolute z-10"
 					style={{
-						backgroundColor: 'var(--footer-glass-bg)',
-						borderColor: 'var(--footer-glass-border)',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: -FOOTER_GLASS_OVERFLOW,
+						borderRadius: '30px 30px 0 0',
 					}}
-				/>
-				<div
-					aria-hidden="true"
-					className="pointer-events-none absolute inset-x-0 top-0 z-10 h-px"
-					style={{ backgroundColor: 'var(--footer-glass-edge)' }}
-				/>
+				>
+					{/* SVG filter definition */}
+					{glass.displacementMap && glass.specularMap ? (
+						<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
+							<defs>
+								<filter
+									id={glass.filterId}
+									x="0"
+									y="0"
+									width={glass.width}
+									height={glass.height}
+									filterUnits="userSpaceOnUse"
+									primitiveUnits="userSpaceOnUse"
+									colorInterpolationFilters="sRGB"
+									filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
+								>
+									<feColorMatrix
+										in="SourceGraphic"
+										type="matrix"
+										values={FOOTER_COLOR_MATRIX}
+										result="adjusted_source"
+									/>
+									<feImage
+										href={glass.displacementMap}
+										x="0"
+										y="0"
+										width={glass.width}
+										height={glass.height}
+										preserveAspectRatio="none"
+										result="displacement_map"
+									/>
+									<feDisplacementMap
+										in="adjusted_source"
+										in2="displacement_map"
+										scale={glass.scale}
+										xChannelSelector="R"
+										yChannelSelector="G"
+										result="displaced"
+									/>
+									<feColorMatrix
+										in="displaced"
+										type="saturate"
+										values={String(glass.saturation)}
+										result="displaced_saturated"
+									/>
+									<feImage
+										href={glass.specularMap}
+										x="0"
+										y="0"
+										width={glass.width}
+										height={glass.height}
+										preserveAspectRatio="none"
+										result="specular_layer"
+									/>
+									<feComposite
+										in="displaced_saturated"
+										in2="specular_layer"
+										operator="in"
+										result="specular_saturated"
+									/>
+									<feComponentTransfer in="specular_layer" result="specular_faded">
+										<feFuncA type="linear" slope={String(glass.specularOpacity)} />
+									</feComponentTransfer>
+									<feBlend
+										in="specular_saturated"
+										in2="displaced"
+										mode="normal"
+										result="with_saturation"
+									/>
+									<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
+								</filter>
+							</defs>
+						</svg>
+					) : null}
+
+					{/* Layer 1: SVG filter */}
+					<div
+						className="pointer-events-none absolute inset-0"
+						style={{
+							borderRadius: '30px 30px 0 0',
+							backdropFilter: svgFilter,
+							WebkitBackdropFilter: svgFilter,
+						}}
+					/>
+					{/* Layer 2: CSS blur edge */}
+					<div
+						className="pointer-events-none absolute inset-0"
+						style={{
+							borderRadius: '30px 30px 0 0',
+							backdropFilter: 'blur(0.5px)',
+							WebkitBackdropFilter: 'blur(0.5px)',
+						}}
+					/>
+					{/* Layer 3: background fill */}
+					<div
+						className="pointer-events-none absolute inset-0"
+						style={{
+							borderRadius: '30px 30px 0 0',
+							background: 'var(--footer-glass-bg)',
+						}}
+					/>
+				</div>
 
 				<div className="mx-auto max-w-6xl px-5 py-10">
 					<div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-stretch">
