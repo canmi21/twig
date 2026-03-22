@@ -3,6 +3,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
+import { useTheme } from '~/lib/theme'
 
 export const Route = createFileRoute('/glass-test')({
 	component: GlassTestPage,
@@ -17,6 +18,8 @@ interface GlassParams {
 	specularOpacity: number
 	specularSaturation: number
 	bgOpacity: number
+	colorScale: number
+	colorOffset: number
 }
 
 const defaultParams: GlassParams = {
@@ -27,7 +30,13 @@ const defaultParams: GlassParams = {
 	scaleRatio: 1,
 	specularOpacity: 0.4,
 	specularSaturation: 6,
-	bgOpacity: 0.6,
+	bgOpacity: 0,
+	colorScale: 0.9,
+	colorOffset: 0.05,
+}
+
+function buildColorMatrix(scale: number, offset: number): string {
+	return `${scale} 0 0 0 ${offset} 0 ${scale} 0 0 ${offset} 0 0 ${scale} 0 ${offset} 0 0 0 1 0`
 }
 
 function Slider({
@@ -75,6 +84,7 @@ function Slider({
 
 function GlassPanel({ params }: { params: GlassParams }) {
 	const ref = useRef<HTMLDivElement>(null)
+	const theme = useTheme()
 	const glass = useSvgLiquidGlass(ref, {
 		bezelWidth: params.bezelWidth,
 		glassThickness: params.glassThickness,
@@ -83,8 +93,9 @@ function GlassPanel({ params }: { params: GlassParams }) {
 		scaleRatio: params.scaleRatio,
 		specularOpacity: params.specularOpacity,
 		specularSaturation: params.specularSaturation,
-		theme: 'dark',
+		theme,
 	})
+	const glassBg = `rgb(var(--glass-base) / ${params.bgOpacity})`
 
 	const backdropFilter = glass.active ? `url(#${glass.filterId})` : 'blur(16px)'
 
@@ -117,7 +128,7 @@ function GlassPanel({ params }: { params: GlassParams }) {
 							<feColorMatrix
 								in="SourceGraphic"
 								type="matrix"
-								values="0.9 0 0 0 -0.3 0 0.9 0 0 -0.3 0 0 0.9 0 -0.3 0 0 0 1 0"
+								values={buildColorMatrix(params.colorScale, params.colorOffset)}
 								result="darkened_source"
 							/>
 							<feGaussianBlur
@@ -187,7 +198,7 @@ function GlassPanel({ params }: { params: GlassParams }) {
 						pointerEvents: 'none',
 						backdropFilter,
 						WebkitBackdropFilter: backdropFilter,
-						background: `rgba(34, 34, 34, ${params.bgOpacity})`,
+						background: glassBg,
 					}}
 				/>
 				<div
@@ -199,7 +210,7 @@ function GlassPanel({ params }: { params: GlassParams }) {
 						gap: 24,
 						borderRadius: 34,
 						padding: '14px 28px',
-						color: '#fff',
+						color: 'var(--text-heading)',
 						fontSize: 15,
 						fontWeight: 600,
 					}}
@@ -305,6 +316,22 @@ function GlassTestPage() {
 					max={1}
 					step={0.05}
 					onChange={set('bgOpacity')}
+				/>
+				<Slider
+					label="COLOR SCALE"
+					value={params.colorScale}
+					min={0.5}
+					max={1.5}
+					step={0.01}
+					onChange={set('colorScale')}
+				/>
+				<Slider
+					label="COLOR OFFSET"
+					value={params.colorOffset}
+					min={-0.5}
+					max={0.5}
+					step={0.01}
+					onChange={set('colorOffset')}
 				/>
 				<button
 					type="button"

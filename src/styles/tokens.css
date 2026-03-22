@@ -90,7 +90,9 @@
 	--nav-glass-bg: color-mix(in oklch, var(--bg-surface) 60%, transparent);
 	--nav-glass-border: color-mix(in oklch, var(--border-subtle) 88%, transparent);
 	--nav-liquid-bg: color-mix(in oklch, var(--bg-surface) 10%, transparent);
-	--nav-liquid-fill: color-mix(in oklch, var(--bg-surface) 60%, transparent);
+	--glass-base: 255 255 255;
+	--glass-opacity: 0;
+	--nav-liquid-fill: rgb(var(--glass-base) / var(--glass-opacity));
 	--nav-liquid-border: oklch(1 0 0 / 0.2);
 	--nav-liquid-edge: oklch(1 0 0 / 0.34);
 	--nav-liquid-shadow: oklch(0.28 0.01 90 / 0.16);
@@ -165,7 +167,8 @@
 	--nav-glass-bg: color-mix(in oklch, var(--bg-surface) 60%, transparent);
 	--nav-glass-border: color-mix(in oklch, var(--border-subtle) 92%, transparent);
 	--nav-liquid-bg: color-mix(in oklch, var(--bg-surface) 14%, transparent);
-	--nav-liquid-fill: color-mix(in oklch, var(--bg-surface) 60%, transparent);
+	--glass-base: 34 34 34;
+	--nav-liquid-fill: rgb(var(--glass-base) / var(--glass-opacity));
 	--nav-liquid-border: oklch(1 0 0 / 0.14);
 	--nav-liquid-edge: oklch(1 0 0 / 0.2);
 	--nav-liquid-shadow: oklch(0.02 0.002 90 / 0.32);

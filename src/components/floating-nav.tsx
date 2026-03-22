@@ -17,8 +17,10 @@ const navItems = [
 	{ exact: false, icon: DotCircle, label: 'More', to: '/more' },
 ]
 
-const DARK_COLOR_MATRIX = '0.9 0 0 0 -0.3 0 0.9 0 0 -0.3 0 0 0.9 0 -0.3 0 0 0 1 0'
-const LIGHT_COLOR_MATRIX = '1.03 0 0 0 0.2 0 1.03 0 0 0.2 0 0 1.03 0 0.2 0 0 0 1 0'
+/** Build an feColorMatrix "matrix" value from per-channel scale and offset. */
+function buildColorMatrix(scale: number, offset: number): string {
+	return `${scale} 0 0 0 ${offset} 0 ${scale} 0 0 ${offset} 0 0 ${scale} 0 ${offset} 0 0 0 1 0`
+}
 
 function isActive(pathname: string, to: string, exact: boolean): boolean {
 	return exact ? pathname === to : pathname.startsWith(to)
@@ -113,41 +115,28 @@ export function FloatingNav() {
 	const theme = useTheme()
 	const glassRef = useRef<HTMLDivElement>(null)
 
-	const glass = useSvgLiquidGlass(glassRef, {
-		bezelWidth: 29,
-		glassThickness: 90,
-		refractiveIndex: 1.3,
-		blur: 1,
-		scaleRatio: 1,
-		specularOpacity: 0.4,
-		specularSaturation: 6,
-		theme,
-	})
+	const glass = useSvgLiquidGlass(glassRef, { theme })
 
 	const backdropFilter = glass.active ? `url(#${glass.filterId})` : 'blur(16px)'
-	const glassBg = theme === 'dark' ? 'rgba(34, 34, 34, 0.6)' : 'rgba(255, 255, 255, 0.6)'
 
 	return (
 		<LayoutGroup id="floating-nav">
 			<nav className="fixed top-4 left-1/2 z-50 -translate-x-1/2" aria-label="Main navigation">
-				<LiquidGlassFilter
-					glass={glass}
-					colorMatrix={theme === 'dark' ? DARK_COLOR_MATRIX : LIGHT_COLOR_MATRIX}
-				/>
+				<LiquidGlassFilter glass={glass} colorMatrix={buildColorMatrix(0.9, 0.05)} />
 
-				<div ref={glassRef} className="relative rounded-[28px]">
+				<div ref={glassRef} className="relative rounded-[24px]">
 					<div
-						className="pointer-events-none absolute inset-0 rounded-[28px]"
+						className="pointer-events-none absolute inset-0 rounded-[24px]"
 						style={{
 							backdropFilter,
 							WebkitBackdropFilter: backdropFilter,
-							background: glassBg,
+							background: 'var(--nav-liquid-fill)',
 						}}
 					/>
 
 					<motion.div
 						layout="size"
-						className="relative z-10 flex items-center gap-1 rounded-[28px] px-3.5 py-1.5"
+						className="relative z-10 flex items-center gap-0.5 px-3 py-1.5"
 						transition={sharedLayoutTransition}
 					>
 						{navItems.map(({ to, label, exact, icon: Icon }) => {
@@ -164,7 +153,7 @@ export function FloatingNav() {
 										to={to}
 										activeOptions={{ exact }}
 										data-active={active || undefined}
-										className="group relative block rounded-full px-3.5 py-2.25 text-[0.8125rem]/[1.05] font-bold no-underline transition-colors duration-200 sm:text-[0.9375rem]/[1.05]"
+										className="group relative block rounded-full px-3 py-2 text-[0.8125rem]/[1.05] font-bold no-underline transition-colors duration-200 sm:text-[0.875rem]/[1.05]"
 									>
 										<motion.span
 											layout

@@ -348,11 +348,12 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		dpr,
 	)
 
+	const specularBezelWidth = Math.min(SPECULAR_BEZEL_WIDTH, radius)
 	const specularDataUrl = rasterizeSpecularMap(
 		width,
 		height,
 		radius,
-		SPECULAR_BEZEL_WIDTH,
+		specularBezelWidth,
 		specularAngle,
 		dpr,
 	)
