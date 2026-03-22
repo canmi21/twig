@@ -37,6 +37,18 @@ export interface UseSvgLiquidGlassResult {
 	height: number
 	/** Device pixel ratio used for rendering, useful for filterRes. */
 	dpr: number
+	/** CSS backdrop-filter value: url(#filterId) when active, undefined when not. */
+	svgFilter: string | undefined
+	/** CSS blur value for the blur layer: larger fallback before active, refined after. */
+	cssBlur: string
+	/** CSS filter for the blur layer: simulates colorMatrix brightness before glass is ready. */
+	cssFilter: string | undefined
+	/** CSS box-shadow for simulated specular edge highlight (always present). */
+	edgeHighlight: string
+	/** CSS transition for the blur layer fade. */
+	blurTransition: string
+	/** CSS animation class for the SVG filter layer fade-in. */
+	fadeInAnimation: string
 }
 
 export function useSvgLiquidGlass(
@@ -104,8 +116,10 @@ export function useSvgLiquidGlass(
 		options.profileSamples,
 	])
 
+	const isActive = supported && Boolean(asset)
+
 	return {
-		active: supported && !!asset,
+		active: isActive,
 		filterId,
 		displacementMap: asset?.displacementDataUrl ?? null,
 		specularMap: asset?.specularDataUrl ?? null,
@@ -116,5 +130,12 @@ export function useSvgLiquidGlass(
 		width: size.width,
 		height: size.height,
 		dpr: typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+		svgFilter: isActive ? `url(#${filterId})` : undefined,
+		cssBlur: isActive ? 'blur(0.5px)' : 'saturate(1.2) blur(12px) brightness(0.95)',
+		cssFilter: undefined,
+		edgeHighlight:
+			'inset 0 0 0 0.5px rgba(255,255,255,0.15), inset 0 0.5px 0 0.5px rgba(255,255,255,0.1)',
+		blurTransition: 'backdrop-filter 300ms ease-out, -webkit-backdrop-filter 300ms ease-out',
+		fadeInAnimation: 'fadeIn 300ms ease-out both',
 	}
 }

@@ -119,8 +119,6 @@ export function FloatingNav() {
 
 	const glass = useSvgLiquidGlass(glassRef, { blur: 0, theme })
 	const adaptive = useAdaptiveGlass(glassRef)
-
-	const svgFilter = glass.active ? `url(#${glass.filterId})` : undefined
 	const glassBg = `rgb(var(--glass-base) / ${adaptive.bgOpacity})`
 
 	return (
@@ -129,20 +127,29 @@ export function FloatingNav() {
 				<LiquidGlassFilter glass={glass} colorMatrix={buildColorMatrix(0.9, 0.05)} />
 
 				<div ref={glassRef} className="relative rounded-[24px]">
-					{/* Layer 1: SVG filter (displacement/specular/color) */}
+					{/* Layer 0: CSS edge highlight */}
 					<div
 						className="pointer-events-none absolute inset-0 rounded-[24px]"
-						style={{
-							backdropFilter: svgFilter,
-							WebkitBackdropFilter: svgFilter,
-						}}
+						style={{ boxShadow: glass.edgeHighlight }}
 					/>
-					{/* Layer 2: CSS blur edge */}
+					{/* Layer 1: SVG filter */}
+					{glass.svgFilter ? (
+						<div
+							className="pointer-events-none absolute inset-0 rounded-[24px]"
+							style={{
+								animation: glass.fadeInAnimation,
+								backdropFilter: glass.svgFilter,
+								WebkitBackdropFilter: glass.svgFilter,
+							}}
+						/>
+					) : null}
+					{/* Layer 2: CSS blur */}
 					<div
 						className="pointer-events-none absolute inset-0 rounded-[24px]"
 						style={{
-							backdropFilter: 'blur(0.5px)',
-							WebkitBackdropFilter: 'blur(0.5px)',
+							backdropFilter: glass.cssBlur,
+							WebkitBackdropFilter: glass.cssBlur,
+							transition: glass.blurTransition,
 						}}
 					/>
 					{/* Layer 3: adaptive tint fill */}

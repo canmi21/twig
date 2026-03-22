@@ -44,30 +44,160 @@ function linkType(href: string): 'internal' | 'external' | 'special' {
 	return 'special'
 }
 
+function SocialGlassIcon({
+	color,
+	href,
+	icon: Icon,
+	label,
+}: {
+	color: string
+	href: string
+	icon: (typeof FOOTER_SOCIAL_LINKS)[number]['icon']
+	label: string
+}) {
+	const ref = useRef<HTMLDivElement>(null)
+	const theme = useTheme()
+	const glass = useSvgLiquidGlass(ref, {
+		radius: 18,
+		bezelWidth: 8,
+		glassThickness: 30,
+		blur: 0,
+		theme,
+	})
+	const isLarge = label === 'RSS' || label === 'Telegram'
+
+	return (
+		<a
+			key={label}
+			href={href}
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label={label}
+			title={label}
+			className="relative inline-flex size-9 items-center justify-center"
+		>
+			{/* Layer 0: solid color circle */}
+			<div className="absolute inset-0 rounded-full" style={{ backgroundColor: color }} />
+
+			{/* Layer 1-3: liquid glass */}
+			<div ref={ref} className="absolute inset-0 rounded-full">
+				{glass.displacementMap && glass.specularMap ? (
+					<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
+						<defs>
+							<filter
+								id={glass.filterId}
+								x="0"
+								y="0"
+								width={glass.width}
+								height={glass.height}
+								filterUnits="userSpaceOnUse"
+								primitiveUnits="userSpaceOnUse"
+								colorInterpolationFilters="sRGB"
+								filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
+							>
+								<feColorMatrix
+									in="SourceGraphic"
+									type="matrix"
+									values="0.9 0 0 0 0.05 0 0.9 0 0 0.05 0 0 0.9 0 0.05 0 0 0 1 0"
+									result="adjusted_source"
+								/>
+								<feImage
+									href={glass.displacementMap}
+									x="0"
+									y="0"
+									width={glass.width}
+									height={glass.height}
+									preserveAspectRatio="none"
+									result="displacement_map"
+								/>
+								<feDisplacementMap
+									in="adjusted_source"
+									in2="displacement_map"
+									scale={glass.scale}
+									xChannelSelector="R"
+									yChannelSelector="G"
+									result="displaced"
+								/>
+								<feColorMatrix
+									in="displaced"
+									type="saturate"
+									values={String(glass.saturation)}
+									result="displaced_saturated"
+								/>
+								<feImage
+									href={glass.specularMap}
+									x="0"
+									y="0"
+									width={glass.width}
+									height={glass.height}
+									preserveAspectRatio="none"
+									result="specular_layer"
+								/>
+								<feComposite
+									in="displaced_saturated"
+									in2="specular_layer"
+									operator="in"
+									result="specular_saturated"
+								/>
+								<feComponentTransfer in="specular_layer" result="specular_faded">
+									<feFuncA type="linear" slope={String(glass.specularOpacity)} />
+								</feComponentTransfer>
+								<feBlend
+									in="specular_saturated"
+									in2="displaced"
+									mode="normal"
+									result="with_saturation"
+								/>
+								<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
+							</filter>
+						</defs>
+					</svg>
+				) : null}
+
+				{/* Edge highlight */}
+				<div
+					className="pointer-events-none absolute inset-0 rounded-full"
+					style={{ boxShadow: glass.edgeHighlight }}
+				/>
+				{/* SVG filter */}
+				{glass.svgFilter ? (
+					<div
+						className="pointer-events-none absolute inset-0 rounded-full"
+						style={{
+							animation: glass.fadeInAnimation,
+							backdropFilter: glass.svgFilter,
+							WebkitBackdropFilter: glass.svgFilter,
+						}}
+					/>
+				) : null}
+				{/* CSS blur */}
+				<div
+					className="pointer-events-none absolute inset-0 rounded-full"
+					style={{
+						backdropFilter: glass.cssBlur,
+						WebkitBackdropFilter: glass.cssBlur,
+						transition: glass.blurTransition,
+					}}
+				/>
+			</div>
+
+			{/* Layer 4: icon on top */}
+			<Icon className={`relative z-10 text-white ${isLarge ? 'size-5' : 'size-4.5'}`} />
+		</a>
+	)
+}
+
 function FooterSocialLinks() {
 	return (
 		<div className="flex items-center gap-4">
 			{FOOTER_SOCIAL_LINKS.map((item) => (
-				<a
+				<SocialGlassIcon
 					key={item.label}
+					color={item.color}
 					href={item.href}
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label={item.label}
-					title={item.label}
-					className="border-border-subtle inline-flex size-9 items-center justify-center rounded-full border"
-					style={{ backgroundColor: item.color }}
-				>
-					{'icon' in item ? (
-						<item.icon
-							className={
-								item.label === 'RSS' || item.label === 'Telegram'
-									? 'size-5 text-white'
-									: 'size-4.5 text-white'
-							}
-						/>
-					) : null}
-				</a>
+					icon={item.icon}
+					label={item.label}
+				/>
 			))}
 		</div>
 	)
@@ -333,7 +463,6 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 	const theme = useTheme()
 	const glassRef = useRef<HTMLDivElement>(null)
 	const glass = useSvgLiquidGlass(glassRef, { radius: 30, blur: 0, theme })
-	const svgFilter = glass.active ? `url(#${glass.filterId})` : undefined
 
 	return (
 		<footer className="relative mt-16">
@@ -424,22 +553,34 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 						</svg>
 					) : null}
 
-					{/* Layer 1: SVG filter */}
+					{/* Layer 0: CSS edge highlight */}
 					<div
 						className="pointer-events-none absolute inset-0"
 						style={{
 							borderRadius: '30px 30px 0 0',
-							backdropFilter: svgFilter,
-							WebkitBackdropFilter: svgFilter,
+							boxShadow: glass.edgeHighlight,
 						}}
 					/>
-					{/* Layer 2: CSS blur edge */}
+					{/* Layer 1: SVG filter */}
+					{glass.svgFilter ? (
+						<div
+							className="pointer-events-none absolute inset-0"
+							style={{
+								borderRadius: '30px 30px 0 0',
+								animation: glass.fadeInAnimation,
+								backdropFilter: glass.svgFilter,
+								WebkitBackdropFilter: glass.svgFilter,
+							}}
+						/>
+					) : null}
+					{/* Layer 2: CSS blur */}
 					<div
 						className="pointer-events-none absolute inset-0"
 						style={{
 							borderRadius: '30px 30px 0 0',
-							backdropFilter: 'blur(0.5px)',
-							WebkitBackdropFilter: 'blur(0.5px)',
+							backdropFilter: glass.cssBlur,
+							WebkitBackdropFilter: glass.cssBlur,
+							transition: glass.blurTransition,
 						}}
 					/>
 					{/* Layer 3: background fill */}

@@ -45,6 +45,15 @@ html.radial-transition::view-transition-new(root) {
 	animation-name: none;
 }
 
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
 @keyframes wipe-from-top-to-bottom {
 	from {
 		clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%);
