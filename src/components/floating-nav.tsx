@@ -4,6 +4,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import { LayoutGroup, motion } from 'motion/react'
 import { useRef } from 'react'
 import { DotCircle, House, SolidFeatherAlt, SolidHammer, TwotoneSignpost } from '~/components/icons'
+import { useAdaptiveGlass } from '~/hooks/use-adaptive-glass'
 import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
 import { useTheme } from '~/lib/theme'
 
@@ -117,8 +118,10 @@ export function FloatingNav() {
 	const glassRef = useRef<HTMLDivElement>(null)
 
 	const glass = useSvgLiquidGlass(glassRef, { blur: 0, theme })
+	const adaptive = useAdaptiveGlass(glassRef)
 
 	const svgFilter = glass.active ? `url(#${glass.filterId})` : undefined
+	const glassBg = `rgb(var(--glass-base) / ${adaptive.bgOpacity})`
 
 	return (
 		<LayoutGroup id="floating-nav">
@@ -142,10 +145,10 @@ export function FloatingNav() {
 							WebkitBackdropFilter: 'blur(0.5px)',
 						}}
 					/>
-					{/* Layer 4: background fill */}
+					{/* Layer 3: adaptive tint fill */}
 					<div
 						className="pointer-events-none absolute inset-0 rounded-[24px]"
-						style={{ background: 'var(--nav-liquid-fill)' }}
+						style={{ background: glassBg }}
 					/>
 
 					<motion.div
@@ -188,9 +191,15 @@ export function FloatingNav() {
 												className={
 													active
 														? 'relative block'
-														: 'text-content-secondary group-hover:text-content-heading relative block'
+														: 'group-hover:!text-content-heading relative block transition-colors'
 												}
-												style={active ? { color: 'var(--accent)' } : undefined}
+												style={
+													active
+														? { color: 'var(--accent)' }
+														: {
+																color: `color-mix(in oklch, var(--text-heading) ${Math.round((1 - adaptive.intensity) * 100)}%, var(--text-secondary))`,
+															}
+												}
 												transition={sharedLayoutTransition}
 											>
 												{label}
@@ -201,6 +210,13 @@ export function FloatingNav() {
 							)
 						})}
 					</motion.div>
+					{/* DEBUG: adaptive intensity */}
+					<div
+						className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 font-mono text-[10px] opacity-60"
+						style={{ color: 'var(--text-tertiary)' }}
+					>
+						{adaptive.intensity.toFixed(2)} / {adaptive.bgOpacity.toFixed(2)}
+					</div>
 				</div>
 			</nav>
 		</LayoutGroup>

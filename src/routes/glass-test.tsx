@@ -2,6 +2,7 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
+import { useAdaptiveGlass } from '~/hooks/use-adaptive-glass'
 import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
 import { useTheme } from '~/lib/theme'
 
@@ -27,6 +28,7 @@ interface GlassParams {
 	mapBlur: number
 	cssBlurEdge: number
 	cssBlurInner: number
+	adaptiveTint: boolean
 	useObjectBBox: boolean
 	enableColorAdjust: boolean
 	enableBlur: boolean
@@ -53,6 +55,7 @@ const defaultParams: GlassParams = {
 	mapBlur: 0.5,
 	cssBlurEdge: 0.5,
 	cssBlurInner: 0.2,
+	adaptiveTint: true,
 	useObjectBBox: false,
 	enableColorAdjust: true,
 	enableBlur: true,
@@ -273,7 +276,13 @@ function GlassPanel({ params }: { params: GlassParams }) {
 		profileSamples: params.profileSamples,
 		theme,
 	})
-	const glassBg = `rgb(var(--glass-base) / ${params.bgOpacity})`
+
+	const adaptive = useAdaptiveGlass(ref)
+
+	const effectiveBlurEdge = params.cssBlurEdge
+	const effectiveBlurInner = params.cssBlurInner
+	const effectiveBgOpacity = params.adaptiveTint ? adaptive.bgOpacity : params.bgOpacity
+	const glassBg = `rgb(var(--glass-base) / ${effectiveBgOpacity})`
 
 	const backdropFilter = glass.active ? `url(#${glass.filterId})` : 'blur(16px)'
 
@@ -304,28 +313,28 @@ function GlassPanel({ params }: { params: GlassParams }) {
 					}}
 				/>
 				{/* Layer 2: CSS blur for edge/bezel zone */}
-				{params.cssBlurEdge > 0 ? (
+				{effectiveBlurEdge > 0 ? (
 					<div
 						style={{
 							position: 'absolute',
 							inset: 0,
 							borderRadius: 34,
 							pointerEvents: 'none',
-							backdropFilter: `blur(${params.cssBlurEdge}px)`,
-							WebkitBackdropFilter: `blur(${params.cssBlurEdge}px)`,
+							backdropFilter: `blur(${effectiveBlurEdge}px)`,
+							WebkitBackdropFilter: `blur(${effectiveBlurEdge}px)`,
 						}}
 					/>
 				) : null}
 				{/* Layer 3: CSS blur for inner zone (clipped inside bezel) */}
-				{params.cssBlurInner > 0 ? (
+				{effectiveBlurInner > 0 ? (
 					<div
 						style={{
 							position: 'absolute',
 							inset: 0,
 							borderRadius: 34,
 							pointerEvents: 'none',
-							backdropFilter: `blur(${params.cssBlurInner}px)`,
-							WebkitBackdropFilter: `blur(${params.cssBlurInner}px)`,
+							backdropFilter: `blur(${effectiveBlurInner}px)`,
+							WebkitBackdropFilter: `blur(${effectiveBlurInner}px)`,
 							clipPath: `inset(${params.bezelWidth}px round ${Math.max(0, 34 - params.bezelWidth)}px)`,
 						}}
 					/>
@@ -359,6 +368,18 @@ function GlassPanel({ params }: { params: GlassParams }) {
 					<span>Note</span>
 					<span>Code</span>
 					<span>More</span>
+					{params.adaptiveTint ? (
+						<span
+							style={{
+								marginLeft: 'auto',
+								fontSize: 10,
+								fontFamily: 'monospace',
+								opacity: 0.6,
+							}}
+						>
+							{adaptive.intensity.toFixed(2)}
+						</span>
+					) : null}
 				</div>
 			</div>
 		</div>
@@ -366,12 +387,19 @@ function GlassPanel({ params }: { params: GlassParams }) {
 }
 
 function GlassTestPage() {
+	const theme = useTheme()
 	const [params, setParams] = useState<GlassParams>(defaultParams)
 	const set = (key: keyof GlassParams) => (v: number) =>
 		setParams((prev) => ({ ...prev, [key]: v }))
 
 	return (
-		<div style={{ minHeight: '300vh', background: '#0A0A0A', fontFamily: 'system-ui, sans-serif' }}>
+		<div
+			style={{
+				minHeight: '300vh',
+				fontFamily: 'system-ui, sans-serif',
+				background: theme === 'dark' ? '#000' : '#fff',
+			}}
+		>
 			<GlassPanel params={params} />
 
 			<div
@@ -457,7 +485,7 @@ function GlassTestPage() {
 					onChange={set('specularSaturation')}
 				/>
 				<Slider
-					label="BG OPACITY"
+					label="GLASS TINT"
 					value={params.bgOpacity}
 					min={0}
 					max={1}
@@ -541,6 +569,7 @@ function GlassTestPage() {
 					<div style={{ fontSize: 10, color: '#666', fontFamily: 'monospace' }}>FILTER STAGES</div>
 					{(
 						[
+							['adaptiveTint', 'ADAPTIVE TINT'],
 							['useObjectBBox', 'OBJ BBOX MODE'],
 							['enableColorAdjust', 'COLOR ADJUST'],
 							['enableBlur', 'BLUR'],
@@ -591,6 +620,20 @@ function GlassTestPage() {
 			</div>
 
 			<div style={{ padding: '40px 60px' }}>
+				{/* ── Section 1: Pure solid color block ── */}
+				<div style={{ height: 200, borderRadius: 16, background: '#2ecc71', marginBottom: 40 }} />
+
+				{/* ── Section 2: Gradient block ── */}
+				<div
+					style={{
+						height: 200,
+						borderRadius: 16,
+						background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+						marginBottom: 40,
+					}}
+				/>
+
+				{/* ── Section 3: Multiple solid color blocks ── */}
 				<div style={{ display: 'flex', gap: 16, marginBottom: 40 }}>
 					{[
 						'#e74c3c',
@@ -605,12 +648,8 @@ function GlassTestPage() {
 						<div key={c} style={{ width: 140, height: 100, borderRadius: 12, background: c }} />
 					))}
 				</div>
-				<p
-					style={{ color: '#fff', fontSize: 28, lineHeight: 1.8, maxWidth: 900, marginBottom: 40 }}
-				>
-					The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet, consectetur
-					adipiscing elit.
-				</p>
+
+				{/* ── Section 4: Multiple gradient blocks ── */}
 				<div style={{ display: 'flex', gap: 20, marginBottom: 40 }}>
 					<div
 						style={{
@@ -645,10 +684,75 @@ function GlassTestPage() {
 						}}
 					/>
 				</div>
-				<p style={{ color: '#aaa', fontSize: 18, lineHeight: 2, maxWidth: 800, marginBottom: 40 }}>
-					Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-					commodo consequat.
+
+				{/* ── Section 5: Photo-like images ── */}
+				<div style={{ display: 'flex', gap: 20, marginBottom: 40 }}>
+					<img
+						src="https://picsum.photos/seed/glass1/400/300"
+						alt="Sample landscape"
+						style={{ width: 400, height: 300, borderRadius: 16, objectFit: 'cover' }}
+					/>
+					<img
+						src="https://picsum.photos/seed/glass2/400/300"
+						alt="Sample scene"
+						style={{ width: 400, height: 300, borderRadius: 16, objectFit: 'cover' }}
+					/>
+				</div>
+
+				{/* ── Section 6: Large heading (sparse text) ── */}
+				<h2
+					style={{ color: 'var(--text-heading)', fontSize: 72, fontWeight: 900, marginBottom: 20 }}
+				>
+					LIQUID GLASS
+				</h2>
+
+				{/* ── Section 7: Large body text ── */}
+				<p
+					style={{
+						color: 'var(--text-heading)',
+						fontSize: 28,
+						lineHeight: 1.8,
+						maxWidth: 900,
+						marginBottom: 40,
+					}}
+				>
+					The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet, consectetur
+					adipiscing elit.
 				</p>
+
+				{/* ── Section 8: Medium body text ── */}
+				<p
+					style={{
+						color: 'var(--text-secondary)',
+						fontSize: 18,
+						lineHeight: 2,
+						maxWidth: 800,
+						marginBottom: 40,
+					}}
+				>
+					Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+					commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+					dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+				</p>
+
+				{/* ── Section 9: Small dense text ── */}
+				<div style={{ marginBottom: 40, maxWidth: 700 }}>
+					<p style={{ color: 'var(--text-tertiary)', fontSize: 13, lineHeight: 1.8 }}>
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+						incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+						exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
+						dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+					</p>
+					<p
+						style={{ color: 'var(--text-tertiary)', fontSize: 13, lineHeight: 1.8, marginTop: 12 }}
+					>
+						Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
+						laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+						architecto beatae vitae dicta sunt explicabo.
+					</p>
+				</div>
+
+				{/* ── Section 10: Many small colored circles ── */}
 				<div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40 }}>
 					{Array.from({ length: 40 }, (_, i) => (
 						<div
@@ -662,11 +766,47 @@ function GlassTestPage() {
 						/>
 					))}
 				</div>
-				<div style={{ height: 400 }} />
-				<h2 style={{ color: '#fff', fontSize: 72, fontWeight: 900, marginBottom: 20 }}>
-					LIQUID GLASS
-				</h2>
-				<p style={{ color: '#666', fontSize: 16, lineHeight: 2, maxWidth: 600 }}>
+
+				{/* ── Section 11: Mixed — image + text side by side ── */}
+				<div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 40 }}>
+					<img
+						src="https://picsum.photos/seed/glass3/300/400"
+						alt="Sample portrait"
+						style={{ width: 300, height: 400, borderRadius: 16, objectFit: 'cover', flexShrink: 0 }}
+					/>
+					<div>
+						<h3
+							style={{
+								color: 'var(--text-heading)',
+								fontSize: 24,
+								fontWeight: 700,
+								marginBottom: 12,
+							}}
+						>
+							Mixed Content Area
+						</h3>
+						<p style={{ color: 'var(--text-secondary)', fontSize: 15, lineHeight: 1.8 }}>
+							This section has both an image and text side by side. The adaptive tint should find a
+							balance between the visual richness of the photo and the text density. When the glass
+							slides over the image portion it should be more transparent, and when it covers the
+							text it should become slightly more frosted.
+						</p>
+					</div>
+				</div>
+
+				{/* ── Section 12: High-contrast blocks (dark + light) ── */}
+				<div style={{ display: 'flex', gap: 0, marginBottom: 40 }}>
+					<div style={{ width: 200, height: 150, background: '#111' }} />
+					<div style={{ width: 200, height: 150, background: '#eee' }} />
+					<div style={{ width: 200, height: 150, background: '#222' }} />
+					<div style={{ width: 200, height: 150, background: '#ddd' }} />
+					<div style={{ width: 200, height: 150, background: '#333' }} />
+				</div>
+
+				<div style={{ height: 200 }} />
+
+				{/* ── Section 13: Final label ── */}
+				<p style={{ color: 'var(--text-tertiary)', fontSize: 14, lineHeight: 2, maxWidth: 600 }}>
 					Scroll to move content behind the glass. Use sliders to tune parameters.
 				</p>
 				<div style={{ height: 600 }} />
