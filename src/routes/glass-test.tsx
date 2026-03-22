@@ -13,26 +13,52 @@ interface GlassParams {
 	bezelWidth: number
 	glassThickness: number
 	refractiveIndex: number
-	blur: number
+	blurX: number
+	blurY: number
 	scaleRatio: number
 	specularOpacity: number
 	specularSaturation: number
 	bgOpacity: number
 	colorScale: number
 	colorOffset: number
+	supersample: number
+	profileSamples: number
+	filterResMul: number
+	mapBlur: number
+	cssBlurEdge: number
+	cssBlurInner: number
+	useObjectBBox: boolean
+	enableColorAdjust: boolean
+	enableBlur: boolean
+	enableDisplacement: boolean
+	enableSaturate: boolean
+	enableSpecular: boolean
 }
 
 const defaultParams: GlassParams = {
 	bezelWidth: 29,
 	glassThickness: 90,
 	refractiveIndex: 1.3,
-	blur: 1,
+	blurX: 0,
+	blurY: 0,
 	scaleRatio: 1,
 	specularOpacity: 0.4,
 	specularSaturation: 6,
 	bgOpacity: 0,
 	colorScale: 0.9,
 	colorOffset: 0.05,
+	supersample: 1,
+	profileSamples: 64,
+	filterResMul: 2,
+	mapBlur: 0.5,
+	cssBlurEdge: 0.5,
+	cssBlurInner: 0.2,
+	useObjectBBox: false,
+	enableColorAdjust: true,
+	enableBlur: true,
+	enableDisplacement: true,
+	enableSaturate: true,
+	enableSpecular: true,
 }
 
 function buildColorMatrix(scale: number, offset: number): string {
@@ -82,6 +108,156 @@ function Slider({
 	)
 }
 
+function prevStage(...stages: [string, boolean][]): string {
+	for (const [name, enabled] of stages) {
+		if (enabled) {
+			return name
+		}
+	}
+	return 'SourceGraphic'
+}
+
+function GlassFilter({
+	glass,
+	params,
+}: {
+	glass: ReturnType<typeof useSvgLiquidGlass>
+	params: GlassParams
+}) {
+	const obb = params.useObjectBBox
+	const w = glass.width || 1
+	const h = glass.height || 1
+
+	/* objectBoundingBox conversions */
+	const imgX = obb ? '0' : '0'
+	const imgY = obb ? '0' : '0'
+	const imgW = obb ? '1' : String(w)
+	const imgH = obb ? '1' : String(h)
+	const blurVal = obb
+		? `${params.blurX / w} ${params.blurY / h}`
+		: `${params.blurX} ${params.blurY}`
+	const mapBlurVal = obb ? `${params.mapBlur / w} ${params.mapBlur / h}` : String(params.mapBlur)
+	const scaleVal = obb ? glass.scale / w : glass.scale
+
+	const afterColor = prevStage(['after_color', params.enableColorAdjust])
+	const afterBlur = prevStage(
+		['after_blur', params.enableBlur],
+		['after_color', params.enableColorAdjust],
+	)
+	const afterDisp = prevStage(
+		['after_disp', params.enableDisplacement],
+		['after_blur', params.enableBlur],
+		['after_color', params.enableColorAdjust],
+	)
+	const afterSat = prevStage(
+		['after_sat', params.enableSaturate],
+		['after_disp', params.enableDisplacement],
+		['after_blur', params.enableBlur],
+		['after_color', params.enableColorAdjust],
+	)
+
+	return (
+		<svg
+			style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
+			aria-hidden="true"
+		>
+			<defs>
+				<filter
+					id={glass.filterId}
+					x="0"
+					y="0"
+					width={obb ? '1' : w}
+					height={obb ? '1' : h}
+					filterUnits={obb ? 'objectBoundingBox' : 'userSpaceOnUse'}
+					primitiveUnits={obb ? 'objectBoundingBox' : 'userSpaceOnUse'}
+					colorInterpolationFilters="sRGB"
+				>
+					{params.enableColorAdjust ? (
+						<feColorMatrix
+							in="SourceGraphic"
+							type="matrix"
+							values={buildColorMatrix(params.colorScale, params.colorOffset)}
+							result="after_color"
+						/>
+					) : null}
+
+					{params.enableBlur ? (
+						<feGaussianBlur in={afterColor} stdDeviation={blurVal} result="after_blur" />
+					) : null}
+
+					{params.enableDisplacement ? (
+						<>
+							<feImage
+								href={glass.displacementMap!}
+								x={imgX}
+								y={imgY}
+								width={imgW}
+								height={imgH}
+								preserveAspectRatio="none"
+								result="displacement_map_raw"
+							/>
+							{params.mapBlur > 0 ? (
+								<feGaussianBlur
+									in="displacement_map_raw"
+									stdDeviation={mapBlurVal}
+									result="displacement_map"
+								/>
+							) : null}
+							<feDisplacementMap
+								in={afterBlur}
+								in2={params.mapBlur > 0 ? 'displacement_map' : 'displacement_map_raw'}
+								scale={scaleVal}
+								xChannelSelector="R"
+								yChannelSelector="G"
+								result="after_disp"
+							/>
+						</>
+					) : null}
+
+					{params.enableSaturate ? (
+						<feColorMatrix
+							in={afterDisp}
+							type="saturate"
+							values={String(glass.saturation)}
+							result="after_sat"
+						/>
+					) : null}
+
+					{params.enableSpecular ? (
+						<>
+							<feImage
+								href={glass.specularMap!}
+								x={imgX}
+								y={imgY}
+								width={imgW}
+								height={imgH}
+								preserveAspectRatio="none"
+								result="specular_layer"
+							/>
+							<feComposite
+								in={afterSat}
+								in2="specular_layer"
+								operator="in"
+								result="specular_saturated"
+							/>
+							<feComponentTransfer in="specular_layer" result="specular_faded">
+								<feFuncA type="linear" slope={String(glass.specularOpacity)} />
+							</feComponentTransfer>
+							<feBlend
+								in="specular_saturated"
+								in2={afterDisp}
+								mode="normal"
+								result="with_saturation"
+							/>
+							<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
+						</>
+					) : null}
+				</filter>
+			</defs>
+		</svg>
+	)
+}
+
 function GlassPanel({ params }: { params: GlassParams }) {
 	const ref = useRef<HTMLDivElement>(null)
 	const theme = useTheme()
@@ -89,10 +265,12 @@ function GlassPanel({ params }: { params: GlassParams }) {
 		bezelWidth: params.bezelWidth,
 		glassThickness: params.glassThickness,
 		refractiveIndex: params.refractiveIndex,
-		blur: params.blur,
+		blur: 0,
 		scaleRatio: params.scaleRatio,
 		specularOpacity: params.specularOpacity,
 		specularSaturation: params.specularSaturation,
+		supersample: params.supersample,
+		profileSamples: params.profileSamples,
 		theme,
 	})
 	const glassBg = `rgb(var(--glass-base) / ${params.bgOpacity})`
@@ -110,86 +288,11 @@ function GlassPanel({ params }: { params: GlassParams }) {
 			}}
 		>
 			{glass.displacementMap && glass.specularMap ? (
-				<svg
-					style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
-					aria-hidden="true"
-				>
-					<defs>
-						<filter
-							id={glass.filterId}
-							x="0"
-							y="0"
-							width={glass.width}
-							height={glass.height}
-							filterUnits="userSpaceOnUse"
-							primitiveUnits="userSpaceOnUse"
-							colorInterpolationFilters="sRGB"
-						>
-							<feColorMatrix
-								in="SourceGraphic"
-								type="matrix"
-								values={buildColorMatrix(params.colorScale, params.colorOffset)}
-								result="darkened_source"
-							/>
-							<feGaussianBlur
-								in="darkened_source"
-								stdDeviation={glass.blur}
-								result="blurred_source"
-							/>
-							<feImage
-								href={glass.displacementMap}
-								x="0"
-								y="0"
-								width={glass.width}
-								height={glass.height}
-								preserveAspectRatio="none"
-								result="displacement_map"
-							/>
-							<feDisplacementMap
-								in="blurred_source"
-								in2="displacement_map"
-								scale={glass.scale}
-								xChannelSelector="R"
-								yChannelSelector="G"
-								result="displaced"
-							/>
-							<feColorMatrix
-								in="displaced"
-								type="saturate"
-								values={String(glass.saturation)}
-								result="displaced_saturated"
-							/>
-							<feImage
-								href={glass.specularMap}
-								x="0"
-								y="0"
-								width={glass.width}
-								height={glass.height}
-								preserveAspectRatio="none"
-								result="specular_layer"
-							/>
-							<feComposite
-								in="displaced_saturated"
-								in2="specular_layer"
-								operator="in"
-								result="specular_saturated"
-							/>
-							<feComponentTransfer in="specular_layer" result="specular_faded">
-								<feFuncA type="linear" slope={String(glass.specularOpacity)} />
-							</feComponentTransfer>
-							<feBlend
-								in="specular_saturated"
-								in2="displaced"
-								mode="normal"
-								result="with_saturation"
-							/>
-							<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
-						</filter>
-					</defs>
-				</svg>
+				<GlassFilter glass={glass} params={params} />
 			) : null}
 
 			<div ref={ref} style={{ position: 'relative', borderRadius: 34 }}>
+				{/* Layer 1: SVG filter (displacement/specular/color) */}
 				<div
 					style={{
 						position: 'absolute',
@@ -198,6 +301,42 @@ function GlassPanel({ params }: { params: GlassParams }) {
 						pointerEvents: 'none',
 						backdropFilter,
 						WebkitBackdropFilter: backdropFilter,
+					}}
+				/>
+				{/* Layer 2: CSS blur for edge/bezel zone */}
+				{params.cssBlurEdge > 0 ? (
+					<div
+						style={{
+							position: 'absolute',
+							inset: 0,
+							borderRadius: 34,
+							pointerEvents: 'none',
+							backdropFilter: `blur(${params.cssBlurEdge}px)`,
+							WebkitBackdropFilter: `blur(${params.cssBlurEdge}px)`,
+						}}
+					/>
+				) : null}
+				{/* Layer 3: CSS blur for inner zone (clipped inside bezel) */}
+				{params.cssBlurInner > 0 ? (
+					<div
+						style={{
+							position: 'absolute',
+							inset: 0,
+							borderRadius: 34,
+							pointerEvents: 'none',
+							backdropFilter: `blur(${params.cssBlurInner}px)`,
+							WebkitBackdropFilter: `blur(${params.cssBlurInner}px)`,
+							clipPath: `inset(${params.bezelWidth}px round ${Math.max(0, 34 - params.bezelWidth)}px)`,
+						}}
+					/>
+				) : null}
+				{/* Layer 4: background fill */}
+				<div
+					style={{
+						position: 'absolute',
+						inset: 0,
+						borderRadius: 34,
+						pointerEvents: 'none',
 						background: glassBg,
 					}}
 				/>
@@ -278,12 +417,20 @@ function GlassTestPage() {
 					onChange={set('refractiveIndex')}
 				/>
 				<Slider
-					label="BLUR"
-					value={params.blur}
+					label="BLUR X"
+					value={params.blurX}
 					min={0}
 					max={8}
-					step={0.5}
-					onChange={set('blur')}
+					step={0.1}
+					onChange={set('blurX')}
+				/>
+				<Slider
+					label="BLUR Y"
+					value={params.blurY}
+					min={0}
+					max={8}
+					step={0.1}
+					onChange={set('blurY')}
 				/>
 				<Slider
 					label="SCALE RATIO"
@@ -333,6 +480,97 @@ function GlassTestPage() {
 					step={0.01}
 					onChange={set('colorOffset')}
 				/>
+				<Slider
+					label="SUPERSAMPLE"
+					value={params.supersample}
+					min={1}
+					max={8}
+					step={1}
+					onChange={set('supersample')}
+				/>
+				<Slider
+					label="PROFILE SAMPLES"
+					value={params.profileSamples}
+					min={64}
+					max={512}
+					step={64}
+					onChange={set('profileSamples')}
+				/>
+				<Slider
+					label="CSS BLUR EDGE"
+					value={params.cssBlurEdge}
+					min={0}
+					max={8}
+					step={0.1}
+					onChange={set('cssBlurEdge')}
+				/>
+				<Slider
+					label="CSS BLUR INNER"
+					value={params.cssBlurInner}
+					min={0}
+					max={8}
+					step={0.1}
+					onChange={set('cssBlurInner')}
+				/>
+				<Slider
+					label="MAP BLUR"
+					value={params.mapBlur}
+					min={0}
+					max={4}
+					step={0.1}
+					onChange={set('mapBlur')}
+				/>
+				<Slider
+					label="FILTER RES MUL"
+					value={params.filterResMul}
+					min={0.5}
+					max={8}
+					step={0.5}
+					onChange={set('filterResMul')}
+				/>
+				<div
+					style={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: 4,
+						marginTop: 8,
+						borderTop: '1px solid #333',
+						paddingTop: 8,
+					}}
+				>
+					<div style={{ fontSize: 10, color: '#666', fontFamily: 'monospace' }}>FILTER STAGES</div>
+					{(
+						[
+							['useObjectBBox', 'OBJ BBOX MODE'],
+							['enableColorAdjust', 'COLOR ADJUST'],
+							['enableBlur', 'BLUR'],
+							['enableDisplacement', 'DISPLACEMENT'],
+							['enableSaturate', 'SATURATE'],
+							['enableSpecular', 'SPECULAR'],
+						] as const
+					).map(([key, label]) => (
+						<label
+							key={key}
+							style={{
+								display: 'flex',
+								alignItems: 'center',
+								gap: 8,
+								fontSize: 11,
+								color: '#aaa',
+								fontFamily: 'monospace',
+								cursor: 'pointer',
+							}}
+						>
+							<input
+								type="checkbox"
+								checked={params[key]}
+								onChange={(e) => setParams((prev) => ({ ...prev, [key]: e.target.checked }))}
+								style={{ accentColor: '#f0c040' }}
+							/>
+							{label}
+						</label>
+					))}
+				</div>
 				<button
 					type="button"
 					onClick={() => setParams(defaultParams)}

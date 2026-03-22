@@ -22,6 +22,10 @@ export interface LiquidGlassParams {
 	specularAngle?: number
 	/** Device pixel ratio override (default window.devicePixelRatio). */
 	dpr?: number
+	/** Supersampling multiplier applied on top of DPR (default 1). */
+	supersample?: number
+	/** Number of 1D refraction profile samples (default 128). */
+	profileSamples?: number
 }
 
 export interface LiquidGlassAsset {
@@ -326,8 +330,11 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		bezelType = 'convex_squircle',
 		specularAngle = Math.PI / 3,
 		dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
+		supersample = 1,
+		profileSamples = 128,
 	} = params
 
+	const effectiveDpr = dpr * supersample
 	const surfaceFn = BEZEL_SURFACE_FNS[bezelType]
 
 	const refractionProfile = computeRefractionProfile(
@@ -335,6 +342,7 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		bezelWidth,
 		surfaceFn,
 		refractiveIndex,
+		profileSamples,
 	)
 	const maxDisplacement = Math.max(...refractionProfile.map((v) => Math.abs(v)))
 
@@ -345,7 +353,7 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		bezelWidth,
 		maxDisplacement,
 		refractionProfile,
-		dpr,
+		effectiveDpr,
 	)
 
 	const specularBezelWidth = Math.min(SPECULAR_BEZEL_WIDTH, radius)
@@ -355,7 +363,7 @@ export function createLiquidGlassAsset(params: LiquidGlassParams): LiquidGlassAs
 		radius,
 		specularBezelWidth,
 		specularAngle,
-		dpr,
+		effectiveDpr,
 	)
 
 	return { displacementDataUrl, specularDataUrl, maxDisplacement }

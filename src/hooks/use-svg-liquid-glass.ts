@@ -19,6 +19,8 @@ export interface SvgLiquidGlassOptions {
 	scaleRatio?: number
 	specularOpacity?: number
 	specularSaturation?: number
+	supersample?: number
+	profileSamples?: number
 	theme?: ResolvedTheme
 }
 
@@ -33,6 +35,8 @@ export interface UseSvgLiquidGlassResult {
 	specularOpacity: number
 	width: number
 	height: number
+	/** Device pixel ratio used for rendering, useful for filterRes. */
+	dpr: number
 }
 
 export function useSvgLiquidGlass(
@@ -83,6 +87,8 @@ export function useSvgLiquidGlass(
 			refractiveIndex: options.refractiveIndex ?? 1.3,
 			bezelType: options.bezelType ?? 'convex_squircle',
 			specularAngle: options.specularAngle,
+			supersample: options.supersample ?? 1,
+			profileSamples: options.profileSamples ?? 64,
 		})
 	}, [
 		supported,
@@ -94,6 +100,8 @@ export function useSvgLiquidGlass(
 		options.refractiveIndex,
 		options.bezelType,
 		options.specularAngle,
+		options.supersample,
+		options.profileSamples,
 	])
 
 	return {
@@ -101,11 +109,12 @@ export function useSvgLiquidGlass(
 		filterId,
 		displacementMap: asset?.displacementDataUrl ?? null,
 		specularMap: asset?.specularDataUrl ?? null,
-		blur: options.blur ?? 1,
+		blur: options.blur ?? 0,
 		scale: (asset?.maxDisplacement ?? 0) * Math.max(0, Math.min(1, options.scaleRatio ?? 1)),
 		saturation: options.specularSaturation ?? 6,
 		specularOpacity: options.specularOpacity ?? 0.4,
 		width: size.width,
 		height: size.height,
+		dpr: typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1,
 	}
 }

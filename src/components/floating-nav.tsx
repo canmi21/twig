@@ -51,6 +51,7 @@ function LiquidGlassFilter({
 					filterUnits="userSpaceOnUse"
 					primitiveUnits="userSpaceOnUse"
 					colorInterpolationFilters="sRGB"
+					filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
 				>
 					<feColorMatrix
 						in="SourceGraphic"
@@ -115,9 +116,9 @@ export function FloatingNav() {
 	const theme = useTheme()
 	const glassRef = useRef<HTMLDivElement>(null)
 
-	const glass = useSvgLiquidGlass(glassRef, { theme })
+	const glass = useSvgLiquidGlass(glassRef, { blur: 0, theme })
 
-	const backdropFilter = glass.active ? `url(#${glass.filterId})` : 'blur(16px)'
+	const svgFilter = glass.active ? `url(#${glass.filterId})` : undefined
 
 	return (
 		<LayoutGroup id="floating-nav">
@@ -125,17 +126,30 @@ export function FloatingNav() {
 				<LiquidGlassFilter glass={glass} colorMatrix={buildColorMatrix(0.9, 0.05)} />
 
 				<div ref={glassRef} className="relative rounded-[24px]">
+					{/* Layer 1: SVG filter (displacement/specular/color) */}
 					<div
 						className="pointer-events-none absolute inset-0 rounded-[24px]"
 						style={{
-							backdropFilter,
-							WebkitBackdropFilter: backdropFilter,
-							background: 'var(--nav-liquid-fill)',
+							backdropFilter: svgFilter,
+							WebkitBackdropFilter: svgFilter,
 						}}
+					/>
+					{/* Layer 2: CSS blur edge */}
+					<div
+						className="pointer-events-none absolute inset-0 rounded-[24px]"
+						style={{
+							backdropFilter: 'blur(0.5px)',
+							WebkitBackdropFilter: 'blur(0.5px)',
+						}}
+					/>
+					{/* Layer 4: background fill */}
+					<div
+						className="pointer-events-none absolute inset-0 rounded-[24px]"
+						style={{ background: 'var(--nav-liquid-fill)' }}
 					/>
 
 					<motion.div
-						layout="size"
+						layout="position"
 						className="relative z-10 flex items-center gap-0.5 px-3 py-1.5"
 						transition={sharedLayoutTransition}
 					>
@@ -156,7 +170,7 @@ export function FloatingNav() {
 										className="group relative block rounded-full px-3 py-2 text-[0.8125rem]/[1.05] font-bold no-underline transition-colors duration-200 sm:text-[0.875rem]/[1.05]"
 									>
 										<motion.span
-											layout
+											layout="position"
 											className="relative flex items-center gap-1.5"
 											transition={sharedLayoutTransition}
 										>
@@ -170,7 +184,7 @@ export function FloatingNav() {
 												</motion.span>
 											) : null}
 											<motion.span
-												layout
+												layout="position"
 												className={
 													active
 														? 'relative block'

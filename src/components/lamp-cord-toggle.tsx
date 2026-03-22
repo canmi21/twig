@@ -349,6 +349,7 @@ export function LampCordToggle() {
 								filterUnits="userSpaceOnUse"
 								primitiveUnits="userSpaceOnUse"
 								colorInterpolationFilters="sRGB"
+								filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
 							>
 								<feColorMatrix
 									in="SourceGraphic"
@@ -413,13 +414,26 @@ export function LampCordToggle() {
 						</defs>
 					</svg>
 				) : null}
+				{/* SVG filter layer */}
 				<div
 					className="pointer-events-none absolute inset-0 rounded-full"
 					style={{
-						backdropFilter: glass.active ? `url(#${glass.filterId})` : 'blur(8px)',
-						WebkitBackdropFilter: glass.active ? `url(#${glass.filterId})` : 'blur(8px)',
-						background: 'var(--nav-liquid-fill)',
+						backdropFilter: glass.active ? `url(#${glass.filterId})` : undefined,
+						WebkitBackdropFilter: glass.active ? `url(#${glass.filterId})` : undefined,
 					}}
+				/>
+				{/* CSS blur edge */}
+				<div
+					className="pointer-events-none absolute inset-0 rounded-full"
+					style={{
+						backdropFilter: 'blur(0.5px)',
+						WebkitBackdropFilter: 'blur(0.5px)',
+					}}
+				/>
+				{/* Background fill */}
+				<div
+					className="pointer-events-none absolute inset-0 rounded-full"
+					style={{ background: 'var(--nav-liquid-fill)' }}
 				/>
 			</div>
 		</motion.button>
