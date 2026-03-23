@@ -80,7 +80,7 @@ function BreakFall({
 				animate={{ height: restLength }}
 				transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.5 }}
 			/>
-			<div className="bg-content-tertiary size-5 w-2 rounded-full" />
+			<div className="bg-content-tertiary size-5 w-2 rounded-sm" />
 		</motion.div>
 	)
 }
@@ -337,8 +337,8 @@ export function LampCordToggle() {
 			}}
 		>
 			<motion.div className="bg-border-strong w-px" style={{ height: cordHeight }} />
-			<div ref={handleRef} className="relative size-5 w-2 rounded-full">
-				<LiquidGlassOverlay glass={glass} borderRadius="50%" background="var(--nav-liquid-fill)" />
+			<div ref={handleRef} className="relative size-5 w-2 rounded-sm">
+				<LiquidGlassOverlay glass={glass} borderRadius={3} background="var(--nav-liquid-fill)" />
 			</div>
 		</motion.button>
 	)

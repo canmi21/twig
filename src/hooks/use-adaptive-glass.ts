@@ -148,8 +148,8 @@ function scoreNonTextColors(colors: RGB[]): number {
 	return raw * NON_TEXT_SCORE_CAP
 }
 
-/** Ratio threshold: if element width > glass width * this, treat as container. */
-const CONTAINER_WIDTH_RATIO = 2
+/** Layout container tags — only these are checked for width-based container detection. */
+const LAYOUT_TAGS = new Set(['MAIN', 'SECTION', 'DIV', 'HEADER', 'FOOTER', 'ASIDE', 'NAV'])
 
 /**
  * Score a single sampled element relative to the glass size.
@@ -167,10 +167,12 @@ function sampleElement(el: Element, glassHeight: number, glassWidth: number): Sa
 		}
 	}
 
-	/* Priority 2: page-level containers (wider than glass * 2, or transparent bg + wider) → empty background */
-	const elWidth = (el as HTMLElement).offsetWidth
-	if (elWidth > 0 && elWidth > glassWidth * CONTAINER_WIDTH_RATIO) {
-		return { isText: false, textScore: -1, color: parseRgb(getComputedStyle(el).backgroundColor) }
+	/* Priority 2: layout containers (generic structural tags wider than glass) → empty background */
+	if (LAYOUT_TAGS.has(el.tagName)) {
+		const elWidth = (el as HTMLElement).offsetWidth
+		if (elWidth > 0 && elWidth > glassWidth * 1.5) {
+			return { isText: false, textScore: -1, color: parseRgb(getComputedStyle(el).backgroundColor) }
+		}
 	}
 
 	/* Priority 3: code/table → always dense text */
