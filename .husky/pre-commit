@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Formatting — mandatory, blocks commit on failure
+bun run fmt || exit 1
+
+# Re-stage any files that fmt modified
+git diff --name-only | xargs -r git add
+
+# Lint — show output, block only on errors (non-zero exit)
+echo "Running oxlint..."
+bun run lint:oxlint
+OXLINT_EXIT=$?
+
+echo "Running eslint..."
+bun run lint:eslint
+ESLINT_EXIT=$?
+
+if [ $OXLINT_EXIT -ne 0 ] || [ $ESLINT_EXIT -ne 0 ]; then
+  echo ""
+  echo "Lint errors found. Commit blocked."
+  exit 1
+fi

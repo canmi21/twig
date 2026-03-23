@@ -13,7 +13,7 @@
     "lint:oxlint:fix": "oxlint --tsconfig tsconfig.json --fix .",
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "eslint . --fix",
-    "fmt": "oxfmt --write . && chore .",
+    "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p drizzle/tsconfig.json",
     "cf:typegen": "wrangler types worker-configuration.d.ts --env-interface CloudflareEnv",
@@ -22,7 +22,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply taki-sql --remote",
     "db:seed": "bun drizzle/seed.ts",
     "db:fresh": "rm -rf .wrangler/state && bun run db:migrate && bun run db:seed",
-    "deploy": "bun run build && wrangler d1 migrations apply taki-sql --remote && wrangler deploy"
+    "deploy": "bun run build && wrangler d1 migrations apply taki-sql --remote && wrangler deploy",
+    "prepare": "husky"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.29.0",
@@ -72,6 +73,7 @@
     "eslint-plugin-oxlint": "^1.56.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.4.0",
+    "husky": "^9.1.7",
     "knip": "^5.87.0",
     "oxfmt": "^0.40.0",
     "oxlint": "^1.56.0",

@@ -1,6 +1,5 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "ignoreBinaries": ["chore"],
   "ignoreDependencies": ["bun-types", "cloudflare", "entities"],
   "workspaces": {
     ".": {

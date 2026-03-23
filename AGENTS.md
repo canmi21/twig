@@ -53,9 +53,15 @@
 - Use a scope only when it materially improves clarity.
 - Do not mention plan phases in commit messages.
 - Do not mention version bumps in commit messages unless the user explicitly asks for that.
-- Before every `git commit`, run `bun run fmt`, `bun run lint`, and `bun run typecheck`, then fix any failures.
+- Before every `git commit`, run `bun run fmt`, `bun run lint`, and `bun run typecheck`, then fix any failures. Husky pre-commit enforces `fmt` (blocks on failure) and runs `lint:oxlint` / `lint:eslint` (blocks only on errors); the commit-msg hook validates Conventional Commit format. These hooks are the safety net — the agent should still run checks explicitly before committing.
 - When routing, build config, generated files, or dependency wiring change, also run `bun run build` and `bun run knip` before commit.
 - If the user provides a full execution plan and the work completes cleanly, commit directly with the required format when requested.
 - If any issue, ambiguity, or suspected breaking change appears, stop and discuss with the user before committing unless the user explicitly asks otherwise.
 - If any issue appears during implementation, stop and do not commit. Wait for the user to confirm the fix before committing.
 - Do not push unless the user explicitly asks.
+
+## Lint Pipeline
+
+- Execution order: `oxfmt` → `oxlint` → `eslint`. Pre-commit hooks follow the same order.
+- `oxlint` handles all general lint rules. `eslint` is minimal — only React Compiler rules and Tailwind CSS.
+- `eslint-plugin-oxlint` auto-disables ESLint rules already covered by oxlint via `buildFromOxlintConfigFile`.
