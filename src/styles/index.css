@@ -130,3 +130,34 @@ code {
 .prose :where(a:hover):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
 	color: var(--prose-links-hover);
 }
+
+/* Heading anchor links — no underline, # icon appears on hover */
+.prose :where(.heading-anchor):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	text-decoration: none;
+	color: inherit;
+}
+
+.prose :where(.heading-anchor:hover):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	color: inherit;
+}
+
+.prose :where(.heading-anchor-icon):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	position: absolute;
+	left: -1.2em;
+	color: var(--text-tertiary);
+	font-weight: 400;
+	opacity: 0;
+	transition: opacity 150ms ease-out;
+}
+
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+	position: relative;
+}
+
+.prose
+	:where(h1:hover, h2:hover, h3:hover, h4:hover, h5:hover, h6:hover):not(
+		:where([class~='not-prose'], [class~='not-prose'] *)
+	)
+	.heading-anchor-icon {
+	opacity: 1;
+}
