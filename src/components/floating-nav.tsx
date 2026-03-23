@@ -101,13 +101,6 @@ export function FloatingNav() {
 							)
 						})}
 					</motion.div>
-					{/* DEBUG: adaptive intensity */}
-					<div
-						className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 font-mono text-[10px] opacity-60"
-						style={{ color: 'var(--text-tertiary)' }}
-					>
-						{adaptive.intensity.toFixed(2)} / {adaptive.bgOpacity.toFixed(2)}
-					</div>
 				</div>
 			</nav>
 		</LayoutGroup>

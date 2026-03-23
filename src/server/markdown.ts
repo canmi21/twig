@@ -5,7 +5,9 @@ import '@tanstack/react-start/server-only'
 
 import { createJavaScriptRegexEngine } from '@shikijs/engine-javascript'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeKatex from 'rehype-katex'
+import rehypeSlug from 'rehype-slug'
 import rehypeStringify from 'rehype-stringify'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
@@ -45,6 +47,8 @@ const processor = unified()
 		},
 	})
 	.use(rehypeKatex)
+	.use(rehypeSlug)
+	.use(rehypeAutolinkHeadings, { behavior: 'wrap' })
 	.use(rehypeStringify)
 
 /** Render a markdown string to syntax-highlighted HTML. */
