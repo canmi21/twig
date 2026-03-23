@@ -23,7 +23,7 @@ function PostPage() {
 	const tags: string[] = meta.tags ? JSON.parse(meta.tags) : []
 
 	return (
-		<article>
+		<article className="border-border-subtle bg-surface rounded-lg border px-8 py-10 shadow-(--shadow-md) sm:px-12 sm:py-12">
 			<header className="mb-8">
 				<h1 className="text-content-heading text-3xl font-bold tracking-tight sm:text-4xl">
 					{meta.title}

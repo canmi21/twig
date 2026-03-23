@@ -2,6 +2,7 @@
 
 @import './codes.css';
 @import './transitions.css';
+@import 'katex/dist/katex.min.css';
 
 html {
 	background-color: var(--background);

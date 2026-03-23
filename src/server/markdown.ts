@@ -5,7 +5,11 @@ import '@tanstack/react-start/server-only'
 
 import { createJavaScriptRegexEngine } from '@shikijs/engine-javascript'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
+import rehypeKatex from 'rehype-katex'
 import rehypeStringify from 'rehype-stringify'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import type { HighlighterGeneric } from '@shikijs/types'
@@ -29,6 +33,9 @@ const highlighter = await createHighlighterCore({
 
 const processor = unified()
 	.use(remarkParse)
+	.use(remarkFrontmatter)
+	.use(remarkGfm)
+	.use(remarkMath)
 	.use(remarkRehype)
 	// See shikijs/shiki#985: HighlighterCore is Generic<never,never> but rehype expects <any,any>.
 	.use(rehypeShikiFromHighlighter, highlighter as HighlighterGeneric<string, string>, {
@@ -37,6 +44,7 @@ const processor = unified()
 			light: 'github-light',
 		},
 	})
+	.use(rehypeKatex)
 	.use(rehypeStringify)
 
 /** Render a markdown string to syntax-highlighted HTML. */

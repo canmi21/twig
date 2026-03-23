@@ -123,17 +123,17 @@
 .dark {
 	/* ── Surfaces ── */
 	/* Mirror light-mode relief: surface deepest, base slightly above, elevated highest */
-	/* Light range 0.94–1.00 (6 steps) ↔ Dark range 0.15–0.22 (7 steps) */
-	--bg-base: oklch(0.21 0.005 90);
-	--bg-surface: oklch(0.18 0.005 90);
-	--bg-elevated: oklch(0.22 0.005 90);
-	--bg-sunken: oklch(0.15 0.004 90);
-	--bg-overlay: oklch(0.08 0.003 90 / 0.65);
+	/* Light range 0.94–1.00 (6 steps) ↔ Dark range 0.19–0.26 (7 steps) */
+	--bg-base: oklch(0.25 0.005 90);
+	--bg-surface: oklch(0.22 0.005 90);
+	--bg-elevated: oklch(0.26 0.005 90);
+	--bg-sunken: oklch(0.19 0.004 90);
+	--bg-overlay: oklch(0.1 0.003 90 / 0.65);
 
 	/* ── Borders ── */
-	--border-default: oklch(0.3 0.005 90);
-	--border-strong: oklch(0.4 0.005 90);
-	--border-subtle: oklch(0.3 0.005 90 / 0.5);
+	--border-default: oklch(0.34 0.005 90);
+	--border-strong: oklch(0.44 0.005 90);
+	--border-subtle: oklch(0.34 0.005 90 / 0.5);
 
 	/* ── Text ── */
 	--text-heading: oklch(0.96 0.002 90);
@@ -167,7 +167,7 @@
 	--nav-glass-bg: color-mix(in oklch, var(--bg-surface) 60%, transparent);
 	--nav-glass-border: color-mix(in oklch, var(--border-subtle) 92%, transparent);
 	--nav-liquid-bg: color-mix(in oklch, var(--bg-surface) 14%, transparent);
-	--glass-base: 34 34 34;
+	--glass-base: 44 44 44;
 	--nav-liquid-fill: rgb(var(--glass-base) / var(--glass-opacity));
 	--nav-liquid-border: oklch(1 0 0 / 0.14);
 	--nav-liquid-edge: oklch(1 0 0 / 0.2);
