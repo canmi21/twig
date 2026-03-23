@@ -4,6 +4,7 @@ import { motion } from 'motion/react'
 import { ArrowUpRight, Mail } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { GitHub, Rss, Telegram, Twitter, YouTube } from '~/components/icons'
+import { LiquidGlassOverlay } from '~/components/liquid-glass-overlay'
 import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
 import { useTheme } from '~/lib/theme'
 
@@ -74,111 +75,14 @@ function SocialGlassIcon({
 			rel="noopener noreferrer"
 			aria-label={label}
 			title={label}
-			className="relative inline-flex size-9 items-center justify-center"
+			className="relative inline-flex size-9 items-center justify-center transition-transform duration-200 ease-out hover:scale-[1.025]"
 		>
 			{/* Layer 0: solid color circle */}
 			<div className="absolute inset-0 rounded-full" style={{ backgroundColor: color }} />
 
-			{/* Layer 1-3: liquid glass */}
+			{/* Liquid glass overlay */}
 			<div ref={ref} className="absolute inset-0 rounded-full">
-				{glass.displacementMap && glass.specularMap ? (
-					<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
-						<defs>
-							<filter
-								id={glass.filterId}
-								x="0"
-								y="0"
-								width={glass.width}
-								height={glass.height}
-								filterUnits="userSpaceOnUse"
-								primitiveUnits="userSpaceOnUse"
-								colorInterpolationFilters="sRGB"
-								filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
-							>
-								<feColorMatrix
-									in="SourceGraphic"
-									type="matrix"
-									values="0.9 0 0 0 0.05 0 0.9 0 0 0.05 0 0 0.9 0 0.05 0 0 0 1 0"
-									result="adjusted_source"
-								/>
-								<feImage
-									href={glass.displacementMap}
-									x="0"
-									y="0"
-									width={glass.width}
-									height={glass.height}
-									preserveAspectRatio="none"
-									result="displacement_map"
-								/>
-								<feDisplacementMap
-									in="adjusted_source"
-									in2="displacement_map"
-									scale={glass.scale}
-									xChannelSelector="R"
-									yChannelSelector="G"
-									result="displaced"
-								/>
-								<feColorMatrix
-									in="displaced"
-									type="saturate"
-									values={String(glass.saturation)}
-									result="displaced_saturated"
-								/>
-								<feImage
-									href={glass.specularMap}
-									x="0"
-									y="0"
-									width={glass.width}
-									height={glass.height}
-									preserveAspectRatio="none"
-									result="specular_layer"
-								/>
-								<feComposite
-									in="displaced_saturated"
-									in2="specular_layer"
-									operator="in"
-									result="specular_saturated"
-								/>
-								<feComponentTransfer in="specular_layer" result="specular_faded">
-									<feFuncA type="linear" slope={String(glass.specularOpacity)} />
-								</feComponentTransfer>
-								<feBlend
-									in="specular_saturated"
-									in2="displaced"
-									mode="normal"
-									result="with_saturation"
-								/>
-								<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
-							</filter>
-						</defs>
-					</svg>
-				) : null}
-
-				{/* Edge highlight */}
-				<div
-					className="pointer-events-none absolute inset-0 rounded-full"
-					style={{ boxShadow: glass.edgeHighlight }}
-				/>
-				{/* SVG filter */}
-				{glass.svgFilter ? (
-					<div
-						className="pointer-events-none absolute inset-0 rounded-full"
-						style={{
-							animation: glass.fadeInAnimation,
-							backdropFilter: glass.svgFilter,
-							WebkitBackdropFilter: glass.svgFilter,
-						}}
-					/>
-				) : null}
-				{/* CSS blur */}
-				<div
-					className="pointer-events-none absolute inset-0 rounded-full"
-					style={{
-						backdropFilter: glass.cssBlur,
-						WebkitBackdropFilter: glass.cssBlur,
-						transition: glass.blurTransition,
-					}}
-				/>
+				<LiquidGlassOverlay glass={glass} borderRadius="50%" />
 			</div>
 
 			{/* Layer 4: icon on top */}
@@ -455,7 +359,6 @@ interface SiteFooterProps {
 	}
 }
 
-const FOOTER_COLOR_MATRIX = '0.9 0 0 0 0.05 0 0.9 0 0 0.05 0 0 0.9 0 0.05 0 0 0 1 0'
 const FOOTER_GLASS_OVERFLOW = 40
 
 export function SiteFooter({ siteConfig }: SiteFooterProps) {
@@ -479,117 +382,10 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 						borderRadius: '30px 30px 0 0',
 					}}
 				>
-					{/* SVG filter definition */}
-					{glass.displacementMap && glass.specularMap ? (
-						<svg className="absolute size-0 overflow-hidden" aria-hidden="true" focusable="false">
-							<defs>
-								<filter
-									id={glass.filterId}
-									x="0"
-									y="0"
-									width={glass.width}
-									height={glass.height}
-									filterUnits="userSpaceOnUse"
-									primitiveUnits="userSpaceOnUse"
-									colorInterpolationFilters="sRGB"
-									filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
-								>
-									<feColorMatrix
-										in="SourceGraphic"
-										type="matrix"
-										values={FOOTER_COLOR_MATRIX}
-										result="adjusted_source"
-									/>
-									<feImage
-										href={glass.displacementMap}
-										x="0"
-										y="0"
-										width={glass.width}
-										height={glass.height}
-										preserveAspectRatio="none"
-										result="displacement_map"
-									/>
-									<feDisplacementMap
-										in="adjusted_source"
-										in2="displacement_map"
-										scale={glass.scale}
-										xChannelSelector="R"
-										yChannelSelector="G"
-										result="displaced"
-									/>
-									<feColorMatrix
-										in="displaced"
-										type="saturate"
-										values={String(glass.saturation)}
-										result="displaced_saturated"
-									/>
-									<feImage
-										href={glass.specularMap}
-										x="0"
-										y="0"
-										width={glass.width}
-										height={glass.height}
-										preserveAspectRatio="none"
-										result="specular_layer"
-									/>
-									<feComposite
-										in="displaced_saturated"
-										in2="specular_layer"
-										operator="in"
-										result="specular_saturated"
-									/>
-									<feComponentTransfer in="specular_layer" result="specular_faded">
-										<feFuncA type="linear" slope={String(glass.specularOpacity)} />
-									</feComponentTransfer>
-									<feBlend
-										in="specular_saturated"
-										in2="displaced"
-										mode="normal"
-										result="with_saturation"
-									/>
-									<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
-								</filter>
-							</defs>
-						</svg>
-					) : null}
-
-					{/* Layer 0: CSS edge highlight */}
-					<div
-						className="pointer-events-none absolute inset-0"
-						style={{
-							borderRadius: '30px 30px 0 0',
-							boxShadow: glass.edgeHighlight,
-						}}
-					/>
-					{/* Layer 1: SVG filter */}
-					{glass.svgFilter ? (
-						<div
-							className="pointer-events-none absolute inset-0"
-							style={{
-								borderRadius: '30px 30px 0 0',
-								animation: glass.fadeInAnimation,
-								backdropFilter: glass.svgFilter,
-								WebkitBackdropFilter: glass.svgFilter,
-							}}
-						/>
-					) : null}
-					{/* Layer 2: CSS blur */}
-					<div
-						className="pointer-events-none absolute inset-0"
-						style={{
-							borderRadius: '30px 30px 0 0',
-							backdropFilter: glass.cssBlur,
-							WebkitBackdropFilter: glass.cssBlur,
-							transition: glass.blurTransition,
-						}}
-					/>
-					{/* Layer 3: background fill */}
-					<div
-						className="pointer-events-none absolute inset-0"
-						style={{
-							borderRadius: '30px 30px 0 0',
-							background: 'var(--footer-glass-bg)',
-						}}
+					<LiquidGlassOverlay
+						glass={glass}
+						borderRadius="30px 30px 0 0"
+						background="var(--footer-glass-bg)"
 					/>
 				</div>
 

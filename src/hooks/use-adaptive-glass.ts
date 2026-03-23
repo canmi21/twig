@@ -148,10 +148,13 @@ function scoreNonTextColors(colors: RGB[]): number {
 	return raw * NON_TEXT_SCORE_CAP
 }
 
+/** Ratio threshold: if element width > glass width * this, treat as container. */
+const CONTAINER_WIDTH_RATIO = 2
+
 /**
  * Score a single sampled element relative to the glass size.
  */
-function sampleElement(el: Element, glassHeight: number): SampleResult {
+function sampleElement(el: Element, glassHeight: number, glassWidth: number): SampleResult {
 	/* Priority 1: declarative hint */
 	const hintEl = el.closest('[data-glass-hint]')
 	if (hintEl) {
@@ -164,23 +167,29 @@ function sampleElement(el: Element, glassHeight: number): SampleResult {
 		}
 	}
 
-	/* Priority 2: code/table → always dense text */
+	/* Priority 2: page-level containers (wider than glass * 2, or transparent bg + wider) → empty background */
+	const elWidth = (el as HTMLElement).offsetWidth
+	if (elWidth > 0 && elWidth > glassWidth * CONTAINER_WIDTH_RATIO) {
+		return { isText: false, textScore: -1, color: parseRgb(getComputedStyle(el).backgroundColor) }
+	}
+
+	/* Priority 3: code/table → always dense text */
 	if (DENSE_TAGS.has(el.tagName)) {
 		return { isText: true, textScore: 1, color: null }
 	}
 
-	/* Priority 3: media → non-text */
+	/* Priority 4: media → non-text */
 	if (MEDIA_TAGS.has(el.tagName)) {
 		return { isText: false, textScore: -1, color: parseRgb(getComputedStyle(el).backgroundColor) }
 	}
 
-	/* Priority 4: no text content → non-text */
+	/* Priority 5: no text content → non-text */
 	const text = el.textContent ? el.textContent.trim() : ''
 	if (text.length === 0) {
 		return { isText: false, textScore: -1, color: parseRgb(getComputedStyle(el).backgroundColor) }
 	}
 
-	/* Priority 5: text — font size relative to glass height */
+	/* Priority 6: text — font size relative to glass height */
 	const fontSize = Number.parseFloat(getComputedStyle(el).fontSize)
 	const ratio = fontSize / Math.max(1, glassHeight)
 	const score = ratio >= 1 ? 0 : 1 - ratio
@@ -203,6 +212,7 @@ function scanIntensity(glassEl: HTMLElement, sampleCols: number, sampleRows: num
 	}
 
 	const glassHeight = rect.height
+	const glassWidth = rect.width
 	const textScores: number[] = []
 	const nonTextColors: RGB[] = []
 
@@ -218,7 +228,7 @@ function scanIntensity(glassEl: HTMLElement, sampleCols: number, sampleRows: num
 					continue
 				}
 
-				const result = sampleElement(el, glassHeight)
+				const result = sampleElement(el, glassHeight, glassWidth)
 
 				if (result.isText) {
 					textScores.push(result.textScore)

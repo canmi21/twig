@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useSpring, useTransform } from 'motion/react'
+import { LiquidGlassOverlay } from '~/components/liquid-glass-overlay'
 import { useSvgLiquidGlass } from '~/hooks/use-svg-liquid-glass'
 import { applyResolvedTheme, setThemeCookie, useTheme } from '~/lib/theme'
 
@@ -337,104 +338,7 @@ export function LampCordToggle() {
 		>
 			<motion.div className="bg-border-strong w-px" style={{ height: cordHeight }} />
 			<div ref={handleRef} className="relative size-5 w-2 rounded-full">
-				{glass.displacementMap && glass.specularMap ? (
-					<svg className="absolute size-0 overflow-hidden" aria-hidden="true">
-						<defs>
-							<filter
-								id={glass.filterId}
-								x="0"
-								y="0"
-								width={glass.width}
-								height={glass.height}
-								filterUnits="userSpaceOnUse"
-								primitiveUnits="userSpaceOnUse"
-								colorInterpolationFilters="sRGB"
-								filterRes={`${Math.round(glass.width * glass.dpr)} ${Math.round(glass.height * glass.dpr)}`}
-							>
-								<feColorMatrix
-									in="SourceGraphic"
-									type="matrix"
-									values="0.9 0 0 0 0.05 0 0.9 0 0 0.05 0 0 0.9 0 0.05 0 0 0 1 0"
-									result="adjusted_source"
-								/>
-								<feGaussianBlur
-									in="adjusted_source"
-									stdDeviation={glass.blur}
-									result="blurred_source"
-								/>
-								<feImage
-									href={glass.displacementMap}
-									x="0"
-									y="0"
-									width={glass.width}
-									height={glass.height}
-									preserveAspectRatio="none"
-									result="displacement_map"
-								/>
-								<feDisplacementMap
-									in="blurred_source"
-									in2="displacement_map"
-									scale={glass.scale}
-									xChannelSelector="R"
-									yChannelSelector="G"
-									result="displaced"
-								/>
-								<feColorMatrix
-									in="displaced"
-									type="saturate"
-									values={String(glass.saturation)}
-									result="displaced_saturated"
-								/>
-								<feImage
-									href={glass.specularMap}
-									x="0"
-									y="0"
-									width={glass.width}
-									height={glass.height}
-									preserveAspectRatio="none"
-									result="specular_layer"
-								/>
-								<feComposite
-									in="displaced_saturated"
-									in2="specular_layer"
-									operator="in"
-									result="specular_saturated"
-								/>
-								<feComponentTransfer in="specular_layer" result="specular_faded">
-									<feFuncA type="linear" slope={String(glass.specularOpacity)} />
-								</feComponentTransfer>
-								<feBlend
-									in="specular_saturated"
-									in2="displaced"
-									mode="normal"
-									result="with_saturation"
-								/>
-								<feBlend in="specular_faded" in2="with_saturation" mode="normal" />
-							</filter>
-						</defs>
-					</svg>
-				) : null}
-				{/* SVG filter layer */}
-				<div
-					className="pointer-events-none absolute inset-0 rounded-full"
-					style={{
-						backdropFilter: glass.active ? `url(#${glass.filterId})` : undefined,
-						WebkitBackdropFilter: glass.active ? `url(#${glass.filterId})` : undefined,
-					}}
-				/>
-				{/* CSS blur edge */}
-				<div
-					className="pointer-events-none absolute inset-0 rounded-full"
-					style={{
-						backdropFilter: 'blur(0.5px)',
-						WebkitBackdropFilter: 'blur(0.5px)',
-					}}
-				/>
-				{/* Background fill */}
-				<div
-					className="pointer-events-none absolute inset-0 rounded-full"
-					style={{ background: 'var(--nav-liquid-fill)' }}
-				/>
+				<LiquidGlassOverlay glass={glass} borderRadius="50%" background="var(--nav-liquid-fill)" />
 			</div>
 		</motion.button>
 	)
