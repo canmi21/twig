@@ -8,6 +8,7 @@ import { config } from '~/server/database'
 
 export interface SiteConfig {
 	copyright: string
+	createdAt: string
 	description: string
 	footerDescription: string
 	footerName: string
@@ -57,6 +58,7 @@ const CONFIG_DEFAULTS: Record<string, string> = {
 	'owner.email': 'owner@example.com',
 	'owner.name': 'Owner Name',
 	'site.copyright': 'Site Name',
+	'site.created_at': '2022-12-25T21:08:34Z',
 	'site.description': 'A one-sentence description of the website.',
 	'site.icp': '',
 	'site.icp.link': '',
@@ -74,6 +76,7 @@ const KEY_MAP: Record<string, keyof SiteConfig> = {
 	'owner.email': 'ownerEmail',
 	'owner.name': 'ownerName',
 	'site.copyright': 'copyright',
+	'site.created_at': 'createdAt',
 	'site.description': 'description',
 	'site.icp': 'icp',
 	'site.icp.link': 'icpLink',

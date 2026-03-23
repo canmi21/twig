@@ -86,7 +86,7 @@ export const Route = createRootRouteWithContext()({
 })
 
 function RootComponent() {
-	const { siteConfig } = Route.useRouteContext()
+	const { siteConfig, timezone } = Route.useRouteContext()
 	const isDashboard = useRouterState({
 		select: (state) => state.location.pathname.startsWith('/~'),
 	})
@@ -123,7 +123,7 @@ function RootComponent() {
 			<ContentWrapper>
 				<Outlet />
 			</ContentWrapper>
-			<SiteFooter siteConfig={siteConfig} />
+			<SiteFooter siteConfig={siteConfig} timezone={timezone} />
 			<TanStackDevtools
 				config={{ position: 'bottom-right' }}
 				plugins={[

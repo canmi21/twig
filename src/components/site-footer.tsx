@@ -349,8 +349,10 @@ function parseNavColumns(json: string): NavColumn[] {
 }
 
 interface SiteFooterProps {
+	timezone?: string
 	siteConfig: {
 		copyright: string
+		createdAt: string
 		footerDescription: string
 		footerName: string
 		footerNav: string
@@ -361,7 +363,26 @@ interface SiteFooterProps {
 
 const FOOTER_GLASS_OVERFLOW = 40
 
-export function SiteFooter({ siteConfig }: SiteFooterProps) {
+function formatCopyrightYears(createdAt: string, timezone?: string): string {
+	const startYear = new Date(createdAt).getUTCFullYear()
+	let currentYear: number
+	try {
+		if (timezone) {
+			currentYear = Number(
+				new Intl.DateTimeFormat('en', { timeZone: timezone, year: 'numeric' }).format(),
+			)
+		} else {
+			currentYear = new Date().getFullYear()
+		}
+	} catch {
+		currentYear = new Date().getFullYear()
+	}
+	return startYear === currentYear
+		? String(startYear)
+		: `${String(startYear)}\u2013${String(currentYear)}`
+}
+
+export function SiteFooter({ siteConfig, timezone }: SiteFooterProps) {
 	const navColumns = parseNavColumns(siteConfig.footerNav)
 	const theme = useTheme()
 	const glassRef = useRef<HTMLDivElement>(null)
@@ -427,7 +448,9 @@ export function SiteFooter({ siteConfig }: SiteFooterProps) {
 								/>
 								<p className="text-content-heading font-medium">All systems normal.</p>
 							</div>
-							<p className="text-content-tertiary font-medium">&copy; {siteConfig.copyright}</p>
+							<p className="text-content-tertiary font-medium">
+								&copy; {formatCopyrightYears(siteConfig.createdAt, timezone)} {siteConfig.copyright}
+							</p>
 							<FooterPoweredBy />
 						</div>
 
