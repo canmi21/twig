@@ -2,7 +2,6 @@
   "$schema": "./node_modules/knip/schema.json",
   "ignoreBinaries": ["chore"],
   "ignoreDependencies": ["bun-types", "cloudflare", "entities"],
-  "ignoreFiles": ["src/components/icons/**"],
   "workspaces": {
     ".": {
       "entry": ["src/router.tsx"],

@@ -27,9 +27,6 @@
 
 ## Formatting
 
-- Respect `.editorconfig` and formatter configuration files.
-- Default indentation is tabs with width 2.
-- JSON, JSONC, and JSON5 use 2 spaces.
 - Generated files should not be reformatted unless the project explicitly expects that.
 
 ## Naming
@@ -62,15 +59,3 @@
 - If any issue, ambiguity, or suspected breaking change appears, stop and discuss with the user before committing unless the user explicitly asks otherwise.
 - If any issue appears during implementation, stop and do not commit. Wait for the user to confirm the fix before committing.
 - Do not push unless the user explicitly asks.
-
-## Database
-
-- Migration files are append-only. Never delete or edit existing migration files.
-- Migrations are incremental: any database can roll forward from any prior state to the current schema by applying pending migrations.
-- Never operate on the remote database during development.
-- `bun run db:gen` generates a new migration file from schema changes. Run it after modifying `schema.ts`.
-- `bun run db:fresh` is the local reset workflow: clears all local D1/KV/R2 state, re-applies every migration from scratch, then seeds. Use it to get a clean, fully usable local database at the current schema.
-- Local dev loop for schema changes: modify schema -> `bun run db:gen` -> `bun run db:fresh` -> verify.
-- Each feature should add its own seed file in `drizzle/seed/` and register it in `drizzle/seed.ts`.
-- Seed data should be realistic in length and self-descriptive of the field's purpose.
-- Seed data must not contain brand-specific content. Use neutral, descriptive placeholder values.
