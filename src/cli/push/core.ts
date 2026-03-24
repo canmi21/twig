@@ -86,7 +86,7 @@ export async function collectFiles(
       results.push(...(await collectFiles(abs, base)))
     } else if (entry.name !== 'index.md') {
       results.push({
-        relativePath: `./${relative(base, abs)}`,
+        relativePath: relative(base, abs),
         absolutePath: abs,
       })
     }

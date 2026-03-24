@@ -23,32 +23,54 @@ export const Route = createFileRoute('/posts/$category/$slug/')({
   component: PostPage,
 })
 
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 function PostPage() {
   const post = Route.useLoaderData()
 
   if (!post) {
-    return <p>Post not found.</p>
+    return (
+      <div className="mx-auto max-w-[720px] px-5 pt-24">
+        <p className="text-secondary">Post not found.</p>
+      </div>
+    )
   }
 
+  const { frontmatter } = post
+
   return (
-    <article
-      className="
-        mx-auto prose max-w-3xl px-4 py-8 prose-neutral
-        dark:prose-invert
-      "
-    >
-      <h1>{post.frontmatter.title}</h1>
-      {post.frontmatter.description && (
-        <p
-          className="
-            text-lg text-gray-500
-            dark:text-gray-400
-          "
-        >
-          {post.frontmatter.description}
-        </p>
+    <article className="mx-auto max-w-[720px] px-5 py-24">
+      <header className="mb-10">
+        <h1 className="text-[15px] font-medium text-primary">
+          {frontmatter.title}
+        </h1>
+        {frontmatter.created_at && (
+          <time
+            dateTime={frontmatter.created_at}
+            className="mt-1.5 block text-[13px] text-secondary"
+          >
+            {formatDate(frontmatter.created_at)}
+          </time>
+        )}
+      </header>
+      {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+      <div className="article">
+        <PostRenderer html={post.html} components={post.components} />
+      </div>
+      {frontmatter.tags && frontmatter.tags.length > 0 && (
+        <footer className="mt-16 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-secondary">
+          {frontmatter.tags.map((tag) => (
+            <span key={tag}>#{tag}</span>
+          ))}
+        </footer>
       )}
-      <PostRenderer html={post.html} components={post.components} />
     </article>
   )
 }

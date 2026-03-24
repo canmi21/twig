@@ -61,7 +61,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         />
         <HeadContent />
       </head>
-      <body className="bg-surface text-on-surface">
+      <body className="bg-surface text-primary">
         <ThemeToggle />
         {children}
         <Scripts />

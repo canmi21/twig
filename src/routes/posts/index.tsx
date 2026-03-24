@@ -15,19 +15,34 @@ export const Route = createFileRoute('/posts/')({
   component: PostList,
 })
 
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 function PostList() {
   const posts = Route.useLoaderData()
 
   if (posts.length === 0) {
-    return <p>No posts yet.</p>
+    return (
+      <div className="mx-auto max-w-[720px] px-5 pt-24">
+        <p className="text-secondary">No posts yet.</p>
+      </div>
+    )
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">Posts</h1>
-      <ul className="space-y-6">
-        {posts.map((post) => (
-          <li key={post.slug}>
+    <div className="mx-auto max-w-[720px] px-5 py-24">
+      <ul>
+        {posts.map((post, i) => (
+          <li
+            key={post.slug}
+            className={i > 0 ? 'mt-6 border-t border-border pt-6' : ''}
+          >
             <Link
               to="/posts/$category/$slug"
               params={{
@@ -35,32 +50,27 @@ function PostList() {
                 slug: post.slug,
               }}
               className="
-                text-lg font-medium text-blue-600
+                text-[15px] font-medium text-primary
                 hover:underline
-                dark:text-blue-400
               "
             >
               {post.title}
             </Link>
+            <div className="mt-1 flex items-center gap-3 text-[13px] text-secondary">
+              {post.category && <span>{post.category}</span>}
+              {post.createdAt && (
+                <>
+                  {post.category && <span className="text-secondary">·</span>}
+                  <time dateTime={post.createdAt}>
+                    {formatDate(post.createdAt)}
+                  </time>
+                </>
+              )}
+            </div>
             {post.description && (
-              <p
-                className="
-                  mt-1 text-gray-500
-                  dark:text-gray-400
-                "
-              >
+              <p className="mt-1.5 text-[14px] leading-relaxed text-primary">
                 {post.description}
               </p>
-            )}
-            {post.category && (
-              <span
-                className="
-                  mt-1 inline-block text-xs text-gray-400
-                  dark:text-gray-500
-                "
-              >
-                {post.category}
-              </span>
             )}
           </li>
         ))}
