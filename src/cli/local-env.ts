@@ -16,6 +16,8 @@ export function createMiniflare() {
     d1Persist: resolve(PERSIST_ROOT, 'd1'),
     r2Buckets: { taki_bucket: 'taki-bucket' },
     r2Persist: resolve(PERSIST_ROOT, 'r2'),
+    kvNamespaces: { taki_kv: 'e823da6d6efe4ebfa7a33945530c2602' },
+    kvPersist: resolve(PERSIST_ROOT, 'kv'),
   })
 }
 

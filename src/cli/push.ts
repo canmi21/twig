@@ -14,9 +14,11 @@ import {
 import { contents, posts } from '../lib/database/schema'
 import { storageKey } from '../lib/database/storage-key'
 import { mimeFromExt } from '../lib/database/mime'
+import { compile } from '../lib/compiler/index'
 import type { Frontmatter } from '../lib/compiler/index'
 import { parse as parseYaml } from 'yaml'
 import { postSchema } from '../lib/content/post-schema'
+import { writePostKv, writePostIndex } from '../lib/content/kv'
 import { createMiniflare, applyMigrations } from './local-env'
 
 const ROOT = resolve(import.meta.dirname, '../..')
@@ -148,6 +150,7 @@ async function main() {
   try {
     const d1 = await mf.getD1Database('taki_sql')
     const r2 = (await mf.getR2Bucket('taki_bucket')) as unknown as R2Bucket
+    const kv = (await mf.getKVNamespace('taki_kv')) as unknown as KVNamespace
 
     console.log('Applying migrations...')
     await applyMigrations(d1)
@@ -198,39 +201,65 @@ async function main() {
       console.log(`  ${result.action}: ${slug} (${result.cid})`)
 
       // Process media and replace references in content
+      let finalContent = content
       if (mediaFiles.length > 0) {
         const replacements = await processMedia(db, r2, result.cid, mediaFiles)
-        const updatedContent = replaceMediaRefs(content, replacements)
+        finalContent = replaceMediaRefs(content, replacements)
 
-        if (updatedContent !== content) {
+        if (finalContent !== content) {
           await db
             .update(posts)
-            .set({ content: updatedContent })
+            .set({ content: finalContent })
             .where(eq(posts.cid, result.cid))
           console.log(`    content refs updated`)
         }
       }
+
+      // Compile and write to KV
+      const compiled = await compile(finalContent)
+      await writePostKv(kv, slug, {
+        frontmatter,
+        html: compiled.html,
+        toc: compiled.toc,
+        components: compiled.components,
+      })
+      console.log(`    kv written: post:${slug}`)
     }
 
     if (skipped > 0) {
       console.log(`\n${skipped} post(s) skipped due to validation errors.`)
     }
 
-    // Summary
+    // Build and write post-index to KV
     const allPosts = await db
       .select({
-        cid: posts.cid,
         slug: posts.slug,
         title: posts.title,
+        description: posts.description,
+        category: posts.category,
+        tags: posts.tags,
         createdAt: contents.createdAt,
         updatedAt: contents.updatedAt,
       })
       .from(posts)
       .innerJoin(contents, eq(posts.cid, contents.cid))
 
-    console.log(`\nDatabase now has ${allPosts.length} post(s):`)
+    await writePostIndex(
+      kv,
+      allPosts.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        description: p.description ?? undefined,
+        category: p.category ?? undefined,
+        tags: p.tags ? (JSON.parse(p.tags) as string[]) : undefined,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      })),
+    )
+    console.log(`\npost-index written (${allPosts.length} entries)`)
+
     for (const p of allPosts) {
-      console.log(`  - ${p.slug}: "${p.title}" (updated: ${p.updatedAt})`)
+      console.log(`  - ${p.slug}: "${p.title}"`)
     }
   } finally {
     await mf.dispose()
