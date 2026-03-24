@@ -1,10 +1,16 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "drizzle.config.ts"
+  ],
   "compilerOptions": {
     "target": "ES2024",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["@cloudflare/workers-types"],
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
