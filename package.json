@@ -20,6 +20,7 @@
     "pull": "bun run src/cli/pull.ts",
     "rebuild": "bun run src/cli/rebuild.ts",
     "test": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },

@@ -1,4 +1,4 @@
-/* vitest.config.ts */
+/* vitest.integration.config.ts */
 
 import { resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/**/*.test.ts'],
-    exclude: ['src/**/*.integration.test.ts'],
+    include: ['src/**/*.integration.test.ts'],
+    testTimeout: 30_000,
   },
 })
