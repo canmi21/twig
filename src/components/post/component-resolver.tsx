@@ -20,8 +20,8 @@ function ImageComponent({ url, alt }: { url: string; alt: string }) {
       alt={alt}
       loading="lazy"
       className="
-        aspect-video w-full rounded-md
-        border border-border object-cover
+        aspect-21/9 w-full rounded-xl
+        border-2 border-border object-cover
         shadow-sm
       "
     />

@@ -5,6 +5,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getEnv } from '~/server/env'
 import { readPostKv } from '~/lib/storage/kv'
 import { PostRenderer } from '~/components/post/post-renderer'
+import { Toc } from '~/components/post/toc'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -46,31 +47,34 @@ function PostPage() {
   const { frontmatter } = post
 
   return (
-    <article className="mx-auto max-w-[720px] px-5 py-24">
-      <header className="mb-10">
-        <h1 className="text-[15px] font-medium text-primary">
-          {frontmatter.title}
-        </h1>
-        {frontmatter.created_at && (
-          <time
-            dateTime={frontmatter.created_at}
-            className="mt-1.5 block text-[13px] text-secondary"
-          >
-            {formatDate(frontmatter.created_at)}
-          </time>
+    <>
+      <Toc entries={post.toc} />
+      <article className="mx-auto max-w-[720px] px-5 pt-28 pb-24">
+        <header className="mb-10">
+          <h1 className="text-[17px] font-medium text-primary">
+            {frontmatter.title}
+          </h1>
+          {frontmatter.created_at && (
+            <time
+              dateTime={frontmatter.created_at}
+              className="mt-1.5 block text-[13px] text-secondary"
+            >
+              {formatDate(frontmatter.created_at)}
+            </time>
+          )}
+        </header>
+        {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+        <div className="article">
+          <PostRenderer html={post.html} components={post.components} />
+        </div>
+        {frontmatter.tags && frontmatter.tags.length > 0 && (
+          <footer className="mt-16 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-secondary">
+            {frontmatter.tags.map((tag) => (
+              <span key={tag}>#{tag}</span>
+            ))}
+          </footer>
         )}
-      </header>
-      {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
-      <div className="article">
-        <PostRenderer html={post.html} components={post.components} />
-      </div>
-      {frontmatter.tags && frontmatter.tags.length > 0 && (
-        <footer className="mt-16 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-secondary">
-          {frontmatter.tags.map((tag) => (
-            <span key={tag}>#{tag}</span>
-          ))}
-        </footer>
-      )}
-    </article>
+      </article>
+    </>
   )
 }
