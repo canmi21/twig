@@ -36,7 +36,12 @@ interface ScannedPost {
   slug: string
   frontmatter: Frontmatter
   content: string
+  rawContentHash: string
   mediaFiles: Array<{ relativePath: string; absolutePath: string }>
+}
+
+function computeContentHash(content: string): string {
+  return createHash('sha256').update(content, 'utf-8').digest('hex')
 }
 
 function extractFrontmatter(source: string): {
@@ -88,7 +93,13 @@ async function scanPosts(): Promise<ScannedPost[]> {
       const source = await readFile(indexPath, 'utf-8')
       const { frontmatter, content } = extractFrontmatter(source)
       const mediaFiles = await collectFiles(slugDir, slugDir)
-      results.push({ slug, frontmatter, content, mediaFiles })
+      results.push({
+        slug,
+        frontmatter,
+        content,
+        rawContentHash: computeContentHash(content),
+        mediaFiles,
+      })
     } catch {
       // skip directories without index.md
     }
@@ -108,6 +119,10 @@ function validateAll(scanned: ScannedPost[]): boolean {
       category: post.frontmatter.category,
       tags: post.frontmatter.tags,
       content: post.content,
+      cid: post.frontmatter.cid,
+      created_at: post.frontmatter.created_at,
+      updated_at: post.frontmatter.updated_at,
+      published: post.frontmatter.published,
     })
     if (!result.success) {
       valid = false
@@ -131,35 +146,61 @@ interface DiffResult {
 
 async function diffPosts(db: Db, scanned: ScannedPost[]): Promise<DiffResult> {
   const dbPosts = await getAllPosts(db)
-  const dbMap = new Map(dbPosts.map((p) => [p.slug, p]))
-  const scannedSlugs = new Set(scanned.map((s) => s.slug))
+  const dbByCid = new Map(dbPosts.map((p) => [p.cid, p]))
+  const dbBySlug = new Map(dbPosts.map((p) => [p.slug, p]))
+  const matchedCids = new Set<string>()
 
   const added: ScannedPost[] = []
   const updated: ScannedPost[] = []
   const unchanged: string[] = []
 
   for (const post of scanned) {
-    const existing = dbMap.get(post.slug)
+    // Match by cid first, then by slug
+    let existing = post.frontmatter.cid
+      ? dbByCid.get(post.frontmatter.cid)
+      : undefined
+    if (!existing) existing = dbBySlug.get(post.slug)
+
     if (!existing) {
       added.push(post)
       continue
     }
+    matchedCids.add(existing.cid)
 
-    // Compare content and frontmatter fields
+    // Fast path: compare content hash
+    const contentChanged =
+      !existing.contentHash || existing.contentHash !== post.rawContentHash
+
+    // Compare frontmatter fields
     const tagsJson = post.frontmatter.tags
       ? JSON.stringify(post.frontmatter.tags)
       : null
-    const changed =
-      existing.content !== post.content ||
+    const fieldsChanged =
       existing.title !== post.frontmatter.title ||
       (existing.description ?? undefined) !== post.frontmatter.description ||
       (existing.category ?? undefined) !== post.frontmatter.category ||
-      existing.tags !== tagsJson
+      existing.tags !== tagsJson ||
+      existing.slug !== post.slug
 
-    if (changed) {
+    // Check published change
+    const publishedChanged =
+      post.frontmatter.published !== undefined &&
+      existing.published !== (post.frontmatter.published ? 1 : 0)
+
+    // Check manual updated_at override
+    const updatedAtOverride =
+      post.frontmatter.updated_at !== undefined &&
+      post.frontmatter.updated_at !== existing.updatedAt
+
+    if (
+      contentChanged ||
+      fieldsChanged ||
+      publishedChanged ||
+      updatedAtOverride
+    ) {
       updated.push(post)
     } else {
-      // Also check if media files changed
+      // Expensive path: check media files (only when everything else matches)
       const dbMedia = await getMediaForPost(db, existing.cid)
       const dbHashes = new Set(dbMedia.map((m) => m.hash))
       let mediaChanged = false
@@ -179,10 +220,11 @@ async function diffPosts(db: Db, scanned: ScannedPost[]): Promise<DiffResult> {
     }
   }
 
+  // Unmatched DB posts = deleted
   const deleted: Array<{ slug: string; cid: string }> = []
-  for (const [slug, row] of dbMap) {
-    if (!scannedSlugs.has(slug)) {
-      deleted.push({ slug, cid: row.cid })
+  for (const row of dbPosts) {
+    if (!matchedCids.has(row.cid)) {
+      deleted.push({ slug: row.slug, cid: row.cid })
     }
   }
 
@@ -247,6 +289,11 @@ async function executeAddOrUpdate(
     category: post.frontmatter.category,
     tags: post.frontmatter.tags,
     content: post.content,
+    contentHash: post.rawContentHash,
+    cid: post.frontmatter.cid,
+    createdAt: post.frontmatter.created_at,
+    updatedAt: post.frontmatter.updated_at,
+    published: post.frontmatter.published,
   })
 
   let finalContent = post.content
@@ -304,6 +351,7 @@ async function buildPostIndex(db: Db): Promise<PostIndexEntry[]> {
     tags: p.tags ? (JSON.parse(p.tags) as string[]) : undefined,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
+    published: p.published === 1,
   }))
 }
 

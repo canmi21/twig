@@ -23,6 +23,10 @@ export interface Frontmatter {
   description?: string
   category?: string
   tags?: string[]
+  cid?: string
+  created_at?: string
+  updated_at?: string
+  published?: boolean
 }
 
 export interface CompileResult {

@@ -34,6 +34,14 @@ export const postSchema = z.object({
     .max(5, 'at most 5 tags allowed')
     .optional(),
   content: z.string().min(1, 'content must not be empty'),
+  cid: z
+    .string()
+    .length(32, 'cid must be exactly 32 hex characters')
+    .regex(/^[0-9a-f]{32}$/, 'cid must be lowercase hex')
+    .optional(),
+  created_at: z.iso.datetime().optional(),
+  updated_at: z.iso.datetime().optional(),
+  published: z.boolean().optional(),
 })
 
 export type PostInput = z.infer<typeof postSchema>

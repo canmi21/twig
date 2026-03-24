@@ -20,6 +20,7 @@ export const posts = sqliteTable('posts', {
   category: text('category'),
   tags: text('tags'),
   content: text('content').notNull(),
+  contentHash: text('content_hash').notNull().default(''),
 })
 
 export const media = sqliteTable('media', {

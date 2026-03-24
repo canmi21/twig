@@ -27,6 +27,10 @@ async function main() {
         description: row.description ?? undefined,
         category: row.category ?? undefined,
         tags,
+        cid: row.cid,
+        created_at: row.createdAt,
+        updated_at: row.updatedAt,
+        published: row.published === 1,
       }
 
       const compiled = await compile(row.content)
@@ -45,6 +49,7 @@ async function main() {
         tags,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
+        published: row.published === 1,
       })
     }
 

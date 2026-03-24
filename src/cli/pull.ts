@@ -29,10 +29,14 @@ async function main() {
     for (const row of rows) {
       const tags = row.tags ? (JSON.parse(row.tags) as string[]) : undefined
       const header = serializeFrontmatter({
+        cid: row.cid,
         title: row.title,
         description: row.description ?? undefined,
         category: row.category ?? undefined,
         tags,
+        created_at: row.createdAt,
+        updated_at: row.updatedAt,
+        published: row.published === 1,
       })
 
       const dir = resolve(POSTS_DIR, row.slug)

@@ -17,6 +17,7 @@ export interface PostIndexEntry {
   tags?: string[]
   createdAt: string
   updatedAt: string
+  published: boolean
 }
 
 export async function writePostKv(

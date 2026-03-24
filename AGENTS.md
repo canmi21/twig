@@ -65,3 +65,36 @@
 - Execution order: `oxfmt` → `oxlint` → `eslint`. Pre-commit hooks follow the same order.
 - `oxlint` handles all general lint rules. `eslint` is minimal — only React Compiler rules and Tailwind CSS.
 - `eslint-plugin-oxlint` auto-disables ESLint rules already covered by oxlint via `buildFromOxlintConfigFile`.
+- `eslint-plugin-better-tailwindcss` has `enforce-consistent-line-wrapping` disabled due to irreconcilable conflict with oxfmt JSX attribute formatting.
+- CLI scripts (`src/cli/`) have oxlint overrides: `no-console` and `no-await-in-loop` are allowed.
+
+## Research Before Guessing
+
+- When encountering unfamiliar APIs, version-specific behavior, or uncertain best practices, search the web for current documentation before attempting implementation.
+- This applies especially to fast-moving ecosystems like TanStack Start, Cloudflare Workers, and Tailwind CSS where APIs change between versions.
+- Do not assume API shapes from memory when the project uses specific pinned versions.
+
+## Architecture
+
+- This is a TanStack Start SSR app deployed to Cloudflare Workers.
+- Storage: D1 (SQLite) for structured data, R2 for media files, KV for compiled content cache.
+- CLI scripts in `src/cli/` use miniflare to access local D1/R2/KV, sharing the same `.wrangler/state/v3/` persistence path as `wrangler dev`.
+- Database operations live in `src/lib/database/`, content domain logic in `src/lib/content/`, markdown compiler in `src/lib/compiler/`.
+- Cloudflare Worker bindings are accessed via `import { env } from 'cloudflare:workers'` in server code, wrapped in `src/lib/content/env.ts`.
+
+## Content Pipeline
+
+- `bun run push`: validate → diff → execute. Scans `contents/posts/`, syncs to D1 + R2 + KV. Incremental: only writes changes.
+- `bun run pull`: full export from D1 + R2 to `contents/posts/`. Cleans target directory first.
+- `bun run rebuild`: recompile all posts from D1 and refresh KV cache. Does not touch D1 or R2.
+- Markdown uses remark-directive for media: `::image{src="..." alt="..."}` instead of standard `![]()` syntax.
+- Compiler output includes `components` array with placeholder comments `<!--component:N-->` in HTML, resolved at render time by `ComponentResolver`.
+- Media files are content-addressed by sha256 hash. Push replaces relative paths with `{hash}.{ext}` in stored content.
+
+## Commit Workflow
+
+- The user often says "commit" or "commit 一下" as a standalone request after completing work. Proceed directly with staging, committing, and verifying — do not ask for confirmation.
+- When the user provides a link or specific text for the commit body, include it in the extended description.
+- Run `bun run fmt`, `bun run lint:oxlint`, `bun run lint:eslint`, and `bun run typecheck` before every commit. Fix errors, then commit.
+- When build config, routing, or dependencies change, also run `bun run build` and `bun run knip`.
+- The user prefers concise commit messages. Lead with the change type, not the implementation details.
