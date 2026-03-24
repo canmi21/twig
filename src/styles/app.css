@@ -47,6 +47,7 @@
   font-weight: 500;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
+  position: relative;
   scroll-margin-top: 7rem;
 }
 
@@ -55,6 +56,7 @@
   font-weight: 500;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
+  position: relative;
   scroll-margin-top: 7rem;
 }
 
@@ -63,7 +65,42 @@
   font-weight: 500;
   margin-top: 1.3em;
   margin-bottom: 0.4em;
+  position: relative;
   scroll-margin-top: 7rem;
+}
+
+.article .heading-link {
+  position: absolute;
+  top: 50%;
+  left: -1.35rem;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-secondary);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition:
+    opacity 140ms ease,
+    color 140ms ease;
+}
+
+.article h2:hover .heading-link,
+.article h2:focus-within .heading-link,
+.article h3:hover .heading-link,
+.article h3:focus-within .heading-link,
+.article h4:hover .heading-link,
+.article h4:focus-within .heading-link {
+  opacity: 1;
+}
+
+.article .heading-link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.article .heading-link-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
 }
 
 .article p {

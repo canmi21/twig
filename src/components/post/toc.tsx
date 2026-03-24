@@ -3,32 +3,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { TocEntry } from '~/lib/compiler/rehype-toc'
 
+// Use the native replaceState from History.prototype to bypass TanStack
+// Router's monkey-patched version, which triggers scroll restoration on
+// every replaceState call and causes viewport jumps during natural scroll.
+const nativeReplaceState = History.prototype.replaceState
+
+function replaceHash(id: string) {
+  const { pathname, search, hash } = window.location
+  const nextHash = id ? `#${id}` : ''
+  if (hash === nextHash) return
+  nativeReplaceState.call(
+    window.history,
+    window.history.state,
+    '',
+    `${pathname}${search}${nextHash}`,
+  )
+}
+
 export function Toc({ entries }: { entries: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>('')
   const observerRef = useRef<IntersectionObserver | null>(null)
-  const clickScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  )
   const isClickScrollingRef = useRef(false)
-  const scrollEndHandlerRef = useRef<(() => void) | null>(null)
-
-  const syncHash = useCallback((id: string) => {
-    const { pathname, search, hash } = window.location
-    const nextHash = id ? `#${id}` : ''
-    if (hash === nextHash) return
-    window.history.replaceState(null, '', `${pathname}${search}${nextHash}`)
-  }, [])
-
-  const clearClickScrollSync = useCallback(() => {
-    if (clickScrollTimeoutRef.current !== null) {
-      window.clearTimeout(clickScrollTimeoutRef.current)
-      clickScrollTimeoutRef.current = null
-    }
-    if (scrollEndHandlerRef.current) {
-      window.removeEventListener('scrollend', scrollEndHandlerRef.current)
-      scrollEndHandlerRef.current = null
-    }
-  }, [])
 
   useEffect(() => {
     const headings = entries
@@ -39,10 +34,11 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
     observerRef.current = new IntersectionObserver(
       (intersections) => {
-        // Find the topmost visible heading
+        if (isClickScrollingRef.current) return
         for (const entry of intersections) {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id)
+            replaceHash(entry.target.id)
             break
           }
         }
@@ -51,41 +47,32 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
     )
 
     for (const el of headings) observerRef.current.observe(el)
-    return () => {
-      observerRef.current?.disconnect()
-      clearClickScrollSync()
-    }
-  }, [clearClickScrollSync, entries])
-
-  useEffect(() => {
-    if (!activeId) return
-    if (isClickScrollingRef.current) return
-    syncHash(activeId)
-  }, [activeId, syncHash])
+    return () => observerRef.current?.disconnect()
+  }, [entries])
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
       e.preventDefault()
       const el = document.getElementById(id)
-      if (el) {
-        clearClickScrollSync()
-        isClickScrollingRef.current = true
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        setActiveId(id)
-        const finishSync = () => {
-          clearClickScrollSync()
-          isClickScrollingRef.current = false
-          syncHash(id)
-        }
-        if ('onscrollend' in window) {
-          scrollEndHandlerRef.current = finishSync
-          window.addEventListener('scrollend', finishSync, { once: true })
-        } else {
-          clickScrollTimeoutRef.current = globalThis.setTimeout(finishSync, 600)
-        }
+      if (!el) return
+
+      isClickScrollingRef.current = true
+      setActiveId(id)
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+      // Wait for smooth scroll to finish before re-enabling observer updates
+      const onEnd = () => {
+        isClickScrollingRef.current = false
+        replaceHash(id)
+      }
+
+      if ('onscrollend' in window) {
+        window.addEventListener('scrollend', onEnd, { once: true })
+      } else {
+        globalThis.setTimeout(onEnd, 600)
       }
     },
-    [clearClickScrollSync, syncHash],
+    [],
   )
 
   if (entries.length === 0) return null
