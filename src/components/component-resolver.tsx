@@ -1,44 +1,47 @@
 /* src/components/component-resolver.tsx */
 
+import { useRouteContext } from '@tanstack/react-router'
 import type { ComponentEntry } from '~/lib/compiler/index'
 import { storageKey } from '~/lib/database/storage-key'
 
-const CDN_PREFIX = import.meta.env.DEV ? '/api/object' : 'https://cdn.canmi.net'
-
-function mediaUrl(src: string): string {
-  // src is "{hash}.{ext}" — derive storage path for the URL
+function mediaUrl(cdnPrefix: string, src: string): string {
   const dotIdx = src.lastIndexOf('.')
   if (dotIdx === -1) return src
 
   const hash = src.slice(0, dotIdx)
   const ext = src.slice(dotIdx + 1)
-  return `${CDN_PREFIX}/${storageKey(hash, ext)}`
+  return `${cdnPrefix}/${storageKey(hash, ext)}`
 }
 
-function ImageComponent({ props }: { props: ComponentEntry['props'] }) {
-  return <img src={mediaUrl(props.src)} alt={props.alt ?? ''} loading="lazy" />
+function ImageComponent({ url, alt }: { url: string; alt: string }) {
+  return <img src={url} alt={alt} loading="lazy" />
 }
 
-function VideoComponent({ props }: { props: ComponentEntry['props'] }) {
+function VideoComponent({ url }: { url: string }) {
   return (
     <video controls preload="metadata">
-      <source src={mediaUrl(props.src)} />
+      <source src={url} />
     </video>
   )
 }
 
-function AudioComponent({ props }: { props: ComponentEntry['props'] }) {
-  return <audio controls preload="metadata" src={mediaUrl(props.src)} />
+function AudioComponent({ url }: { url: string }) {
+  return <audio controls preload="metadata" src={url} />
 }
 
 export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
+  const { cdnPublicUrl } = useRouteContext({ from: '__root__' })
+  const prefix = import.meta.env.DEV ? '/api/object' : cdnPublicUrl
+
+  const url = mediaUrl(prefix, entry.props.src)
+
   switch (entry.type) {
     case 'image':
-      return <ImageComponent props={entry.props} />
+      return <ImageComponent url={url} alt={entry.props.alt ?? ''} />
     case 'video':
-      return <VideoComponent props={entry.props} />
+      return <VideoComponent url={url} />
     case 'audio':
-      return <AudioComponent props={entry.props} />
+      return <AudioComponent url={url} />
     default:
       return (
         <div data-component={entry.type}>Unknown component: {entry.type}</div>

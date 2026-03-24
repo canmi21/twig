@@ -5,11 +5,13 @@ import {
   Outlet,
   HeadContent,
   Scripts,
-  createRootRoute,
+  createRootRouteWithContext,
 } from '@tanstack/react-router'
+import type { RootContext } from '~/router'
+import { getCdnPublicUrl } from '~/lib/content/get-cdn-url'
 import appCss from '~/styles/app.css?url'
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RootContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -21,6 +23,10 @@ export const Route = createRootRoute({
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
+  beforeLoad: async () => {
+    const cdnPublicUrl = await getCdnPublicUrl()
+    return { cdnPublicUrl }
+  },
   component: RootComponent,
 })
 
