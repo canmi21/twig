@@ -1,13 +1,13 @@
-/* src/cli/pull.integration.test.ts */
+/* src/cli/pull/integration.test.ts */
 
 import { resolve } from 'node:path'
 import { readFile, readdir, mkdir, writeFile } from 'node:fs/promises'
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
-import { createTestEnv, truncateAll, type TestEnv } from './test-env'
-import { pullCore } from './pull-core'
-import { upsertPost } from '../lib/database/posts'
-import { insertMedia, upsertMediaRef } from '../lib/database/media'
-import { storageKey } from '../lib/database/storage-key'
+import { createTestEnv, truncateAll, type TestEnv } from '../test-env'
+import { pullCore } from './core'
+import { upsertPost } from '../../lib/database/posts'
+import { insertMedia, upsertMediaRef } from '../../lib/database/media'
+import { storageKey } from '../../lib/storage/storage-key'
 
 describe('pull integration', () => {
   let env: TestEnv

@@ -1,4 +1,4 @@
-/* src/lib/content/env.ts */
+/* src/server/env.ts */
 
 import { env } from 'cloudflare:workers'
 

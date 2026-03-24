@@ -1,4 +1,4 @@
-/* src/components/post-renderer.tsx */
+/* src/components/post/post-renderer.tsx */
 
 import type { ComponentEntry } from '~/lib/compiler/index'
 import { ComponentResolver } from './component-resolver'

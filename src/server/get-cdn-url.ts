@@ -1,4 +1,4 @@
-/* src/lib/content/get-cdn-url.ts */
+/* src/server/get-cdn-url.ts */
 
 import { createServerFn } from '@tanstack/react-start'
 import { getEnv } from './env'

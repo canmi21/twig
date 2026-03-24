@@ -1,7 +1,7 @@
 /* src/routes/api/object/$.ts */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { getEnv } from '~/lib/content/env'
+import { getEnv } from '~/server/env'
 
 export const Route = createFileRoute('/api/object/$')({
   server: {

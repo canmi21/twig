@@ -1,8 +1,8 @@
-/* src/components/component-resolver.tsx */
+/* src/components/post/component-resolver.tsx */
 
 import { useRouteContext } from '@tanstack/react-router'
 import type { ComponentEntry } from '~/lib/compiler/index'
-import { storageKey } from '~/lib/database/storage-key'
+import { storageKey } from '~/lib/storage/storage-key'
 
 function mediaUrl(cdnPrefix: string, src: string): string {
   const dotIdx = src.lastIndexOf('.')

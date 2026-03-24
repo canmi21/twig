@@ -1,4 +1,4 @@
-/* src/lib/database/uuid.ts */
+/* src/lib/utils/uuid.ts */
 
 import { v7 } from 'uuid'
 

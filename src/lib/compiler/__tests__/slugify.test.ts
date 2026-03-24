@@ -1,7 +1,7 @@
-/* src/lib/compiler/slugify.test.ts */
+/* src/lib/compiler/__tests__/slugify.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { slugify } from './slugify'
+import { slugify } from '../slugify'
 
 describe('slugify', () => {
   test('lowercases text', () => {

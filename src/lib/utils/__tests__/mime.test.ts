@@ -1,7 +1,7 @@
-/* src/lib/database/mime.test.ts */
+/* src/lib/utils/__tests__/mime.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { mimeFromExt } from './mime'
+import { mimeFromExt } from '../mime'
 
 describe('mimeFromExt', () => {
   test.each([

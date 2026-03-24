@@ -8,7 +8,7 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { RootContext } from '~/router'
-import { getCdnPublicUrl } from '~/lib/content/get-cdn-url'
+import { getCdnPublicUrl } from '~/server/get-cdn-url'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({

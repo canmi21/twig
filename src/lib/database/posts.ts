@@ -3,7 +3,7 @@
 import { eq } from 'drizzle-orm'
 import type { Db } from './index'
 import { contents, posts } from './schema'
-import { newCid } from './uuid'
+import { newCid } from '../utils/uuid'
 
 export interface UpsertPostInput {
   slug: string

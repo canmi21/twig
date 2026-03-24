@@ -1,11 +1,11 @@
-/* src/cli/push.ts */
+/* src/cli/push/index.ts */
 
 import { resolve } from 'node:path'
-import { createDb } from '../lib/database/index'
-import { createMiniflare, applyMigrations } from './local-env'
-import { pushCore, PushValidationError } from './push-core'
+import { createDb } from '../../lib/database/index'
+import { createMiniflare, applyMigrations } from '../local-env'
+import { pushCore, PushValidationError } from './core'
 
-const ROOT = resolve(import.meta.dirname, '../..')
+const ROOT = resolve(import.meta.dirname, '../../..')
 const POSTS_DIR = resolve(ROOT, 'contents/posts')
 
 async function main() {

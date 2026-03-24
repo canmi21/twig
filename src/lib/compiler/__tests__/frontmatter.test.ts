@@ -1,7 +1,7 @@
-/* src/lib/compiler/frontmatter.test.ts */
+/* src/lib/compiler/__tests__/frontmatter.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { serializeFrontmatter } from './frontmatter'
+import { serializeFrontmatter } from '../frontmatter'
 
 describe('serializeFrontmatter', () => {
   test('serializes all fields in correct order', () => {

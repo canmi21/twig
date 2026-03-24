@@ -1,4 +1,4 @@
-/* src/lib/content/kv.ts */
+/* src/lib/storage/kv.ts */
 
 import type { CompileResult } from '../compiler/index'
 

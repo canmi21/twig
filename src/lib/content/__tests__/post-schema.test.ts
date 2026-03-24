@@ -1,7 +1,7 @@
-/* src/lib/content/post-schema.test.ts */
+/* src/lib/content/__tests__/post-schema.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { postSchema } from './post-schema'
+import { postSchema } from '../post-schema'
 
 const validInput = {
   slug: 'hello-world',

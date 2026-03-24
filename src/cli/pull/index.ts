@@ -1,11 +1,11 @@
-/* src/cli/pull.ts */
+/* src/cli/pull/index.ts */
 
 import { resolve } from 'node:path'
-import { createDb } from '../lib/database/index'
-import { createMiniflare, applyMigrations } from './local-env'
-import { pullCore } from './pull-core'
+import { createDb } from '../../lib/database/index'
+import { createMiniflare, applyMigrations } from '../local-env'
+import { pullCore } from './core'
 
-const ROOT = resolve(import.meta.dirname, '../..')
+const ROOT = resolve(import.meta.dirname, '../../..')
 const POSTS_DIR = resolve(ROOT, 'contents/posts')
 
 async function main() {

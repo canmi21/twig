@@ -1,8 +1,8 @@
-/* src/cli/rebuild.ts */
+/* src/cli/rebuild/index.ts */
 
-import { createDb } from '../lib/database/index'
-import { createMiniflare, applyMigrations } from './local-env'
-import { rebuildCore } from './rebuild-core'
+import { createDb } from '../../lib/database/index'
+import { createMiniflare, applyMigrations } from '../local-env'
+import { rebuildCore } from './core'
 
 async function main() {
   const mf = createMiniflare()

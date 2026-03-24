@@ -1,7 +1,7 @@
-/* src/lib/compiler/compiler.test.ts */
+/* src/lib/compiler/__tests__/compiler.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { compile } from './index'
+import { compile } from '../index'
 
 const fixture = `---
 title: Hello World

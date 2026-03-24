@@ -1,13 +1,13 @@
-/* src/cli/rebuild.integration.test.ts */
+/* src/cli/rebuild/integration.test.ts */
 
 import { resolve } from 'node:path'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { stringify as stringifyYaml } from 'yaml'
-import { createTestEnv, truncateAll, type TestEnv } from './test-env'
-import { pushCore } from './push-core'
-import { rebuildCore } from './rebuild-core'
-import { readPostKv, readPostIndex } from '../lib/content/kv'
+import { createTestEnv, truncateAll, type TestEnv } from '../test-env'
+import { pushCore } from '../push/core'
+import { rebuildCore } from './core'
+import { readPostKv, readPostIndex } from '../../lib/storage/kv'
 
 describe('rebuild integration', () => {
   let env: TestEnv

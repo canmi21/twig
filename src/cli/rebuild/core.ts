@@ -1,10 +1,10 @@
-/* src/cli/rebuild-core.ts */
+/* src/cli/rebuild/core.ts */
 
-import type { Db } from '../lib/database/index'
-import { getAllPosts } from '../lib/database/posts'
-import { compile } from '../lib/compiler/index'
-import { writePostKv, writePostIndex } from '../lib/content/kv'
-import type { PostIndexEntry } from '../lib/content/kv'
+import type { Db } from '../../lib/database/index'
+import { getAllPosts } from '../../lib/database/posts'
+import { compile } from '../../lib/compiler/index'
+import { writePostKv, writePostIndex } from '../../lib/storage/kv'
+import type { PostIndexEntry } from '../../lib/storage/kv'
 
 export interface RebuildResult {
   compiled: number

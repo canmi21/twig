@@ -1,4 +1,4 @@
-/* src/lib/database/mime.ts */
+/* src/lib/utils/mime.ts */
 
 const mimeMap: Record<string, string> = {
   webp: 'image/webp',

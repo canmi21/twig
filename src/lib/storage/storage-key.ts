@@ -1,4 +1,4 @@
-/* src/lib/database/storage-key.ts */
+/* src/lib/storage/storage-key.ts */
 
 const imageExts = new Set(['webp', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'avif'])
 const videoExts = new Set(['mp4', 'webm', 'mov'])

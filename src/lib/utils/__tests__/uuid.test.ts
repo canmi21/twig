@@ -1,7 +1,7 @@
-/* src/lib/database/uuid.test.ts */
+/* src/lib/utils/__tests__/uuid.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { cid, newCid } from './uuid'
+import { cid, newCid } from '../uuid'
 
 describe('cid', () => {
   test('returns a 32-char hex string', () => {

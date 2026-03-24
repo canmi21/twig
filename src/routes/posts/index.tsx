@@ -2,8 +2,8 @@
 
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getEnv } from '~/lib/content/env'
-import { readPostIndex } from '~/lib/content/kv'
+import { getEnv } from '~/server/env'
+import { readPostIndex } from '~/lib/storage/kv'
 
 const getPosts = createServerFn().handler(async () => {
   const { taki_kv } = getEnv()

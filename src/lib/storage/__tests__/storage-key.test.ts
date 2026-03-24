@@ -1,7 +1,7 @@
-/* src/lib/database/storage-key.test.ts */
+/* src/lib/storage/__tests__/storage-key.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { storageKey } from './storage-key'
+import { storageKey } from '../storage-key'
 
 const hash = 'a'.repeat(64)
 

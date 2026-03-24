@@ -1,15 +1,15 @@
-/* src/cli/push.integration.test.ts */
+/* src/cli/push/integration.test.ts */
 
 import { resolve } from 'node:path'
 import { mkdir, writeFile, rm } from 'node:fs/promises'
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
 import { stringify as stringifyYaml } from 'yaml'
-import { createTestEnv, truncateAll, type TestEnv } from './test-env'
-import { pushCore, PushValidationError } from './push-core'
-import { pullCore } from './pull-core'
-import { getAllPosts } from '../lib/database/posts'
-import { readPostKv, readPostIndex } from '../lib/content/kv'
-import { storageKey } from '../lib/database/storage-key'
+import { createTestEnv, truncateAll, type TestEnv } from '../test-env'
+import { pushCore, PushValidationError } from './core'
+import { pullCore } from '../pull/core'
+import { getAllPosts } from '../../lib/database/posts'
+import { readPostKv, readPostIndex } from '../../lib/storage/kv'
+import { storageKey } from '../../lib/storage/storage-key'
 
 // --- Fixture helpers ---
 

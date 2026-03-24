@@ -2,9 +2,9 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getEnv } from '~/lib/content/env'
-import { readPostKv } from '~/lib/content/kv'
-import { PostRenderer } from '~/components/post-renderer'
+import { getEnv } from '~/server/env'
+import { readPostKv } from '~/lib/storage/kv'
+import { PostRenderer } from '~/components/post/post-renderer'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
