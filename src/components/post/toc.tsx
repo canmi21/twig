@@ -8,6 +8,9 @@ import type { TocEntry } from '~/lib/compiler/rehype-toc'
 // every replaceState call and causes viewport jumps during natural scroll.
 const nativeReplaceState = History.prototype.replaceState
 
+// Hash is cleared when the user is within this many pixels of the top.
+const TOP_DEAD_ZONE_PX = 64
+
 function replaceHash(id: string) {
   const { pathname, search, hash } = window.location
   const nextHash = id ? `#${id}` : ''
@@ -25,6 +28,19 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
   const observerRef = useRef<IntersectionObserver | null>(null)
   const isClickScrollingRef = useRef(false)
 
+  // Clear hash when scrolled back into the top dead zone
+  useEffect(() => {
+    const onScroll = () => {
+      if (isClickScrollingRef.current) return
+      if (window.scrollY <= TOP_DEAD_ZONE_PX) {
+        setActiveId('')
+        replaceHash('')
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   useEffect(() => {
     const headings = entries
       .map((e) => document.getElementById(e.id))
@@ -35,6 +51,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
     observerRef.current = new IntersectionObserver(
       (intersections) => {
         if (isClickScrollingRef.current) return
+        if (window.scrollY <= TOP_DEAD_ZONE_PX) return
         for (const entry of intersections) {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id)
