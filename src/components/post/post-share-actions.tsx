@@ -18,8 +18,8 @@ type AiProvider = 'claude' | 'chatgpt' | 'gemini' | 'grok'
 const AI_PROVIDER_STORAGE_KEY = 'ai-provider'
 const AI_PROVIDER_CHANGE_EVENT = 'ai-provider-change'
 const AI_PROVIDERS: AiProvider[] = ['claude', 'chatgpt', 'gemini', 'grok']
-const MINGCUTE_ICON_CLASS = 'size-[0.95rem]'
-const LUCIDE_ICON_CLASS = 'size-[0.875rem]'
+const MINGCUTE_ICON_CLASS = 'size-[1.15rem]'
+const LUCIDE_ICON_CLASS = 'size-[1.05rem]'
 
 async function copyText(text: string) {
   if (navigator.clipboard?.writeText) {
@@ -218,7 +218,7 @@ export function PostShareActions() {
   )
 
   return (
-    <div className="mt-0.5 flex shrink-0 items-center gap-1">
+    <div className="mt-0.5 flex shrink-0 items-center gap-px">
       <Tooltip.Provider delayDuration={480} skipDelayDuration={0}>
         <Tooltip.Root
           open={isAiSelectorOpen}
@@ -234,7 +234,7 @@ export function PostShareActions() {
               aria-label={getAiProviderLabel(aiProvider)}
               title={getAiProviderLabel(aiProvider)}
               className="
-                inline-flex cursor-pointer items-center justify-center rounded-full p-1.5
+                inline-flex cursor-pointer items-center justify-center rounded-full p-1
                 text-secondary transition-colors
                 hover:text-primary
               "
@@ -248,8 +248,8 @@ export function PostShareActions() {
               align="center"
               sideOffset={2}
               className="
-                z-10 flex items-center gap-1 rounded-full border border-border
-                bg-surface p-1 shadow-sm
+                z-10 flex items-center gap-px rounded-full border border-border
+                bg-surface p-0.5 shadow-sm
               "
             >
               {switchableAiProviders.map((provider) => (
@@ -263,7 +263,7 @@ export function PostShareActions() {
                   aria-label={`Set default AI to ${getAiProviderName(provider)}`}
                   title={`Set default AI to ${getAiProviderName(provider)}`}
                   className="
-                    inline-flex cursor-pointer items-center justify-center rounded-full p-1.5
+                    inline-flex cursor-pointer items-center justify-center rounded-full p-1
                     text-secondary transition-colors
                     hover:text-primary
                   "
@@ -295,7 +295,7 @@ export function PostShareActions() {
         aria-label="Share on X"
         title="Share on X"
         className="
-          inline-flex cursor-pointer items-center justify-center rounded-full p-1.5
+          inline-flex cursor-pointer items-center justify-center rounded-full p-1
           text-secondary transition-colors
           hover:text-primary
         "
@@ -312,7 +312,7 @@ export function PostShareActions() {
             className="
               pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-1/2 z-10
               -translate-x-1/2 rounded-full border border-border bg-surface
-              px-2 py-1 text-[11px] leading-none text-primary shadow-sm
+              px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
             "
           >
             {copyToastLabel}
@@ -326,12 +326,15 @@ export function PostShareActions() {
           aria-label={copyLabel}
           title={copyLabel}
           className="
-            inline-flex cursor-pointer items-center justify-center rounded-full p-1.5
+            inline-flex cursor-pointer items-center justify-center rounded-full p-1
             text-secondary transition-colors
             hover:text-primary
           "
         >
-          <Link className={LUCIDE_ICON_CLASS} strokeWidth={1.8} />
+          <Link
+            className={`${LUCIDE_ICON_CLASS} translate-y-px`}
+            strokeWidth={1.8}
+          />
         </button>
       </div>
     </div>
