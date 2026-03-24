@@ -6,12 +6,26 @@ import type { TocEntry } from '~/lib/compiler/rehype-toc'
 export function Toc({ entries }: { entries: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>('')
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const clickScrollTimeoutRef = useRef<number | null>(null)
+  const isClickScrollingRef = useRef(false)
+  const scrollEndHandlerRef = useRef<(() => void) | null>(null)
 
   const syncHash = useCallback((id: string) => {
     const { pathname, search, hash } = window.location
     const nextHash = id ? `#${id}` : ''
     if (hash === nextHash) return
     window.history.replaceState(null, '', `${pathname}${search}${nextHash}`)
+  }, [])
+
+  const clearClickScrollSync = useCallback(() => {
+    if (clickScrollTimeoutRef.current !== null) {
+      window.clearTimeout(clickScrollTimeoutRef.current)
+      clickScrollTimeoutRef.current = null
+    }
+    if (scrollEndHandlerRef.current) {
+      window.removeEventListener('scrollend', scrollEndHandlerRef.current)
+      scrollEndHandlerRef.current = null
+    }
   }, [])
 
   useEffect(() => {
@@ -35,11 +49,15 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
     )
 
     for (const el of headings) observerRef.current.observe(el)
-    return () => observerRef.current?.disconnect()
-  }, [entries])
+    return () => {
+      observerRef.current?.disconnect()
+      clearClickScrollSync()
+    }
+  }, [clearClickScrollSync, entries])
 
   useEffect(() => {
     if (!activeId) return
+    if (isClickScrollingRef.current) return
     syncHash(activeId)
   }, [activeId, syncHash])
 
@@ -48,12 +66,24 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       e.preventDefault()
       const el = document.getElementById(id)
       if (el) {
+        clearClickScrollSync()
+        isClickScrollingRef.current = true
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         setActiveId(id)
-        syncHash(id)
+        const finishSync = () => {
+          clearClickScrollSync()
+          isClickScrollingRef.current = false
+          syncHash(id)
+        }
+        if ('onscrollend' in window) {
+          scrollEndHandlerRef.current = finishSync
+          window.addEventListener('scrollend', finishSync, { once: true })
+        } else {
+          clickScrollTimeoutRef.current = window.setTimeout(finishSync, 600)
+        }
       }
     },
-    [syncHash],
+    [clearClickScrollSync, syncHash],
   )
 
   if (entries.length === 0) return null
