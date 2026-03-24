@@ -1,0 +1,1 @@
+ALTER TABLE `posts` ADD `content_hash` text DEFAULT '' NOT NULL;

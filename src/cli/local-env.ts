@@ -43,7 +43,12 @@ export async function applyMigrations(d1: D1Database) {
         await d1.prepare(stmt).run()
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
-        if (!msg.includes('already exists')) throw err
+        // Tolerate re-running migrations: CREATE → "already exists", ALTER ADD → "duplicate column"
+        if (
+          !msg.includes('already exists') &&
+          !msg.includes('duplicate column name')
+        )
+          throw err
       }
     }
   }

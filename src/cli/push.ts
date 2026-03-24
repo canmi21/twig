@@ -52,7 +52,7 @@ function extractFrontmatter(source: string): {
   if (!match) return { frontmatter: { title: '' }, content: source }
   return {
     frontmatter: parseYaml(match[1]) as Frontmatter,
-    content: match[2].trimStart(),
+    content: match[2].trim(),
   }
 }
 
