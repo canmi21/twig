@@ -14,7 +14,18 @@ function mediaUrl(cdnPrefix: string, src: string): string {
 }
 
 function ImageComponent({ url, alt }: { url: string; alt: string }) {
-  return <img src={url} alt={alt} loading="lazy" />
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      className="
+        aspect-video w-full rounded-md
+        border border-border object-cover
+        shadow-sm
+      "
+    />
+  )
 }
 
 function VideoComponent({ url }: { url: string }) {

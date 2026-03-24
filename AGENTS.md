@@ -114,4 +114,4 @@
 - Run `bun run fmt`, `bun run lint:oxlint`, `bun run lint:eslint`, and `bun run typecheck` before every commit. Fix errors, then commit.
 - When build config, routing, or dependencies change, also run `bun run build` and `bun run knip`.
 - The user prefers concise commit messages. Lead with the change type, not the implementation details.
-- Versioning: follow semver on `package.json` version. When a commit introduces a new feature (`feat:`) or significant fix, bump patch (`+0.0.1`). If the user says "+ minor", reset patch to 0 and bump minor (`+0.1.0`). Breaking changes also bump minor. Do not bump for `chore:`, `docs:`, `test:`, `refactor:` or other non-functional changes. Do not mention the version bump in the commit message unless the user asks.
+- Versioning: follow semver. For `feat:` or significant `fix:`, run `./scripts/bump-version.sh` (patch). If the user says "+ minor" or there is a breaking change, run `./scripts/bump-version.sh minor`. Do not bump for `chore:`, `docs:`, `test:`, `refactor:`. Do not mention the bump in the commit message unless asked.
