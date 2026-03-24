@@ -16,6 +16,8 @@
     "lint:eslint:fix": "eslint . --fix",
     "fmt": "oxfmt --write . && chore .",
     "fmt:check": "oxfmt --check .",
+    "push": "bun run src/cli/push.ts",
+    "pull": "bun run src/cli/pull.ts",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
@@ -30,6 +32,7 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "unified": "^11.0.5",
+    "uuid": "^13.0.0",
     "yaml": "^2.8.3"
   },
   "devDependencies": {
@@ -40,6 +43,7 @@
     "@types/node": "^25.5.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "@types/uuid": "^11.0.0",
     "@vitejs/plugin-react": "^6.0.1",
     "drizzle-kit": "^0.31.10",
     "eslint": "^10.0.3",

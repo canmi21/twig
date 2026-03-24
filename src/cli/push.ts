@@ -1,0 +1,218 @@
+/* src/cli/push.ts */
+
+import { resolve, relative, extname } from 'node:path'
+import { readdir, readFile, stat } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { eq } from 'drizzle-orm'
+import { createDb } from '../lib/database/index'
+import { upsertPost } from '../lib/database/posts'
+import {
+  getMediaByHash,
+  insertMedia,
+  upsertMediaRef,
+} from '../lib/database/media'
+import { contents, posts } from '../lib/database/schema'
+import { storageKey } from '../lib/database/storage-key'
+import { mimeFromExt } from '../lib/database/mime'
+import type { Frontmatter } from '../lib/compiler/index'
+import { parse as parseYaml } from 'yaml'
+import { createMiniflare, applyMigrations } from './local-env'
+
+const ROOT = resolve(import.meta.dirname, '../..')
+const POSTS_DIR = resolve(ROOT, 'contents/posts')
+
+function extractFrontmatter(source: string): {
+  frontmatter: Frontmatter
+  content: string
+} {
+  const match = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
+  if (!match) return { frontmatter: { title: '' }, content: source }
+
+  return {
+    frontmatter: parseYaml(match[1]) as Frontmatter,
+    content: match[2].trimStart(),
+  }
+}
+
+interface ScannedPost {
+  slug: string
+  source: string
+  mediaFiles: Array<{ relativePath: string; absolutePath: string }>
+}
+
+async function collectFiles(
+  dir: string,
+  base: string,
+): Promise<Array<{ relativePath: string; absolutePath: string }>> {
+  const results: Array<{ relativePath: string; absolutePath: string }> = []
+  const entries = await readdir(dir, { withFileTypes: true })
+
+  for (const entry of entries) {
+    const abs = resolve(dir, entry.name)
+    if (entry.isDirectory()) {
+      results.push(...(await collectFiles(abs, base)))
+    } else if (entry.name !== 'index.md') {
+      results.push({
+        relativePath: `./${relative(base, abs)}`,
+        absolutePath: abs,
+      })
+    }
+  }
+
+  return results
+}
+
+async function scanPosts(): Promise<ScannedPost[]> {
+  let entries: string[]
+  try {
+    entries = await readdir(POSTS_DIR)
+  } catch {
+    console.log('No posts directory found at', POSTS_DIR)
+    return []
+  }
+
+  const results: ScannedPost[] = []
+
+  for (const slug of entries) {
+    const slugDir = resolve(POSTS_DIR, slug)
+    const slugStat = await stat(slugDir).catch(() => null)
+    if (!slugStat?.isDirectory()) continue
+
+    const indexPath = resolve(slugDir, 'index.md')
+    try {
+      const source = await readFile(indexPath, 'utf-8')
+      const mediaFiles = await collectFiles(slugDir, slugDir)
+      results.push({ slug, source, mediaFiles })
+    } catch {
+      // skip directories without index.md
+    }
+  }
+
+  return results
+}
+
+async function processMedia(
+  db: ReturnType<typeof createDb>,
+  r2: R2Bucket,
+  cid: string,
+  mediaFiles: ScannedPost['mediaFiles'],
+): Promise<Map<string, string>> {
+  // Map: original relative path -> "{hash}.{ext}"
+  const replacements = new Map<string, string>()
+
+  for (const { relativePath, absolutePath } of mediaFiles) {
+    const data = await readFile(absolutePath)
+    const hash = createHash('sha256').update(data).digest('hex')
+    const ext = extname(absolutePath).slice(1).toLowerCase()
+    const hashName = `${hash}.${ext}`
+
+    replacements.set(relativePath, hashName)
+
+    const existing = await getMediaByHash(db, hash)
+    if (!existing) {
+      const key = storageKey(hash, ext)
+      await r2.put(key, new Uint8Array(data))
+      await insertMedia(db, {
+        hash,
+        ext,
+        mime: mimeFromExt(ext),
+        size: data.length,
+        createdAt: new Date().toISOString(),
+      })
+      console.log(`    media new: ${relativePath} -> ${key}`)
+    } else {
+      console.log(`    media exists: ${relativePath} (${hash.slice(0, 8)}...)`)
+    }
+
+    await upsertMediaRef(db, hash, cid)
+  }
+
+  return replacements
+}
+
+function replaceMediaRefs(
+  content: string,
+  replacements: Map<string, string>,
+): string {
+  let result = content
+  for (const [original, hashed] of replacements) {
+    result = result.replaceAll(original, hashed)
+  }
+  return result
+}
+
+async function main() {
+  const mf = createMiniflare()
+
+  try {
+    const d1 = await mf.getD1Database('taki_sql')
+    const r2 = (await mf.getR2Bucket('taki_bucket')) as unknown as R2Bucket
+
+    console.log('Applying migrations...')
+    await applyMigrations(d1)
+
+    const postFiles = await scanPosts()
+    if (postFiles.length === 0) {
+      console.log('No posts found.')
+      return
+    }
+
+    console.log(`Found ${postFiles.length} post(s)\n`)
+
+    const db = createDb(d1)
+
+    for (const { slug, source, mediaFiles } of postFiles) {
+      const { frontmatter, content } = extractFrontmatter(source)
+
+      // Upsert post first to get cid
+      const result = await upsertPost(db, {
+        slug,
+        title: frontmatter.title,
+        description: frontmatter.description,
+        category: frontmatter.category,
+        tags: frontmatter.tags,
+        content,
+      })
+
+      console.log(`  ${result.action}: ${slug} (${result.cid})`)
+
+      // Process media and replace references in content
+      if (mediaFiles.length > 0) {
+        const replacements = await processMedia(db, r2, result.cid, mediaFiles)
+        const updatedContent = replaceMediaRefs(content, replacements)
+
+        if (updatedContent !== content) {
+          await db
+            .update(posts)
+            .set({ content: updatedContent })
+            .where(eq(posts.cid, result.cid))
+          console.log(`    content refs updated`)
+        }
+      }
+    }
+
+    // Summary
+    const allPosts = await db
+      .select({
+        cid: posts.cid,
+        slug: posts.slug,
+        title: posts.title,
+        createdAt: contents.createdAt,
+        updatedAt: contents.updatedAt,
+      })
+      .from(posts)
+      .innerJoin(contents, eq(posts.cid, contents.cid))
+
+    console.log(`\nDatabase now has ${allPosts.length} post(s):`)
+    for (const p of allPosts) {
+      console.log(`  - ${p.slug}: "${p.title}" (updated: ${p.updatedAt})`)
+    }
+  } finally {
+    await mf.dispose()
+  }
+}
+
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

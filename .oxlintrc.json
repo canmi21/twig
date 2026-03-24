@@ -55,6 +55,13 @@
         "typescript/no-explicit-any": "off",
         "typescript/no-non-null-assertion": "off"
       }
+    },
+    {
+      "files": ["src/cli/**/*.ts"],
+      "rules": {
+        "no-console": "off",
+        "no-await-in-loop": "off"
+      }
     }
   ],
   "ignorePatterns": [
