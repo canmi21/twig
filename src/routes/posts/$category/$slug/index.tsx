@@ -6,6 +6,7 @@ import { getEnv } from '~/server/env'
 import { readPostKv } from '~/lib/storage/kv'
 import { PostRenderer } from '~/components/post/post-renderer'
 import { PostBackLink } from '~/components/post/post-back-link'
+import { PostShareActions } from '~/components/post/post-share-actions'
 import { Toc } from '~/components/post/toc'
 
 const getPost = createServerFn()
@@ -52,18 +53,21 @@ function PostPage() {
       <PostBackLink />
       <Toc entries={post.toc} />
       <article className="mx-auto max-w-[720px] px-5 pt-28 pb-24">
-        <header className="mb-10">
-          <h1 className="text-[17px] font-medium text-primary">
-            {frontmatter.title}
-          </h1>
-          {frontmatter.created_at && (
-            <time
-              dateTime={frontmatter.created_at}
-              className="mt-1.5 block text-[13px] text-secondary"
-            >
-              {formatDate(frontmatter.created_at)}
-            </time>
-          )}
+        <header className="mb-10 flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[17px] font-medium text-primary">
+              {frontmatter.title}
+            </h1>
+            {frontmatter.created_at && (
+              <time
+                dateTime={frontmatter.created_at}
+                className="mt-1.5 block text-[13px] text-secondary"
+              >
+                {formatDate(frontmatter.created_at)}
+              </time>
+            )}
+          </div>
+          <PostShareActions />
         </header>
         {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
         <div className="article">

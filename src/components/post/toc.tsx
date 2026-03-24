@@ -3,19 +3,21 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { TocEntry } from '~/lib/compiler/rehype-toc'
 
+// Hash is cleared when the user is within this many pixels of the top.
+const TOP_DEAD_ZONE_PX = 64
+
 // Use the native replaceState from History.prototype to bypass TanStack
 // Router's monkey-patched version, which triggers scroll restoration on
 // every replaceState call and causes viewport jumps during natural scroll.
-const nativeReplaceState = History.prototype.replaceState
-
-// Hash is cleared when the user is within this many pixels of the top.
-const TOP_DEAD_ZONE_PX = 64
+function getNativeReplaceState() {
+  return window.History?.prototype.replaceState ?? window.history.replaceState
+}
 
 function replaceHash(id: string) {
   const { pathname, search, hash } = window.location
   const nextHash = id ? `#${id}` : ''
   if (hash === nextHash) return
-  nativeReplaceState.call(
+  getNativeReplaceState().call(
     window.history,
     window.history.state,
     '',
