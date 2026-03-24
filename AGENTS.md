@@ -78,9 +78,25 @@
 
 - This is a TanStack Start SSR app deployed to Cloudflare Workers.
 - Storage: D1 (SQLite) for structured data, R2 for media files, KV for compiled content cache.
-- CLI scripts in `src/cli/` use miniflare to access local D1/R2/KV, sharing the same `.wrangler/state/v3/` persistence path as `wrangler dev`.
-- Database operations live in `src/lib/database/`, content domain logic in `src/lib/content/`, markdown compiler in `src/lib/compiler/`.
-- Cloudflare Worker bindings are accessed via `import { env } from 'cloudflare:workers'` in server code, wrapped in `src/lib/content/env.ts`.
+- Directory layout:
+  - `src/cli/{push,pull,rebuild}/` — CLI commands, each split into `index.ts` (entry) and `core.ts` (logic).
+  - `src/lib/compiler/` — Markdown compiler pipeline (unified/remark/rehype/shiki).
+  - `src/lib/content/` — Content domain logic (zod schema).
+  - `src/lib/database/` — Drizzle schema and D1 CRUD operations.
+  - `src/lib/storage/` — KV read/write helpers and storage key derivation.
+  - `src/lib/utils/` — Shared utilities (MIME inference, UUID generation).
+  - `src/server/` — Cloudflare Worker env bindings and server-only functions.
+  - `src/components/post/` — Post rendering components (PostRenderer, ComponentResolver).
+  - `src/routes/` — TanStack Router file-based routes (folder hierarchy, not dot notation).
+- CLI scripts use miniflare to access local D1/R2/KV, sharing `.wrangler/state/v3/` persistence with `wrangler dev`.
+- Cloudflare Worker bindings are accessed via `import { env } from 'cloudflare:workers'`, wrapped in `src/server/env.ts`.
+
+## Testing
+
+- Test runner: vitest (`bun run test`).
+- Unit tests live in `__tests__/` subdirectories next to the code they test.
+- Integration tests (`*.integration.test.ts`) are excluded from `bun run test` and run separately.
+- Tests use `describe`/`test`/`expect` from vitest, not `bun:test`.
 
 ## Content Pipeline
 
