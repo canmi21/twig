@@ -6,6 +6,11 @@
 /* Class-based dark mode instead of prefers-color-scheme */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Browser native controls and scrollbars follow the theme */
+:root {
+  color-scheme: light;
+}
+
 /* Light/dark color scheme via CSS custom properties */
 @theme {
   --color-surface: rgb(255, 255, 255);
@@ -14,6 +19,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --color-surface: rgb(22, 22, 22);
   --color-on-surface: rgb(160, 160, 160);
   --color-heading: rgb(237, 237, 237);
