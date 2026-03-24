@@ -2,3 +2,29 @@
 
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+
+/* Class-based dark mode instead of prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light/dark color scheme via CSS custom properties */
+@theme {
+  --color-surface: rgb(255, 255, 255);
+  --color-on-surface: rgb(55, 55, 55);
+  --color-heading: rgb(17, 17, 17);
+}
+
+.dark {
+  --color-surface: rgb(22, 22, 22);
+  --color-on-surface: rgb(160, 160, 160);
+  --color-heading: rgb(237, 237, 237);
+}
+
+/* Shiki dual-theme: follow class-based dark mode instead of prefers-color-scheme */
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}

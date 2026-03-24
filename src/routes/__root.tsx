@@ -9,6 +9,9 @@ import {
 } from '@tanstack/react-router'
 import type { RootContext } from '~/router'
 import { getCdnPublicUrl } from '~/server/get-cdn-url'
+import { getTheme } from '~/server/get-theme'
+import { themeScript } from '~/lib/theme/theme-script'
+import { ThemeToggle } from '~/components/theme-toggle'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({
@@ -22,10 +25,14 @@ export const Route = createRootRouteWithContext<RootContext>()({
       { title: 'Taki' },
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
+    scripts: [{ children: themeScript }],
   }),
   beforeLoad: async () => {
-    const cdnPublicUrl = await getCdnPublicUrl()
-    return { cdnPublicUrl }
+    const [cdnPublicUrl, theme] = await Promise.all([
+      getCdnPublicUrl(),
+      getTheme(),
+    ])
+    return { cdnPublicUrl, theme }
   },
   component: RootComponent,
 })
@@ -39,17 +46,19 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+  const { theme } = Route.useRouteContext()
   return (
-    <html lang="zh-Hans">
+    <html
+      lang="zh-Hans"
+      // eslint-disable-next-line better-tailwindcss/no-unknown-classes -- dark mode strategy class, not a Tailwind utility
+      className={theme === 'dark' ? 'dark' : undefined}
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>
-      <body
-        className="
-        bg-white text-gray-900
-        dark:bg-gray-950 dark:text-gray-100
-      "
-      >
+      <body className="bg-surface text-on-surface">
+        <ThemeToggle />
         {children}
         <Scripts />
       </body>

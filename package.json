@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -31,6 +31,7 @@
     "@tanstack/react-router": "^1.168.3",
     "@tanstack/react-start": "^1.167.5",
     "drizzle-orm": "^0.45.1",
+    "lucide-react": "^1.0.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "rehype-stringify": "^10.0.1",
