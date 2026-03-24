@@ -5,6 +5,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getEnv } from '~/server/env'
 import { readPostKv } from '~/lib/storage/kv'
 import { PostRenderer } from '~/components/post/post-renderer'
+import { PostBackLink } from '~/components/post/post-back-link'
 import { Toc } from '~/components/post/toc'
 
 const getPost = createServerFn()
@@ -48,6 +49,7 @@ function PostPage() {
 
   return (
     <>
+      <PostBackLink />
       <Toc entries={post.toc} />
       <article className="mx-auto max-w-[720px] px-5 pt-28 pb-24">
         <header className="mb-10">

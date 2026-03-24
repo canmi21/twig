@@ -7,6 +7,13 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>('')
   const observerRef = useRef<IntersectionObserver | null>(null)
 
+  const syncHash = useCallback((id: string) => {
+    const { pathname, search, hash } = window.location
+    const nextHash = id ? `#${id}` : ''
+    if (hash === nextHash) return
+    window.history.replaceState(null, '', `${pathname}${search}${nextHash}`)
+  }, [])
+
   useEffect(() => {
     const headings = entries
       .map((e) => document.getElementById(e.id))
@@ -31,6 +38,11 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
     return () => observerRef.current?.disconnect()
   }, [entries])
 
+  useEffect(() => {
+    if (!activeId) return
+    syncHash(activeId)
+  }, [activeId, syncHash])
+
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
       e.preventDefault()
@@ -38,9 +50,10 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
         setActiveId(id)
+        syncHash(id)
       }
     },
-    [],
+    [syncHash],
   )
 
   if (entries.length === 0) return null
@@ -57,15 +70,12 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
     >
       <ul className="space-y-1.5">
         {entries.map((entry) => (
-          <li
-            key={entry.id}
-            style={{ paddingLeft: `${(entry.depth - 2) * 12}px` }}
-          >
+          <li key={entry.id}>
             <a
               href={`#${entry.id}`}
               onClick={(e) => handleClick(e, entry.id)}
               className={`
-                block truncate text-[12px] leading-snug
+                block truncate text-[13px] leading-snug
                 ${activeId === entry.id ? 'text-primary' : 'text-secondary'}
               `}
             >
