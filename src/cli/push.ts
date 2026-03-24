@@ -16,6 +16,7 @@ import { storageKey } from '../lib/database/storage-key'
 import { mimeFromExt } from '../lib/database/mime'
 import type { Frontmatter } from '../lib/compiler/index'
 import { parse as parseYaml } from 'yaml'
+import { postSchema } from '../lib/content/post-schema'
 import { createMiniflare, applyMigrations } from './local-env'
 
 const ROOT = resolve(import.meta.dirname, '../..')
@@ -161,8 +162,28 @@ async function main() {
 
     const db = createDb(d1)
 
+    let skipped = 0
+
     for (const { slug, source, mediaFiles } of postFiles) {
       const { frontmatter, content } = extractFrontmatter(source)
+
+      const validation = postSchema.safeParse({
+        slug,
+        title: frontmatter.title,
+        description: frontmatter.description,
+        category: frontmatter.category,
+        tags: frontmatter.tags,
+        content,
+      })
+
+      if (!validation.success) {
+        console.log(`  skipped: ${slug} (validation failed)`)
+        for (const issue of validation.error.issues) {
+          console.log(`    - ${issue.path.join('.')}: ${issue.message}`)
+        }
+        skipped++
+        continue
+      }
 
       // Upsert post first to get cid
       const result = await upsertPost(db, {
@@ -189,6 +210,10 @@ async function main() {
           console.log(`    content refs updated`)
         }
       }
+    }
+
+    if (skipped > 0) {
+      console.log(`\n${skipped} post(s) skipped due to validation errors.`)
     }
 
     // Summary
