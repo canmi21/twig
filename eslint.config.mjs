@@ -1,3 +1,5 @@
+/* eslint.config.mjs */
+
 import tseslint from 'typescript-eslint'
 import oxlint from 'eslint-plugin-oxlint'
 import reactHooks from 'eslint-plugin-react-hooks'

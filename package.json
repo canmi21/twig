@@ -14,7 +14,7 @@
     "lint:oxlint:fix": "oxlint --tsconfig tsconfig.json --fix .",
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "eslint . --fix",
-    "fmt": "oxfmt --write .",
+    "fmt": "oxfmt --write . && chore .",
     "fmt:check": "oxfmt --check .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"

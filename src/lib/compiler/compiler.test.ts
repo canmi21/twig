@@ -1,3 +1,5 @@
+/* src/lib/compiler/compiler.test.ts */
+
 import { expect, test } from 'bun:test'
 import { compile } from './index'
 

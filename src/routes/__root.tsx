@@ -1,4 +1,5 @@
-/// <reference types="vite/client" />
+/* src/routes/__root.tsx */
+
 import type { ReactNode } from 'react'
 import {
   Outlet,

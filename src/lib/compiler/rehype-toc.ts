@@ -1,3 +1,5 @@
+/* src/lib/compiler/rehype-toc.ts */
+
 import type { Root, Element, Text } from 'hast'
 import type { Plugin } from 'unified'
 import { slugify } from './slugify'
