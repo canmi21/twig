@@ -38,7 +38,7 @@ export async function applyMigrations(d1: D1Database) {
 
     for (const stmt of statements) {
       try {
-        await d1.exec(stmt)
+        await d1.prepare(stmt).run()
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
         if (!msg.includes('already exists')) throw err

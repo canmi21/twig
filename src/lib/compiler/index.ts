@@ -3,6 +3,7 @@
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkFrontmatter from 'remark-frontmatter'
+import remarkDirective from 'remark-directive'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import { parse as parseYaml } from 'yaml'
@@ -10,8 +11,10 @@ import type { Root as MdastRoot } from 'mdast'
 import type { Plugin } from 'unified'
 import { rehypeToc } from './rehype-toc'
 import type { TocEntry } from './rehype-toc'
+import { remarkExtractDirectives } from './remark-directives'
+import type { ComponentEntry } from './remark-directives'
 
-export type { TocEntry }
+export type { TocEntry, ComponentEntry }
 
 export interface Frontmatter {
   title: string
@@ -24,6 +27,7 @@ export interface CompileResult {
   frontmatter: Frontmatter
   html: string
   toc: TocEntry[]
+  components: ComponentEntry[]
 }
 
 const remarkExtractFrontmatter: Plugin<
@@ -41,14 +45,17 @@ const remarkExtractFrontmatter: Plugin<
 export async function compile(source: string): Promise<CompileResult> {
   const fmStore: { raw?: string } = {}
   const toc: TocEntry[] = []
+  const components: ComponentEntry[] = []
 
   const html = await unified()
     .use(remarkParse)
     .use(remarkFrontmatter, ['yaml'])
     .use(remarkExtractFrontmatter, { store: fmStore })
-    .use(remarkRehype)
+    .use(remarkDirective)
+    .use(remarkExtractDirectives, { components })
+    .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeToc, { toc })
-    .use(rehypeStringify)
+    .use(rehypeStringify, { allowDangerousHtml: true })
     .process(source)
 
   const frontmatter: Frontmatter = fmStore.raw
@@ -59,5 +66,6 @@ export async function compile(source: string): Promise<CompileResult> {
     frontmatter,
     html: String(html),
     toc,
+    components,
   }
 }

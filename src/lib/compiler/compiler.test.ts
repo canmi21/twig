@@ -61,4 +61,67 @@ test('compile handles markdown without frontmatter', async () => {
   expect(result.frontmatter.title).toBe('')
   expect(result.html).toContain('<h2 id="just-a-heading">Just a heading</h2>')
   expect(result.toc).toHaveLength(1)
+  expect(result.components).toEqual([])
+})
+
+test('compile extracts directives as component placeholders', async () => {
+  const md = `## Photos
+
+::image{src="abc123.webp" alt="A photo"}
+
+Some text between.
+
+::video{src="def456.mp4"}
+
+## End
+`
+
+  const result = await compile(md)
+
+  expect(result.components).toEqual([
+    { type: 'image', props: { src: 'abc123.webp', alt: 'A photo' }, index: 0 },
+    { type: 'video', props: { src: 'def456.mp4' }, index: 1 },
+  ])
+
+  expect(result.html).toContain('<!--component:0-->')
+  expect(result.html).toContain('<!--component:1-->')
+  expect(result.html).not.toContain('abc123.webp')
+  expect(result.html).not.toContain('def456.mp4')
+})
+
+test('compile ignores unknown directives', async () => {
+  const md = `::unknown{foo="bar"}
+
+Some text.
+`
+
+  const result = await compile(md)
+
+  expect(result.components).toEqual([])
+})
+
+test('compile handles mixed content with directives', async () => {
+  const md = `## Title
+
+A paragraph.
+
+::image{src="photo.png" alt="test"}
+
+Another paragraph with a [link](https://example.com).
+
+::audio{src="track.mp3"}
+
+Final text.
+`
+
+  const result = await compile(md)
+
+  expect(result.toc).toEqual([{ depth: 2, text: 'Title', id: 'title' }])
+  expect(result.components).toHaveLength(2)
+  expect(result.components[0].type).toBe('image')
+  expect(result.components[1].type).toBe('audio')
+  expect(result.html).toContain('<p>A paragraph.</p>')
+  expect(result.html).toContain('<a href="https://example.com">link</a>')
+  expect(result.html).toContain('<!--component:0-->')
+  expect(result.html).toContain('<!--component:1-->')
 })
