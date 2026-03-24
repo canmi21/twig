@@ -20,7 +20,6 @@
     "no-unused-vars": "off",
     "no-console": "error",
     "no-debugger": "error",
-
     "typescript/consistent-type-imports": "error",
     "typescript/no-non-null-assertion": "error",
     "typescript/no-unused-vars": [
@@ -38,13 +37,11 @@
     "unicorn/prevent-abbreviations": "off",
     "unicorn/no-useless-undefined": "off",
     "unicorn/prefer-node-protocol": "error",
-
     "import/no-cycle": "error",
     "import/no-duplicates": "error",
     "import/no-self-import": "error",
-
+    "react/react-in-jsx-scope": "off",
     "react-hooks/exhaustive-deps": "error",
-
     "jsx-a11y/no-autofocus": "off",
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/alt-text": "error",

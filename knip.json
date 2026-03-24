@@ -1,16 +1,11 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "ignoreDependencies": ["bun-types", "cloudflare", "entities"],
-  "workspaces": {
-    ".": {
-      "entry": ["src/router.tsx"],
-      "project": [
-        "src/**/*.{ts,tsx}",
-        "src/**/*.css",
-        "drizzle/**/*.ts",
-        "*.config.ts",
-        "*.config.mjs"
-      ]
-    }
-  }
+  "ignoreDependencies": [],
+  "entry": ["src/router.tsx"],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "src/**/*.css",
+    "*.config.ts",
+    "*.config.mjs"
+  ]
 }

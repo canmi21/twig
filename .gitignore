@@ -7,3 +7,5 @@ dist
 .wrangler
 .output
 reference
+contents/*
+!contents/.gitkeep
