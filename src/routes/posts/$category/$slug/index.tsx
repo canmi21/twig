@@ -31,9 +31,23 @@ function PostPage() {
   }
 
   return (
-    <article>
+    <article
+      className="
+        mx-auto prose max-w-3xl px-4 py-8 prose-neutral
+        dark:prose-invert
+      "
+    >
       <h1>{post.frontmatter.title}</h1>
-      {post.frontmatter.description && <p>{post.frontmatter.description}</p>}
+      {post.frontmatter.description && (
+        <p
+          className="
+            text-lg text-gray-500
+            dark:text-gray-400
+          "
+        >
+          {post.frontmatter.description}
+        </p>
+      )}
       <PostRenderer html={post.html} components={post.components} />
     </article>
   )

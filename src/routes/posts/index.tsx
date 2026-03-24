@@ -23,9 +23,9 @@ function PostList() {
   }
 
   return (
-    <div>
-      <h1>Posts</h1>
-      <ul>
+    <div className="mx-auto max-w-3xl px-4 py-8">
+      <h1 className="mb-8 text-3xl font-bold">Posts</h1>
+      <ul className="space-y-6">
         {posts.map((post) => (
           <li key={post.slug}>
             <Link
@@ -34,11 +34,34 @@ function PostList() {
                 category: post.category ?? 'uncategorized',
                 slug: post.slug,
               }}
+              className="
+                text-lg font-medium text-blue-600
+                hover:underline
+                dark:text-blue-400
+              "
             >
               {post.title}
             </Link>
-            {post.description && <p>{post.description}</p>}
-            {post.category && <span> [{post.category}]</span>}
+            {post.description && (
+              <p
+                className="
+                  mt-1 text-gray-500
+                  dark:text-gray-400
+                "
+              >
+                {post.description}
+              </p>
+            )}
+            {post.category && (
+              <span
+                className="
+                  mt-1 inline-block text-xs text-gray-400
+                  dark:text-gray-500
+                "
+              >
+                {post.category}
+              </span>
+            )}
           </li>
         ))}
       </ul>

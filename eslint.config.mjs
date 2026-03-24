@@ -43,7 +43,15 @@ export default [
       'react-hooks/use-memo': 'error',
     },
   },
-  tailwindcss.configs.recommended,
+  {
+    ...tailwindcss.configs.recommended,
+    settings: {
+      ...tailwindcss.configs.recommended.settings,
+      'better-tailwindcss': {
+        entryPoint: 'src/styles/app.css',
+      },
+    },
+  },
   // Auto-disable rules already covered by oxlint
   ...oxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 ]

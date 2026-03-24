@@ -5,6 +5,8 @@ import remarkParse from 'remark-parse'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkDirective from 'remark-directive'
 import remarkRehype from 'remark-rehype'
+import rehypeShiki from '@shikijs/rehype'
+import { createJavaScriptRegexEngine } from '@shikijs/engine-javascript'
 import rehypeStringify from 'rehype-stringify'
 import { parse as parseYaml } from 'yaml'
 import type { Root as MdastRoot } from 'mdast'
@@ -55,6 +57,10 @@ export async function compile(source: string): Promise<CompileResult> {
     .use(remarkExtractDirectives, { components })
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeToc, { toc })
+    .use(rehypeShiki, {
+      themes: { light: 'github-light', dark: 'github-dark' },
+      engine: createJavaScriptRegexEngine(),
+    })
     .use(rehypeStringify, { allowDangerousHtml: true })
     .process(source)
 
