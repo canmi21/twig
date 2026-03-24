@@ -6,9 +6,25 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+const disguise = '_next'
+
 export default defineConfig({
+  build: {
+    cssCodeSplit: true,
+    rolldownOptions: {
+      output: {
+        entryFileNames: `${disguise}/chunks/[hash:21].js`,
+        chunkFileNames: `${disguise}/chunks/[hash:21].js`,
+        assetFileNames: `${disguise}/static/[hash:21].[ext]`,
+        hashCharacters: 'hex',
+      },
+    },
+  },
   resolve: {
     tsconfigPaths: true,
+  },
+  server: {
+    port: 26315,
   },
   plugins: [
     tailwindcss(),

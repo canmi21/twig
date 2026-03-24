@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
   path: '/posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
+  id: '/api/object/$',
+  path: '/api/object/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsCategorySlugIndexRoute = PostsCategorySlugIndexRouteImport.update({
   id: '/posts/$category/$slug/',
   path: '/posts/$category/$slug/',
@@ -32,30 +38,34 @@ const PostsCategorySlugIndexRoute = PostsCategorySlugIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts': typeof PostsIndexRoute
+  '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts/' | '/posts/$category/$slug/'
+  fullPaths: '/' | '/posts/' | '/api/object/$' | '/posts/$category/$slug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/posts/$category/$slug'
-  id: '__root__' | '/' | '/posts/' | '/posts/$category/$slug/'
+  to: '/' | '/posts' | '/api/object/$' | '/posts/$category/$slug'
+  id: '__root__' | '/' | '/posts/' | '/api/object/$' | '/posts/$category/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
+  ApiObjectSplatRoute: typeof ApiObjectSplatRoute
   PostsCategorySlugIndexRoute: typeof PostsCategorySlugIndexRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/object/$': {
+      id: '/api/object/$'
+      path: '/api/object/$'
+      fullPath: '/api/object/$'
+      preLoaderRoute: typeof ApiObjectSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$category/$slug/': {
       id: '/posts/$category/$slug/'
       path: '/posts/$category/$slug'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PostsIndexRoute: PostsIndexRoute,
+  ApiObjectSplatRoute: ApiObjectSplatRoute,
   PostsCategorySlugIndexRoute: PostsCategorySlugIndexRoute,
 }
 export const routeTree = rootRouteImport

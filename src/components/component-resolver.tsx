@@ -3,6 +3,8 @@
 import type { ComponentEntry } from '~/lib/compiler/index'
 import { storageKey } from '~/lib/database/storage-key'
 
+const CDN_PREFIX = import.meta.env.DEV ? '/api/object' : 'https://cdn.canmi.net'
+
 function mediaUrl(src: string): string {
   // src is "{hash}.{ext}" — derive storage path for the URL
   const dotIdx = src.lastIndexOf('.')
@@ -10,7 +12,7 @@ function mediaUrl(src: string): string {
 
   const hash = src.slice(0, dotIdx)
   const ext = src.slice(dotIdx + 1)
-  return `/${storageKey(hash, ext)}`
+  return `${CDN_PREFIX}/${storageKey(hash, ext)}`
 }
 
 function ImageComponent({ props }: { props: ComponentEntry['props'] }) {

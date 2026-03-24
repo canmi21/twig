@@ -114,7 +114,9 @@ async function processMedia(
     const existing = await getMediaByHash(db, hash)
     if (!existing) {
       const key = storageKey(hash, ext)
-      await r2.put(key, new Uint8Array(data))
+      await r2.put(key, new Uint8Array(data), {
+        httpMetadata: { contentType: mimeFromExt(ext) },
+      })
       await insertMedia(db, {
         hash,
         ext,
