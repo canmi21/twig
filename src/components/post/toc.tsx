@@ -6,7 +6,9 @@ import type { TocEntry } from '~/lib/compiler/rehype-toc'
 export function Toc({ entries }: { entries: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>('')
   const observerRef = useRef<IntersectionObserver | null>(null)
-  const clickScrollTimeoutRef = useRef<number | null>(null)
+  const clickScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  )
   const isClickScrollingRef = useRef(false)
   const scrollEndHandlerRef = useRef<(() => void) | null>(null)
 
@@ -79,7 +81,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
           scrollEndHandlerRef.current = finishSync
           window.addEventListener('scrollend', finishSync, { once: true })
         } else {
-          clickScrollTimeoutRef.current = window.setTimeout(finishSync, 600)
+          clickScrollTimeoutRef.current = globalThis.setTimeout(finishSync, 600)
         }
       }
     },

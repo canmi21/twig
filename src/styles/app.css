@@ -47,6 +47,7 @@
   font-weight: 500;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
+  scroll-margin-top: 7rem;
 }
 
 .article h3 {
@@ -54,6 +55,7 @@
   font-weight: 500;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
+  scroll-margin-top: 7rem;
 }
 
 .article h4 {
@@ -61,6 +63,7 @@
   font-weight: 500;
   margin-top: 1.3em;
   margin-bottom: 0.4em;
+  scroll-margin-top: 7rem;
 }
 
 .article p {
