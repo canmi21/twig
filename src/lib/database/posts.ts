@@ -52,6 +52,11 @@ export async function getAllPosts(db: Db): Promise<PostRow[]> {
     .all()
 }
 
+export async function deletePost(db: Db, cid: string): Promise<void> {
+  await db.delete(posts).where(eq(posts.cid, cid))
+  await db.delete(contents).where(eq(contents.cid, cid))
+}
+
 export async function upsertPost(
   db: Db,
   input: UpsertPostInput,

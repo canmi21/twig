@@ -34,6 +34,13 @@ export async function writePostIndex(
   await kv.put('post-index', JSON.stringify(entries))
 }
 
+export async function deletePostKv(
+  kv: KVNamespace,
+  slug: string,
+): Promise<void> {
+  await kv.delete(`post:${slug}`)
+}
+
 export async function readPostKv(
   kv: KVNamespace,
   slug: string,

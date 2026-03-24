@@ -5,24 +5,39 @@ import { readdir, readFile, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { createDb } from '../lib/database/index'
-import { upsertPost } from '../lib/database/posts'
+import type { Db } from '../lib/database/index'
+import { getAllPosts, upsertPost, deletePost } from '../lib/database/posts'
 import {
   getMediaByHash,
   insertMedia,
   upsertMediaRef,
+  deleteMediaRefsForPost,
+  getMediaRefCount,
+  deleteMedia,
+  getMediaForPost,
 } from '../lib/database/media'
-import { contents, posts } from '../lib/database/schema'
+import { posts } from '../lib/database/schema'
 import { storageKey } from '../lib/database/storage-key'
 import { mimeFromExt } from '../lib/database/mime'
 import { compile } from '../lib/compiler/index'
 import type { Frontmatter } from '../lib/compiler/index'
 import { parse as parseYaml } from 'yaml'
 import { postSchema } from '../lib/content/post-schema'
-import { writePostKv, writePostIndex } from '../lib/content/kv'
+import { writePostKv, writePostIndex, deletePostKv } from '../lib/content/kv'
+import type { PostIndexEntry } from '../lib/content/kv'
 import { createMiniflare, applyMigrations } from './local-env'
 
 const ROOT = resolve(import.meta.dirname, '../..')
 const POSTS_DIR = resolve(ROOT, 'contents/posts')
+
+// --- Scanning ---
+
+interface ScannedPost {
+  slug: string
+  frontmatter: Frontmatter
+  content: string
+  mediaFiles: Array<{ relativePath: string; absolutePath: string }>
+}
 
 function extractFrontmatter(source: string): {
   frontmatter: Frontmatter
@@ -30,17 +45,10 @@ function extractFrontmatter(source: string): {
 } {
   const match = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
   if (!match) return { frontmatter: { title: '' }, content: source }
-
   return {
     frontmatter: parseYaml(match[1]) as Frontmatter,
     content: match[2].trimStart(),
   }
-}
-
-interface ScannedPost {
-  slug: string
-  source: string
-  mediaFiles: Array<{ relativePath: string; absolutePath: string }>
 }
 
 async function collectFiles(
@@ -49,7 +57,6 @@ async function collectFiles(
 ): Promise<Array<{ relativePath: string; absolutePath: string }>> {
   const results: Array<{ relativePath: string; absolutePath: string }> = []
   const entries = await readdir(dir, { withFileTypes: true })
-
   for (const entry of entries) {
     const abs = resolve(dir, entry.name)
     if (entry.isDirectory()) {
@@ -61,7 +68,6 @@ async function collectFiles(
       })
     }
   }
-
   return results
 }
 
@@ -70,46 +76,133 @@ async function scanPosts(): Promise<ScannedPost[]> {
   try {
     entries = await readdir(POSTS_DIR)
   } catch {
-    console.log('No posts directory found at', POSTS_DIR)
     return []
   }
-
   const results: ScannedPost[] = []
-
   for (const slug of entries) {
     const slugDir = resolve(POSTS_DIR, slug)
     const slugStat = await stat(slugDir).catch(() => null)
     if (!slugStat?.isDirectory()) continue
-
     const indexPath = resolve(slugDir, 'index.md')
     try {
       const source = await readFile(indexPath, 'utf-8')
+      const { frontmatter, content } = extractFrontmatter(source)
       const mediaFiles = await collectFiles(slugDir, slugDir)
-      results.push({ slug, source, mediaFiles })
+      results.push({ slug, frontmatter, content, mediaFiles })
     } catch {
       // skip directories without index.md
     }
   }
-
   return results
 }
 
+// --- Phase 1: Validate ---
+
+function validateAll(scanned: ScannedPost[]): boolean {
+  let valid = true
+  for (const post of scanned) {
+    const result = postSchema.safeParse({
+      slug: post.slug,
+      title: post.frontmatter.title,
+      description: post.frontmatter.description,
+      category: post.frontmatter.category,
+      tags: post.frontmatter.tags,
+      content: post.content,
+    })
+    if (!result.success) {
+      valid = false
+      console.log(`push aborted: validation failed for "${post.slug}"`)
+      for (const issue of result.error.issues) {
+        console.log(`  ${issue.path.join('.')}: ${issue.message}`)
+      }
+    }
+  }
+  return valid
+}
+
+// --- Phase 2: Diff ---
+
+interface DiffResult {
+  added: ScannedPost[]
+  updated: ScannedPost[]
+  deleted: Array<{ slug: string; cid: string }>
+  unchanged: string[]
+}
+
+async function diffPosts(db: Db, scanned: ScannedPost[]): Promise<DiffResult> {
+  const dbPosts = await getAllPosts(db)
+  const dbMap = new Map(dbPosts.map((p) => [p.slug, p]))
+  const scannedSlugs = new Set(scanned.map((s) => s.slug))
+
+  const added: ScannedPost[] = []
+  const updated: ScannedPost[] = []
+  const unchanged: string[] = []
+
+  for (const post of scanned) {
+    const existing = dbMap.get(post.slug)
+    if (!existing) {
+      added.push(post)
+      continue
+    }
+
+    // Compare content and frontmatter fields
+    const tagsJson = post.frontmatter.tags
+      ? JSON.stringify(post.frontmatter.tags)
+      : null
+    const changed =
+      existing.content !== post.content ||
+      existing.title !== post.frontmatter.title ||
+      (existing.description ?? undefined) !== post.frontmatter.description ||
+      (existing.category ?? undefined) !== post.frontmatter.category ||
+      existing.tags !== tagsJson
+
+    if (changed) {
+      updated.push(post)
+    } else {
+      // Also check if media files changed
+      const dbMedia = await getMediaForPost(db, existing.cid)
+      const dbHashes = new Set(dbMedia.map((m) => m.hash))
+      let mediaChanged = false
+      for (const mf of post.mediaFiles) {
+        const data = await readFile(mf.absolutePath)
+        const hash = createHash('sha256').update(data).digest('hex')
+        if (!dbHashes.has(hash)) {
+          mediaChanged = true
+          break
+        }
+      }
+      if (mediaChanged || dbHashes.size !== post.mediaFiles.length) {
+        updated.push(post)
+      } else {
+        unchanged.push(post.slug)
+      }
+    }
+  }
+
+  const deleted: Array<{ slug: string; cid: string }> = []
+  for (const [slug, row] of dbMap) {
+    if (!scannedSlugs.has(slug)) {
+      deleted.push({ slug, cid: row.cid })
+    }
+  }
+
+  return { added, updated, deleted, unchanged }
+}
+
+// --- Phase 3: Execute ---
+
 async function processMedia(
-  db: ReturnType<typeof createDb>,
+  db: Db,
   r2: R2Bucket,
   cid: string,
   mediaFiles: ScannedPost['mediaFiles'],
 ): Promise<Map<string, string>> {
-  // Map: original relative path -> "{hash}.{ext}"
   const replacements = new Map<string, string>()
-
   for (const { relativePath, absolutePath } of mediaFiles) {
     const data = await readFile(absolutePath)
     const hash = createHash('sha256').update(data).digest('hex')
     const ext = extname(absolutePath).slice(1).toLowerCase()
-    const hashName = `${hash}.${ext}`
-
-    replacements.set(relativePath, hashName)
+    replacements.set(relativePath, `${hash}.${ext}`)
 
     const existing = await getMediaByHash(db, hash)
     if (!existing) {
@@ -124,14 +217,9 @@ async function processMedia(
         size: data.length,
         createdAt: new Date().toISOString(),
       })
-      console.log(`    media new: ${relativePath} -> ${key}`)
-    } else {
-      console.log(`    media exists: ${relativePath} (${hash.slice(0, 8)}...)`)
     }
-
     await upsertMediaRef(db, hash, cid)
   }
-
   return replacements
 }
 
@@ -146,6 +234,81 @@ function replaceMediaRefs(
   return result
 }
 
+async function executeAddOrUpdate(
+  db: Db,
+  r2: R2Bucket,
+  kv: KVNamespace,
+  post: ScannedPost,
+): Promise<void> {
+  const result = await upsertPost(db, {
+    slug: post.slug,
+    title: post.frontmatter.title,
+    description: post.frontmatter.description,
+    category: post.frontmatter.category,
+    tags: post.frontmatter.tags,
+    content: post.content,
+  })
+
+  let finalContent = post.content
+  if (post.mediaFiles.length > 0) {
+    const replacements = await processMedia(db, r2, result.cid, post.mediaFiles)
+    finalContent = replaceMediaRefs(post.content, replacements)
+    if (finalContent !== post.content) {
+      await db
+        .update(posts)
+        .set({ content: finalContent })
+        .where(eq(posts.cid, result.cid))
+    }
+  }
+
+  const compiled = await compile(finalContent)
+  await writePostKv(kv, post.slug, {
+    frontmatter: post.frontmatter,
+    html: compiled.html,
+    toc: compiled.toc,
+    components: compiled.components,
+  })
+}
+
+async function executeDelete(
+  db: Db,
+  r2: R2Bucket,
+  kv: KVNamespace,
+  slug: string,
+  cid: string,
+): Promise<void> {
+  // Clean media refs and orphaned media
+  const hashes = await deleteMediaRefsForPost(db, cid)
+  for (const hash of hashes) {
+    const refCount = await getMediaRefCount(db, hash)
+    if (refCount === 0) {
+      const row = await getMediaByHash(db, hash)
+      if (row) {
+        await r2.delete(storageKey(row.hash, row.ext))
+        await deleteMedia(db, hash)
+      }
+    }
+  }
+
+  await deletePost(db, cid)
+  await deletePostKv(kv, slug)
+}
+
+async function buildPostIndex(db: Db): Promise<PostIndexEntry[]> {
+  const allPosts = await getAllPosts(db)
+  return allPosts.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    description: p.description ?? undefined,
+    category: p.category ?? undefined,
+    tags: p.tags ? (JSON.parse(p.tags) as string[]) : undefined,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  }))
+}
+
+// --- Main ---
+
 async function main() {
   const mf = createMiniflare()
 
@@ -154,115 +317,45 @@ async function main() {
     const r2 = (await mf.getR2Bucket('taki_bucket')) as unknown as R2Bucket
     const kv = (await mf.getKVNamespace('taki_kv')) as unknown as KVNamespace
 
-    console.log('Applying migrations...')
     await applyMigrations(d1)
+    const db = createDb(d1)
 
-    const postFiles = await scanPosts()
-    if (postFiles.length === 0) {
-      console.log('No posts found.')
+    // Phase 1: Scan + Validate
+    const scanned = await scanPosts()
+    if (!validateAll(scanned)) {
+      process.exit(1)
+    }
+
+    // Phase 2: Diff
+    const diff = await diffPosts(db, scanned)
+
+    if (
+      diff.added.length === 0 &&
+      diff.updated.length === 0 &&
+      diff.deleted.length === 0
+    ) {
+      console.log('push complete: no changes')
       return
     }
 
-    console.log(`Found ${postFiles.length} post(s)\n`)
-
-    const db = createDb(d1)
-
-    let skipped = 0
-
-    for (const { slug, source, mediaFiles } of postFiles) {
-      const { frontmatter, content } = extractFrontmatter(source)
-
-      const validation = postSchema.safeParse({
-        slug,
-        title: frontmatter.title,
-        description: frontmatter.description,
-        category: frontmatter.category,
-        tags: frontmatter.tags,
-        content,
-      })
-
-      if (!validation.success) {
-        console.log(`  skipped: ${slug} (validation failed)`)
-        for (const issue of validation.error.issues) {
-          console.log(`    - ${issue.path.join('.')}: ${issue.message}`)
-        }
-        skipped++
-        continue
-      }
-
-      // Upsert post first to get cid
-      const result = await upsertPost(db, {
-        slug,
-        title: frontmatter.title,
-        description: frontmatter.description,
-        category: frontmatter.category,
-        tags: frontmatter.tags,
-        content,
-      })
-
-      console.log(`  ${result.action}: ${slug} (${result.cid})`)
-
-      // Process media and replace references in content
-      let finalContent = content
-      if (mediaFiles.length > 0) {
-        const replacements = await processMedia(db, r2, result.cid, mediaFiles)
-        finalContent = replaceMediaRefs(content, replacements)
-
-        if (finalContent !== content) {
-          await db
-            .update(posts)
-            .set({ content: finalContent })
-            .where(eq(posts.cid, result.cid))
-          console.log(`    content refs updated`)
-        }
-      }
-
-      // Compile and write to KV
-      const compiled = await compile(finalContent)
-      await writePostKv(kv, slug, {
-        frontmatter,
-        html: compiled.html,
-        toc: compiled.toc,
-        components: compiled.components,
-      })
-      console.log(`    kv written: post:${slug}`)
+    // Phase 3: Execute
+    for (const post of diff.added) {
+      await executeAddOrUpdate(db, r2, kv, post)
+    }
+    for (const post of diff.updated) {
+      await executeAddOrUpdate(db, r2, kv, post)
+    }
+    for (const { slug, cid } of diff.deleted) {
+      await executeDelete(db, r2, kv, slug, cid)
     }
 
-    if (skipped > 0) {
-      console.log(`\n${skipped} post(s) skipped due to validation errors.`)
-    }
+    // Update post-index
+    const index = await buildPostIndex(db)
+    await writePostIndex(kv, index)
 
-    // Build and write post-index to KV
-    const allPosts = await db
-      .select({
-        slug: posts.slug,
-        title: posts.title,
-        description: posts.description,
-        category: posts.category,
-        tags: posts.tags,
-        createdAt: contents.createdAt,
-        updatedAt: contents.updatedAt,
-      })
-      .from(posts)
-      .innerJoin(contents, eq(posts.cid, contents.cid))
-
-    await writePostIndex(
-      kv,
-      allPosts.map((p) => ({
-        slug: p.slug,
-        title: p.title,
-        description: p.description ?? undefined,
-        category: p.category ?? undefined,
-        tags: p.tags ? (JSON.parse(p.tags) as string[]) : undefined,
-        createdAt: p.createdAt,
-        updatedAt: p.updatedAt,
-      })),
+    console.log(
+      `push complete: ${diff.added.length} added, ${diff.updated.length} updated, ${diff.deleted.length} deleted, ${diff.unchanged.length} unchanged`,
     )
-    console.log(`\npost-index written (${allPosts.length} entries)`)
-
-    for (const p of allPosts) {
-      console.log(`  - ${p.slug}: "${p.title}"`)
-    }
   } finally {
     await mf.dispose()
   }

@@ -18,6 +18,7 @@
     "fmt:check": "oxfmt --check .",
     "push": "bun run src/cli/push.ts",
     "pull": "bun run src/cli/pull.ts",
+    "rebuild": "bun run src/cli/rebuild.ts",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },

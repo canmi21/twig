@@ -39,6 +39,36 @@ export async function upsertMediaRef(
   }
 }
 
+export async function deleteMediaRefsForPost(
+  db: Db,
+  cid: string,
+): Promise<string[]> {
+  const refs = await db
+    .select({ hash: mediaRefs.hash })
+    .from(mediaRefs)
+    .where(eq(mediaRefs.cid, cid))
+    .all()
+
+  if (refs.length > 0) {
+    await db.delete(mediaRefs).where(eq(mediaRefs.cid, cid))
+  }
+
+  return refs.map((r) => r.hash)
+}
+
+export async function getMediaRefCount(db: Db, hash: string): Promise<number> {
+  const rows = await db
+    .select({ hash: mediaRefs.hash })
+    .from(mediaRefs)
+    .where(eq(mediaRefs.hash, hash))
+    .all()
+  return rows.length
+}
+
+export async function deleteMedia(db: Db, hash: string): Promise<void> {
+  await db.delete(media).where(eq(media.hash, hash))
+}
+
 export async function getMediaForPost(
   db: Db,
   cid: string,

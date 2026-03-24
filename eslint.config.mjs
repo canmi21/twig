@@ -45,6 +45,11 @@ export default [
   },
   {
     ...tailwindcss.configs.recommended,
+    rules: {
+      ...tailwindcss.configs.recommended.rules,
+      // Conflicts with oxfmt JSX attribute line-breaking
+      'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+    },
     settings: {
       ...tailwindcss.configs.recommended.settings,
       'better-tailwindcss': {
