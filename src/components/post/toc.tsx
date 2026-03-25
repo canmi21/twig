@@ -103,7 +103,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       className="
         hidden
         xl:fixed xl:top-1/2 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
-        xl:block xl:max-h-[calc(100vh-6rem)] xl:w-44
+        xl:block xl:max-h-[calc(100vh-16rem)] xl:w-44
         xl:-translate-y-1/2 xl:overflow-y-auto
       "
     >
