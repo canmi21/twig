@@ -1,7 +1,7 @@
 /* src/components/post/toc.tsx */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
 import type { TocEntry } from '~/lib/compiler/rehype-toc'
 
 // Hash is cleared when the user is within this many pixels of the top.
@@ -107,21 +107,16 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
         xl:-translate-y-1/2 xl:overflow-y-auto
       "
     >
-      <ul className="relative space-y-1.5">
-        <AnimatePresence>
-          {activeId && (
-            <motion.div
-              layoutId="toc-indicator"
-              className="absolute left-0 h-4 w-0.5 rounded-full bg-primary"
-              style={{
-                top: entries.findIndex((e) => e.id === activeId) * 26,
-              }}
-              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            />
-          )}
-        </AnimatePresence>
+      <ul className="space-y-1.5">
         {entries.map((entry) => (
-          <li key={entry.id}>
+          <li key={entry.id} className="relative">
+            {activeId === entry.id && (
+              <motion.div
+                layoutId="toc-indicator"
+                className="absolute top-0 left-0 h-full w-0.5 rounded-full bg-primary"
+                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              />
+            )}
             <a
               href={`#${entry.id}`}
               onClick={(e) => handleClick(e, entry.id)}
