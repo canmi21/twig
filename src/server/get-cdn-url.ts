@@ -1,9 +1,8 @@
 /* src/server/get-cdn-url.ts */
 
 import { createServerFn } from '@tanstack/react-start'
-import { getEnv } from './env'
+import { getCdnUrl } from './platform'
 
 export const getCdnPublicUrl = createServerFn().handler(() => {
-  const { CDN_PUBLIC_URL } = getEnv()
-  return CDN_PUBLIC_URL
+  return getCdnUrl()
 })

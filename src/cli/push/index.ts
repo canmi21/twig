@@ -12,9 +12,9 @@ async function main() {
   const mf = createMiniflare()
 
   try {
-    const d1 = await mf.getD1Database('taki_sql')
-    const r2 = (await mf.getR2Bucket('taki_bucket')) as unknown as R2Bucket
-    const kv = (await mf.getKVNamespace('taki_kv')) as unknown as KVNamespace
+    const d1 = await mf.getD1Database('CONTENT')
+    const r2 = (await mf.getR2Bucket('BUCKET')) as unknown as R2Bucket
+    const kv = (await mf.getKVNamespace('CACHE')) as unknown as KVNamespace
 
     await applyMigrations(d1)
     const db = createDb(d1)

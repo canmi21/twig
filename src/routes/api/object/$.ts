@@ -1,7 +1,7 @@
 /* src/routes/api/object/$.ts */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { getEnv } from '~/server/env'
+import { getBucket } from '~/server/platform'
 
 export const Route = createFileRoute('/api/object/$')({
   server: {
@@ -12,8 +12,7 @@ export const Route = createFileRoute('/api/object/$')({
           return new Response('Not found', { status: 404 })
         }
 
-        const { taki_bucket } = getEnv()
-        const object = await taki_bucket.get(key)
+        const object = await getBucket().get(key)
 
         if (!object) {
           return new Response('Not found', { status: 404 })

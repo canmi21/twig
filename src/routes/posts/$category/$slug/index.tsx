@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { CreativeCommons, Type } from 'lucide-react'
-import { getEnv } from '~/server/env'
+import { getCache } from '~/server/platform'
 import { readPostKv } from '~/lib/storage/kv'
 import { PostRenderer } from '~/components/post/renderer'
 import { PostBackLink } from '~/components/post/back-link'
@@ -15,8 +15,7 @@ import { PostActions } from '~/components/post/actions'
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
   .handler(async ({ data }) => {
-    const { taki_kv } = getEnv()
-    return readPostKv(taki_kv, data.slug)
+    return readPostKv(getCache(), data.slug)
   })
 
 export const Route = createFileRoute('/posts/$category/$slug/')({

@@ -2,12 +2,11 @@
 
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getEnv } from '~/server/env'
+import { getCache } from '~/server/platform'
 import { readPostIndex } from '~/lib/storage/kv'
 
 const getPosts = createServerFn().handler(async () => {
-  const { taki_kv } = getEnv()
-  return readPostIndex(taki_kv)
+  return readPostIndex(getCache())
 })
 
 export const Route = createFileRoute('/')({
@@ -29,14 +28,14 @@ function HomePage() {
 
   if (posts.length === 0) {
     return (
-      <div className="mx-auto max-w-[720px] px-5 pt-24">
+      <div className="mx-auto max-w-180 px-5 pt-24">
         <p className="text-secondary">No posts yet.</p>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-[720px] px-5 py-24">
+    <div className="mx-auto max-w-180 px-5 py-24">
       <ul className="space-y-6">
         {posts.map((post) => (
           <li key={post.slug}>

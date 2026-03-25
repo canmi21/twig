@@ -13,17 +13,9 @@
   "placement": {
     "mode": "smart",
   },
-  "d1_databases": [
-    {
-      "binding": "taki_sql",
-      "database_name": "taki-sql",
-      "database_id": "5a58a081-29e1-4e96-ab6b-1f3f7370d654",
-      "migrations_dir": "drizzle/migrations",
-    },
-  ],
   "kv_namespaces": [
     {
-      "binding": "taki_kv",
+      "binding": "CACHE",
       "id": "e823da6d6efe4ebfa7a33945530c2602",
     },
   ],
@@ -36,7 +28,15 @@
   "r2_buckets": [
     {
       "bucket_name": "taki-bucket",
-      "binding": "taki_bucket",
+      "binding": "BUCKET",
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "CONTENT",
+      "database_name": "taki-sql",
+      "database_id": "488012b4-4ab2-4a4c-99ac-33dc0e197615",
+      "migrations_dir": "drizzle/migrations",
     },
   ],
 }

@@ -12,11 +12,11 @@ export function createMiniflare() {
   return new Miniflare({
     modules: true,
     script: 'export default { fetch() { return new Response("") } }',
-    d1Databases: { taki_sql: '5a58a081-29e1-4e96-ab6b-1f3f7370d654' },
+    d1Databases: { CONTENT: '488012b4-4ab2-4a4c-99ac-33dc0e197615' },
     d1Persist: resolve(PERSIST_ROOT, 'd1'),
-    r2Buckets: { taki_bucket: 'taki-bucket' },
+    r2Buckets: { BUCKET: 'taki-bucket' },
     r2Persist: resolve(PERSIST_ROOT, 'r2'),
-    kvNamespaces: { taki_kv: 'e823da6d6efe4ebfa7a33945530c2602' },
+    kvNamespaces: { CACHE: 'e823da6d6efe4ebfa7a33945530c2602' },
     kvPersist: resolve(PERSIST_ROOT, 'kv'),
   })
 }
