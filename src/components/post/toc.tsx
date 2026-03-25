@@ -113,7 +113,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
             {activeId === entry.id && (
               <motion.div
                 layoutId="toc-indicator"
-                className="absolute top-0.5 left-1 h-3 w-0.5 rounded-full bg-primary"
+                className="absolute top-[3px] left-1 h-3 w-0.5 rounded-full bg-primary"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
