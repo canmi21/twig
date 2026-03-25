@@ -6,10 +6,11 @@ import * as Tooltip from '@radix-ui/react-tooltip'
 import { CreativeCommons, Type } from 'lucide-react'
 import { getEnv } from '~/server/env'
 import { readPostKv } from '~/lib/storage/kv'
-import { PostRenderer } from '~/components/post/post-renderer'
-import { PostBackLink } from '~/components/post/post-back-link'
-import { PostShareActions } from '~/components/post/post-share-actions'
+import { PostRenderer } from '~/components/post/renderer'
+import { PostBackLink } from '~/components/post/back-link'
+import { PostShareActions } from '~/components/post/share-actions'
 import { Toc } from '~/components/post/toc'
+import { PostActions } from '~/components/post/actions'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -21,9 +22,7 @@ const getPost = createServerFn()
 export const Route = createFileRoute('/posts/$category/$slug/')({
   loader: ({ params }) => getPost({ data: { slug: params.slug } }),
   head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [{ title: `${loaderData.frontmatter.title} - Taki` }]
-      : [],
+    meta: loaderData ? [{ title: loaderData.frontmatter.title }] : [],
   }),
   component: PostPage,
 })
@@ -92,7 +91,7 @@ function PostPage() {
 
   if (!post) {
     return (
-      <div className="mx-auto max-w-[720px] px-5 pt-24">
+      <div className="mx-auto max-w-180 px-5 pt-24">
         <p className="text-secondary">Post not found.</p>
       </div>
     )
@@ -109,7 +108,8 @@ function PostPage() {
     <>
       <PostBackLink />
       <Toc entries={post.toc} />
-      <article className="mx-auto max-w-[720px] px-5 pt-28 pb-24">
+      <PostActions />
+      <article className="mx-auto max-w-180 px-5 pt-28 pb-24">
         <header className="mb-10 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="text-[17px] font-medium text-primary">
@@ -124,13 +124,10 @@ function PostPage() {
               <Tooltip.Provider delayDuration={480} skipDelayDuration={0}>
                 <Tooltip.Root>
                   <Tooltip.Trigger asChild>
-                    <a
-                      href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
-                      target="_blank"
-                      rel="noreferrer"
+                    <span
                       aria-label="CC BY-NC-SA 4.0 license"
                       className="
-                        inline-flex items-center text-secondary transition-colors
+                        inline-flex cursor-default items-center text-secondary transition-colors
                         hover:text-primary
                       "
                     >
@@ -138,7 +135,7 @@ function PostPage() {
                         className="size-[0.8rem]"
                         strokeWidth={1.8}
                       />
-                    </a>
+                    </span>
                   </Tooltip.Trigger>
                   <Tooltip.Portal>
                     <Tooltip.Content
@@ -146,10 +143,17 @@ function PostPage() {
                       sideOffset={4}
                       className="
                         z-10 rounded-full border border-border bg-surface
-                        px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
+                        px-2.5 py-1.5 text-[11px] leading-none shadow-sm
                       "
                     >
-                      CC BY-NC-SA 4.0
+                      <a
+                        href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        CC BY-NC-SA 4.0
+                      </a>
                     </Tooltip.Content>
                   </Tooltip.Portal>
                 </Tooltip.Root>

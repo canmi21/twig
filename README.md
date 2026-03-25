@@ -1,6 +1,6 @@
 # Taki
 
-My personal website, and just for fun.
+My personal website, created mainly for fun. A configurable version is planned for the future, but it’s not ready yet. Feel free to explore the source code in the meantime.
 
 ## Commands
 

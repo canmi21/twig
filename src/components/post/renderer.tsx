@@ -1,4 +1,4 @@
-/* src/components/post/post-renderer.tsx */
+/* src/components/post/renderer.tsx */
 
 import { useCallback } from 'react'
 import type { ComponentEntry } from '~/lib/compiler/index'

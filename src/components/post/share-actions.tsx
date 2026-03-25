@@ -1,4 +1,4 @@
-/* src/components/post/post-share-actions.tsx */
+/* src/components/post/share-actions.tsx */
 
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { Link } from 'lucide-react'
@@ -240,7 +240,18 @@ export function PostShareActions() {
                 hover:text-primary
               "
             >
-              {getAiProviderIcon(aiProvider)}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={aiProvider}
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
+                  transition={{ duration: 0.2 }}
+                  className="inline-flex"
+                >
+                  {getAiProviderIcon(aiProvider)}
+                </motion.span>
+              </AnimatePresence>
             </button>
           </Tooltip.Trigger>
           <Tooltip.Portal>

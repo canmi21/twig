@@ -21,9 +21,25 @@ export const Route = createRootRouteWithContext<RootContext>()({
         name: 'viewport',
         content: 'width=device-width, initial-scale=1',
       },
-      { title: 'Taki' },
+      { title: 'サボり記' },
+      { name: 'description', content: '蛋糕是一个谎言！' },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [
+      { rel: 'stylesheet', href: appCss },
+      {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/favicon.svg',
+        sizes: 'any',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/favicon-96x96.png',
+        sizes: '96x96',
+      },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+    ],
   }),
   beforeLoad: async () => {
     const cdnPublicUrl = await getCdnPublicUrl()

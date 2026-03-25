@@ -1,4 +1,4 @@
-/* src/components/post/post-back-link.tsx */
+/* src/components/post/back-link.tsx */
 
 import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
