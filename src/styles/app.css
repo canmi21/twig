@@ -10,6 +10,15 @@
   color-scheme: light;
 }
 
+/* Text selection highlight */
+::selection {
+  background-color: #fef9b2;
+}
+
+.dark ::selection {
+  background-color: #4a605f;
+}
+
 /* ── Color tokens ───────────────────────────────
  * surface   — page background
  * primary   — main text, headings, links
