@@ -1,6 +1,6 @@
 /* src/components/post/component-resolver.tsx */
 
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouteContext } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ComponentEntry } from '~/lib/compiler/index'
@@ -17,18 +17,26 @@ function mediaUrl(cdnPrefix: string, src: string): string {
 
 function ImageComponent({ url, alt }: { url: string; alt: string }) {
   const [loaded, setLoaded] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  // Handle both fresh loads and already-cached images
+  const handleRef = useCallback((el: HTMLImageElement | null) => {
+    ;(imgRef as React.MutableRefObject<HTMLImageElement | null>).current = el
+    if (el?.complete && el.naturalWidth > 0) setLoaded(true)
+  }, [])
 
   return (
     <motion.img
+      ref={handleRef}
       src={url}
       alt={alt}
       loading="lazy"
       onLoad={() => setLoaded(true)}
-      initial={{ opacity: 0, filter: 'blur(8px)' }}
+      initial={false}
       animate={
         loaded
           ? { opacity: 1, filter: 'blur(0px)' }
-          : { opacity: 0, filter: 'blur(8px)' }
+          : { opacity: 0.01, filter: 'blur(8px)' }
       }
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="
