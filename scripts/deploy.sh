@@ -34,7 +34,7 @@ fi
 
 echo "==> Syncing local data to remote..."
 
-# --- D1: export local, import remote ---
+# --- D1: export local, clear remote tables, import ---
 DUMP_FILE=$(mktemp /tmp/taki-d1-dump.XXXXXX.sql)
 trap 'rm -f "$DUMP_FILE"' EXIT
 
@@ -42,6 +42,10 @@ echo "  D1: exporting local database..."
 bunx wrangler d1 export "$DB_NAME" --local --no-schema --output="$DUMP_FILE"
 
 if [[ -s "$DUMP_FILE" ]]; then
+  echo "  D1: clearing remote tables..."
+  bunx wrangler d1 execute "$DB_NAME" --remote --yes \
+    --command "DELETE FROM media_refs; DELETE FROM posts; DELETE FROM media; DELETE FROM contents;"
+
   echo "  D1: importing to remote..."
   bunx wrangler d1 execute "$DB_NAME" --remote --file="$DUMP_FILE" --yes
   echo "  D1: done"
@@ -74,7 +78,7 @@ for r in rows:
     LOCAL_FILE=$(mktemp /tmp/taki-r2-obj.XXXXXX)
     bunx wrangler r2 object get "$BUCKET_NAME/$key" --local --file="$LOCAL_FILE" 2>/dev/null || true
     if [[ -s "$LOCAL_FILE" ]]; then
-      bunx wrangler r2 object put "$BUCKET_NAME/$key" --file="$LOCAL_FILE" --content-type="$mime" 2>/dev/null
+      bunx wrangler r2 object put "$BUCKET_NAME/$key" --file="$LOCAL_FILE" --content-type="$mime" --remote 2>/dev/null
       echo "    $key"
     fi
     rm -f "$LOCAL_FILE"
@@ -117,7 +121,7 @@ KV_COUNT=$(python3 -c "import json; print(len(json.load(open('$KV_DUMP_FILE'))))
 
 if [[ "$KV_COUNT" -gt 0 ]]; then
   echo "  KV: uploading $KV_COUNT keys..."
-  bunx wrangler kv bulk put "$KV_DUMP_FILE" --namespace-id="$KV_NAMESPACE_ID"
+  bunx wrangler kv bulk put "$KV_DUMP_FILE" --namespace-id="$KV_NAMESPACE_ID" --remote
   echo "  KV: done"
 else
   echo "  KV: no data to sync"
