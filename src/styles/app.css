@@ -8,6 +8,7 @@
 /* Browser native controls and scrollbars follow the theme */
 :root {
   color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 /* Text selection highlight */
