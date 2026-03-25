@@ -6,7 +6,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
   ClaudeLine,
   GoogleGeminiFill,
-  Grok2Line,
+  Grok2Fill,
   OpenaiLine,
   SocialXLine,
   TwitterLine,
@@ -166,7 +166,7 @@ function getAiProviderIcon(provider: AiProvider) {
   if (provider === 'gemini') {
     return <GoogleGeminiFill className={MINGCUTE_ICON_CLASS} />
   }
-  return <Grok2Line className={MINGCUTE_ICON_CLASS} />
+  return <Grok2Fill className={MINGCUTE_ICON_CLASS} />
 }
 
 export function PostShareActions() {

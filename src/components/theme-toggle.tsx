@@ -41,10 +41,11 @@ export function ThemeToggle() {
         theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
       }
       className="
-        fixed top-5 right-5 z-50
+        absolute top-5 right-5 z-50
         cursor-pointer rounded-full p-2
         text-secondary
         hover:text-primary
+        xl:fixed
       "
     >
       {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}

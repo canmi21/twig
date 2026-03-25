@@ -12,19 +12,19 @@ const getPosts = createServerFn().handler(async () => {
 
 export const Route = createFileRoute('/posts/')({
   loader: () => getPosts(),
-  component: PostList,
+  component: PostsPage,
 })
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   })
 }
 
-function PostList() {
+function PostsPage() {
   const posts = Route.useLoaderData()
 
   if (posts.length === 0) {
@@ -37,12 +37,9 @@ function PostList() {
 
   return (
     <div className="mx-auto max-w-[720px] px-5 py-24">
-      <ul>
-        {posts.map((post, i) => (
-          <li
-            key={post.slug}
-            className={i > 0 ? 'mt-6 border-t border-border pt-6' : ''}
-          >
+      <ul className="space-y-6">
+        {posts.map((post) => (
+          <li key={post.slug}>
             <Link
               to="/posts/$category/$slug"
               params={{
@@ -50,28 +47,33 @@ function PostList() {
                 slug: post.slug,
               }}
               className="
-                text-[15px] font-medium text-primary
-                hover:underline
+                block
+                text-primary
+                hover:text-primary
               "
             >
-              {post.title}
-            </Link>
-            <div className="mt-1 flex items-center gap-3 text-[13px] text-secondary">
-              {post.category && <span>{post.category}</span>}
-              {post.createdAt && (
-                <>
-                  {post.category && <span className="text-secondary">·</span>}
-                  <time dateTime={post.createdAt}>
+              <div className="flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[15px] font-medium">
+                    {post.title}
+                  </div>
+                  {post.description && (
+                    <p className="mt-1 truncate text-[13px] text-secondary">
+                      {post.description}
+                    </p>
+                  )}
+                </div>
+                <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
+                {post.createdAt && (
+                  <time
+                    dateTime={post.createdAt}
+                    className="shrink-0 text-[13px] text-secondary"
+                  >
                     {formatDate(post.createdAt)}
                   </time>
-                </>
-              )}
-            </div>
-            {post.description && (
-              <p className="mt-1.5 text-[14px] leading-relaxed text-primary">
-                {post.description}
-              </p>
-            )}
+                )}
+              </div>
+            </Link>
           </li>
         ))}
       </ul>
