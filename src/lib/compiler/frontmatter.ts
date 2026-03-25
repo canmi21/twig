@@ -10,10 +10,9 @@ export function serializeFrontmatter(fm: Frontmatter): string {
   // cid first
   if (fm.cid) obj.cid = fm.cid
 
-  // core content fields
+  // core content fields (category is derived from directory path, not stored in frontmatter)
   obj.title = fm.title
   if (fm.description) obj.description = fm.description
-  if (fm.category) obj.category = fm.category
   if (fm.tags && fm.tags.length > 0) obj.tags = fm.tags
 
   // metadata fields last

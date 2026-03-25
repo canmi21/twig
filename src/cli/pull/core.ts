@@ -29,14 +29,14 @@ export async function pullCore(opts: {
       cid: row.cid,
       title: row.title,
       description: row.description ?? undefined,
-      category: row.category ?? undefined,
       tags,
       created_at: row.createdAt,
       updated_at: row.updatedAt,
       published: row.published === 1,
     })
 
-    const dir = resolve(postsDir, row.slug)
+    const category = row.category ?? 'uncategorized'
+    const dir = resolve(postsDir, category, row.slug)
     await mkdir(dir, { recursive: true })
     await writeFile(
       resolve(dir, 'index.md'),

@@ -29,6 +29,7 @@ import type { PostIndexEntry } from '../../lib/storage/kv'
 
 export interface ScannedPost {
   slug: string
+  category: string
   frontmatter: Frontmatter
   content: string
   rawContentHash: string
@@ -95,31 +96,40 @@ export async function collectFiles(
 }
 
 export async function scanPosts(postsDir: string): Promise<ScannedPost[]> {
-  let entries: string[]
+  // Structure: postsDir/{category}/{slug}/index.md
+  let categories: string[]
   try {
-    entries = await readdir(postsDir)
+    categories = await readdir(postsDir)
   } catch {
     return []
   }
   const results: ScannedPost[] = []
-  for (const slug of entries) {
-    const slugDir = resolve(postsDir, slug)
-    const slugStat = await stat(slugDir).catch(() => null)
-    if (!slugStat?.isDirectory()) continue
-    const indexPath = resolve(slugDir, 'index.md')
-    try {
-      const source = await readFile(indexPath, 'utf-8')
-      const { frontmatter, content } = extractFrontmatter(source)
-      const mediaFiles = await collectFiles(slugDir, slugDir)
-      results.push({
-        slug,
-        frontmatter,
-        content,
-        rawContentHash: computeContentHash(content),
-        mediaFiles,
-      })
-    } catch {
-      // skip directories without index.md
+  for (const category of categories) {
+    const categoryDir = resolve(postsDir, category)
+    const categoryStat = await stat(categoryDir).catch(() => null)
+    if (!categoryStat?.isDirectory()) continue
+
+    const slugs = await readdir(categoryDir)
+    for (const slug of slugs) {
+      const slugDir = resolve(categoryDir, slug)
+      const slugStat = await stat(slugDir).catch(() => null)
+      if (!slugStat?.isDirectory()) continue
+      const indexPath = resolve(slugDir, 'index.md')
+      try {
+        const source = await readFile(indexPath, 'utf-8')
+        const { frontmatter, content } = extractFrontmatter(source)
+        const mediaFiles = await collectFiles(slugDir, slugDir)
+        results.push({
+          slug,
+          category,
+          frontmatter,
+          content,
+          rawContentHash: computeContentHash(content),
+          mediaFiles,
+        })
+      } catch {
+        // skip directories without index.md
+      }
     }
   }
   return results
@@ -134,7 +144,7 @@ export function validateAll(scanned: ScannedPost[]): boolean {
       slug: post.slug,
       title: post.frontmatter.title,
       description: post.frontmatter.description,
-      category: post.frontmatter.category,
+      category: post.category,
       tags: post.frontmatter.tags,
       content: post.content,
       cid: post.frontmatter.cid,
@@ -192,7 +202,7 @@ export async function diffPosts(
     const fieldsChanged =
       existing.title !== post.frontmatter.title ||
       (existing.description ?? undefined) !== post.frontmatter.description ||
-      (existing.category ?? undefined) !== post.frontmatter.category ||
+      (existing.category ?? undefined) !== post.category ||
       existing.tags !== tagsJson ||
       existing.slug !== post.slug
 
@@ -300,7 +310,7 @@ export async function executeAddOrUpdate(
     slug: post.slug,
     title: post.frontmatter.title,
     description: post.frontmatter.description,
-    category: post.frontmatter.category,
+    category: post.category,
     tags: post.frontmatter.tags,
     content: post.content,
     contentHash: post.rawContentHash,

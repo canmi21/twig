@@ -65,7 +65,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     document.documentElement.classList.contains('dark')
   return (
     <html
-      lang="zh-Hans"
+      lang="zh"
       // eslint-disable-next-line better-tailwindcss/no-unknown-classes
       className={isDark ? 'dark' : undefined}
       suppressHydrationWarning
