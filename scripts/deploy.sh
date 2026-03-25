@@ -88,45 +88,28 @@ else
   echo "  R2: no media to sync"
 fi
 
-# --- KV: read local keys and bulk put to remote ---
+# --- KV: export each local key to a temp file, put to remote one by one ---
 echo "  KV: reading local keys..."
 
-KV_DUMP_FILE=$(mktemp /tmp/taki-kv-dump.XXXXXX.json)
+KV_KEYS=$(bunx wrangler kv key list --namespace-id="$KV_NAMESPACE_ID" --local 2>/dev/null \
+  | python3 -c "import sys,json; [print(k['name']) for k in json.loads(sys.stdin.read())]" 2>/dev/null || true)
 
-# List keys, fetch each value, build bulk JSON array
-KV_KEYS_JSON=$(bunx wrangler kv key list --namespace-id="$KV_NAMESPACE_ID" --local 2>/dev/null \
-  | grep -o '\[.*\]' || echo "[]")
-
-python3 -c "
-import sys, json, subprocess
-
-keys = json.loads('''$KV_KEYS_JSON''')
-entries = []
-for k in keys:
-    name = k['name']
-    result = subprocess.run(
-        ['bunx', 'wrangler', 'kv', 'key', 'get', name,
-         '--namespace-id', '$KV_NAMESPACE_ID', '--local', '--text'],
-        capture_output=True, text=True
-    )
-    if result.returncode == 0:
-        entries.append({'key': name, 'value': result.stdout})
-
-with open('$KV_DUMP_FILE', 'w') as f:
-    json.dump(entries, f)
-print(len(entries))
-" 2>/dev/null || echo "0" > "$KV_DUMP_FILE"
-
-KV_COUNT=$(python3 -c "import json; print(len(json.load(open('$KV_DUMP_FILE'))))" 2>/dev/null || echo "0")
-
-if [[ "$KV_COUNT" -gt 0 ]]; then
-  echo "  KV: uploading $KV_COUNT keys..."
-  bunx wrangler kv bulk put "$KV_DUMP_FILE" --namespace-id="$KV_NAMESPACE_ID" --remote
-  echo "  KV: done"
+KV_COUNT=0
+if [[ -n "$KV_KEYS" ]]; then
+  while IFS= read -r key; do
+    KV_TMP=$(mktemp /tmp/taki-kv-val.XXXXXX)
+    bunx wrangler kv key get "$key" --namespace-id="$KV_NAMESPACE_ID" --local --text 2>/dev/null \
+      | tail -1 > "$KV_TMP"
+    if [[ -s "$KV_TMP" ]]; then
+      bunx wrangler kv key put "$key" --namespace-id="$KV_NAMESPACE_ID" --remote --path="$KV_TMP" 2>/dev/null
+      echo "    $key"
+      KV_COUNT=$((KV_COUNT + 1))
+    fi
+    rm -f "$KV_TMP"
+  done <<< "$KV_KEYS"
+  echo "  KV: uploaded $KV_COUNT keys"
 else
   echo "  KV: no data to sync"
 fi
-
-rm -f "$KV_DUMP_FILE"
 
 echo "Deploy + sync complete."

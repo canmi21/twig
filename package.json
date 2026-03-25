@@ -22,7 +22,8 @@
     "test": "vitest run --exclude '**/integration.test.ts'",
     "test:integration": "vitest run integration.test",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@mingcute/react": "1.4.1",
