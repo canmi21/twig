@@ -3,6 +3,7 @@
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { Link } from 'lucide-react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import {
   ClaudeLine,
   GoogleGeminiFill,
@@ -307,17 +308,23 @@ export function PostShareActions() {
         )}
       </button>
       <div className="relative">
-        {copyStatus !== 'idle' && (
-          <div
-            className="
-              pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-1/2 z-10
-              -translate-x-1/2 rounded-full border border-border bg-surface
-              px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
-            "
-          >
-            {copyToastLabel}
-          </div>
-        )}
+        <AnimatePresence>
+          {copyStatus !== 'idle' && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="
+                pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-1/2 z-10
+                -translate-x-1/2 rounded-full border border-border bg-surface
+                px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
+              "
+            >
+              {copyToastLabel}
+            </motion.div>
+          )}
+        </AnimatePresence>
         <button
           type="button"
           onClick={() => {
