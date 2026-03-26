@@ -1,6 +1,12 @@
 /* src/routes/@/editor/$cid/index.tsx */
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type PointerEvent,
+} from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
@@ -12,7 +18,13 @@ import { computeContentHash } from '~/lib/utils/hash'
 import { postSchema } from '~/lib/content/post-schema'
 import { verifyCfAccess } from '~/server/auth'
 import type { PostIndexEntry } from '~/lib/storage/kv'
+import { ArticleHeader } from '~/components/post/article-header'
+import { PostShareActions } from '~/components/post/share-actions'
 import type { PreviewResult } from '~/lib/compiler/compile-preview'
+
+const DEFAULT_SPLIT = 0.5
+const MIN_SPLIT = 0.25
+const MAX_SPLIT = 0.75
 
 // --- Server functions ---
 
@@ -163,6 +175,31 @@ function EditorPage() {
     compilePreview: (source: string) => Promise<PreviewResult>
   } | null>(null)
 
+  // Resizable split
+  const [splitRatio, setSplitRatio] = useState(DEFAULT_SPLIT)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const draggingRef = useRef(false)
+
+  function handleDragStart(e: PointerEvent) {
+    e.preventDefault()
+    draggingRef.current = true
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+  }
+
+  function handleDragMove(e: PointerEvent) {
+    if (!draggingRef.current || !containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const ratio = Math.min(
+      MAX_SPLIT,
+      Math.max(MIN_SPLIT, (e.clientX - rect.left) / rect.width),
+    )
+    setSplitRatio(ratio)
+  }
+
+  function handleDragEnd() {
+    draggingRef.current = false
+  }
+
   // Lazy-load compiler
   useEffect(() => {
     import('~/lib/compiler/compile-preview').then((mod) => {
@@ -244,6 +281,9 @@ function EditorPage() {
   const inputClass =
     'rounded-sm border border-border bg-surface px-2 py-1 text-sm text-primary outline-none focus:border-secondary'
 
+  const leftPercent = `${splitRatio * 100}%`
+  const rightPercent = `${(1 - splitRatio) * 100}%`
+
   return (
     <div className="flex h-screen flex-col bg-surface">
       {/* Top bar */}
@@ -268,22 +308,10 @@ function EditorPage() {
             className={`${inputClass} min-w-0 flex-1`}
           />
           <input
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="category"
-            className={`${inputClass} w-24`}
-          />
-          <input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="tags"
-            className={`${inputClass} w-32`}
-          />
-          <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="description"
-            className={`${inputClass} w-40`}
+            placeholder="Description"
+            className={`${inputClass} w-48`}
           />
           <label className="flex shrink-0 items-center gap-1.5 text-sm">
             <input
@@ -314,20 +342,59 @@ function EditorPage() {
           )}
         </div>
       </header>
-      {/* Editor + Preview */}
-      <div className="flex min-h-0 flex-1">
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="h-full flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-primary outline-none"
-          spellCheck={false}
+
+      {/* Editor + Preview with resizable split */}
+      <div ref={containerRef} className="flex min-h-0 flex-1">
+        {/* Left: metadata + textarea */}
+        <div
+          className="flex flex-col overflow-hidden"
+          style={{ width: leftPercent }}
+        >
+          <div className="flex shrink-0 gap-2 border-b border-border px-4 py-2">
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="category"
+              className={`${inputClass} w-24`}
+            />
+            <input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="tags"
+              className={`${inputClass} w-36`}
+            />
+            <span className="ml-auto text-xs/7 text-tertiary">
+              {post.createdAt}
+            </span>
+          </div>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="min-h-0 flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-primary outline-none"
+            spellCheck={false}
+          />
+        </div>
+
+        {/* Drag handle */}
+        <div
+          className="w-1 shrink-0 cursor-col-resize bg-border hover:bg-secondary active:bg-secondary"
+          onPointerDown={handleDragStart}
+          onPointerMove={handleDragMove}
+          onPointerUp={handleDragEnd}
         />
-        <div className="flex-1 overflow-y-auto border-l border-border py-6">
-          <div className="mx-auto max-w-180 px-5">
-            {!compilerReady ? (
-              <p className="text-sm text-secondary">Loading preview...</p>
-            ) : compileError ? (
+
+        {/* Right: preview */}
+        <div className="overflow-y-auto" style={{ width: rightPercent }}>
+          <div className="mx-auto max-w-180 px-5 pt-14 pb-16">
+            <ArticleHeader
+              title={title}
+              createdAt={post.createdAt}
+              html={previewHtml}
+            >
+              <PostShareActions />
+            </ArticleHeader>
+            {!compilerReady ? null : compileError ? (
               <div className="rounded-sm border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
                 {compileError}
               </div>
