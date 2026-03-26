@@ -150,6 +150,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       "
     >
       <motion.ul
+        initial={false}
         style={{ gap: COLLAPSED_GAP_PX }}
         animate={{ gap: isOpen ? EXPANDED_GAP_PX : COLLAPSED_GAP_PX }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
@@ -178,7 +179,9 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
               >
                 {/* Bar — collapses to zero when text is shown */}
                 <motion.span
+                  data-toc-bar-intro="true"
                   className="block rounded-full"
+                  initial={false}
                   animate={{
                     width: showText ? 0 : bw,
                     height: showText ? 0 : 4,
@@ -189,7 +192,8 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
                 />
                 {/* Text — fades in during revealed phase */}
                 <motion.span
-                  className="block truncate overflow-hidden text-[13px] leading-snug"
+                  className="block h-0 truncate overflow-hidden text-[13px] leading-snug opacity-0"
+                  initial={false}
                   animate={{
                     height: showText ? 'auto' : 0,
                     opacity: showText ? 1 : 0,

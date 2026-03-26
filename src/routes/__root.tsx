@@ -5,10 +5,12 @@ import {
   Outlet,
   HeadContent,
   Scripts,
+  useRouteContext,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { RootContext } from '~/router'
 import { getCdnPublicUrl } from '~/server/get-cdn-url'
+import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { ThemeToggle } from '~/components/theme-toggle'
 import appCss from '~/styles/app.css?url'
@@ -42,32 +44,36 @@ export const Route = createRootRouteWithContext<RootContext>()({
     ],
   }),
   beforeLoad: async () => {
-    const cdnPublicUrl = await getCdnPublicUrl()
-    return { cdnPublicUrl }
+    const [cdnPublicUrl, initialTheme] = await Promise.all([
+      getCdnPublicUrl(),
+      getInitialTheme(),
+    ])
+    return { cdnPublicUrl, initialTheme }
   },
   component: RootComponent,
 })
 
 function RootComponent() {
+  const { initialTheme } = useRouteContext({ from: '__root__' })
   return (
-    <RootDocument>
+    <RootDocument initialTheme={initialTheme}>
       <Outlet />
     </RootDocument>
   )
 }
 
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  // Read the class that the inline head script already set on <html>.
-  // This makes React's virtual DOM match the real DOM so hydration
-  // does not strip the dark class.
-  const isDark =
-    typeof document !== 'undefined' &&
-    document.documentElement.classList.contains('dark')
+function RootDocument({
+  children,
+  initialTheme,
+}: Readonly<{
+  children: ReactNode
+  initialTheme: RootContext['initialTheme']
+}>) {
   return (
     <html
       lang="zh"
       // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-      className={isDark ? 'dark' : undefined}
+      className={initialTheme === 'dark' ? 'dark' : undefined}
       suppressHydrationWarning
     >
       <head>
