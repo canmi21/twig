@@ -1,7 +1,7 @@
 /* src/lib/theme/font-fallback-script.ts */
 
 const FONT_PATH =
-  '/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=optional'
+  '/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap'
 
 const MIRRORS = ['https://fonts.loli.net', 'https://fonts.font.im']
 
