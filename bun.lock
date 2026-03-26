@@ -48,6 +48,7 @@
         "miniflare": "^4.20260317.1",
         "oxfmt": "^0.40.0",
         "oxlint": "^1.56.0",
+        "prettier": "^3.8.1",
         "tailwindcss": "^4.2.2",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.57.1",
