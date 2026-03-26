@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-router'
 import type { RootContext } from '~/router'
 import { getCdnPublicUrl } from '~/server/get-cdn-url'
+import { getPublicUrl } from '~/server/platform'
 import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { ThemeToggle } from '~/components/theme-toggle'
@@ -63,20 +64,21 @@ export const Route = createRootRouteWithContext<RootContext>()({
       { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
     ],
   }),
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const [cdnPublicUrl, initialTheme] = await Promise.all([
       getCdnPublicUrl(),
       getInitialTheme(),
     ])
-    return { cdnPublicUrl, initialTheme }
+    const canonicalUrl = `${getPublicUrl()}${location.pathname}`
+    return { cdnPublicUrl, canonicalUrl, initialTheme }
   },
   component: RootComponent,
 })
 
 function RootComponent() {
-  const { initialTheme } = useRouteContext({ from: '__root__' })
+  const { initialTheme, canonicalUrl } = useRouteContext({ from: '__root__' })
   return (
-    <RootDocument initialTheme={initialTheme}>
+    <RootDocument initialTheme={initialTheme} canonicalUrl={canonicalUrl}>
       <Outlet />
     </RootDocument>
   )
@@ -85,9 +87,11 @@ function RootComponent() {
 function RootDocument({
   children,
   initialTheme,
+  canonicalUrl,
 }: Readonly<{
   children: ReactNode
   initialTheme: RootContext['initialTheme']
+  canonicalUrl: string
 }>) {
   return (
     <html
@@ -101,6 +105,7 @@ function RootDocument({
           dangerouslySetInnerHTML={{ __html: themeScript }}
           suppressHydrationWarning
         />
+        <link rel="canonical" href={canonicalUrl} />
         <HeadContent />
         <script
           dangerouslySetInnerHTML={{
