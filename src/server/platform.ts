@@ -14,6 +14,8 @@ interface Bindings {
   BUCKET: R2Bucket
   CDN_PUBLIC_URL: string
   PUBLIC_URL: string
+  CF_ACCESS_TEAM_DOMAIN: string
+  CF_ACCESS_AUD: string
 }
 
 function getBindings(): Bindings {
@@ -43,4 +45,14 @@ export function getCdnUrl() {
 /** Site public URL. */
 export function getPublicUrl() {
   return getBindings().PUBLIC_URL
+}
+
+/** CF Access team domain for JWT verification. */
+export function getCfAccessTeamDomain() {
+  return getBindings().CF_ACCESS_TEAM_DOMAIN
+}
+
+/** CF Access audience tag for JWT verification. */
+export function getCfAccessAud() {
+  return getBindings().CF_ACCESS_AUD
 }

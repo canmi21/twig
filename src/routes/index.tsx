@@ -76,6 +76,18 @@ function HomePage() {
           </li>
         ))}
       </ul>
+      <p className="mt-16 text-center text-[12px] text-tertiary">
+        <a
+          href="https://icp.gov.moe/?keyword=20260000"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-secondary"
+        >
+          萌ICP备20260000号
+        </a>
+        {'  '}
+        2023-{new Date().getFullYear()} © Canmi
+      </p>
     </div>
   )
 }

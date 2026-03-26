@@ -19,6 +19,7 @@ import { Route as RssIndexRouteImport } from './routes/rss/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as FeedIndexRouteImport } from './routes/feed/index'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -71,6 +72,11 @@ const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
   path: '/api/object/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsCategorySlugIndexRoute = PostsCategorySlugIndexRouteImport.update({
   id: '/posts/$category/$slug/',
   path: '/posts/$category/$slug/',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/posts': typeof PostsIndexRoute
   '/rss': typeof RssIndexRoute
   '/sitemap': typeof SitemapIndexRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
+    | '/api/auth/me'
     | '/api/object/$'
     | '/posts/$category/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/posts'
     | '/rss'
     | '/sitemap'
+    | '/api/auth/me'
     | '/api/object/$'
     | '/posts/$category/$slug'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
+    | '/api/auth/me'
     | '/api/object/$'
     | '/posts/$category/$slug/'
   fileRoutesById: FileRoutesById
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   PostsIndexRoute: typeof PostsIndexRoute
   RssIndexRoute: typeof RssIndexRoute
   SitemapIndexRoute: typeof SitemapIndexRoute
+  ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiObjectSplatRoute: typeof ApiObjectSplatRoute
   PostsCategorySlugIndexRoute: typeof PostsCategorySlugIndexRoute
 }
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiObjectSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$category/$slug/': {
       id: '/posts/$category/$slug/'
       path: '/posts/$category/$slug'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostsIndexRoute: PostsIndexRoute,
   RssIndexRoute: RssIndexRoute,
   SitemapIndexRoute: SitemapIndexRoute,
+  ApiAuthMeRoute: ApiAuthMeRoute,
   ApiObjectSplatRoute: ApiObjectSplatRoute,
   PostsCategorySlugIndexRoute: PostsCategorySlugIndexRoute,
 }

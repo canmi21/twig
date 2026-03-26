@@ -24,6 +24,7 @@
  * surface   — page background
  * primary   — main text, headings, links
  * secondary — meta text, dates, muted info
+ * tertiary  — footnotes, disclaimers, very subdued text
  * border    — dividers, separators
  * raised    — elevated surface (code blocks, tags)
  * ─────────────────────────────────────────────── */
@@ -31,6 +32,7 @@
   --color-surface: rgb(255, 255, 255);
   --color-primary: rgb(28, 28, 28);
   --color-secondary: rgb(130, 130, 130);
+  --color-tertiary: rgb(180, 180, 180);
   --color-border: rgb(234, 234, 234);
   --color-raised: rgb(246, 246, 246);
 }
@@ -40,6 +42,7 @@
   --color-surface: rgb(22, 22, 22);
   --color-primary: rgb(212, 212, 212);
   --color-secondary: rgb(130, 130, 130);
+  --color-tertiary: rgb(80, 80, 80);
   --color-border: rgb(40, 40, 40);
   --color-raised: rgb(30, 30, 30);
 }
