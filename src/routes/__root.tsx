@@ -1,5 +1,6 @@
 /* src/routes/__root.tsx */
 
+import { version as reactVersion } from 'react'
 import type { ReactNode } from 'react'
 import {
   Outlet,
@@ -13,6 +14,7 @@ import { getCdnPublicUrl } from '~/server/get-cdn-url'
 import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { ThemeToggle } from '~/components/theme-toggle'
+import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({
@@ -23,8 +25,25 @@ export const Route = createRootRouteWithContext<RootContext>()({
         name: 'viewport',
         content: 'width=device-width, initial-scale=1',
       },
-      { title: 'サボり記' },
-      { name: 'description', content: '蛋糕是一个谎言！' },
+      { title: SITE_TITLE },
+      { name: 'description', content: SITE_DESCRIPTION },
+    ],
+    scripts: [
+      {
+        src: 'https://cloud.umami.is/script.js',
+        'data-website-id': '2b0a1e79-405a-47c0-a263-05732e0a130c',
+        defer: true,
+      },
+      {
+        children: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "w1qyo3ct84");`,
+      },
+      {
+        src: 'https://www.googletagmanager.com/gtag/js?id=G-JSSDP56B0P',
+        async: true,
+      },
+      {
+        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JSSDP56B0P');`,
+      },
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
@@ -82,6 +101,19 @@ function RootDocument({
           suppressHydrationWarning
         />
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `Object.defineProperty(window,'React',{value:Object.freeze({version:"${reactVersion}"}),writable:false,configurable:false});window.___FONT_AWESOME___=true;`,
+          }}
+        />
+        <script
+          id="vite-plugin-meta"
+          type="application/json"
+          dangerouslySetInnerHTML={{
+            __html:
+              '{"btw":"i-use-vite-btw","blazingly-fast":true,"webpack":"no-thanks","rolldown":"yes"}',
+          }}
+        />
       </head>
       <body className="bg-surface text-primary">
         <ThemeToggle />

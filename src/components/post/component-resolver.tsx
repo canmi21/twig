@@ -4,16 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouteContext } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import type { ComponentEntry } from '~/lib/compiler/index'
-import { storageKey } from '~/lib/storage/storage-key'
-
-function mediaUrl(cdnPrefix: string, src: string): string {
-  const dotIdx = src.lastIndexOf('.')
-  if (dotIdx === -1) return src
-
-  const hash = src.slice(0, dotIdx)
-  const ext = src.slice(dotIdx + 1)
-  return `${cdnPrefix}/${storageKey(hash, ext)}`
-}
+import { mediaUrl } from '~/lib/storage/media-url'
 
 function ImageComponent({ url, alt }: { url: string; alt: string }) {
   const [loaded, setLoaded] = useState(false)

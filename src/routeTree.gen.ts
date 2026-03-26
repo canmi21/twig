@@ -9,19 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SitemapIndexRouteImport } from './routes/sitemap/index'
+import { Route as RssIndexRouteImport } from './routes/rss/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as FeedIndexRouteImport } from './routes/feed/index'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapIndexRoute = SitemapIndexRouteImport.update({
+  id: '/sitemap/',
+  path: '/sitemap/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssIndexRoute = RssIndexRouteImport.update({
+  id: '/rss/',
+  path: '/rss/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedIndexRoute = FeedIndexRouteImport.update({
+  id: '/feed/',
+  path: '/feed/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
@@ -37,40 +79,130 @@ const PostsCategorySlugIndexRoute = PostsCategorySlugIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/feed.xml': typeof FeedDotxmlRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/feed/': typeof FeedIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/rss/': typeof RssIndexRoute
+  '/sitemap/': typeof SitemapIndexRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/feed.xml': typeof FeedDotxmlRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/feed': typeof FeedIndexRoute
   '/posts': typeof PostsIndexRoute
+  '/rss': typeof RssIndexRoute
+  '/sitemap': typeof SitemapIndexRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/feed.xml': typeof FeedDotxmlRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/rss.xml': typeof RssDotxmlRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/feed/': typeof FeedIndexRoute
   '/posts/': typeof PostsIndexRoute
+  '/rss/': typeof RssIndexRoute
+  '/sitemap/': typeof SitemapIndexRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts/' | '/api/object/$' | '/posts/$category/$slug/'
+  fullPaths:
+    | '/'
+    | '/feed.xml'
+    | '/robots.txt'
+    | '/rss.xml'
+    | '/sitemap.xml'
+    | '/feed/'
+    | '/posts/'
+    | '/rss/'
+    | '/sitemap/'
+    | '/api/object/$'
+    | '/posts/$category/$slug/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts' | '/api/object/$' | '/posts/$category/$slug'
-  id: '__root__' | '/' | '/posts/' | '/api/object/$' | '/posts/$category/$slug/'
+  to:
+    | '/'
+    | '/feed.xml'
+    | '/robots.txt'
+    | '/rss.xml'
+    | '/sitemap.xml'
+    | '/feed'
+    | '/posts'
+    | '/rss'
+    | '/sitemap'
+    | '/api/object/$'
+    | '/posts/$category/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/feed.xml'
+    | '/robots.txt'
+    | '/rss.xml'
+    | '/sitemap.xml'
+    | '/feed/'
+    | '/posts/'
+    | '/rss/'
+    | '/sitemap/'
+    | '/api/object/$'
+    | '/posts/$category/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FeedDotxmlRoute: typeof FeedDotxmlRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  RssDotxmlRoute: typeof RssDotxmlRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  FeedIndexRoute: typeof FeedIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
+  RssIndexRoute: typeof RssIndexRoute
+  SitemapIndexRoute: typeof SitemapIndexRoute
   ApiObjectSplatRoute: typeof ApiObjectSplatRoute
   PostsCategorySlugIndexRoute: typeof PostsCategorySlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -78,11 +210,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap/': {
+      id: '/sitemap/'
+      path: '/sitemap'
+      fullPath: '/sitemap/'
+      preLoaderRoute: typeof SitemapIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss/': {
+      id: '/rss/'
+      path: '/rss'
+      fullPath: '/rss/'
+      preLoaderRoute: typeof RssIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/': {
       id: '/posts/'
       path: '/posts'
       fullPath: '/posts/'
       preLoaderRoute: typeof PostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed/': {
+      id: '/feed/'
+      path: '/feed'
+      fullPath: '/feed/'
+      preLoaderRoute: typeof FeedIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/object/$': {
@@ -104,7 +257,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FeedDotxmlRoute: FeedDotxmlRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  RssDotxmlRoute: RssDotxmlRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  FeedIndexRoute: FeedIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
+  RssIndexRoute: RssIndexRoute,
+  SitemapIndexRoute: SitemapIndexRoute,
   ApiObjectSplatRoute: ApiObjectSplatRoute,
   PostsCategorySlugIndexRoute: PostsCategorySlugIndexRoute,
 }

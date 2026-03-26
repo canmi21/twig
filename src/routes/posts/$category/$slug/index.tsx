@@ -49,9 +49,9 @@ function stripHtml(html: string): string {
     .replaceAll(/<!--[\s\S]*?-->/g, ' ')
     .replaceAll(/<[^>]+>/g, ' ')
     .replaceAll(/&nbsp;/g, ' ')
-    .replaceAll(/&amp;/g, '&')
     .replaceAll(/&lt;/g, '<')
     .replaceAll(/&gt;/g, '>')
+    .replaceAll(/&amp;/g, '&')
     .replaceAll(/\s+/g, ' ')
     .trim()
 }

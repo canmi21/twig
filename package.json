@@ -19,6 +19,7 @@
     "push": "bun run src/cli/push/index.ts",
     "pull": "bun run src/cli/pull/index.ts",
     "rebuild": "bun run src/cli/rebuild/index.ts",
+    "watch": "bun run src/cli/watch/index.ts",
     "test": "vitest run --exclude '**/integration.test.ts'",
     "test:integration": "vitest run integration.test",
     "typecheck": "tsc --noEmit",
