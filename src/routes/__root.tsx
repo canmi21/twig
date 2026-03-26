@@ -16,6 +16,7 @@ import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { ThemeToggle } from '~/components/theme-toggle'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
+import { fontFallbackScript } from '~/lib/theme/font-fallback-script'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({
@@ -48,6 +49,16 @@ export const Route = createRootRouteWithContext<RootContext>()({
       },
     ],
     links: [
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
+      },
       { rel: 'stylesheet', href: appCss },
       {
         rel: 'icon',
@@ -119,6 +130,7 @@ function RootDocument({
         />
         <link rel="canonical" href={canonicalUrl} />
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: fontFallbackScript }} />
         <script
           dangerouslySetInnerHTML={{
             __html: `Object.defineProperty(window,'React',{value:Object.freeze({version:"${reactVersion}"}),writable:false,configurable:false});window.___FONT_AWESOME___=true;`,

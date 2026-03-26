@@ -9,6 +9,13 @@
 :root {
   color-scheme: light;
   scroll-behavior: smooth;
+  font-family:
+    'Noto Sans',
+    'Noto Sans SC',
+    'Noto Sans JP',
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 /* Text selection highlight */
