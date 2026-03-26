@@ -27,6 +27,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
       },
       { title: SITE_TITLE },
       { name: 'description', content: SITE_DESCRIPTION },
+      { name: 'baidu-site-verification', content: 'codeva-vxytO6KmID' },
     ],
     scripts: [
       {
