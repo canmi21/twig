@@ -17,6 +17,14 @@ export default defineConfig({
         chunkFileNames: `${disguise}/chunks/[hash:21].js`,
         assetFileNames: `${disguise}/static/[hash:21].[ext]`,
         hashCharacters: 'hex',
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react',
+              test: /node_modules[\\/](react|react-dom)\//,
+            },
+          ],
+        },
       },
     },
   },
