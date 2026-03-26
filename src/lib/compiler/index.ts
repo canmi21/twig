@@ -3,6 +3,7 @@
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkFrontmatter from 'remark-frontmatter'
+import remarkGfm from 'remark-gfm'
 import remarkDirective from 'remark-directive'
 import remarkRehype from 'remark-rehype'
 import rehypeShiki from '@shikijs/rehype'
@@ -55,6 +56,7 @@ export async function compile(source: string): Promise<CompileResult> {
 
   const html = await unified()
     .use(remarkParse)
+    .use(remarkGfm)
     .use(remarkFrontmatter, ['yaml'])
     .use(remarkExtractFrontmatter, { store: fmStore })
     .use(remarkDirective)
