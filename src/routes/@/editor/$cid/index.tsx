@@ -323,21 +323,23 @@ function EditorPage() {
           className="h-full flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-primary outline-none"
           spellCheck={false}
         />
-        <div className="flex-1 overflow-y-auto border-l border-border p-6">
-          {!compilerReady ? (
-            <p className="text-sm text-secondary">Loading preview...</p>
-          ) : compileError ? (
-            <div className="rounded-sm border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-              {compileError}
-            </div>
-          ) : (
-            // Content authored by authenticated admin, compiled by our remark/rehype pipeline
-            <div
-              // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-              className="article"
-              dangerouslySetInnerHTML={{ __html: previewHtml }}
-            />
-          )}
+        <div className="flex-1 overflow-y-auto border-l border-border py-6">
+          <div className="mx-auto max-w-180 px-5">
+            {!compilerReady ? (
+              <p className="text-sm text-secondary">Loading preview...</p>
+            ) : compileError ? (
+              <div className="rounded-sm border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+                {compileError}
+              </div>
+            ) : (
+              // Content authored by authenticated admin, compiled by our remark/rehype pipeline
+              <div
+                // eslint-disable-next-line better-tailwindcss/no-unknown-classes
+                className="article"
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
