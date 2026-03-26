@@ -24,16 +24,22 @@ function replaceHash(id: string) {
   )
 }
 
-function measureTextWidths(texts: string[]): Map<string, number> {
+function estimateTextWidth(text: string): number {
+  let width = 0
+  for (const char of text) {
+    if (/\p{Script=Han}/u.test(char)) {
+      width += 8
+      continue
+    }
+    width += char === ' ' ? 2 : 4
+  }
+  return Math.max(20, Math.min(56, width))
+}
+
+function estimateTextWidths(texts: string[]): Map<string, number> {
   const widths = new Map<string, number>()
-  if (typeof document === 'undefined') return widths
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return widths
-  ctx.font = '13px system-ui, sans-serif'
   for (const text of texts) {
-    const measured = ctx.measureText(text).width
-    widths.set(text, Math.max(20, Math.round(measured * 0.6)))
+    widths.set(text, estimateTextWidth(text))
   }
   return widths
 }
@@ -47,7 +53,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
   const isClickScrollingRef = useRef(false)
   const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const barWidths = useMemo(
-    () => measureTextWidths(entries.map((e) => e.text)),
+    () => estimateTextWidths(entries.map((e) => e.text)),
     [entries],
   )
 
