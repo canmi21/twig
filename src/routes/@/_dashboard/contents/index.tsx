@@ -1,7 +1,12 @@
-/* src/routes/~/contents/index.tsx */
+/* src/routes/@/_dashboard/contents/index.tsx */
 
 import { useState } from 'react'
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Link,
+  useRouter,
+  useNavigate,
+} from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getDb, getCache, getBucket } from '~/server/platform'
 import {
@@ -9,6 +14,7 @@ import {
   deletePost,
   setPublished,
   getPostByCid,
+  upsertPost,
 } from '~/lib/database/posts'
 import {
   deleteMediaRefsForPost,
@@ -19,11 +25,28 @@ import {
 import { writePostKv, deletePostKv, writePostIndex } from '~/lib/storage/kv'
 import { compile } from '~/lib/compiler/index'
 import { storageKey } from '~/lib/storage/storage-key'
+import { newCid } from '~/lib/utils/uuid'
+import { computeContentHash } from '~/lib/utils/hash'
 import type { PostIndexEntry } from '~/lib/storage/kv'
 
 const listPosts = createServerFn().handler(async () => {
   const db = getDb()
   return getAllPosts(db)
+})
+
+const createDraft = createServerFn({ method: 'POST' }).handler(async () => {
+  const db = getDb()
+  const cid = newCid()
+  const contentHash = computeContentHash('')
+  await upsertPost(db, {
+    slug: `untitled-${cid.slice(0, 8)}`,
+    title: 'Untitled',
+    content: '',
+    contentHash,
+    cid,
+    published: false,
+  })
+  return { cid }
 })
 
 const togglePublished = createServerFn({ method: 'POST' })
@@ -71,7 +94,6 @@ const removePost = createServerFn({ method: 'POST' })
     const post = await getPostByCid(db, data.cid)
     if (!post) return
 
-    // Clean media refs and orphaned media
     const hashes = await deleteMediaRefsForPost(db, data.cid)
     const refCounts = await Promise.all(
       hashes.map((hash) =>
@@ -111,7 +133,7 @@ async function rebuildPostIndex(db: ReturnType<typeof getDb>, kv: KVNamespace) {
   await writePostIndex(kv, index)
 }
 
-export const Route = createFileRoute('/~/contents/')({
+export const Route = createFileRoute('/@/_dashboard/contents/')({
   loader: () => listPosts(),
   component: PostsList,
 })
@@ -127,7 +149,13 @@ function formatDate(iso: string): string {
 function PostsList() {
   const posts = Route.useLoaderData()
   const router = useRouter()
+  const navigate = useNavigate()
   const [deleting, setDeleting] = useState<string | null>(null)
+
+  async function handleNewPost() {
+    const { cid } = await createDraft()
+    navigate({ to: '/@/editor/$cid', params: { cid } })
+  }
 
   async function handleToggle(cid: string, current: number) {
     await togglePublished({ data: { cid, published: current === 0 } })
@@ -144,12 +172,13 @@ function PostsList() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-lg font-medium">Posts</h1>
-        <Link
-          to="/~/contents/new"
+        <button
+          type="button"
+          onClick={handleNewPost}
           className="rounded-sm bg-primary px-3 py-1.5 text-sm text-surface"
         >
           New Post
-        </Link>
+        </button>
       </div>
 
       {posts.length === 0 ? (
@@ -192,7 +221,7 @@ function PostsList() {
                 <td className="py-3 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <Link
-                      to="/~/contents/$cid/edit"
+                      to="/@/editor/$cid"
                       params={{ cid: post.cid }}
                       className="text-secondary hover:text-primary"
                     >

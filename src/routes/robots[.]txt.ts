@@ -10,7 +10,7 @@ export const Route = createFileRoute('/robots.txt')({
         const body = [
           '# https://www.robotstxt.org/robotstxt.html',
           'User-agent: *',
-          'Disallow: /~/',
+          'Disallow: /@/',
           'Disallow: /cgi-bin/',
           'Disallow: /cdn-cgi/',
           `Sitemap: ${getPublicUrl()}/sitemap.xml`,
