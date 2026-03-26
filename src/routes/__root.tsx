@@ -74,6 +74,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
     return { cdnPublicUrl, canonicalUrl, initialTheme }
   },
   component: RootComponent,
+  notFoundComponent: NotFound,
 })
 
 function RootComponent() {
@@ -82,6 +83,16 @@ function RootComponent() {
     <RootDocument initialTheme={initialTheme} canonicalUrl={canonicalUrl}>
       <Outlet />
     </RootDocument>
+  )
+}
+
+function NotFound() {
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <span className="text-xl font-medium">404</span>
+      <span className="mx-4 h-8 w-px bg-border" />
+      <span className="text-sm text-secondary">Not Found</span>
+    </div>
   )
 }
 

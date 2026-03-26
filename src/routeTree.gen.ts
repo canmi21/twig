@@ -13,14 +13,19 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
+import { Route as Char126RouteRouteImport } from './routes/~/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as Char126IndexRouteImport } from './routes/~/index'
 import { Route as SitemapIndexRouteImport } from './routes/sitemap/index'
 import { Route as RssIndexRouteImport } from './routes/rss/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as FeedIndexRouteImport } from './routes/feed/index'
+import { Route as Char126ContentsIndexRouteImport } from './routes/~/contents/index'
+import { Route as Char126ContentsNewRouteImport } from './routes/~/contents/new'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
+import { Route as Char126ContentsCidEditRouteImport } from './routes/~/contents/$cid/edit'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -42,10 +47,20 @@ const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
   path: '/feed.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char126RouteRoute = Char126RouteRouteImport.update({
+  id: '/~',
+  path: '/~',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const Char126IndexRoute = Char126IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Char126RouteRoute,
 } as any)
 const SitemapIndexRoute = SitemapIndexRouteImport.update({
   id: '/sitemap/',
@@ -67,6 +82,16 @@ const FeedIndexRoute = FeedIndexRouteImport.update({
   path: '/feed/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char126ContentsIndexRoute = Char126ContentsIndexRouteImport.update({
+  id: '/contents/',
+  path: '/contents/',
+  getParentRoute: () => Char126RouteRoute,
+} as any)
+const Char126ContentsNewRoute = Char126ContentsNewRouteImport.update({
+  id: '/contents/new',
+  path: '/contents/new',
+  getParentRoute: () => Char126RouteRoute,
+} as any)
 const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
   id: '/api/object/$',
   path: '/api/object/$',
@@ -82,9 +107,15 @@ const PostsCategorySlugIndexRoute = PostsCategorySlugIndexRouteImport.update({
   path: '/posts/$category/$slug/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char126ContentsCidEditRoute = Char126ContentsCidEditRouteImport.update({
+  id: '/contents/$cid/edit',
+  path: '/contents/$cid/edit',
+  getParentRoute: () => Char126RouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/~': typeof Char126RouteRouteWithChildren
   '/feed.xml': typeof FeedDotxmlRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
@@ -93,8 +124,12 @@ export interface FileRoutesByFullPath {
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
+  '/~/': typeof Char126IndexRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/~/contents/new': typeof Char126ContentsNewRoute
+  '/~/contents/': typeof Char126ContentsIndexRoute
+  '/~/contents/$cid/edit': typeof Char126ContentsCidEditRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -107,13 +142,18 @@ export interface FileRoutesByTo {
   '/posts': typeof PostsIndexRoute
   '/rss': typeof RssIndexRoute
   '/sitemap': typeof SitemapIndexRoute
+  '/~': typeof Char126IndexRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/~/contents/new': typeof Char126ContentsNewRoute
+  '/~/contents': typeof Char126ContentsIndexRoute
+  '/~/contents/$cid/edit': typeof Char126ContentsCidEditRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/~': typeof Char126RouteRouteWithChildren
   '/feed.xml': typeof FeedDotxmlRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
@@ -122,14 +162,19 @@ export interface FileRoutesById {
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
+  '/~/': typeof Char126IndexRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/~/contents/new': typeof Char126ContentsNewRoute
+  '/~/contents/': typeof Char126ContentsIndexRoute
+  '/~/contents/$cid/edit': typeof Char126ContentsCidEditRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/~'
     | '/feed.xml'
     | '/robots.txt'
     | '/rss.xml'
@@ -138,8 +183,12 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
+    | '/~/'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/~/contents/new'
+    | '/~/contents/'
+    | '/~/contents/$cid/edit'
     | '/posts/$category/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -152,12 +201,17 @@ export interface FileRouteTypes {
     | '/posts'
     | '/rss'
     | '/sitemap'
+    | '/~'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/~/contents/new'
+    | '/~/contents'
+    | '/~/contents/$cid/edit'
     | '/posts/$category/$slug'
   id:
     | '__root__'
     | '/'
+    | '/~'
     | '/feed.xml'
     | '/robots.txt'
     | '/rss.xml'
@@ -166,13 +220,18 @@ export interface FileRouteTypes {
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
+    | '/~/'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/~/contents/new'
+    | '/~/contents/'
+    | '/~/contents/$cid/edit'
     | '/posts/$category/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  Char126RouteRoute: typeof Char126RouteRouteWithChildren
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
@@ -216,12 +275,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeedDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/~': {
+      id: '/~'
+      path: '/~'
+      fullPath: '/~'
+      preLoaderRoute: typeof Char126RouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/~/': {
+      id: '/~/'
+      path: '/'
+      fullPath: '/~/'
+      preLoaderRoute: typeof Char126IndexRouteImport
+      parentRoute: typeof Char126RouteRoute
     }
     '/sitemap/': {
       id: '/sitemap/'
@@ -251,6 +324,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeedIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/~/contents/': {
+      id: '/~/contents/'
+      path: '/contents'
+      fullPath: '/~/contents/'
+      preLoaderRoute: typeof Char126ContentsIndexRouteImport
+      parentRoute: typeof Char126RouteRoute
+    }
+    '/~/contents/new': {
+      id: '/~/contents/new'
+      path: '/contents/new'
+      fullPath: '/~/contents/new'
+      preLoaderRoute: typeof Char126ContentsNewRouteImport
+      parentRoute: typeof Char126RouteRoute
+    }
     '/api/object/$': {
       id: '/api/object/$'
       path: '/api/object/$'
@@ -272,11 +359,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsCategorySlugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/~/contents/$cid/edit': {
+      id: '/~/contents/$cid/edit'
+      path: '/contents/$cid/edit'
+      fullPath: '/~/contents/$cid/edit'
+      preLoaderRoute: typeof Char126ContentsCidEditRouteImport
+      parentRoute: typeof Char126RouteRoute
+    }
   }
 }
 
+interface Char126RouteRouteChildren {
+  Char126IndexRoute: typeof Char126IndexRoute
+  Char126ContentsNewRoute: typeof Char126ContentsNewRoute
+  Char126ContentsIndexRoute: typeof Char126ContentsIndexRoute
+  Char126ContentsCidEditRoute: typeof Char126ContentsCidEditRoute
+}
+
+const Char126RouteRouteChildren: Char126RouteRouteChildren = {
+  Char126IndexRoute: Char126IndexRoute,
+  Char126ContentsNewRoute: Char126ContentsNewRoute,
+  Char126ContentsIndexRoute: Char126ContentsIndexRoute,
+  Char126ContentsCidEditRoute: Char126ContentsCidEditRoute,
+}
+
+const Char126RouteRouteWithChildren = Char126RouteRoute._addFileChildren(
+  Char126RouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  Char126RouteRoute: Char126RouteRouteWithChildren,
   FeedDotxmlRoute: FeedDotxmlRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   RssDotxmlRoute: RssDotxmlRoute,

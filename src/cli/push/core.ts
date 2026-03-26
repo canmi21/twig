@@ -3,6 +3,7 @@
 import { resolve, relative, extname } from 'node:path'
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
+import { computeContentHash } from '../../lib/utils/hash'
 import { eq } from 'drizzle-orm'
 import type { Db } from '../../lib/database/index'
 import { getAllPosts, upsertPost, deletePost } from '../../lib/database/posts'
@@ -59,9 +60,7 @@ export class PushValidationError extends Error {
 
 // --- Scanning ---
 
-export function computeContentHash(content: string): string {
-  return createHash('sha256').update(content, 'utf-8').digest('hex')
-}
+export { computeContentHash } from '../../lib/utils/hash'
 
 export function extractFrontmatter(source: string): {
   frontmatter: Frontmatter

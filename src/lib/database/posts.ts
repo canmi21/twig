@@ -59,6 +59,42 @@ export async function getAllPosts(db: Db): Promise<PostRow[]> {
     .all()
 }
 
+export async function getPostByCid(
+  db: Db,
+  cid: string,
+): Promise<PostRow | undefined> {
+  return db
+    .select({
+      cid: posts.cid,
+      slug: posts.slug,
+      title: posts.title,
+      description: posts.description,
+      category: posts.category,
+      tags: posts.tags,
+      content: posts.content,
+      contentHash: posts.contentHash,
+      createdAt: contents.createdAt,
+      updatedAt: contents.updatedAt,
+      published: contents.published,
+    })
+    .from(posts)
+    .innerJoin(contents, eq(posts.cid, contents.cid))
+    .where(eq(posts.cid, cid))
+    .get()
+}
+
+export async function setPublished(
+  db: Db,
+  cid: string,
+  published: boolean,
+): Promise<void> {
+  const now = new Date().toISOString()
+  await db
+    .update(contents)
+    .set({ published: published ? 1 : 0, updatedAt: now })
+    .where(eq(contents.cid, cid))
+}
+
 export async function deletePost(db: Db, cid: string): Promise<void> {
   await db.delete(posts).where(eq(posts.cid, cid))
   await db.delete(contents).where(eq(contents.cid, cid))
