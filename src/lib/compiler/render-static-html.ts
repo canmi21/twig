@@ -1,21 +1,23 @@
-/* src/lib/content/render-html.ts */
+/* src/lib/compiler/render-static-html.ts */
 
-import type { ComponentEntry } from '~/lib/compiler/index'
+import type { ComponentEntry } from './index'
 import { mediaUrl } from '~/lib/storage/media-url'
 
 /**
  * Resolve component placeholders in compiled HTML to plain HTML tags.
- * No React dependency — pure string operations for feeds and other
- * non-interactive contexts.
+ * Strips interactive heading links (anchor + SVG icon) that are
+ * meaningless outside the website. No React dependency.
  */
 export function renderStaticHtml(
   html: string,
   components: ComponentEntry[],
   opts: { cdnPrefix: string; articleUrl?: string },
 ): string {
-  if (components.length === 0) return html
+  let result = stripHeadingLinks(html)
 
-  return html.replace(/<!--component:(\d+)-->/g, (_, indexStr: string) => {
+  if (components.length === 0) return result
+
+  return result.replace(/<!--component:(\d+)-->/g, (_, indexStr: string) => {
     const entry = components[Number(indexStr)]
     if (!entry) return ''
 
@@ -30,10 +32,18 @@ export function renderStaticHtml(
         return `<audio src="${url}" controls></audio>`
       default:
         return opts.articleUrl
-          ? `<p><a href="${opts.articleUrl}">View interactive content</a></p>`
+          ? `<p><a href="${opts.articleUrl}">View interactive content on the website</a></p>`
           : ''
     }
   })
+}
+
+/** Remove `<a data-heading-link="true">...<svg>...</svg></a>` from headings. */
+function stripHeadingLinks(html: string): string {
+  return html.replaceAll(
+    /<a\s[^>]*data-heading-link="true"[^>]*>[\s\S]*?<\/a>/g,
+    '',
+  )
 }
 
 function escapeAttr(s: string): string {
