@@ -18,8 +18,11 @@ import { computeContentHash } from '~/lib/utils/hash'
 import { postSchema } from '~/lib/content/post-schema'
 import { verifyCfAccess } from '~/server/auth'
 import type { PostIndexEntry } from '~/lib/storage/kv'
+import { ArrowLeft, Settings, Eye, CodeXml } from 'lucide-react'
+import { motion } from 'motion/react'
 import { ArticleHeader } from '~/components/post/article-header'
 import { PostShareActions } from '~/components/post/share-actions'
+import { ThemeToggle } from '~/components/theme-toggle'
 import type { PreviewResult } from '~/lib/compiler/compile-preview'
 
 const DEFAULT_SPLIT = 0.5
@@ -143,6 +146,9 @@ const savePost = createServerFn({ method: 'POST' })
 
 export const Route = createFileRoute('/@/editor/$cid/')({
   loader: ({ params }) => getPost({ data: { cid: params.cid } }),
+  head: ({ loaderData }) => ({
+    meta: loaderData ? [{ title: `Editor - ${loaderData.title}` }] : [],
+  }),
   component: EditorPage,
 })
 
@@ -161,6 +167,10 @@ function EditorPage() {
   const [content, setContent] = useState(post.content)
   const [published, setPublished] = useState(post.published === 1)
 
+  const [previewMode, setPreviewMode] = useState<'rendered' | 'source'>(
+    'rendered',
+  )
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error'
@@ -286,87 +296,103 @@ function EditorPage() {
 
   return (
     <div className="flex h-screen flex-col bg-surface">
-      {/* Top bar */}
-      <header className="shrink-0 border-b border-border px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <Link
-            to="/@/contents"
-            className="mr-1 text-sm text-secondary hover:text-primary"
+      {/* Toolbar */}
+      <header className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
+        <Link
+          to="/@/contents"
+          className="rounded-sm p-1.5 text-secondary hover:bg-raised hover:text-primary"
+        >
+          <ArrowLeft className="size-3.5" strokeWidth={1.8} />
+        </Link>
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(!settingsOpen)}
+          className={`rounded-sm p-1.5 transition-colors ${settingsOpen ? 'bg-raised text-primary' : 'text-secondary hover:bg-raised hover:text-primary'}`}
+        >
+          <Settings className="size-3.5" strokeWidth={1.8} />
+        </button>
+        <div className="mx-1 h-4 w-px bg-border" />
+        <label className="flex shrink-0 items-center gap-1.5 text-xs">
+          <input
+            type="checkbox"
+            checked={published}
+            onChange={(e) => setPublished(e.target.checked)}
+          />
+          <span className="text-secondary">Publish</span>
+        </label>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="ml-1 shrink-0 rounded-sm bg-primary px-3 py-1 text-xs text-surface disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save'}
+        </button>
+        {feedback && (
+          <span
+            className={`shrink-0 text-xs ${
+              feedback.type === 'success'
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-500'
+            }`}
           >
-            &larr;
-          </Link>
-          <input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            placeholder="slug"
-            className={`${inputClass} w-32`}
-          />
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Title"
-            className={`${inputClass} min-w-0 flex-1`}
-          />
-          <input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
-            className={`${inputClass} w-48`}
-          />
-          <label className="flex shrink-0 items-center gap-1.5 text-sm">
-            <input
-              type="checkbox"
-              checked={published}
-              onChange={(e) => setPublished(e.target.checked)}
-            />
-            <span className="text-secondary">Publish</span>
-          </label>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="shrink-0 rounded-sm bg-primary px-3 py-1 text-sm text-surface disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save'}
-          </button>
-          {feedback && (
-            <span
-              className={`shrink-0 text-xs ${
-                feedback.type === 'success'
-                  ? 'text-green-600 dark:text-green-400'
-                  : 'text-red-500'
-              }`}
-            >
-              {feedback.message}
-            </span>
-          )}
-        </div>
+            {feedback.message}
+          </span>
+        )}
+        <ThemeToggle />
       </header>
 
-      {/* Editor + Preview with resizable split */}
-      <div ref={containerRef} className="flex min-h-0 flex-1">
-        {/* Left: metadata + textarea */}
-        <div
-          className="flex flex-col overflow-hidden"
-          style={{ width: leftPercent }}
-        >
-          <div className="flex shrink-0 gap-2 border-b border-border px-4 py-2">
+      {/* Settings panel */}
+      {settingsOpen && (
+        <div className="shrink-0 border-b border-border px-4 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Title"
+              className={`${inputClass} min-w-0 flex-1`}
+            />
+            <input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="slug"
+              className={`${inputClass} w-36`}
+            />
             <input
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               placeholder="category"
-              className={`${inputClass} w-24`}
+              className={`${inputClass} w-28`}
             />
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="tags"
-              className={`${inputClass} w-36`}
+              className={`${inputClass} w-40`}
             />
-            <span className="ml-auto text-xs/7 text-tertiary">
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description"
+              className={`${inputClass} min-w-0 flex-1`}
+            />
+            <span className="shrink-0 text-xs text-tertiary">
               {post.createdAt}
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Editor + Preview with resizable split */}
+      <div ref={containerRef} className="flex min-h-0 flex-1">
+        {/* Left: textarea */}
+        <div
+          className="flex flex-col overflow-hidden"
+          style={{ width: leftPercent }}
+        >
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -377,16 +403,23 @@ function EditorPage() {
         </div>
 
         {/* Drag handle */}
-        <div
-          className="w-1 shrink-0 cursor-col-resize bg-border hover:bg-secondary active:bg-secondary"
+        <motion.div
+          className="shrink-0 cursor-col-resize bg-border"
+          initial={{ width: 1 }}
+          whileHover={{ width: 3 }}
+          whileTap={{ width: 3 }}
+          transition={{ duration: 0.15 }}
           onPointerDown={handleDragStart}
           onPointerMove={handleDragMove}
           onPointerUp={handleDragEnd}
         />
 
         {/* Right: preview */}
-        <div className="overflow-y-auto" style={{ width: rightPercent }}>
-          <div className="mx-auto max-w-180 px-5 pt-14 pb-16">
+        <div
+          className="relative overflow-y-auto"
+          style={{ width: rightPercent }}
+        >
+          <div className="mx-auto max-w-180 px-5 pt-14 pb-24">
             <ArticleHeader
               title={title}
               createdAt={post.createdAt}
@@ -398,14 +431,38 @@ function EditorPage() {
               <div className="rounded-sm border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
                 {compileError}
               </div>
-            ) : (
+            ) : previewMode === 'rendered' ? (
               // Content authored by authenticated admin, compiled by our remark/rehype pipeline
               <div
                 // eslint-disable-next-line better-tailwindcss/no-unknown-classes
                 className="article"
                 dangerouslySetInnerHTML={{ __html: previewHtml }}
               />
+            ) : (
+              <pre className="rounded-sm bg-raised p-4 font-mono text-[13px]/6 whitespace-pre-wrap text-primary">
+                {previewHtml}
+              </pre>
             )}
+          </div>
+          {/* Floating pill toolbar */}
+          <div className="sticky bottom-6 flex justify-center">
+            <div className="flex items-center rounded-full border border-border bg-surface shadow-sm">
+              <button
+                type="button"
+                onClick={() =>
+                  setPreviewMode(
+                    previewMode === 'rendered' ? 'source' : 'rendered',
+                  )
+                }
+                className="rounded-full p-2 text-secondary transition-colors hover:text-primary"
+              >
+                {previewMode === 'rendered' ? (
+                  <Eye className="size-3.5" strokeWidth={1.8} />
+                ) : (
+                  <CodeXml className="size-3.5" strokeWidth={1.8} />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
