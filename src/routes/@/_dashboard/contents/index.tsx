@@ -157,7 +157,12 @@ function PostsList() {
     navigate({
       to: '/@/editor/$cid',
       params: { cid },
-      search: { preview: 'rendered' },
+      search: {
+        preview: 'rendered',
+        pretty: undefined,
+        format: true,
+        highlight: true,
+      },
     })
   }
 
@@ -227,7 +232,12 @@ function PostsList() {
                     <Link
                       to="/@/editor/$cid"
                       params={{ cid: post.cid }}
-                      search={{ preview: 'rendered' }}
+                      search={{
+                        preview: 'rendered',
+                        pretty: undefined,
+                        format: true,
+                        highlight: true,
+                      }}
                       className="text-secondary hover:text-primary"
                     >
                       Edit

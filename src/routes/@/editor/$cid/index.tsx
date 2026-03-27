@@ -32,6 +32,11 @@ const DEFAULT_SPLIT = 0.5
 const MIN_SPLIT = 0.25
 const MAX_SPLIT = 0.75
 
+function parseActiveSearch(value: unknown): boolean | undefined {
+  if (value === true || value === 'true') return true
+  return undefined
+}
+
 // --- Server functions ---
 
 const getPost = createServerFn({ method: 'GET' })
@@ -153,6 +158,9 @@ export const Route = createFileRoute('/@/editor/$cid/')({
       search.preview === 'rendered' || search.preview === 'source'
         ? search.preview
         : undefined,
+    pretty: parseActiveSearch(search.pretty),
+    format: parseActiveSearch(search.format),
+    highlight: parseActiveSearch(search.highlight),
   }),
   loader: ({ params }) => getPost({ data: { cid: params.cid } }),
   head: ({ loaderData }) => ({
@@ -198,11 +206,20 @@ function EditorPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const draggingRef = useRef(false)
   const previewMode = search.preview ?? 'rendered'
+  const prettyPrint = search.pretty === true
+  const formatHtml = search.format === true
+  const syntaxHighlight = search.highlight === true
 
   useEffect(() => {
     if (search.preview) return
     navigate({
-      search: (prev) => ({ ...prev, preview: 'rendered' }),
+      search: (prev) => ({
+        ...prev,
+        preview: 'rendered',
+        pretty: undefined,
+        format: true,
+        highlight: true,
+      }),
       replace: true,
     })
   }, [navigate, search.preview])
@@ -465,7 +482,39 @@ function EditorPage() {
                 )}
               </div>
             ) : (
-              <HtmlSourceView html={previewHtml} />
+              <HtmlSourceView
+                html={previewHtml}
+                prettyPrint={prettyPrint}
+                formatHtml={formatHtml}
+                syntaxHighlight={syntaxHighlight}
+                onPrettyPrintChange={(next) =>
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      pretty: next ? true : undefined,
+                    }),
+                    replace: true,
+                  })
+                }
+                onFormatHtmlChange={(next) =>
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      format: next ? true : undefined,
+                    }),
+                    replace: true,
+                  })
+                }
+                onSyntaxHighlightChange={(next) =>
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      highlight: next ? true : undefined,
+                    }),
+                    replace: true,
+                  })
+                }
+              />
             )}
           </div>
           {/* Floating pill toolbar */}
@@ -499,10 +548,25 @@ function EditorPage() {
   )
 }
 
-function HtmlSourceView({ html }: { html: string }) {
-  const [prettyPrint, setPrettyPrint] = useState(false)
-  const [formatHtml, setFormatHtml] = useState(false)
-  const [syntaxHighlight, setSyntaxHighlight] = useState(true)
+interface HtmlSourceViewProps {
+  html: string
+  prettyPrint: boolean
+  formatHtml: boolean
+  syntaxHighlight: boolean
+  onPrettyPrintChange: (next: boolean) => void
+  onFormatHtmlChange: (next: boolean) => void
+  onSyntaxHighlightChange: (next: boolean) => void
+}
+
+function HtmlSourceView({
+  html,
+  prettyPrint,
+  formatHtml,
+  syntaxHighlight,
+  onPrettyPrintChange,
+  onFormatHtmlChange,
+  onSyntaxHighlightChange,
+}: HtmlSourceViewProps) {
   const [isDark, setIsDark] = useState(() =>
     typeof document !== 'undefined'
       ? document.documentElement.classList.contains('dark')
@@ -586,7 +650,7 @@ function HtmlSourceView({ html }: { html: string }) {
           <input
             type="checkbox"
             checked={prettyPrint}
-            onChange={(e) => setPrettyPrint(e.target.checked)}
+            onChange={(e) => onPrettyPrintChange(e.target.checked)}
             className="size-3"
           />
           <span>Pretty Print</span>
@@ -595,7 +659,7 @@ function HtmlSourceView({ html }: { html: string }) {
           <input
             type="checkbox"
             checked={formatHtml}
-            onChange={(e) => setFormatHtml(e.target.checked)}
+            onChange={(e) => onFormatHtmlChange(e.target.checked)}
             className="size-3"
           />
           <span>Format HTML</span>
@@ -604,7 +668,7 @@ function HtmlSourceView({ html }: { html: string }) {
           <input
             type="checkbox"
             checked={syntaxHighlight}
-            onChange={(e) => setSyntaxHighlight(e.target.checked)}
+            onChange={(e) => onSyntaxHighlightChange(e.target.checked)}
             className="size-3"
           />
           <span>Syntax Highlight</span>
