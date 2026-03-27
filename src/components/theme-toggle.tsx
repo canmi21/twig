@@ -3,13 +3,21 @@
 import { useCallback } from 'react'
 import { Sun, Moon } from 'lucide-react'
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  className?: string
+}
+
+export function toggleDocumentTheme() {
+  const next = document.documentElement.classList.contains('dark')
+    ? 'light'
+    : 'dark'
+  document.documentElement.classList.toggle('dark', next === 'dark')
+  document.cookie = `theme=${next};path=/;max-age=31536000;SameSite=Lax`
+}
+
+export function ThemeToggle({ className }: ThemeToggleProps = {}) {
   const toggle = useCallback(() => {
-    const next = document.documentElement.classList.contains('dark')
-      ? 'light'
-      : 'dark'
-    document.documentElement.classList.toggle('dark', next === 'dark')
-    document.cookie = `theme=${next};path=/;max-age=31536000;SameSite=Lax`
+    toggleDocumentTheme()
   }, [])
 
   return (
@@ -17,13 +25,16 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="Toggle theme"
-      className="
-        absolute top-5 right-5 z-50
-        cursor-pointer rounded-full p-2
-        text-secondary
-        hover:text-primary
-        xl:fixed
-      "
+      className={
+        className ??
+        `
+          absolute top-5 right-5 z-50
+          cursor-pointer rounded-full p-2
+          text-secondary
+          hover:text-primary
+          xl:fixed
+        `
+      }
     >
       <span className="relative block size-4">
         <span

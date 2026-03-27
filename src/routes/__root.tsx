@@ -90,8 +90,16 @@ export const Route = createRootRouteWithContext<RootContext>()({
 
 function RootComponent() {
   const { initialTheme, canonicalUrl } = useRouteContext({ from: '__root__' })
+  const hideGlobalThemeToggle = new URL(canonicalUrl).pathname.startsWith(
+    '/@/editor/',
+  )
+
   return (
-    <RootDocument initialTheme={initialTheme} canonicalUrl={canonicalUrl}>
+    <RootDocument
+      initialTheme={initialTheme}
+      canonicalUrl={canonicalUrl}
+      hideGlobalThemeToggle={hideGlobalThemeToggle}
+    >
       <Outlet />
     </RootDocument>
   )
@@ -111,10 +119,12 @@ function RootDocument({
   children,
   initialTheme,
   canonicalUrl,
+  hideGlobalThemeToggle,
 }: Readonly<{
   children: ReactNode
   initialTheme: RootContext['initialTheme']
   canonicalUrl: string
+  hideGlobalThemeToggle: boolean
 }>) {
   return (
     <html
@@ -146,7 +156,7 @@ function RootDocument({
         />
       </head>
       <body className="bg-surface text-primary">
-        <ThemeToggle />
+        {hideGlobalThemeToggle ? null : <ThemeToggle />}
         {children}
         <Scripts />
       </body>

@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -29,7 +29,6 @@
   "dependencies": {
     "@mingcute/react": "1.4.1",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@shikijs/engine-javascript": "^4.0.2",
     "@shikijs/langs": "4.0.2",
     "@shikijs/rehype": "^4.0.2",
     "@shikijs/themes": "4.0.2",

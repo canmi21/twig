@@ -1,6 +1,6 @@
 /* src/lib/compiler/frontmatter.ts */
 
-import { stringify as stringifyYaml } from 'yaml'
+import { stringify as stringifyYaml, parse as parseYaml } from 'yaml'
 import type { Frontmatter } from './index'
 
 /** Serialize frontmatter to a YAML header block. Omits null/undefined fields. */
@@ -21,4 +21,17 @@ export function serializeFrontmatter(fm: Frontmatter): string {
   if (fm.published !== undefined) obj.published = fm.published
 
   return `---\n${stringifyYaml(obj).trimEnd()}\n---`
+}
+
+export function extractFrontmatterSource(source: string): {
+  frontmatter: Frontmatter
+  content: string
+} {
+  const match = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
+  if (!match) return { frontmatter: { title: '' }, content: source }
+
+  return {
+    frontmatter: parseYaml(match[1]) as Frontmatter,
+    content: match[2].trim(),
+  }
 }

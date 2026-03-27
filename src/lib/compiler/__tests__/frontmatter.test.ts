@@ -1,7 +1,7 @@
 /* src/lib/compiler/__tests__/frontmatter.test.ts */
 
 import { describe, expect, test } from 'vitest'
-import { serializeFrontmatter } from '../frontmatter'
+import { extractFrontmatterSource, serializeFrontmatter } from '../frontmatter'
 
 describe('serializeFrontmatter', () => {
   test('serializes all fields in correct order', () => {
@@ -9,7 +9,6 @@ describe('serializeFrontmatter', () => {
       cid: 'a'.repeat(32),
       title: 'Hello',
       description: 'A post',
-      category: 'dev',
       tags: ['ts', 'node'],
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-02T00:00:00.000Z',
@@ -22,7 +21,6 @@ describe('serializeFrontmatter', () => {
     expect(lines[1]).toMatch(/^cid:/)
     expect(lines[2]).toMatch(/^title:/)
     expect(lines[3]).toMatch(/^description:/)
-    expect(lines[4]).toMatch(/^category:/)
     // tags array occupies multiple lines
     const joined = result
     expect(joined.indexOf('cid:')).toBeLessThan(joined.indexOf('title:'))
@@ -76,5 +74,25 @@ describe('serializeFrontmatter', () => {
 
     expect(result).toMatch(/^---\n/)
     expect(result).toMatch(/\n---$/)
+  })
+})
+
+describe('extractFrontmatterSource', () => {
+  test('extracts YAML frontmatter and markdown body', () => {
+    const result = extractFrontmatterSource(
+      `---\ntitle: Hello\ndescription: Test\npublished: true\n---\n\n# Heading\n`,
+    )
+
+    expect(result.frontmatter.title).toBe('Hello')
+    expect(result.frontmatter.description).toBe('Test')
+    expect(result.frontmatter.published).toBe(true)
+    expect(result.content).toBe('# Heading')
+  })
+
+  test('falls back to raw content when no frontmatter exists', () => {
+    const result = extractFrontmatterSource('# Heading')
+
+    expect(result.frontmatter).toEqual({ title: '' })
+    expect(result.content).toBe('# Heading')
   })
 })

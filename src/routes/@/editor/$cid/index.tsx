@@ -14,17 +14,21 @@ import { getRequest } from '@tanstack/react-start/server'
 import { getDb, getCache } from '~/server/platform'
 import { getPostByCid, upsertPost, getAllPosts } from '~/lib/database/posts'
 import { writePostKv, deletePostKv, writePostIndex } from '~/lib/storage/kv'
-import { compile } from '~/lib/compiler/index'
 import { computeContentHash } from '~/lib/utils/hash'
 import { postSchema } from '~/lib/content/post-schema'
 import { verifyCfAccess } from '~/server/auth'
 import type { PostIndexEntry } from '~/lib/storage/kv'
-import { ArrowLeft, Settings, Eye, CodeXml } from 'lucide-react'
+import { ArrowLeft, Eye, CodeXml, Save, Sun, Moon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { ArticleHeader } from '~/components/post/article-header'
 import { PostShareActions } from '~/components/post/share-actions'
-import { ThemeToggle } from '~/components/theme-toggle'
+import { toggleDocumentTheme } from '~/components/theme-toggle'
+import {
+  serializeFrontmatter,
+  extractFrontmatterSource,
+} from '~/lib/compiler/frontmatter'
 import type { PreviewResult } from '~/lib/compiler/compile-preview'
+import type { Frontmatter } from '~/lib/compiler/index'
 import type { HtmlSourceHighlightResult } from '~/lib/shiki/html-source-highlighter'
 import type { ThemedToken } from 'shiki/core'
 
@@ -35,6 +39,44 @@ const MAX_SPLIT = 0.75
 function parseActiveSearch(value: unknown): boolean | undefined {
   if (value === true || value === 'true') return true
   return undefined
+}
+
+function buildEditorSource(frontmatter: Frontmatter, content: string) {
+  return `${serializeFrontmatter(frontmatter)}\n\n${content}`
+}
+
+function ToolbarThemeButton() {
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    const root = document.documentElement
+    const syncTheme = () => setIsDark(root.classList.contains('dark'))
+    const observer = new MutationObserver(syncTheme)
+
+    syncTheme()
+    observer.observe(root, {
+      attributeFilter: ['class'],
+      attributes: true,
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <button
+      type="button"
+      onClick={toggleDocumentTheme}
+      aria-label="Toggle theme"
+      title="Toggle theme"
+      className="rounded-full p-2 text-secondary transition-colors hover:text-primary"
+    >
+      {isDark ? (
+        <Sun className="size-3.5" strokeWidth={1.8} />
+      ) : (
+        <Moon className="size-3.5" strokeWidth={1.8} />
+      )}
+    </button>
+  )
 }
 
 // --- Server functions ---
@@ -51,12 +93,8 @@ const getPost = createServerFn({ method: 'GET' })
 interface SavePostData {
   cid: string
   slug: string
-  title: string
-  description: string
   category: string
-  tags: string
-  content: string
-  published: boolean
+  source: string
 }
 
 const savePost = createServerFn({ method: 'POST' })
@@ -67,20 +105,36 @@ const savePost = createServerFn({ method: 'POST' })
       if (!identity) throw new Error('Unauthorized')
     }
 
+    let extracted: ReturnType<typeof extractFrontmatterSource>
+    try {
+      extracted = extractFrontmatterSource(data.source)
+    } catch (error) {
+      return {
+        ok: false as const,
+        errors: [
+          error instanceof Error ? error.message : 'Frontmatter parse failed',
+        ],
+      }
+    }
+
+    if (extracted.frontmatter.cid && extracted.frontmatter.cid !== data.cid) {
+      return {
+        ok: false as const,
+        errors: ['cid in frontmatter does not match current post'],
+      }
+    }
+
     const parsed = postSchema.safeParse({
       slug: data.slug,
-      title: data.title,
-      description: data.description || undefined,
+      title: extracted.frontmatter.title,
+      description: extracted.frontmatter.description,
       category: data.category,
-      tags: data.tags
-        ? data.tags
-            .split(',')
-            .map((t: string) => t.trim())
-            .filter(Boolean)
-        : undefined,
-      content: data.content,
-      cid: data.cid,
-      published: data.published,
+      tags: extracted.frontmatter.tags,
+      content: extracted.content,
+      cid: extracted.frontmatter.cid ?? data.cid,
+      created_at: extracted.frontmatter.created_at,
+      updated_at: extracted.frontmatter.updated_at,
+      published: extracted.frontmatter.published,
     })
 
     if (!parsed.success) {
@@ -98,16 +152,18 @@ const savePost = createServerFn({ method: 'POST' })
     const oldPost = await getPostByCid(db, data.cid)
     const oldSlug = oldPost?.slug
 
-    const contentHash = computeContentHash(data.content)
+    const contentHash = computeContentHash(extracted.content)
     const result = await upsertPost(db, {
       slug: parsed.data.slug,
       title: parsed.data.title,
       description: parsed.data.description,
       category: parsed.data.category,
       tags: parsed.data.tags,
-      content: parsed.data.content,
+      content: extracted.content,
       contentHash,
       cid: parsed.data.cid,
+      createdAt: parsed.data.created_at,
+      updatedAt: parsed.data.updated_at,
       published: parsed.data.published,
     })
 
@@ -116,7 +172,10 @@ const savePost = createServerFn({ method: 'POST' })
     }
 
     if (parsed.data.published) {
-      const compiled = await compile(parsed.data.content)
+      const { compile } = await import('~/lib/compiler/index')
+      const compiled = await compile(extracted.content)
+      const savedPost = await getPostByCid(db, result.cid)
+
       await writePostKv(kv, result.slug, {
         frontmatter: {
           title: parsed.data.title,
@@ -124,7 +183,9 @@ const savePost = createServerFn({ method: 'POST' })
           category: parsed.data.category,
           tags: parsed.data.tags,
           cid: result.cid,
-          published: true,
+          created_at: savedPost?.createdAt ?? parsed.data.created_at,
+          updated_at: savedPost?.updatedAt ?? parsed.data.updated_at,
+          published: parsed.data.published,
         },
         html: compiled.html,
         toc: compiled.toc,
@@ -175,18 +236,25 @@ function EditorPage() {
   const post = Route.useLoaderData()
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
+  const initialFrontmatter: Frontmatter = {
+    cid: post.cid,
+    title: post.title,
+    description: post.description ?? undefined,
+    tags: post.tags ? (JSON.parse(post.tags) as string[]) : undefined,
+    created_at: post.createdAt,
+    updated_at: post.updatedAt,
+    published: post.published === 1,
+  }
 
   const [slug, setSlug] = useState(post.slug)
-  const [title, setTitle] = useState(post.title)
   const [category, setCategory] = useState(post.category ?? '')
-  const [tags, setTags] = useState(
-    post.tags ? (JSON.parse(post.tags) as string[]).join(', ') : '',
+  const [source, setSource] = useState(() =>
+    buildEditorSource(initialFrontmatter, post.content),
   )
-  const [description, setDescription] = useState(post.description ?? '')
-  const [content, setContent] = useState(post.content)
-  const [published, setPublished] = useState(post.published === 1)
-
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [parsedFrontmatter, setParsedFrontmatter] =
+    useState<Frontmatter>(initialFrontmatter)
+  const [parsedContent, setParsedContent] = useState(post.content)
+  const [sourceError, setSourceError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error'
@@ -209,6 +277,8 @@ function EditorPage() {
   const prettyPrint = search.pretty === true
   const formatHtml = search.format === true
   const syntaxHighlight = search.highlight === true
+  const previewTitle = parsedFrontmatter.title || post.title
+  const previewCreatedAt = parsedFrontmatter.created_at ?? post.createdAt
 
   useEffect(() => {
     if (search.preview) return
@@ -223,6 +293,21 @@ function EditorPage() {
       replace: true,
     })
   }, [navigate, search.preview])
+
+  useEffect(() => {
+    try {
+      const extracted = extractFrontmatterSource(source)
+      setParsedFrontmatter(extracted.frontmatter)
+      setParsedContent(extracted.content)
+      setSourceError(null)
+    } catch (error) {
+      setParsedFrontmatter({ title: '' })
+      setParsedContent('')
+      setSourceError(
+        error instanceof Error ? error.message : 'Frontmatter parse failed',
+      )
+    }
+  }, [source])
 
   function handleDragStart(e: PointerEvent) {
     e.preventDefault()
@@ -258,8 +343,14 @@ function EditorPage() {
     if (!compilerReady || !compiler) return
 
     const timer = setTimeout(async () => {
+      if (sourceError) {
+        setPreviewHtml('')
+        setCompileError(sourceError)
+        return
+      }
+
       try {
-        const result = await compiler.compilePreview(content)
+        const result = await compiler.compilePreview(parsedContent)
         setPreviewHtml(result.html)
         setCompileError(null)
       } catch (err) {
@@ -268,7 +359,7 @@ function EditorPage() {
     }, 400)
 
     return () => clearTimeout(timer)
-  }, [content, compilerReady])
+  }, [compilerReady, parsedContent, sourceError])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -279,7 +370,7 @@ function EditorPage() {
         const end = ta.selectionEnd
         const next =
           ta.value.substring(0, start) + '\t' + ta.value.substring(end)
-        setContent(next)
+        setSource(next)
         requestAnimationFrame(() => {
           ta.selectionStart = ta.selectionEnd = start + 1
         })
@@ -297,12 +388,8 @@ function EditorPage() {
         data: {
           cid: post.cid,
           slug,
-          title,
-          description,
           category,
-          tags,
-          content,
-          published,
+          source,
         },
       })
 
@@ -329,7 +416,7 @@ function EditorPage() {
   const rightPercent = `${(1 - splitRatio) * 100}%`
 
   return (
-    <div className="flex h-screen flex-col bg-surface">
+    <div className="relative flex h-screen flex-col bg-surface">
       {/* Toolbar */}
       <header className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
         <Link
@@ -339,30 +426,6 @@ function EditorPage() {
           <ArrowLeft className="size-3.5" strokeWidth={1.8} />
         </Link>
         <div className="flex-1" />
-        <button
-          type="button"
-          onClick={() => setSettingsOpen(!settingsOpen)}
-          className={`rounded-sm p-1.5 transition-colors ${settingsOpen ? 'bg-raised text-primary' : 'text-secondary hover:bg-raised hover:text-primary'}`}
-        >
-          <Settings className="size-3.5" strokeWidth={1.8} />
-        </button>
-        <div className="mx-1 h-4 w-px bg-border" />
-        <label className="flex shrink-0 items-center gap-1.5 text-xs">
-          <input
-            type="checkbox"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-          />
-          <span className="text-secondary">Publish</span>
-        </label>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="ml-1 shrink-0 rounded-sm bg-primary px-3 py-1 text-xs text-surface disabled:opacity-50"
-        >
-          {saving ? 'Saving...' : 'Save'}
-        </button>
         {feedback && (
           <span
             className={`shrink-0 text-xs ${
@@ -374,51 +437,7 @@ function EditorPage() {
             {feedback.message}
           </span>
         )}
-        <ThemeToggle />
       </header>
-
-      {/* Settings panel */}
-      {settingsOpen && (
-        <div className="shrink-0 border-b border-border px-4 py-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title"
-              className={`${inputClass} min-w-0 flex-1`}
-            />
-            <input
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder="slug"
-              className={`${inputClass} w-36`}
-            />
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="category"
-              className={`${inputClass} w-28`}
-            />
-            <input
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="tags"
-              className={`${inputClass} w-40`}
-            />
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description"
-              className={`${inputClass} min-w-0 flex-1`}
-            />
-            <span className="shrink-0 text-xs text-tertiary">
-              {post.createdAt}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Editor + Preview with resizable split */}
       <div ref={containerRef} className="flex min-h-0 flex-1">
@@ -427,9 +446,23 @@ function EditorPage() {
           className="flex min-w-0 flex-col overflow-hidden"
           style={{ width: leftPercent }}
         >
+          <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
+            <input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="slug"
+              className={`${inputClass} min-w-0 flex-1`}
+            />
+            <input
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="category"
+              className={`${inputClass} w-28 shrink-0`}
+            />
+          </div>
           <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
             onKeyDown={handleKeyDown}
             className="min-h-0 flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-primary outline-none"
             spellCheck={false}
@@ -462,8 +495,8 @@ function EditorPage() {
             {previewMode === 'rendered' ? (
               <div className="mx-auto max-w-180 px-5 pt-4 pb-24">
                 <ArticleHeader
-                  title={title}
-                  createdAt={post.createdAt}
+                  title={previewTitle}
+                  createdAt={previewCreatedAt}
                   html={previewHtml}
                 >
                   <PostShareActions />
@@ -519,7 +552,18 @@ function EditorPage() {
           </div>
           {/* Floating pill toolbar */}
           <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
-            <div className="pointer-events-auto flex items-center rounded-full border border-border bg-surface shadow-sm">
+            <div className="pointer-events-auto flex items-center gap-px rounded-full border border-border bg-surface px-0.5 shadow-sm">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                aria-label="Save"
+                title={saving ? 'Saving...' : 'Save'}
+                className="rounded-full p-2 text-secondary transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Save className="size-3.5" strokeWidth={1.8} />
+              </button>
+              <ToolbarThemeButton />
               <button
                 type="button"
                 onClick={() =>
