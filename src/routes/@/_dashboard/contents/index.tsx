@@ -154,7 +154,11 @@ function PostsList() {
 
   async function handleNewPost() {
     const { cid } = await createDraft()
-    navigate({ to: '/@/editor/$cid', params: { cid } })
+    navigate({
+      to: '/@/editor/$cid',
+      params: { cid },
+      search: { preview: 'rendered' },
+    })
   }
 
   async function handleToggle(cid: string, current: number) {
@@ -223,6 +227,7 @@ function PostsList() {
                     <Link
                       to="/@/editor/$cid"
                       params={{ cid: post.cid }}
+                      search={{ preview: 'rendered' }}
                       className="text-secondary hover:text-primary"
                     >
                       Edit

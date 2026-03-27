@@ -145,6 +145,12 @@ const savePost = createServerFn({ method: 'POST' })
 // --- Route ---
 
 export const Route = createFileRoute('/@/editor/$cid/')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    preview:
+      search.preview === 'rendered' || search.preview === 'source'
+        ? search.preview
+        : undefined,
+  }),
   loader: ({ params }) => getPost({ data: { cid: params.cid } }),
   head: ({ loaderData }) => ({
     meta: loaderData ? [{ title: `Editor - ${loaderData.title}` }] : [],
@@ -156,6 +162,8 @@ export const Route = createFileRoute('/@/editor/$cid/')({
 
 function EditorPage() {
   const post = Route.useLoaderData()
+  const search = Route.useSearch()
+  const navigate = Route.useNavigate()
 
   const [slug, setSlug] = useState(post.slug)
   const [title, setTitle] = useState(post.title)
@@ -167,9 +175,6 @@ function EditorPage() {
   const [content, setContent] = useState(post.content)
   const [published, setPublished] = useState(post.published === 1)
 
-  const [previewMode, setPreviewMode] = useState<'rendered' | 'source'>(
-    'rendered',
-  )
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState<{
@@ -189,6 +194,15 @@ function EditorPage() {
   const [splitRatio, setSplitRatio] = useState(DEFAULT_SPLIT)
   const containerRef = useRef<HTMLDivElement>(null)
   const draggingRef = useRef(false)
+  const previewMode = search.preview ?? 'rendered'
+
+  useEffect(() => {
+    if (search.preview) return
+    navigate({
+      search: (prev) => ({ ...prev, preview: 'rendered' }),
+      replace: true,
+    })
+  }, [navigate, search.preview])
 
   function handleDragStart(e: PointerEvent) {
     e.preventDefault()
@@ -403,14 +417,15 @@ function EditorPage() {
         </div>
 
         {/* Drag handle — fixed hitbox, visual line animates inside */}
-        <div
-          className="group flex w-2 shrink-0 cursor-col-resize items-stretch justify-center"
-          onPointerDown={handleDragStart}
-          onPointerMove={handleDragMove}
-          onPointerUp={handleDragEnd}
-        >
+        <div className="group relative w-px shrink-0 self-stretch">
+          <div
+            className="absolute -inset-x-1 inset-y-0 cursor-col-resize"
+            onPointerDown={handleDragStart}
+            onPointerMove={handleDragMove}
+            onPointerUp={handleDragEnd}
+          />
           <motion.div
-            className="bg-border group-hover:bg-secondary group-active:bg-secondary"
+            className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 bg-border group-hover:bg-secondary group-active:bg-secondary"
             initial={false}
             animate={{ width: 1 }}
             whileHover={{ width: 3 }}
@@ -456,9 +471,14 @@ function EditorPage() {
               <button
                 type="button"
                 onClick={() =>
-                  setPreviewMode(
-                    previewMode === 'rendered' ? 'source' : 'rendered',
-                  )
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      preview:
+                        previewMode === 'rendered' ? 'source' : 'rendered',
+                    }),
+                    replace: true,
+                  })
                 }
                 className="rounded-full p-2 text-secondary transition-colors hover:text-primary"
               >
@@ -479,19 +499,71 @@ function EditorPage() {
 function HtmlSourceView({ html }: { html: string }) {
   const lines = html.split('\n')
   const gutterWidth = String(lines.length).length
+  const [prettyPrint, setPrettyPrint] = useState(false)
+  const gutterStyle = { width: `calc(${gutterWidth}ch + 0.5rem)` }
 
   return (
-    <div className="flex h-full font-mono text-[13px]/6">
-      <div className="shrink-0 border-r border-border bg-raised px-3 py-4 text-right text-tertiary select-none">
-        {/* Line numbers are a stable ordered sequence — index keys are correct */}
-        {lines.map((_, i) => (
-          // oxlint-disable-next-line react/no-array-index-key
-          <div key={i}>{String(i + 1).padStart(gutterWidth)}</div>
-        ))}
+    <div className="flex h-full min-h-0 flex-col font-mono text-[13px]/6">
+      <div className="flex shrink-0 items-center border-b border-border bg-surface px-3 py-1.5">
+        <label className="flex items-center gap-2 text-[10px] text-secondary select-none">
+          <input
+            type="checkbox"
+            checked={prettyPrint}
+            onChange={(e) => setPrettyPrint(e.target.checked)}
+            className="size-3"
+          />
+          <span>Pretty Print</span>
+        </label>
       </div>
-      <pre className="min-w-0 flex-1 overflow-x-auto p-4 whitespace-pre text-primary">
-        {html}
-      </pre>
+      <div className="min-h-0 flex-1 overflow-auto">
+        {prettyPrint ? (
+          <div className="min-h-full">
+            {lines.map((line, i) => {
+              const edgePadding =
+                (i === 0 ? 'pt-4 ' : '') +
+                (i === lines.length - 1 ? 'pb-4' : '')
+
+              return (
+                <div
+                  // oxlint-disable-next-line react/no-array-index-key
+                  key={i}
+                  className="grid"
+                  style={{
+                    gridTemplateColumns: `calc(${gutterWidth}ch + 0.5rem) minmax(0, 1fr)`,
+                  }}
+                >
+                  <div
+                    className={`border-r border-border bg-raised pr-1 text-right text-tertiary tabular-nums select-none ${edgePadding}`}
+                  >
+                    {String(i + 1)}
+                  </div>
+                  <div
+                    className={`min-w-0 px-4 break-all whitespace-pre-wrap text-primary ${edgePadding}`}
+                  >
+                    {line || '\u00a0'}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="flex min-h-full items-stretch">
+            <div
+              className="shrink-0 border-r border-border bg-raised py-4 pr-1 text-right text-tertiary tabular-nums select-none"
+              style={gutterStyle}
+            >
+              {/* Line numbers are a stable ordered sequence — index keys are correct */}
+              {lines.map((_, i) => (
+                // oxlint-disable-next-line react/no-array-index-key
+                <div key={i}>{String(i + 1)}</div>
+              ))}
+            </div>
+            <pre className="min-w-0 flex-1 overflow-x-auto p-4 whitespace-pre text-primary">
+              {html}
+            </pre>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
