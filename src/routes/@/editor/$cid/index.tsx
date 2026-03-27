@@ -390,7 +390,7 @@ function EditorPage() {
       <div ref={containerRef} className="flex min-h-0 flex-1">
         {/* Left: textarea */}
         <div
-          className="flex flex-col overflow-hidden"
+          className="flex min-w-0 flex-col overflow-hidden"
           style={{ width: leftPercent }}
         >
           <textarea
@@ -402,51 +402,57 @@ function EditorPage() {
           />
         </div>
 
-        {/* Drag handle */}
-        <motion.div
-          className="shrink-0 cursor-col-resize bg-border"
-          initial={{ width: 1 }}
-          whileHover={{ width: 3 }}
-          whileTap={{ width: 3 }}
-          transition={{ duration: 0.15 }}
+        {/* Drag handle — fixed hitbox, visual line animates inside */}
+        <div
+          className="group flex w-2 shrink-0 cursor-col-resize items-stretch justify-center"
           onPointerDown={handleDragStart}
           onPointerMove={handleDragMove}
           onPointerUp={handleDragEnd}
-        />
+        >
+          <motion.div
+            className="bg-border group-hover:bg-secondary group-active:bg-secondary"
+            initial={false}
+            animate={{ width: 1 }}
+            whileHover={{ width: 3 }}
+            transition={{ duration: 0.15 }}
+          />
+        </div>
 
         {/* Right: preview */}
         <div
-          className="relative overflow-y-auto"
+          className="relative min-w-0 overflow-hidden"
           style={{ width: rightPercent }}
         >
-          <div className="mx-auto max-w-180 px-5 pt-14 pb-24">
-            <ArticleHeader
-              title={title}
-              createdAt={post.createdAt}
-              html={previewHtml}
-            >
-              <PostShareActions />
-            </ArticleHeader>
-            {!compilerReady ? null : compileError ? (
-              <div className="rounded-sm border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-                {compileError}
+          <div className="h-full overflow-y-auto">
+            {previewMode === 'rendered' ? (
+              <div className="mx-auto max-w-180 px-5 pt-14 pb-24">
+                <ArticleHeader
+                  title={title}
+                  createdAt={post.createdAt}
+                  html={previewHtml}
+                >
+                  <PostShareActions />
+                </ArticleHeader>
+                {!compilerReady ? null : compileError ? (
+                  <div className="rounded-sm border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+                    {compileError}
+                  </div>
+                ) : (
+                  // Content authored by authenticated admin, compiled by our remark/rehype pipeline
+                  <div
+                    // eslint-disable-next-line better-tailwindcss/no-unknown-classes
+                    className="article"
+                    dangerouslySetInnerHTML={{ __html: previewHtml }}
+                  />
+                )}
               </div>
-            ) : previewMode === 'rendered' ? (
-              // Content authored by authenticated admin, compiled by our remark/rehype pipeline
-              <div
-                // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-                className="article"
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-              />
             ) : (
-              <pre className="rounded-sm bg-raised p-4 font-mono text-[13px]/6 whitespace-pre-wrap text-primary">
-                {previewHtml}
-              </pre>
+              <HtmlSourceView html={previewHtml} />
             )}
           </div>
           {/* Floating pill toolbar */}
-          <div className="sticky bottom-6 flex justify-center">
-            <div className="flex items-center rounded-full border border-border bg-surface shadow-sm">
+          <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
+            <div className="pointer-events-auto flex items-center rounded-full border border-border bg-surface shadow-sm">
               <button
                 type="button"
                 onClick={() =>
@@ -466,6 +472,26 @@ function EditorPage() {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function HtmlSourceView({ html }: { html: string }) {
+  const lines = html.split('\n')
+  const gutterWidth = String(lines.length).length
+
+  return (
+    <div className="flex h-full font-mono text-[13px]/6">
+      <div className="shrink-0 border-r border-border bg-raised px-3 py-4 text-right text-tertiary select-none">
+        {/* Line numbers are a stable ordered sequence — index keys are correct */}
+        {lines.map((_, i) => (
+          // oxlint-disable-next-line react/no-array-index-key
+          <div key={i}>{String(i + 1).padStart(gutterWidth)}</div>
+        ))}
+      </div>
+      <pre className="min-w-0 flex-1 overflow-x-auto p-4 whitespace-pre text-primary">
+        {html}
+      </pre>
     </div>
   )
 }
