@@ -460,7 +460,7 @@ function EditorPage() {
         >
           <div className="h-full overflow-y-auto">
             {previewMode === 'rendered' ? (
-              <div className="mx-auto max-w-180 px-5 pt-14 pb-24">
+              <div className="mx-auto max-w-180 px-5 pt-4 pb-24">
                 <ArticleHeader
                   title={title}
                   createdAt={post.createdAt}
