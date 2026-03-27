@@ -6,6 +6,7 @@ import {
   useRef,
   useCallback,
   type PointerEvent,
+  type CSSProperties,
 } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -24,6 +25,8 @@ import { ArticleHeader } from '~/components/post/article-header'
 import { PostShareActions } from '~/components/post/share-actions'
 import { ThemeToggle } from '~/components/theme-toggle'
 import type { PreviewResult } from '~/lib/compiler/compile-preview'
+import type { HtmlSourceHighlightResult } from '~/lib/shiki/html-source-highlighter'
+import type { ThemedToken } from 'shiki/core'
 
 const DEFAULT_SPLIT = 0.5
 const MIN_SPLIT = 0.25
@@ -500,11 +503,57 @@ function HtmlSourceView({ html }: { html: string }) {
   const lines = html.split('\n')
   const gutterWidth = String(lines.length).length
   const [prettyPrint, setPrettyPrint] = useState(false)
+  const [syntaxHighlight, setSyntaxHighlight] = useState(true)
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== 'undefined'
+      ? document.documentElement.classList.contains('dark')
+      : false,
+  )
+  const [highlighted, setHighlighted] =
+    useState<HtmlSourceHighlightResult | null>(null)
   const gutterStyle = { width: `calc(${gutterWidth}ch + 0.5rem)` }
+
+  useEffect(() => {
+    const root = document.documentElement
+    const syncTheme = () => setIsDark(root.classList.contains('dark'))
+    const observer = new MutationObserver(syncTheme)
+
+    syncTheme()
+    observer.observe(root, {
+      attributeFilter: ['class'],
+      attributes: true,
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!syntaxHighlight) {
+      setHighlighted(null)
+      return
+    }
+
+    let cancelled = false
+
+    import('~/lib/shiki/html-source-highlighter')
+      .then((mod) =>
+        mod.highlightHtmlSource(html, isDark ? 'github-dark' : 'github-light'),
+      )
+      .then((result) => {
+        if (!cancelled) setHighlighted(result)
+      })
+      .catch(() => {
+        if (!cancelled) setHighlighted(null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [html, isDark, syntaxHighlight])
 
   return (
     <div className="flex h-full min-h-0 flex-col font-mono text-[13px]/6">
-      <div className="flex shrink-0 items-center border-b border-border bg-surface px-3 py-1.5">
+      <div className="flex shrink-0 items-center gap-4 border-b border-border bg-surface px-3 py-1.5">
         <label className="flex items-center gap-2 text-[10px] text-secondary select-none">
           <input
             type="checkbox"
@@ -514,56 +563,80 @@ function HtmlSourceView({ html }: { html: string }) {
           />
           <span>Pretty Print</span>
         </label>
+        <label className="flex items-center gap-2 text-[10px] text-secondary select-none">
+          <input
+            type="checkbox"
+            checked={syntaxHighlight}
+            onChange={(e) => setSyntaxHighlight(e.target.checked)}
+            className="size-3"
+          />
+          <span>Syntax Highlight</span>
+        </label>
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
-        {prettyPrint ? (
-          <div className="min-h-full">
-            {lines.map((line, i) => {
-              const edgePadding =
-                (i === 0 ? 'pt-4 ' : '') +
-                (i === lines.length - 1 ? 'pb-4' : '')
+        <div className="min-h-full">
+          {lines.map((line, i) => {
+            const edgePadding =
+              (i === 0 ? 'pt-4 ' : '') + (i === lines.length - 1 ? 'pb-4' : '')
 
-              return (
-                <div
-                  // oxlint-disable-next-line react/no-array-index-key
-                  key={i}
-                  className="grid"
-                  style={{
-                    gridTemplateColumns: `calc(${gutterWidth}ch + 0.5rem) minmax(0, 1fr)`,
-                  }}
-                >
-                  <div
-                    className={`border-r border-border bg-raised pr-1 text-right text-tertiary tabular-nums select-none ${edgePadding}`}
-                  >
-                    {String(i + 1)}
-                  </div>
-                  <div
-                    className={`min-w-0 px-4 break-all whitespace-pre-wrap text-primary ${edgePadding}`}
-                  >
-                    {line || '\u00a0'}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="flex min-h-full items-stretch">
-            <div
-              className="shrink-0 border-r border-border bg-raised py-4 pr-1 text-right text-tertiary tabular-nums select-none"
-              style={gutterStyle}
-            >
-              {/* Line numbers are a stable ordered sequence — index keys are correct */}
-              {lines.map((_, i) => (
+            return (
+              <div
                 // oxlint-disable-next-line react/no-array-index-key
-                <div key={i}>{String(i + 1)}</div>
-              ))}
-            </div>
-            <pre className="min-w-0 flex-1 overflow-x-auto p-4 whitespace-pre text-primary">
-              {html}
-            </pre>
-          </div>
-        )}
+                key={i}
+                className="grid"
+                style={{
+                  gridTemplateColumns: `calc(${gutterWidth}ch + 0.5rem) minmax(0, 1fr)`,
+                }}
+              >
+                <div
+                  className={`border-r border-border bg-raised pr-1 text-right text-tertiary tabular-nums select-none ${edgePadding}`}
+                  style={gutterStyle}
+                >
+                  {String(i + 1)}
+                </div>
+                <div
+                  className={`min-w-0 px-4 text-primary ${prettyPrint ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'} ${edgePadding}`}
+                  style={
+                    highlighted?.fg
+                      ? ({ color: highlighted.fg } as CSSProperties)
+                      : undefined
+                  }
+                >
+                  {syntaxHighlight && highlighted
+                    ? renderHighlightedLine(highlighted.tokens[i] ?? [])
+                    : line || '\u00a0'}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
+}
+
+function renderHighlightedLine(tokens: ThemedToken[]) {
+  if (tokens.length === 0) return '\u00a0'
+
+  return tokens.map((token, i) => (
+    // oxlint-disable-next-line react/no-array-index-key
+    <span key={i} style={getTokenStyle(token)}>
+      {token.content}
+    </span>
+  ))
+}
+
+function getTokenStyle(token: ThemedToken): CSSProperties {
+  if (token.htmlStyle) return token.htmlStyle
+
+  return {
+    backgroundColor: token.bgColor,
+    color: token.color,
+    fontStyle:
+      token.fontStyle && (token.fontStyle & 1) !== 0 ? 'italic' : undefined,
+    fontWeight:
+      token.fontStyle && (token.fontStyle & 2) !== 0 ? '700' : undefined,
+    textDecoration:
+      token.fontStyle && (token.fontStyle & 4) !== 0 ? 'underline' : undefined,
+  }
 }
