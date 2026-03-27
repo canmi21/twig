@@ -676,9 +676,17 @@ function HtmlSourceView({
       </div>
       <div className="min-h-0 flex-1 overflow-auto">
         <div className="min-h-full">
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns: `calc(${gutterWidth}ch + 0.5rem) minmax(0, 1fr)`,
+            }}
+          >
+            <div className="h-1 border-r border-border bg-raised" />
+            <div />
+          </div>
           {lines.map((line, i) => {
-            const edgePadding =
-              (i === 0 ? 'pt-4 ' : '') + (i === lines.length - 1 ? 'pb-4' : '')
+            const edgePadding = i === lines.length - 1 ? 'pb-4' : ''
 
             return (
               <div
