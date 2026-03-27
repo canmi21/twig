@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -40,6 +40,7 @@
     "jose": "^6.2.2",
     "lucide-react": "^1.0.1",
     "motion": "^12.38.0",
+    "prettier": "3.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "rehype-stringify": "^10.0.1",
@@ -75,7 +76,6 @@
     "miniflare": "^4.20260317.1",
     "oxfmt": "^0.40.0",
     "oxlint": "^1.56.0",
-    "prettier": "^3.8.1",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1",

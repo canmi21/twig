@@ -500,17 +500,20 @@ function EditorPage() {
 }
 
 function HtmlSourceView({ html }: { html: string }) {
-  const lines = html.split('\n')
-  const gutterWidth = String(lines.length).length
   const [prettyPrint, setPrettyPrint] = useState(false)
+  const [formatHtml, setFormatHtml] = useState(false)
   const [syntaxHighlight, setSyntaxHighlight] = useState(true)
   const [isDark, setIsDark] = useState(() =>
     typeof document !== 'undefined'
       ? document.documentElement.classList.contains('dark')
       : false,
   )
+  const [formattedHtml, setFormattedHtml] = useState<string | null>(null)
   const [highlighted, setHighlighted] =
     useState<HtmlSourceHighlightResult | null>(null)
+  const sourceHtml = formattedHtml ?? html
+  const lines = sourceHtml.split('\n')
+  const gutterWidth = String(lines.length).length
   const gutterStyle = { width: `calc(${gutterWidth}ch + 0.5rem)` }
 
   useEffect(() => {
@@ -528,6 +531,28 @@ function HtmlSourceView({ html }: { html: string }) {
   }, [])
 
   useEffect(() => {
+    if (!formatHtml) {
+      setFormattedHtml(null)
+      return
+    }
+
+    let cancelled = false
+
+    import('~/lib/prettier/html-source-formatter')
+      .then((mod) => mod.formatHtmlSource(html))
+      .then((result) => {
+        if (!cancelled) setFormattedHtml(result)
+      })
+      .catch(() => {
+        if (!cancelled) setFormattedHtml(null)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [formatHtml, html])
+
+  useEffect(() => {
     if (!syntaxHighlight) {
       setHighlighted(null)
       return
@@ -537,7 +562,10 @@ function HtmlSourceView({ html }: { html: string }) {
 
     import('~/lib/shiki/html-source-highlighter')
       .then((mod) =>
-        mod.highlightHtmlSource(html, isDark ? 'github-dark' : 'github-light'),
+        mod.highlightHtmlSource(
+          sourceHtml,
+          isDark ? 'github-dark' : 'github-light',
+        ),
       )
       .then((result) => {
         if (!cancelled) setHighlighted(result)
@@ -549,7 +577,7 @@ function HtmlSourceView({ html }: { html: string }) {
     return () => {
       cancelled = true
     }
-  }, [html, isDark, syntaxHighlight])
+  }, [isDark, sourceHtml, syntaxHighlight])
 
   return (
     <div className="flex h-full min-h-0 flex-col font-mono text-[13px]/6">
@@ -562,6 +590,15 @@ function HtmlSourceView({ html }: { html: string }) {
             className="size-3"
           />
           <span>Pretty Print</span>
+        </label>
+        <label className="flex items-center gap-2 text-[10px] text-secondary select-none">
+          <input
+            type="checkbox"
+            checked={formatHtml}
+            onChange={(e) => setFormatHtml(e.target.checked)}
+            className="size-3"
+          />
+          <span>Format HTML</span>
         </label>
         <label className="flex items-center gap-2 text-[10px] text-secondary select-none">
           <input
