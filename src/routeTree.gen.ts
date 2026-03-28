@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapIndexRouteImport } from './routes/sitemap/index'
 import { Route as RssIndexRouteImport } from './routes/rss/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as LogoutIndexRouteImport } from './routes/logout/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as FeedIndexRouteImport } from './routes/feed/index'
 import { Route as AtDashboardRouteRouteImport } from './routes/@/_dashboard/route'
@@ -28,6 +29,7 @@ import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
 import { Route as AtEditorCidIndexRouteImport } from './routes/@/editor/$cid/index'
+import { Route as AtDashboardUsersIndexRouteImport } from './routes/@/_dashboard/users/index'
 import { Route as AtDashboardContentsIndexRouteImport } from './routes/@/_dashboard/contents/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -73,6 +75,11 @@ const RssIndexRoute = RssIndexRouteImport.update({
 const PostsIndexRoute = PostsIndexRouteImport.update({
   id: '/posts/',
   path: '/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoutIndexRoute = LogoutIndexRouteImport.update({
+  id: '/logout/',
+  path: '/logout/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -124,6 +131,11 @@ const AtEditorCidIndexRoute = AtEditorCidIndexRouteImport.update({
   path: '/editor/$cid/',
   getParentRoute: () => AtRouteRoute,
 } as any)
+const AtDashboardUsersIndexRoute = AtDashboardUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AtDashboardRouteRoute,
+} as any)
 const AtDashboardContentsIndexRoute =
   AtDashboardContentsIndexRouteImport.update({
     id: '/contents/',
@@ -140,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/feed/': typeof FeedIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/logout/': typeof LogoutIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
@@ -149,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/@/': typeof AtDashboardIndexRoute
   '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/contents/': typeof AtDashboardContentsIndexRoute
+  '/@/users/': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
@@ -161,6 +175,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/feed': typeof FeedIndexRoute
   '/login': typeof LoginIndexRoute
+  '/logout': typeof LogoutIndexRoute
   '/posts': typeof PostsIndexRoute
   '/rss': typeof RssIndexRoute
   '/sitemap': typeof SitemapIndexRoute
@@ -169,6 +184,7 @@ export interface FileRoutesByTo {
   '/api/object/$': typeof ApiObjectSplatRoute
   '/login/verify': typeof LoginVerifyIndexRoute
   '/@/contents': typeof AtDashboardContentsIndexRoute
+  '/@/users': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
 }
@@ -183,6 +199,7 @@ export interface FileRoutesById {
   '/@/_dashboard': typeof AtDashboardRouteRouteWithChildren
   '/feed/': typeof FeedIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/logout/': typeof LogoutIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
@@ -192,6 +209,7 @@ export interface FileRoutesById {
   '/@/_dashboard/': typeof AtDashboardIndexRoute
   '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/_dashboard/contents/': typeof AtDashboardContentsIndexRoute
+  '/@/_dashboard/users/': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
 }
@@ -206,6 +224,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/feed/'
     | '/login/'
+    | '/logout/'
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
@@ -215,6 +234,7 @@ export interface FileRouteTypes {
     | '/@/'
     | '/login/verify/'
     | '/@/contents/'
+    | '/@/users/'
     | '/@/editor/$cid/'
     | '/posts/$category/$slug/'
   fileRoutesByTo: FileRoutesByTo
@@ -227,6 +247,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/feed'
     | '/login'
+    | '/logout'
     | '/posts'
     | '/rss'
     | '/sitemap'
@@ -235,6 +256,7 @@ export interface FileRouteTypes {
     | '/api/object/$'
     | '/login/verify'
     | '/@/contents'
+    | '/@/users'
     | '/@/editor/$cid'
     | '/posts/$category/$slug'
   id:
@@ -248,6 +270,7 @@ export interface FileRouteTypes {
     | '/@/_dashboard'
     | '/feed/'
     | '/login/'
+    | '/logout/'
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
@@ -257,6 +280,7 @@ export interface FileRouteTypes {
     | '/@/_dashboard/'
     | '/login/verify/'
     | '/@/_dashboard/contents/'
+    | '/@/_dashboard/users/'
     | '/@/editor/$cid/'
     | '/posts/$category/$slug/'
   fileRoutesById: FileRoutesById
@@ -270,6 +294,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   FeedIndexRoute: typeof FeedIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  LogoutIndexRoute: typeof LogoutIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   RssIndexRoute: typeof RssIndexRoute
   SitemapIndexRoute: typeof SitemapIndexRoute
@@ -345,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/logout/': {
+      id: '/logout/'
+      path: '/logout'
+      fullPath: '/logout/'
+      preLoaderRoute: typeof LogoutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -415,6 +447,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtEditorCidIndexRouteImport
       parentRoute: typeof AtRouteRoute
     }
+    '/@/_dashboard/users/': {
+      id: '/@/_dashboard/users/'
+      path: '/users'
+      fullPath: '/@/users/'
+      preLoaderRoute: typeof AtDashboardUsersIndexRouteImport
+      parentRoute: typeof AtDashboardRouteRoute
+    }
     '/@/_dashboard/contents/': {
       id: '/@/_dashboard/contents/'
       path: '/contents'
@@ -428,11 +467,13 @@ declare module '@tanstack/react-router' {
 interface AtDashboardRouteRouteChildren {
   AtDashboardIndexRoute: typeof AtDashboardIndexRoute
   AtDashboardContentsIndexRoute: typeof AtDashboardContentsIndexRoute
+  AtDashboardUsersIndexRoute: typeof AtDashboardUsersIndexRoute
 }
 
 const AtDashboardRouteRouteChildren: AtDashboardRouteRouteChildren = {
   AtDashboardIndexRoute: AtDashboardIndexRoute,
   AtDashboardContentsIndexRoute: AtDashboardContentsIndexRoute,
+  AtDashboardUsersIndexRoute: AtDashboardUsersIndexRoute,
 }
 
 const AtDashboardRouteRouteWithChildren =
@@ -460,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   FeedIndexRoute: FeedIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
+  LogoutIndexRoute: LogoutIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   RssIndexRoute: RssIndexRoute,
   SitemapIndexRoute: SitemapIndexRoute,

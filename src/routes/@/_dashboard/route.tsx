@@ -24,6 +24,16 @@ function DashboardLayout() {
           >
             Posts
           </Link>
+          <Link
+            to="/@/users"
+            className="block rounded-sm px-3 py-1.5 text-sm text-secondary hover:bg-raised hover:text-primary"
+            activeProps={{
+              className:
+                'block rounded-sm px-3 py-1.5 text-sm bg-raised text-primary font-medium',
+            }}
+          >
+            Users
+          </Link>
         </nav>
         <div className="border-t border-border px-2 py-3">
           <Link

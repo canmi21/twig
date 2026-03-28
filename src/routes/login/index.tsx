@@ -2,7 +2,29 @@
 
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { eq } from 'drizzle-orm'
 import { authClient } from '~/lib/auth-client'
+import { user as userTable } from '~/lib/database/auth-schema'
+import { getDb, getPublicUrl } from '~/server/platform'
+
+const checkBanned = createServerFn({ method: 'POST' })
+  .inputValidator((input: { email: string }) => input)
+  .handler(async ({ data }) => {
+    const [row] = await getDb()
+      .select({ banned: userTable.banned })
+      .from(userTable)
+      .where(eq(userTable.email, data.email))
+      .limit(1)
+    if (row?.banned) {
+      const domain = getPublicUrl().replace(/^https?:\/\//, '')
+      return {
+        banned: true as const,
+        message: `This account has been suspended. If you believe this is a mistake, contact support@${domain}`,
+      }
+    }
+    return { banned: false as const }
+  })
 
 export const Route = createFileRoute('/login/')({
   component: LoginPage,
@@ -21,6 +43,11 @@ function LoginPage() {
     setLoading(true)
     setError(null)
     try {
+      const ban = await checkBanned({ data: { email } })
+      if (ban.banned) {
+        setError(ban.message)
+        return
+      }
       const result = await authClient.emailOtp.sendVerificationOtp({
         email,
         type: 'sign-in',

@@ -2,7 +2,7 @@
 
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { emailOTP } from 'better-auth/plugins'
+import { admin, emailOTP } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { Resend } from 'resend'
 import * as authSchema from '~/lib/database/auth-schema'
@@ -16,10 +16,18 @@ import {
   getEmailFromNoreply,
 } from './platform'
 
+const DEV_PORT = 26315
+
+function devTrustedOrigins(): string[] {
+  const hosts = ['localhost', '127.0.0.1', '[::1]']
+  return hosts.map((h) => `http://${h}:${DEV_PORT}`)
+}
+
 /** Create a Better Auth instance per request (D1 binding is request-scoped). */
 export function getAuth() {
   const resend = new Resend(getResendApiKey())
-  const baseURL = getPublicUrl()
+  const isDev = import.meta.env.DEV
+  const baseURL = isDev ? `http://localhost:${DEV_PORT}` : getPublicUrl()
   const fromNoreply = getEmailFromNoreply()
 
   return betterAuth({
@@ -28,21 +36,43 @@ export function getAuth() {
       schema: authSchema,
     }),
     baseURL,
+    trustedOrigins: isDev ? devTrustedOrigins() : [],
     secret: getBetterAuthSecret(),
     advanced: {
       database: {
         generateId: () => newCid(),
       },
     },
+    databaseHooks: {
+      user: {
+        create: {
+          async before(user) {
+            // First registered user becomes admin (bootstrap)
+            const db = getDb()
+            const existing = await db
+              .select({ id: authSchema.user.id })
+              .from(authSchema.user)
+              .limit(1)
+            if (existing.length === 0) {
+              return { data: { ...user, role: 'admin' } }
+            }
+            return { data: user }
+          },
+        },
+      },
+    },
     plugins: [
+      admin({ defaultRole: 'user' }),
       emailOTP({
         otpLength: 6,
         expiresIn: 300,
         async sendVerificationOTP({ email, otp, type }) {
+          const publicURL = getPublicUrl()
+          const domain = publicURL.replace(/^https?:\/\//, '')
           const verifyUrl = `${baseURL}/login/verify?email=${encodeURIComponent(email)}&code=${otp}`
 
           const subjects: Record<string, string> = {
-            'sign-in': `Sign in to ${SITE_TITLE}`,
+            'sign-in': `Sign in to ${domain}`,
             'email-verification': 'Verify your email',
             'forget-password': 'Reset your password',
           }
