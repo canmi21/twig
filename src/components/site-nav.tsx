@@ -38,10 +38,13 @@ export function SiteNav({ article }: SiteNavProps) {
   const lastScrollY = useRef(0)
   const wheelAnimating = useRef(false)
   const isMouseWheel = useRef(false)
+  const initAnimating = useRef(false)
+  const mountedAt = useRef(0)
 
   useEffect(() => {
     if (!article) return
     lastScrollY.current = window.scrollY
+    mountedAt.current = Date.now()
 
     function snapToNearest() {
       const cur = y.get()
@@ -78,6 +81,22 @@ export function SiteNav({ article }: SiteNavProps) {
       lastScrollY.current = sy
       if (Math.abs(delta) < 1) return
 
+      // First scroll after mount (e.g. browser jumping to hash):
+      // always animate fully to the direction, 300ms, then resume normal logic
+      if (mountedAt.current) {
+        mountedAt.current = 0
+        initAnimating.current = true
+        const target = delta > 0 ? -NAV_HEIGHT : 0
+        animate(y, target, {
+          duration: 0.5,
+          ease: [0.25, 0.1, 0.25, 1],
+          onComplete: () => {
+            initAnimating.current = false
+          },
+        })
+        return
+      }
+
       // Mouse wheel: 300ms animation
       if (isMouseWheel.current) {
         const target = delta > 0 ? -NAV_HEIGHT : 0
@@ -101,11 +120,12 @@ export function SiteNav({ article }: SiteNavProps) {
     }
 
     function onScrollEnd() {
-      // Mouse wheel animation handles its own completion
+      // Programmatic animations handle their own completion
       if (wheelAnimating.current) {
         wheelAnimating.current = false
         return
       }
+      if (initAnimating.current) return
       // Touchpad: snap to nearest panel using remaining momentum
       snapToNearest()
     }

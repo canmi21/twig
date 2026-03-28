@@ -40,7 +40,7 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
         <span
           className="
             absolute inset-0 inline-flex items-center justify-center
-            opacity-100 transition-all duration-200
+            opacity-100 transition-all duration-500
             dark:scale-75 dark:rotate-90 dark:opacity-0
           "
         >
@@ -49,7 +49,7 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
         <span
           className="
             absolute inset-0 inline-flex scale-75 -rotate-90
-            items-center justify-center opacity-0 transition-all duration-200
+            items-center justify-center opacity-0 transition-all duration-500
             dark:scale-100 dark:rotate-0 dark:opacity-100
           "
         >
