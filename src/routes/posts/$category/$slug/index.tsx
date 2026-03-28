@@ -11,7 +11,6 @@ import { Toc } from '~/components/post/toc'
 import { PostActions } from '~/components/post/actions'
 import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
-import { ThemeToggle } from '~/components/theme-toggle'
 import { SiteNav } from '~/components/site-nav'
 import { SiteFooter } from '~/components/site-footer'
 
@@ -58,12 +57,12 @@ function PostPage() {
   return (
     <>
       <SiteNav />
-      <ThemeToggle />
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <main className="bg-canvas py-14">
-        <article className="mx-auto max-w-208 rounded-lg border border-border bg-surface px-8 py-16 shadow-sm sm:px-14">
+      {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+      <main className="noise-bg relative bg-canvas py-14">
+        <article className="relative z-10 mx-auto max-w-208 rounded-lg border border-border bg-surface px-8 py-16 shadow-sm sm:px-14">
           <ArticleHeader
             title={frontmatter.title}
             createdAt={frontmatter.created_at}
@@ -101,7 +100,7 @@ function PostPage() {
           )}
         </article>
         {frontmatter.cid && (
-          <div className="mx-auto max-w-180 px-5">
+          <div className="relative z-10 mx-auto max-w-180 px-5">
             <CommentSection postCid={frontmatter.cid} />
           </div>
         )}

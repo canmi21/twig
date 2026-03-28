@@ -17,6 +17,7 @@ import { themeScript } from '~/lib/theme/theme-script'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
 import { fontFallbackScript } from '~/lib/theme/font-fallback-script'
 import appCss from '~/styles/app.css?url'
+import noiseCss from '~/styles/noise.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({
   head: () => ({
@@ -59,6 +60,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
         href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
       },
       { rel: 'stylesheet', href: appCss },
+      { rel: 'stylesheet', href: noiseCss },
       {
         rel: 'icon',
         type: 'image/svg+xml',

@@ -2,6 +2,7 @@
 
 import { Link } from '@tanstack/react-router'
 import { SITE_TITLE } from '~/lib/content/metadata'
+import { ThemeToggle } from '~/components/theme-toggle'
 
 export function SiteNav() {
   return (
@@ -13,13 +14,14 @@ export function SiteNav() {
         >
           {SITE_TITLE}
         </Link>
-        <nav className="flex items-center gap-5">
+        <nav className="flex items-center gap-4">
           <Link
             to="/posts"
             className="text-[13px] text-secondary transition-colors hover:text-primary"
           >
             Posts
           </Link>
+          <ThemeToggle className="cursor-pointer text-secondary transition-colors hover:text-primary" />
         </nav>
       </div>
     </header>

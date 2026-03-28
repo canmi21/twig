@@ -16,7 +16,7 @@ export function PostBackLink() {
         text-secondary
         hover:text-primary
         xl:fixed
-        xl:top-28 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
+        xl:top-40 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:justify-start xl:gap-1.5
         xl:rounded-none xl:p-0
       "

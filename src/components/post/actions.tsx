@@ -113,7 +113,7 @@ export function PostActions() {
       className="
         hidden
         xl:fixed xl:top-1/2 xl:right-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
-        xl:flex xl:max-h-[calc(100vh-16rem)] xl:w-10
+        xl:z-30 xl:flex xl:max-h-[calc(100vh-16rem)] xl:w-10
         xl:-translate-y-1/2 xl:flex-col xl:items-center xl:gap-1
       "
     >
