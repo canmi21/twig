@@ -9,6 +9,8 @@
 :root {
   color-scheme: light;
   scroll-behavior: smooth;
+  /* Pre-blended chrome/50 over canvas — visible only during overscroll */
+  background-color: rgb(248, 247, 243);
   font-family:
     'Noto Sans',
     'Noto Sans SC',
@@ -58,6 +60,7 @@
 
 .dark {
   color-scheme: dark;
+  background-color: rgb(23, 23, 23);
   --color-surface: rgb(20, 20, 20);
   --color-canvas: rgb(28, 28, 28);
   --color-chrome: rgb(17, 17, 17);
