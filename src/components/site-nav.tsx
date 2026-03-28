@@ -184,17 +184,31 @@ export function SiteNav({ article }: SiteNavProps) {
 
         {/* Panel 2: Article mode */}
         <div
-          className="flex items-center justify-between px-8"
+          className="relative flex items-center"
           style={{ height: NAV_HEIGHT }}
         >
+          {/* Back + share: absolute so they don't affect title centering */}
           <Link
             to="/posts"
-            className="shrink-0 text-secondary transition-colors hover:text-primary"
+            className="absolute left-8 text-secondary transition-colors hover:text-primary"
             aria-label="Back to posts"
           >
             <Undo2 className="size-4" strokeWidth={1.8} />
           </Link>
-          <div className="mx-auto w-full max-w-208 min-w-0 px-8 sm:px-14">
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className="absolute right-8 text-secondary transition-colors hover:text-primary"
+            aria-label="Copy link"
+          >
+            {copied ? (
+              <Check className="size-4" strokeWidth={1.8} />
+            ) : (
+              <LinkIcon className="size-4" strokeWidth={1.8} />
+            )}
+          </button>
+          {/* Title area: aligns with paper content edge */}
+          <div className="mx-auto w-full max-w-208 min-w-0 px-4 sm:px-7">
             <div className="truncate text-[13px] font-medium text-primary">
               {article?.title}
             </div>
@@ -204,18 +218,6 @@ export function SiteNav({ article }: SiteNavProps) {
               </div>
             )}
           </div>
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="shrink-0 text-secondary transition-colors hover:text-primary"
-            aria-label="Copy link"
-          >
-            {copied ? (
-              <Check className="size-4" strokeWidth={1.8} />
-            ) : (
-              <LinkIcon className="size-4" strokeWidth={1.8} />
-            )}
-          </button>
         </div>
       </motion.div>
     </header>
