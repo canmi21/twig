@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { motion, AnimatePresence } from 'motion/react'
 import { authClient } from '~/lib/auth-client'
 import { SITE_TITLE } from '~/lib/content/metadata'
 
@@ -70,7 +71,12 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
   return (
     <div className="mx-auto max-w-180 px-5 py-24">
       <div className="mx-auto max-w-72">
-        <p className="mb-8 text-[12px] text-tertiary">{SITE_TITLE}</p>
+        <Link
+          to="/"
+          className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+        >
+          {SITE_TITLE}
+        </Link>
         <h1 className="text-[17px] font-medium text-primary">
           Confirm sign in
         </h1>
@@ -78,13 +84,26 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
           Click the button below to sign in as {email}.
         </p>
 
-        {error && <p className="mt-4 text-[13px] text-danger">{error}</p>}
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              key="error"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
+              className="mt-4 text-[13px] text-danger"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
 
         <button
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </button>

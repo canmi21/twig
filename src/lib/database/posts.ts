@@ -1,6 +1,6 @@
 /* src/lib/database/posts.ts */
 
-import { eq } from 'drizzle-orm'
+import { eq, count, desc, sql } from 'drizzle-orm'
 import type { Db } from './index'
 import { contents, posts } from './schema'
 import { newCid } from '../utils/uuid'
@@ -189,4 +189,48 @@ export async function upsertPost(
   })
 
   return { cid, slug: input.slug, action: 'created' }
+}
+
+export interface PostStats {
+  total: number
+  published: number
+  draft: number
+}
+
+export async function getPostStats(db: Db): Promise<PostStats> {
+  const [row] = await db
+    .select({
+      total: count(),
+      published: count(sql`CASE WHEN ${contents.published} = 1 THEN 1 END`),
+    })
+    .from(contents)
+    .where(eq(contents.type, 'post'))
+    .all()
+  const total = row?.total ?? 0
+  const published = row?.published ?? 0
+  return { total, published, draft: total - published }
+}
+
+export interface RecentPost {
+  cid: string
+  slug: string
+  title: string
+  published: number
+  updatedAt: string
+}
+
+export async function getRecentPosts(db: Db, limit = 5): Promise<RecentPost[]> {
+  return db
+    .select({
+      cid: posts.cid,
+      slug: posts.slug,
+      title: posts.title,
+      published: contents.published,
+      updatedAt: contents.updatedAt,
+    })
+    .from(posts)
+    .innerJoin(contents, eq(posts.cid, contents.cid))
+    .orderBy(desc(contents.updatedAt))
+    .limit(limit)
+    .all()
 }

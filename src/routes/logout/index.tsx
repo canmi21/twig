@@ -24,7 +24,12 @@ function LogoutPage() {
   return (
     <div className="mx-auto max-w-180 px-5 py-24">
       <div className="mx-auto max-w-72 text-center">
-        <p className="mb-8 text-[12px] text-tertiary">{SITE_TITLE}</p>
+        <Link
+          to="/"
+          className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+        >
+          {SITE_TITLE}
+        </Link>
 
         <AnimatePresence mode="wait">
           {done ? (
@@ -57,7 +62,7 @@ function LogoutPage() {
                 type="button"
                 onClick={handleLogout}
                 disabled={loading}
-                className="mt-4 rounded-md bg-primary px-4 py-2 text-[14px] font-medium text-surface transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="mt-4 rounded-md bg-primary px-4 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
               >
                 {loading ? 'Signing out...' : 'Sign out'}
               </button>

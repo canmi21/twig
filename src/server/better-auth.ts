@@ -14,6 +14,7 @@ import {
   getBetterAuthSecret,
   getResendApiKey,
   getEmailFromNoreply,
+  getSkipOtpVerify,
 } from './platform'
 
 const DEV_PORT = 26315
@@ -27,6 +28,7 @@ function devTrustedOrigins(): string[] {
 export function getAuth() {
   const resend = new Resend(getResendApiKey())
   const isDev = import.meta.env.DEV
+  const skipOtp = getSkipOtpVerify()
   const baseURL = isDev ? `http://localhost:${DEV_PORT}` : getPublicUrl()
   const fromNoreply = getEmailFromNoreply()
 
@@ -66,7 +68,16 @@ export function getAuth() {
       emailOTP({
         otpLength: 6,
         expiresIn: 300,
+        // In dev with SKIP_OTP_VERIFY, any OTP input passes verification
+        ...(skipOtp && {
+          storeOTP: { hash: async () => 'dev-bypass' },
+        }),
         async sendVerificationOTP({ email, otp, type }) {
+          if (skipOtp) {
+            console.log(`[dev] OTP for ${email} (${type}): ${otp}`)
+            return
+          }
+
           const publicURL = getPublicUrl()
           const domain = publicURL.replace(/^https?:\/\//, '')
           const verifyUrl = `${baseURL}/login/verify?email=${encodeURIComponent(email)}&code=${otp}`

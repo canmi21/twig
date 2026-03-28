@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+import { motion, AnimatePresence } from 'motion/react'
 import { getAuth } from '~/server/better-auth'
 
 interface UserRow {
@@ -111,12 +112,25 @@ function UsersList() {
 
   return (
     <div>
-      <div className="mb-6 border-b border-border pb-4">
-        <h1 className="text-lg font-medium">Users</h1>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="mb-8"
+      >
+        <h1 className="text-[17px] font-medium">Users</h1>
+        <p className="mt-1 text-[13px] text-secondary">{users.length} total</p>
+      </motion.div>
 
       {users.length === 0 ? (
-        <p className="text-sm text-secondary">No users yet.</p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="py-16 text-center"
+        >
+          <p className="text-[14px] text-secondary">No users yet.</p>
+        </motion.div>
       ) : (
         <table className="w-full text-sm">
           <thead>
@@ -130,92 +144,123 @@ function UsersList() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr
-                key={user.id}
+            {users.map((u, i) => (
+              <motion.tr
+                key={u.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.05 }}
                 className="border-b border-border transition-colors hover:bg-raised/50"
               >
-                <td className="py-3 font-medium">{user.name}</td>
-                <td className="py-3 text-secondary">{user.email}</td>
+                <td className="py-3 text-[14px] font-medium">{u.name}</td>
+                <td className="py-3 text-[13px] text-secondary">{u.email}</td>
                 <td className="py-3">
                   <span
                     className={`rounded-sm px-2 py-0.5 text-xs ${
-                      user.role === 'admin'
+                      u.role === 'admin'
                         ? 'bg-accent/10 text-accent'
                         : 'bg-raised text-secondary'
                     }`}
                   >
-                    {user.role ?? 'user'}
+                    {u.role ?? 'user'}
                   </span>
                 </td>
                 <td className="py-3">
-                  {user.banned ? (
-                    <span
-                      className="rounded-sm bg-danger/10 px-2 py-0.5 text-xs text-danger"
-                      title={user.banReason ?? undefined}
-                    >
-                      Banned
-                    </span>
-                  ) : (
-                    <span className="rounded-sm bg-success/10 px-2 py-0.5 text-xs text-success">
-                      Active
-                    </span>
-                  )}
+                  <AnimatePresence mode="wait">
+                    {u.banned ? (
+                      <motion.span
+                        key="banned"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="rounded-sm bg-danger/10 px-2 py-0.5 text-xs text-danger"
+                        title={u.banReason ?? undefined}
+                      >
+                        Banned
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="active"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="rounded-sm bg-success/10 px-2 py-0.5 text-xs text-success"
+                      >
+                        Active
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </td>
-                <td className="py-3 text-secondary">
-                  {formatDate(user.createdAt)}
+                <td className="py-3 text-[13px] text-secondary">
+                  {formatDate(u.createdAt)}
                 </td>
                 <td className="py-3 text-right">
                   <div className="flex items-center justify-end gap-3">
-                    {user.banned ? (
+                    {u.banned ? (
                       <button
                         type="button"
-                        disabled={loading === user.id}
-                        onClick={() => handleUnban(user.id)}
-                        className="text-secondary hover:text-primary disabled:opacity-50"
+                        disabled={loading === u.id}
+                        onClick={() => handleUnban(u.id)}
+                        className="text-secondary transition-colors hover:text-primary disabled:opacity-50"
                       >
                         Unban
                       </button>
                     ) : (
                       <button
                         type="button"
-                        disabled={loading === user.id}
-                        onClick={() => handleBan(user.id)}
-                        className="text-secondary hover:text-danger disabled:opacity-50"
+                        disabled={loading === u.id}
+                        onClick={() => handleBan(u.id)}
+                        className="text-secondary transition-colors hover:text-danger disabled:opacity-50"
                       >
                         Ban
                       </button>
                     )}
-                    {deleting === user.id ? (
-                      <span className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={loading === user.id}
-                          onClick={() => handleDelete(user.id)}
-                          className="text-danger disabled:opacity-50"
+                    <AnimatePresence mode="wait">
+                      {deleting === u.id ? (
+                        <motion.span
+                          key="confirm"
+                          className="flex items-center gap-2"
+                          initial={{ opacity: 0, x: 4 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -4 }}
+                          transition={{ duration: 0.15 }}
                         >
-                          Confirm
-                        </button>
-                        <button
+                          <button
+                            type="button"
+                            disabled={loading === u.id}
+                            onClick={() => handleDelete(u.id)}
+                            className="text-danger disabled:opacity-50"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleting(null)}
+                            className="text-secondary"
+                          >
+                            Cancel
+                          </button>
+                        </motion.span>
+                      ) : (
+                        <motion.button
+                          key="delete"
                           type="button"
-                          onClick={() => setDeleting(null)}
-                          className="text-secondary"
+                          onClick={() => setDeleting(u.id)}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="text-secondary transition-colors hover:text-danger"
                         >
-                          Cancel
-                        </button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setDeleting(user.id)}
-                        className="text-secondary hover:text-danger"
-                      >
-                        Delete
-                      </button>
-                    )}
+                          Delete
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>

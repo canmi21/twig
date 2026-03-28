@@ -1,6 +1,6 @@
 /* src/lib/database/comments.ts */
 
-import { eq, and, desc, asc } from 'drizzle-orm'
+import { eq, and, desc, asc, count, sql } from 'drizzle-orm'
 import type { Db } from './index'
 import { comments, posts } from './schema'
 import { user } from './auth-schema'
@@ -115,4 +115,66 @@ export async function updateCommentStatus(
 
 export async function deleteComment(db: Db, id: string): Promise<void> {
   await db.delete(comments).where(eq(comments.id, id))
+}
+
+export interface CommentStats {
+  total: number
+  pending: number
+  approved: number
+  rejected: number
+}
+
+export async function getCommentStats(db: Db): Promise<CommentStats> {
+  const [row] = await db
+    .select({
+      total: count(),
+      pending: count(sql`CASE WHEN ${comments.status} = 'pending' THEN 1 END`),
+      approved: count(
+        sql`CASE WHEN ${comments.status} = 'approved' THEN 1 END`,
+      ),
+      rejected: count(
+        sql`CASE WHEN ${comments.status} = 'rejected' THEN 1 END`,
+      ),
+    })
+    .from(comments)
+    .all()
+  return {
+    total: row?.total ?? 0,
+    pending: row?.pending ?? 0,
+    approved: row?.approved ?? 0,
+    rejected: row?.rejected ?? 0,
+  }
+}
+
+export async function getPendingCommentCount(db: Db): Promise<number> {
+  const [row] = await db
+    .select({ n: count() })
+    .from(comments)
+    .where(eq(comments.status, 'pending'))
+    .all()
+  return row?.n ?? 0
+}
+
+export async function getRecentComments(
+  db: Db,
+  limit = 5,
+): Promise<CommentWithContext[]> {
+  return db
+    .select({
+      id: comments.id,
+      content: comments.content,
+      status: comments.status,
+      createdAt: comments.createdAt,
+      userName: user.name,
+      userEmail: user.email,
+      postCid: comments.postCid,
+      postTitle: posts.title,
+      postSlug: posts.slug,
+    })
+    .from(comments)
+    .innerJoin(user, eq(comments.userId, user.id))
+    .innerJoin(posts, eq(comments.postCid, posts.cid))
+    .orderBy(desc(comments.createdAt))
+    .limit(limit)
+    .all()
 }

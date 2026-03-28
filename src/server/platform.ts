@@ -24,6 +24,7 @@ interface Bindings {
   EMAIL_OWNER: string
   BETTER_AUTH_SECRET: string
   RESEND_API_KEY: string
+  SKIP_OTP_VERIFY?: string
 }
 
 function getBindings(): Bindings {
@@ -88,4 +89,9 @@ export function getBetterAuthSecret() {
 /** Resend API key for sending emails. */
 export function getResendApiKey() {
   return getBindings().RESEND_API_KEY
+}
+
+/** Whether to skip OTP verification (dev convenience). */
+export function getSkipOtpVerify() {
+  return !!getBindings().SKIP_OTP_VERIFY
 }

@@ -8,6 +8,7 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { motion, AnimatePresence } from 'motion/react'
 import { getDb, getCache, getBucket } from '~/server/platform'
 import {
   getAllPosts,
@@ -179,8 +180,18 @@ function PostsList() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
-        <h1 className="text-lg font-medium">Posts</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="mb-8 flex items-center justify-between"
+      >
+        <div>
+          <h1 className="text-[17px] font-medium">Posts</h1>
+          <p className="mt-1 text-[13px] text-secondary">
+            {posts.length} total
+          </p>
+        </div>
         <button
           type="button"
           onClick={handleNewPost}
@@ -188,10 +199,20 @@ function PostsList() {
         >
           New Post
         </button>
-      </div>
+      </motion.div>
 
       {posts.length === 0 ? (
-        <p className="text-sm text-secondary">No posts yet.</p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="py-16 text-center"
+        >
+          <p className="text-[14px] text-secondary">No posts yet.</p>
+          <p className="mt-1 text-[12px] text-tertiary">
+            Create your first post to get started.
+          </p>
+        </motion.div>
       ) : (
         <table className="w-full text-sm">
           <thead>
@@ -204,30 +225,42 @@ function PostsList() {
             </tr>
           </thead>
           <tbody>
-            {posts.map((post) => (
-              <tr
+            {posts.map((post, i) => (
+              <motion.tr
                 key={post.cid}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.05 }}
                 className="border-b border-border transition-colors hover:bg-raised/50"
               >
                 <td className="py-3">
-                  <div className="font-medium">{post.title}</div>
-                  <div className="text-xs text-secondary">{post.slug}</div>
+                  <div className="text-[14px] font-medium">{post.title}</div>
+                  <div className="text-[12px] text-tertiary">{post.slug}</div>
                 </td>
-                <td className="py-3 text-secondary">{post.category ?? '-'}</td>
+                <td className="py-3 text-[13px] text-secondary">
+                  {post.category ?? '-'}
+                </td>
                 <td className="py-3">
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(post.cid, post.published)}
-                    className={`rounded-sm px-2 py-0.5 text-xs ${
-                      post.published === 1
-                        ? 'bg-success/10 text-success'
-                        : 'bg-raised text-secondary'
-                    }`}
-                  >
-                    {post.published === 1 ? 'Published' : 'Draft'}
-                  </button>
+                  <AnimatePresence mode="wait">
+                    <motion.button
+                      key={post.published}
+                      type="button"
+                      onClick={() => handleToggle(post.cid, post.published)}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className={`rounded-sm px-2 py-0.5 text-xs ${
+                        post.published === 1
+                          ? 'bg-success/10 text-success'
+                          : 'bg-raised text-secondary'
+                      }`}
+                    >
+                      {post.published === 1 ? 'Published' : 'Draft'}
+                    </motion.button>
+                  </AnimatePresence>
                 </td>
-                <td className="py-3 text-secondary">
+                <td className="py-3 text-[13px] text-secondary">
                   {formatDate(post.createdAt)}
                 </td>
                 <td className="py-3 text-right">
@@ -241,39 +274,53 @@ function PostsList() {
                         format: true,
                         highlight: true,
                       }}
-                      className="text-secondary hover:text-primary"
+                      className="text-secondary transition-colors hover:text-primary"
                     >
                       Edit
                     </Link>
-                    {deleting === post.cid ? (
-                      <span className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(post.cid)}
-                          className="text-danger"
+                    <AnimatePresence mode="wait">
+                      {deleting === post.cid ? (
+                        <motion.span
+                          key="confirm"
+                          className="flex items-center gap-2"
+                          initial={{ opacity: 0, x: 4 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -4 }}
+                          transition={{ duration: 0.15 }}
                         >
-                          Confirm
-                        </button>
-                        <button
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(post.cid)}
+                            className="text-danger"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleting(null)}
+                            className="text-secondary"
+                          >
+                            Cancel
+                          </button>
+                        </motion.span>
+                      ) : (
+                        <motion.button
+                          key="delete"
                           type="button"
-                          onClick={() => setDeleting(null)}
-                          className="text-secondary"
+                          onClick={() => setDeleting(post.cid)}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                          className="text-secondary transition-colors hover:text-danger"
                         >
-                          Cancel
-                        </button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setDeleting(post.cid)}
-                        className="text-secondary hover:text-danger"
-                      >
-                        Delete
-                      </button>
-                    )}
+                          Delete
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>

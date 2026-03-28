@@ -63,6 +63,12 @@
         "no-console": "off",
         "no-await-in-loop": "off"
       }
+    },
+    {
+      "files": ["src/server/better-auth.ts"],
+      "rules": {
+        "no-console": "off"
+      }
     }
   ],
   "ignorePatterns": [

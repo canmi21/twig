@@ -45,15 +45,11 @@ function HomePage() {
                 category: post.category ?? 'uncategorized',
                 slug: post.slug,
               }}
-              className="
-                block
-                text-primary
-                hover:text-primary
-              "
+              className="group block text-primary"
             >
               <div className="flex items-center gap-3">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15px] font-medium">
+                  <div className="truncate text-[15px] font-medium decoration-border underline-offset-[3px] group-hover:underline">
                     {post.title}
                   </div>
                   {post.description && (
