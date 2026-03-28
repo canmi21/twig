@@ -11,6 +11,7 @@ import { Toc } from '~/components/post/toc'
 import { PostActions } from '~/components/post/actions'
 import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
+import { ThemeToggle } from '~/components/theme-toggle'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -54,6 +55,7 @@ function PostPage() {
 
   return (
     <>
+      <ThemeToggle />
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
