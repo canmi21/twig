@@ -2,14 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from '@tanstack/react-router'
+import { motion, AnimatePresence } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
-
-function gravatarUrl(email: string, size = 80): string {
-  // Simple hash for Gravatar — use SubtleCrypto on client
-  // Fallback: encode email directly, actual md5 computed in useEffect
-  return `https://www.gravatar.com/avatar/?d=mp&s=${size}`
-}
 
 function GravatarImg({
   email,
@@ -20,7 +15,9 @@ function GravatarImg({
   size?: number
   className?: string
 }) {
-  const [src, setSrc] = useState(gravatarUrl('', size))
+  const [src, setSrc] = useState(
+    `https://www.gravatar.com/avatar/?d=mp&s=${size}`,
+  )
 
   useEffect(() => {
     const encoder = new TextEncoder()
@@ -131,17 +128,23 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
       {comments.length > 0 && (
         <div className="mt-6 space-y-6">
-          {comments.map((c) => (
-            <div key={c.id} className="flex gap-3">
+          {comments.map((c, i) => (
+            <motion.div
+              key={c.id}
+              className="flex gap-3"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: i * 0.05 }}
+            >
               <GravatarImg
                 email={c.userEmail}
                 size={36}
-                className="size-9 shrink-0 rounded-full"
+                className="size-9 shrink-0 rounded-full bg-raised"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-2">
                   <span className="text-[13px] font-medium text-primary">
-                    {c.userName}
+                    {c.userName || 'Anonymous'}
                   </span>
                   <span className="text-[12px] text-tertiary">
                     {timeAgo(c.createdAt)}
@@ -151,52 +154,71 @@ export function CommentSection({ postCid }: { postCid: string }) {
                   {c.content}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
 
       <div className="mt-8">
-        {!session ? (
-          <p className="text-[13px] text-secondary">
-            <Link to="/login" className="text-primary hover:underline">
-              Sign in
-            </Link>{' '}
-            to leave a comment.
-          </p>
-        ) : submitted ? (
-          <p className="text-[13px] text-secondary">
-            Comment submitted, pending review.
-          </p>
-        ) : (
-          <form onSubmit={handleSubmit}>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write a comment..."
-              maxLength={2000}
-              rows={3}
-              className="w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
-            />
-            {error && (
-              <p className="mt-2 text-[13px] text-red-600 dark:text-red-400">
-                {error}
-              </p>
-            )}
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-[12px] text-tertiary">
-                {content.length}/2000
-              </span>
-              <button
-                type="submit"
-                disabled={submitting || !content.trim()}
-                className="rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-surface disabled:opacity-50"
+        <AnimatePresence mode="wait">
+          {!session ? (
+            <motion.p
+              key="login"
+              className="text-[13px] text-secondary"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.15 }}
+            >
+              <Link
+                to="/login"
+                className="text-primary transition-colors hover:text-secondary"
               >
-                {submitting ? 'Submitting...' : 'Submit'}
-              </button>
-            </div>
-          </form>
-        )}
+                Sign in
+              </Link>{' '}
+              to leave a comment.
+            </motion.p>
+          ) : submitted ? (
+            <motion.p
+              key="submitted"
+              className="text-[13px] text-success"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              Comment submitted, pending review.
+            </motion.p>
+          ) : (
+            <motion.form
+              key="form"
+              onSubmit={handleSubmit}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.15 }}
+            >
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write a comment..."
+                maxLength={2000}
+                rows={3}
+                className="w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary transition-colors outline-none placeholder:text-tertiary focus:border-secondary"
+              />
+              {error && <p className="mt-2 text-[13px] text-danger">{error}</p>}
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[12px] text-tertiary">
+                  {content.length}/2000
+                </span>
+                <button
+                  type="submit"
+                  disabled={submitting || !content.trim()}
+                  className="rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-surface transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {submitting ? 'Submitting...' : 'Submit'}
+                </button>
+              </div>
+            </motion.form>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

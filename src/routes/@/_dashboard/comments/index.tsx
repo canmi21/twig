@@ -50,11 +50,9 @@ function formatDate(iso: string): string {
 
 function statusBadge(status: string) {
   const styles: Record<string, string> = {
-    pending:
-      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    approved:
-      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    pending: 'bg-caution/10 text-caution',
+    approved: 'bg-success/10 text-success',
+    rejected: 'bg-danger/10 text-danger',
   }
   return (
     <span
@@ -98,7 +96,7 @@ function CommentsPage() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-6 border-b border-border pb-4">
         <h1 className="text-lg font-medium">Comments</h1>
       </div>
 
@@ -145,7 +143,10 @@ function CommentsPage() {
           </thead>
           <tbody>
             {comments.map((c) => (
-              <tr key={c.id} className="border-b border-border">
+              <tr
+                key={c.id}
+                className="border-b border-border transition-colors hover:bg-raised/50"
+              >
                 <td className="max-w-64 py-3">
                   <div className="truncate">{c.content}</div>
                 </td>
@@ -167,7 +168,7 @@ function CommentsPage() {
                           type="button"
                           disabled={loading === c.id}
                           onClick={() => handleApprove(c.id)}
-                          className="text-green-600 hover:text-green-700 disabled:opacity-50 dark:text-green-400"
+                          className="text-success hover:opacity-80 disabled:opacity-50"
                         >
                           Approve
                         </button>
@@ -175,7 +176,7 @@ function CommentsPage() {
                           type="button"
                           disabled={loading === c.id}
                           onClick={() => handleReject(c.id)}
-                          className="text-secondary hover:text-red-500 disabled:opacity-50"
+                          className="text-secondary hover:text-danger disabled:opacity-50"
                         >
                           Reject
                         </button>
@@ -187,7 +188,7 @@ function CommentsPage() {
                           type="button"
                           disabled={loading === c.id}
                           onClick={() => handleDelete(c.id)}
-                          className="text-red-500 disabled:opacity-50"
+                          className="text-danger disabled:opacity-50"
                         >
                           Confirm
                         </button>
@@ -203,7 +204,7 @@ function CommentsPage() {
                       <button
                         type="button"
                         onClick={() => setDeleting(c.id)}
-                        className="text-secondary hover:text-red-500"
+                        className="text-secondary hover:text-danger"
                       >
                         Delete
                       </button>

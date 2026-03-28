@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { authClient } from '~/lib/auth-client'
+import { SITE_TITLE } from '~/lib/content/metadata'
 
 interface VerifySearch {
   email?: string
@@ -69,6 +70,7 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
   return (
     <div className="mx-auto max-w-180 px-5 py-24">
       <div className="mx-auto max-w-72">
+        <p className="mb-8 text-[12px] text-tertiary">{SITE_TITLE}</p>
         <h1 className="text-[17px] font-medium text-primary">
           Confirm sign in
         </h1>
@@ -76,24 +78,20 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
           Click the button below to sign in as {email}.
         </p>
 
-        {error && (
-          <p className="mt-4 text-[13px] text-red-600 dark:text-red-400">
-            {error}
-          </p>
-        )}
+        {error && <p className="mt-4 text-[13px] text-danger">{error}</p>}
 
         <button
           type="button"
           onClick={handleConfirm}
           disabled={loading}
-          className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface disabled:opacity-50"
+          className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
 
         <Link
           to="/login"
-          className="mt-3 block w-full text-center text-[13px] text-secondary hover:text-primary"
+          className="mt-3 block w-full text-center text-[13px] text-secondary transition-colors hover:text-primary"
         >
           Back to sign in
         </Link>

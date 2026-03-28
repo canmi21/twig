@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
+import { motion, AnimatePresence } from 'motion/react'
 import { authClient } from '~/lib/auth-client'
+import { SITE_TITLE } from '~/lib/content/metadata'
 import { user as userTable } from '~/lib/database/auth-schema'
 import { getDb, getPublicUrl } from '~/server/platform'
 
@@ -85,86 +87,107 @@ function LoginPage() {
   return (
     <div className="mx-auto max-w-180 px-5 py-24">
       <div className="mx-auto max-w-72">
-        <h1 className="text-[17px] font-medium text-primary">Sign in</h1>
-        <p className="mt-1.5 text-[13px] text-secondary">
-          {step === 'email'
-            ? 'Enter your email to receive a verification code.'
-            : `A code has been sent to ${email}.`}
-        </p>
+        <p className="mb-8 text-[12px] text-tertiary">{SITE_TITLE}</p>
 
-        {error && (
-          <p className="mt-4 text-[13px] text-red-600 dark:text-red-400">
-            {error}
-          </p>
-        )}
+        <AnimatePresence mode="wait">
+          {step === 'email' ? (
+            <motion.div
+              key="email"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+            >
+              <h1 className="text-[17px] font-medium text-primary">Sign in</h1>
+              <p className="mt-1.5 text-[13px] text-secondary">
+                Enter your email to receive a verification code.
+              </p>
 
-        {step === 'email' ? (
-          <form onSubmit={handleSendOtp} className="mt-6">
-            <label
-              htmlFor="email"
-              className="block text-[13px] font-medium text-primary"
+              {error && <p className="mt-4 text-[13px] text-danger">{error}</p>}
+
+              <form onSubmit={handleSendOtp} className="mt-6">
+                <label
+                  htmlFor="email"
+                  className="block text-[13px] font-medium text-primary"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  autoFocus
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="mt-1.5 w-full rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary transition-colors outline-none placeholder:text-tertiary focus:border-secondary"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {loading ? 'Sending...' : 'Send code'}
+                </button>
+              </form>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="otp"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
             >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="mt-1.5 w-full rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface disabled:opacity-50"
-            >
-              {loading ? 'Sending...' : 'Send code'}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="mt-6">
-            <label
-              htmlFor="otp"
-              className="block text-[13px] font-medium text-primary"
-            >
-              Verification code
-            </label>
-            <input
-              id="otp"
-              type="text"
-              required
-              autoFocus
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="000000"
-              className="mt-1.5 w-full rounded-md border border-border bg-surface px-3 py-2 text-center text-[20px] tracking-[0.25em] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
-            />
-            <button
-              type="submit"
-              disabled={loading || otp.length < 6}
-              className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface disabled:opacity-50"
-            >
-              {loading ? 'Verifying...' : 'Sign in'}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setStep('email')
-                setOtp('')
-                setError(null)
-              }}
-              className="mt-3 w-full text-[13px] text-secondary hover:text-primary"
-            >
-              Use a different email
-            </button>
-          </form>
-        )}
+              <h1 className="text-[17px] font-medium text-primary">Sign in</h1>
+              <p className="mt-1.5 text-[13px] text-secondary">
+                A code has been sent to {email}.
+              </p>
+
+              {error && <p className="mt-4 text-[13px] text-danger">{error}</p>}
+
+              <form onSubmit={handleVerifyOtp} className="mt-6">
+                <label
+                  htmlFor="otp"
+                  className="block text-[13px] font-medium text-primary"
+                >
+                  Verification code
+                </label>
+                <input
+                  id="otp"
+                  type="text"
+                  required
+                  autoFocus
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="000000"
+                  className="mt-1.5 w-full rounded-md border border-border bg-surface px-3 py-2 text-center text-[20px] tracking-[0.25em] text-primary transition-colors outline-none placeholder:text-tertiary focus:border-secondary"
+                />
+                <button
+                  type="submit"
+                  disabled={loading || otp.length < 6}
+                  className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {loading ? 'Verifying...' : 'Sign in'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('email')
+                    setOtp('')
+                    setError(null)
+                  }}
+                  className="mt-3 w-full text-[13px] text-secondary transition-colors hover:text-primary"
+                >
+                  Use a different email
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

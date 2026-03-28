@@ -111,7 +111,7 @@ function UsersList() {
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-6 border-b border-border pb-4">
         <h1 className="text-lg font-medium">Users</h1>
       </div>
 
@@ -131,14 +131,17 @@ function UsersList() {
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} className="border-b border-border">
+              <tr
+                key={user.id}
+                className="border-b border-border transition-colors hover:bg-raised/50"
+              >
                 <td className="py-3 font-medium">{user.name}</td>
                 <td className="py-3 text-secondary">{user.email}</td>
                 <td className="py-3">
                   <span
                     className={`rounded-sm px-2 py-0.5 text-xs ${
                       user.role === 'admin'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                        ? 'bg-accent/10 text-accent'
                         : 'bg-raised text-secondary'
                     }`}
                   >
@@ -148,13 +151,13 @@ function UsersList() {
                 <td className="py-3">
                   {user.banned ? (
                     <span
-                      className="rounded-sm bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      className="rounded-sm bg-danger/10 px-2 py-0.5 text-xs text-danger"
                       title={user.banReason ?? undefined}
                     >
                       Banned
                     </span>
                   ) : (
-                    <span className="rounded-sm bg-green-100 px-2 py-0.5 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <span className="rounded-sm bg-success/10 px-2 py-0.5 text-xs text-success">
                       Active
                     </span>
                   )}
@@ -178,7 +181,7 @@ function UsersList() {
                         type="button"
                         disabled={loading === user.id}
                         onClick={() => handleBan(user.id)}
-                        className="text-secondary hover:text-red-500 disabled:opacity-50"
+                        className="text-secondary hover:text-danger disabled:opacity-50"
                       >
                         Ban
                       </button>
@@ -189,7 +192,7 @@ function UsersList() {
                           type="button"
                           disabled={loading === user.id}
                           onClick={() => handleDelete(user.id)}
-                          className="text-red-500 disabled:opacity-50"
+                          className="text-danger disabled:opacity-50"
                         >
                           Confirm
                         </button>
@@ -205,7 +208,7 @@ function UsersList() {
                       <button
                         type="button"
                         onClick={() => setDeleting(user.id)}
-                        className="text-secondary hover:text-red-500"
+                        className="text-secondary hover:text-danger"
                       >
                         Delete
                       </button>

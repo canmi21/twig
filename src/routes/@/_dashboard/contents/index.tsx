@@ -179,7 +179,7 @@ function PostsList() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between border-b border-border pb-4">
         <h1 className="text-lg font-medium">Posts</h1>
         <button
           type="button"
@@ -205,7 +205,10 @@ function PostsList() {
           </thead>
           <tbody>
             {posts.map((post) => (
-              <tr key={post.cid} className="border-b border-border">
+              <tr
+                key={post.cid}
+                className="border-b border-border transition-colors hover:bg-raised/50"
+              >
                 <td className="py-3">
                   <div className="font-medium">{post.title}</div>
                   <div className="text-xs text-secondary">{post.slug}</div>
@@ -217,7 +220,7 @@ function PostsList() {
                     onClick={() => handleToggle(post.cid, post.published)}
                     className={`rounded-sm px-2 py-0.5 text-xs ${
                       post.published === 1
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        ? 'bg-success/10 text-success'
                         : 'bg-raised text-secondary'
                     }`}
                   >
@@ -247,7 +250,7 @@ function PostsList() {
                         <button
                           type="button"
                           onClick={() => handleDelete(post.cid)}
-                          className="text-red-500"
+                          className="text-danger"
                         >
                           Confirm
                         </button>
@@ -263,7 +266,7 @@ function PostsList() {
                       <button
                         type="button"
                         onClick={() => setDeleting(post.cid)}
-                        className="text-secondary hover:text-red-500"
+                        className="text-secondary hover:text-danger"
                       >
                         Delete
                       </button>
