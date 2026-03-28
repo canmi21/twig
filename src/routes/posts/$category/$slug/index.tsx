@@ -10,6 +10,7 @@ import { PostShareActions } from '~/components/post/share-actions'
 import { Toc } from '~/components/post/toc'
 import { PostActions } from '~/components/post/actions'
 import { ArticleHeader } from '~/components/post/article-header'
+import { CommentSection } from '~/components/post/comment-section'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -92,6 +93,7 @@ function PostPage() {
             </div>
           </>
         )}
+        {frontmatter.cid && <CommentSection postCid={frontmatter.cid} />}
       </article>
     </>
   )

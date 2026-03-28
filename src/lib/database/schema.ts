@@ -1,6 +1,13 @@
 /* src/lib/database/schema.ts */
 
-import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core'
+import {
+  index,
+  sqliteTable,
+  text,
+  integer,
+  primaryKey,
+} from 'drizzle-orm/sqlite-core'
+import { user } from './auth-schema'
 
 export const contents = sqliteTable('contents', {
   cid: text('cid').primaryKey(),
@@ -42,4 +49,26 @@ export const mediaRefs = sqliteTable(
       .references(() => contents.cid),
   },
   (table) => [primaryKey({ columns: [table.hash, table.cid] })],
+)
+
+export const comments = sqliteTable(
+  'comments',
+  {
+    id: text('id').primaryKey(),
+    postCid: text('post_cid')
+      .notNull()
+      .references(() => contents.cid),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id),
+    content: text('content').notNull(),
+    parentId: text('parent_id'),
+    status: text('status').notNull().default('pending'),
+    createdAt: text('created_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (table) => [
+    index('comments_post_cid_idx').on(table.postCid),
+    index('comments_user_id_idx').on(table.userId),
+  ],
 )

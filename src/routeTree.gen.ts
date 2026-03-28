@@ -31,6 +31,7 @@ import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$cate
 import { Route as AtEditorCidIndexRouteImport } from './routes/@/editor/$cid/index'
 import { Route as AtDashboardUsersIndexRouteImport } from './routes/@/_dashboard/users/index'
 import { Route as AtDashboardContentsIndexRouteImport } from './routes/@/_dashboard/contents/index'
+import { Route as AtDashboardCommentsIndexRouteImport } from './routes/@/_dashboard/comments/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -142,6 +143,12 @@ const AtDashboardContentsIndexRoute =
     path: '/contents/',
     getParentRoute: () => AtDashboardRouteRoute,
   } as any)
+const AtDashboardCommentsIndexRoute =
+  AtDashboardCommentsIndexRouteImport.update({
+    id: '/comments/',
+    path: '/comments/',
+    getParentRoute: () => AtDashboardRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/api/object/$': typeof ApiObjectSplatRoute
   '/@/': typeof AtDashboardIndexRoute
   '/login/verify/': typeof LoginVerifyIndexRoute
+  '/@/comments/': typeof AtDashboardCommentsIndexRoute
   '/@/contents/': typeof AtDashboardContentsIndexRoute
   '/@/users/': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
@@ -183,6 +191,7 @@ export interface FileRoutesByTo {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/login/verify': typeof LoginVerifyIndexRoute
+  '/@/comments': typeof AtDashboardCommentsIndexRoute
   '/@/contents': typeof AtDashboardContentsIndexRoute
   '/@/users': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid': typeof AtEditorCidIndexRoute
@@ -208,6 +217,7 @@ export interface FileRoutesById {
   '/api/object/$': typeof ApiObjectSplatRoute
   '/@/_dashboard/': typeof AtDashboardIndexRoute
   '/login/verify/': typeof LoginVerifyIndexRoute
+  '/@/_dashboard/comments/': typeof AtDashboardCommentsIndexRoute
   '/@/_dashboard/contents/': typeof AtDashboardContentsIndexRoute
   '/@/_dashboard/users/': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/api/object/$'
     | '/@/'
     | '/login/verify/'
+    | '/@/comments/'
     | '/@/contents/'
     | '/@/users/'
     | '/@/editor/$cid/'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/object/$'
     | '/login/verify'
+    | '/@/comments'
     | '/@/contents'
     | '/@/users'
     | '/@/editor/$cid'
@@ -279,6 +291,7 @@ export interface FileRouteTypes {
     | '/api/object/$'
     | '/@/_dashboard/'
     | '/login/verify/'
+    | '/@/_dashboard/comments/'
     | '/@/_dashboard/contents/'
     | '/@/_dashboard/users/'
     | '/@/editor/$cid/'
@@ -461,17 +474,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtDashboardContentsIndexRouteImport
       parentRoute: typeof AtDashboardRouteRoute
     }
+    '/@/_dashboard/comments/': {
+      id: '/@/_dashboard/comments/'
+      path: '/comments'
+      fullPath: '/@/comments/'
+      preLoaderRoute: typeof AtDashboardCommentsIndexRouteImport
+      parentRoute: typeof AtDashboardRouteRoute
+    }
   }
 }
 
 interface AtDashboardRouteRouteChildren {
   AtDashboardIndexRoute: typeof AtDashboardIndexRoute
+  AtDashboardCommentsIndexRoute: typeof AtDashboardCommentsIndexRoute
   AtDashboardContentsIndexRoute: typeof AtDashboardContentsIndexRoute
   AtDashboardUsersIndexRoute: typeof AtDashboardUsersIndexRoute
 }
 
 const AtDashboardRouteRouteChildren: AtDashboardRouteRouteChildren = {
   AtDashboardIndexRoute: AtDashboardIndexRoute,
+  AtDashboardCommentsIndexRoute: AtDashboardCommentsIndexRoute,
   AtDashboardContentsIndexRoute: AtDashboardContentsIndexRoute,
   AtDashboardUsersIndexRoute: AtDashboardUsersIndexRoute,
 }

@@ -21,6 +21,7 @@ interface Bindings {
   CF_ACCESS_AUD: string
   EMAIL_FROM_NOREPLY: string
   EMAIL_FROM_NOTIFY: string
+  EMAIL_OWNER: string
   BETTER_AUTH_SECRET: string
   RESEND_API_KEY: string
 }
@@ -72,6 +73,11 @@ export function getEmailFromNoreply() {
 /** Notification sender address for user-facing alerts (reserved for future use). */
 export function getEmailFromNotify() {
   return getBindings().EMAIL_FROM_NOTIFY
+}
+
+/** Admin email for notifications. */
+export function getEmailOwner() {
+  return getBindings().EMAIL_OWNER
 }
 
 /** Better Auth secret for session signing. */
