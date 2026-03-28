@@ -28,12 +28,13 @@
 }
 
 /* ── Color tokens ───────────────────────────────
- * surface   — page background
+ * surface   — content area, article paper (lightest)
+ * canvas    — page background behind content
+ * raised    — nav, footer, code blocks, tags (chrome)
  * primary   — main text, headings, links
  * secondary — meta text, dates, muted info
  * tertiary  — footnotes, disclaimers, very subdued text
  * border    — dividers, separators
- * raised    — elevated surface (code blocks, tags)
  * danger    — errors, destructive actions, banned
  * success   — published, active, approved
  * caution   — pending, warnings
@@ -41,6 +42,7 @@
  * ─────────────────────────────────────────────── */
 @theme {
   --color-surface: rgb(255, 255, 255);
+  --color-canvas: rgb(241, 241, 241);
   --color-primary: rgb(28, 28, 28);
   --color-secondary: rgb(130, 130, 130);
   --color-tertiary: rgb(180, 180, 180);
@@ -55,6 +57,7 @@
 .dark {
   color-scheme: dark;
   --color-surface: rgb(22, 22, 22);
+  --color-canvas: rgb(26, 26, 26);
   --color-primary: rgb(212, 212, 212);
   --color-secondary: rgb(130, 130, 130);
   --color-tertiary: rgb(80, 80, 80);

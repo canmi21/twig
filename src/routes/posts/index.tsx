@@ -5,6 +5,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getCache } from '~/server/platform'
 import { readPostIndex } from '~/lib/storage/kv'
 import { SiteNav } from '~/components/site-nav'
+import { SiteFooter } from '~/components/site-footer'
 
 const getPosts = createServerFn().handler(async () => {
   return readPostIndex(getCache())
@@ -38,44 +39,47 @@ function PostsPage() {
   return (
     <>
       <SiteNav />
-      <div className="mx-auto max-w-180 px-5 pt-12 pb-24">
-        <ul className="space-y-6">
-          {posts.map((post) => (
-            <li key={post.slug}>
-              <Link
-                to="/posts/$category/$slug"
-                params={{
-                  category: post.category ?? 'uncategorized',
-                  slug: post.slug,
-                }}
-                className="group block text-primary"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-medium decoration-border underline-offset-[3px] group-hover:underline">
-                      {post.title}
+      <main className="min-h-screen bg-surface">
+        <div className="mx-auto max-w-180 px-5 pt-12 pb-24">
+          <ul className="space-y-6">
+            {posts.map((post) => (
+              <li key={post.slug}>
+                <Link
+                  to="/posts/$category/$slug"
+                  params={{
+                    category: post.category ?? 'uncategorized',
+                    slug: post.slug,
+                  }}
+                  className="group block text-primary"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[15px] font-medium decoration-border underline-offset-[3px] group-hover:underline">
+                        {post.title}
+                      </div>
+                      {post.description && (
+                        <p className="mt-1 truncate text-[13px] text-secondary">
+                          {post.description}
+                        </p>
+                      )}
                     </div>
-                    {post.description && (
-                      <p className="mt-1 truncate text-[13px] text-secondary">
-                        {post.description}
-                      </p>
+                    <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
+                    {post.createdAt && (
+                      <time
+                        dateTime={post.createdAt}
+                        className="shrink-0 text-[13px] text-secondary"
+                      >
+                        {formatDate(post.createdAt)}
+                      </time>
                     )}
                   </div>
-                  <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
-                  {post.createdAt && (
-                    <time
-                      dateTime={post.createdAt}
-                      className="shrink-0 text-[13px] text-secondary"
-                    >
-                      {formatDate(post.createdAt)}
-                    </time>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </main>
+      <SiteFooter />
     </>
   )
 }

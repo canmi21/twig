@@ -59,7 +59,8 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
   const handleEnter = useCallback(() => {
     if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
-    // Phase 1: expand spacing
+    phaseTimerRef.current = null
+    // Phase 1: expand spacing immediately
     setPhase('expanded')
     // Phase 2: reveal text after bars finish expanding
     phaseTimerRef.current = setTimeout(() => setPhase('revealed'), 180)
@@ -67,7 +68,8 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
   const handleLeave = useCallback(() => {
     if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
-    setPhase('collapsed')
+    // Delay collapse so brief mouse-outs don't flicker
+    phaseTimerRef.current = setTimeout(() => setPhase('collapsed'), 300)
   }, [])
 
   useEffect(() => {

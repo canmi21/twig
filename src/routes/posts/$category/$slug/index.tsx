@@ -13,6 +13,7 @@ import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
 import { ThemeToggle } from '~/components/theme-toggle'
 import { SiteNav } from '~/components/site-nav'
+import { SiteFooter } from '~/components/site-footer'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -61,44 +62,51 @@ function PostPage() {
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="mx-auto max-w-180 px-5 pt-16 pb-24">
-        <ArticleHeader
-          title={frontmatter.title}
-          createdAt={frontmatter.created_at}
-          html={post.html}
-        >
-          <PostShareActions />
-        </ArticleHeader>
-        {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
-        <div className="article">
-          <PostRenderer html={post.html} components={post.components} />
-        </div>
-        {frontmatter.tags && frontmatter.tags.length > 0 && (
-          <>
-            <div className="mt-14 border-t border-dashed border-border pt-6">
-              <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[13px] text-secondary">
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {frontmatter.tags.map((tag) => (
-                    <span key={tag} className="capitalize">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-                {frontmatter.updated_at && (
-                  <div className="text-[12px] text-secondary">
-                    Updated on{' '}
-                    {formatShortDate(
-                      frontmatter.updated_at,
-                      shouldShowUpdatedYear,
-                    )}
+      <main className="bg-canvas py-14">
+        <article className="mx-auto max-w-180 rounded-lg border border-border bg-surface px-10 py-16 shadow-sm sm:px-14">
+          <ArticleHeader
+            title={frontmatter.title}
+            createdAt={frontmatter.created_at}
+            html={post.html}
+          >
+            <PostShareActions />
+          </ArticleHeader>
+          {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+          <div className="article">
+            <PostRenderer html={post.html} components={post.components} />
+          </div>
+          {frontmatter.tags && frontmatter.tags.length > 0 && (
+            <>
+              <div className="mt-14 border-t border-dashed border-border pt-6">
+                <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[13px] text-secondary">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
+                    {frontmatter.tags.map((tag) => (
+                      <span key={tag} className="capitalize">
+                        #{tag}
+                      </span>
+                    ))}
                   </div>
-                )}
-              </footer>
-            </div>
-          </>
+                  {frontmatter.updated_at && (
+                    <div className="text-[12px] text-secondary">
+                      Updated on{' '}
+                      {formatShortDate(
+                        frontmatter.updated_at,
+                        shouldShowUpdatedYear,
+                      )}
+                    </div>
+                  )}
+                </footer>
+              </div>
+            </>
+          )}
+        </article>
+        {frontmatter.cid && (
+          <div className="mx-auto max-w-180 px-5">
+            <CommentSection postCid={frontmatter.cid} />
+          </div>
         )}
-        {frontmatter.cid && <CommentSection postCid={frontmatter.cid} />}
-      </article>
+      </main>
+      <SiteFooter />
     </>
   )
 }

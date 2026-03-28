@@ -5,8 +5,8 @@ import { SITE_TITLE } from '~/lib/content/metadata'
 
 export function SiteNav() {
   return (
-    <header className="border-b border-border bg-raised">
-      <div className="mx-auto flex max-w-180 items-center justify-between px-5 py-4">
+    <header className="sticky top-0 z-40 border-b border-border bg-raised">
+      <div className="mx-auto flex max-w-180 items-center justify-between p-5">
         <Link
           to="/"
           className="text-[13px] font-medium text-primary transition-colors hover:text-secondary"

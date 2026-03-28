@@ -24,17 +24,19 @@ function VerifyPage() {
 
   if (!email || !code) {
     return (
-      <div className="mx-auto max-w-180 px-5 py-24">
-        <div className="mx-auto max-w-72">
-          <p className="text-[14px] text-secondary">
-            Invalid verification link.
-          </p>
-          <Link
-            to="/login"
-            className="mt-4 inline-block text-[13px] text-primary hover:underline"
-          >
-            Back to sign in
-          </Link>
+      <div className="min-h-screen bg-surface">
+        <div className="mx-auto max-w-180 px-5 py-24">
+          <div className="mx-auto max-w-72">
+            <p className="text-[14px] text-secondary">
+              Invalid verification link.
+            </p>
+            <Link
+              to="/login"
+              className="mt-4 inline-block text-[13px] text-primary hover:underline"
+            >
+              Back to sign in
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -69,51 +71,53 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-180 px-5 py-24">
-      <div className="mx-auto max-w-72">
-        <Link
-          to="/"
-          className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
-        >
-          {SITE_TITLE}
-        </Link>
-        <h1 className="text-[17px] font-medium text-primary">
-          Confirm sign in
-        </h1>
-        <p className="mt-1.5 text-[13px] text-secondary">
-          Click the button below to sign in as {email}.
-        </p>
+    <div className="min-h-screen bg-surface">
+      <div className="mx-auto max-w-180 px-5 py-24">
+        <div className="mx-auto max-w-72">
+          <Link
+            to="/"
+            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+          >
+            {SITE_TITLE}
+          </Link>
+          <h1 className="text-[17px] font-medium text-primary">
+            Confirm sign in
+          </h1>
+          <p className="mt-1.5 text-[13px] text-secondary">
+            Click the button below to sign in as {email}.
+          </p>
 
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              key="error"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              className="mt-4 text-[13px] text-danger"
-            >
-              {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                key="error"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="mt-4 text-[13px] text-danger"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
 
-        <button
-          type="button"
-          onClick={handleConfirm}
-          disabled={loading}
-          className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-        >
-          {loading ? 'Signing in...' : 'Sign in'}
-        </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={loading}
+            className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
 
-        <Link
-          to="/login"
-          className="mt-3 block w-full text-center text-[13px] text-secondary transition-colors hover:text-primary"
-        >
-          Back to sign in
-        </Link>
+          <Link
+            to="/login"
+            className="mt-3 block w-full text-center text-[13px] text-secondary transition-colors hover:text-primary"
+          >
+            Back to sign in
+          </Link>
+        </div>
       </div>
     </div>
   )

@@ -145,7 +145,7 @@ function RootDocument({
           }}
         />
       </head>
-      <body className="bg-surface text-primary">
+      <body className="bg-raised text-primary">
         {children}
         <Scripts />
       </body>
