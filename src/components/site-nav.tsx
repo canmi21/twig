@@ -46,19 +46,25 @@ export function SiteNav({ article }: SiteNavProps) {
     function snapToNearest() {
       const cur = y.get()
       if (cur === 0 || cur === -NAV_HEIGHT) return
+
       const target = cur < -NAV_HEIGHT / 2 ? -NAV_HEIGHT : 0
-      // Borrow the strip's current velocity so snap feels like a
-      // natural continuation of the scroll momentum
-      const vel = y.getVelocity()
+      const rawVel = y.getVelocity()
+      const snapDir = target < cur ? -1 : 1
+      // Use 0.5x velocity, but guarantee a minimum so snap is always smooth
+      const MIN_SNAP_VEL = 200 // px/s
+      const scaled = rawVel * 0.5
+      const snapVel =
+        Math.abs(scaled) >= MIN_SNAP_VEL ? scaled : snapDir * MIN_SNAP_VEL
+
+      // Snap nav strip
       animate(y, target, {
         type: 'spring',
         stiffness: 350,
         damping: 30,
-        velocity: vel,
+        velocity: snapVel,
       })
     }
 
-    // Detect input device from wheel events (fires before scroll)
     function onWheel(e: WheelEvent) {
       // Mouse wheel: deltaMode=1 (line), or pixel mode with large discrete steps
       // Touchpad: deltaMode=0 with small continuous deltas
