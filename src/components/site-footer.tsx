@@ -2,7 +2,7 @@
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border bg-raised">
+    <footer className="border-t border-border bg-chrome">
       <div className="mx-auto max-w-180 px-5 py-6 text-center text-[12px] text-tertiary">
         <a
           href="https://icp.gov.moe/?keyword=20260000"

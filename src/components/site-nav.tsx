@@ -6,7 +6,7 @@ import { ThemeToggle } from '~/components/theme-toggle'
 
 export function SiteNav() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-raised">
+    <header className="sticky top-0 z-40 border-b border-border bg-chrome/50 backdrop-blur-lg">
       <div className="mx-auto flex max-w-180 items-center justify-between p-5">
         <Link
           to="/"

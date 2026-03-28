@@ -147,7 +147,7 @@ function RootDocument({
           }}
         />
       </head>
-      <body className="bg-raised text-primary">
+      <body className="bg-chrome text-primary">
         {children}
         <Scripts />
       </body>
