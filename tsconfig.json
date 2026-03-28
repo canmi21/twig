@@ -21,7 +21,6 @@
     "noEmit": true,
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     }

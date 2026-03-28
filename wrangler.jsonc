@@ -22,10 +22,12 @@
     },
   ],
   "vars": {
-    "CF_ACCESS_TEAM_DOMAIN": "https://canmi.cloudflareaccess.com",
-    "CF_ACCESS_AUD": "72884251705292d1d1afbe7ad595c3d20dbf83f80be6c18bd699dcde2d0f6b16",
     "PUBLIC_URL": "https://canmi.net",
     "CDN_PUBLIC_URL": "https://cdn.canmi.net",
+    "CF_ACCESS_TEAM_DOMAIN": "https://canmi.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "72884251705292d1d1afbe7ad595c3d20dbf83f80be6c18bd699dcde2d0f6b16",
+    "EMAIL_FROM_NOREPLY": "noreply@canmi.net",
+    "EMAIL_FROM_NOTIFY": "notify@canmi.net",
   },
   "r2_buckets": [
     {

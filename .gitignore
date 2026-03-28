@@ -2,7 +2,9 @@ node_modules
 .DS_Store
 dist
 .env
+.dev.vars
 .claude
+.codex-artifacts
 .tanstack
 .wrangler
 .output

@@ -18,11 +18,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapIndexRouteImport } from './routes/sitemap/index'
 import { Route as RssIndexRouteImport } from './routes/rss/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as FeedIndexRouteImport } from './routes/feed/index'
 import { Route as AtDashboardRouteRouteImport } from './routes/@/_dashboard/route'
+import { Route as LoginVerifyIndexRouteImport } from './routes/login/verify/index'
 import { Route as AtDashboardIndexRouteImport } from './routes/@/_dashboard/index'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
 import { Route as AtEditorCidIndexRouteImport } from './routes/@/editor/$cid/index'
 import { Route as AtDashboardContentsIndexRouteImport } from './routes/@/_dashboard/contents/index'
@@ -72,6 +75,11 @@ const PostsIndexRoute = PostsIndexRouteImport.update({
   path: '/posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeedIndexRoute = FeedIndexRouteImport.update({
   id: '/feed/',
   path: '/feed/',
@@ -80,6 +88,11 @@ const FeedIndexRoute = FeedIndexRouteImport.update({
 const AtDashboardRouteRoute = AtDashboardRouteRouteImport.update({
   id: '/_dashboard',
   getParentRoute: () => AtRouteRoute,
+} as any)
+const LoginVerifyIndexRoute = LoginVerifyIndexRouteImport.update({
+  id: '/login/verify/',
+  path: '/login/verify/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AtDashboardIndexRoute = AtDashboardIndexRouteImport.update({
   id: '/',
@@ -94,6 +107,11 @@ const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
 const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
   id: '/api/auth/me',
   path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsCategorySlugIndexRoute = PostsCategorySlugIndexRouteImport.update({
@@ -121,12 +139,15 @@ export interface FileRoutesByFullPath {
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/feed/': typeof FeedIndexRoute
+  '/login/': typeof LoginIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/@/': typeof AtDashboardIndexRoute
+  '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/contents/': typeof AtDashboardContentsIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
@@ -139,11 +160,14 @@ export interface FileRoutesByTo {
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/feed': typeof FeedIndexRoute
+  '/login': typeof LoginIndexRoute
   '/posts': typeof PostsIndexRoute
   '/rss': typeof RssIndexRoute
   '/sitemap': typeof SitemapIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/login/verify': typeof LoginVerifyIndexRoute
   '/@/contents': typeof AtDashboardContentsIndexRoute
   '/@/editor/$cid': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
@@ -158,12 +182,15 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/@/_dashboard': typeof AtDashboardRouteRouteWithChildren
   '/feed/': typeof FeedIndexRoute
+  '/login/': typeof LoginIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/@/_dashboard/': typeof AtDashboardIndexRoute
+  '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/_dashboard/contents/': typeof AtDashboardContentsIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
@@ -178,12 +205,15 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/sitemap.xml'
     | '/feed/'
+    | '/login/'
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
+    | '/api/auth/$'
     | '/api/auth/me'
     | '/api/object/$'
     | '/@/'
+    | '/login/verify/'
     | '/@/contents/'
     | '/@/editor/$cid/'
     | '/posts/$category/$slug/'
@@ -196,11 +226,14 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/sitemap.xml'
     | '/feed'
+    | '/login'
     | '/posts'
     | '/rss'
     | '/sitemap'
+    | '/api/auth/$'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/login/verify'
     | '/@/contents'
     | '/@/editor/$cid'
     | '/posts/$category/$slug'
@@ -214,12 +247,15 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/@/_dashboard'
     | '/feed/'
+    | '/login/'
     | '/posts/'
     | '/rss/'
     | '/sitemap/'
+    | '/api/auth/$'
     | '/api/auth/me'
     | '/api/object/$'
     | '/@/_dashboard/'
+    | '/login/verify/'
     | '/@/_dashboard/contents/'
     | '/@/editor/$cid/'
     | '/posts/$category/$slug/'
@@ -233,11 +269,14 @@ export interface RootRouteChildren {
   RssDotxmlRoute: typeof RssDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   FeedIndexRoute: typeof FeedIndexRoute
+  LoginIndexRoute: typeof LoginIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   RssIndexRoute: typeof RssIndexRoute
   SitemapIndexRoute: typeof SitemapIndexRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiObjectSplatRoute: typeof ApiObjectSplatRoute
+  LoginVerifyIndexRoute: typeof LoginVerifyIndexRoute
   PostsCategorySlugIndexRoute: typeof PostsCategorySlugIndexRoute
 }
 
@@ -306,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/feed/': {
       id: '/feed/'
       path: '/feed'
@@ -319,6 +365,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/@'
       preLoaderRoute: typeof AtDashboardRouteRouteImport
       parentRoute: typeof AtRouteRoute
+    }
+    '/login/verify/': {
+      id: '/login/verify/'
+      path: '/login/verify'
+      fullPath: '/login/verify/'
+      preLoaderRoute: typeof LoginVerifyIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/@/_dashboard/': {
       id: '/@/_dashboard/'
@@ -339,6 +392,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/me'
       fullPath: '/api/auth/me'
       preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/$category/$slug/': {
@@ -399,11 +459,14 @@ const rootRouteChildren: RootRouteChildren = {
   RssDotxmlRoute: RssDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   FeedIndexRoute: FeedIndexRoute,
+  LoginIndexRoute: LoginIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   RssIndexRoute: RssIndexRoute,
   SitemapIndexRoute: SitemapIndexRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiObjectSplatRoute: ApiObjectSplatRoute,
+  LoginVerifyIndexRoute: LoginVerifyIndexRoute,
   PostsCategorySlugIndexRoute: PostsCategorySlugIndexRoute,
 }
 export const routeTree = rootRouteImport

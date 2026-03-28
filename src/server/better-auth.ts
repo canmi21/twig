@@ -1,0 +1,84 @@
+/* src/server/better-auth.ts */
+
+import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { emailOTP } from 'better-auth/plugins'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import { Resend } from 'resend'
+import * as authSchema from '~/lib/database/auth-schema'
+import { SITE_TITLE } from '~/lib/content/metadata'
+import { newCid } from '~/lib/utils/uuid'
+import {
+  getDb,
+  getPublicUrl,
+  getBetterAuthSecret,
+  getResendApiKey,
+  getEmailFromNoreply,
+} from './platform'
+
+/** Create a Better Auth instance per request (D1 binding is request-scoped). */
+export function getAuth() {
+  const resend = new Resend(getResendApiKey())
+  const baseURL = getPublicUrl()
+  const fromNoreply = getEmailFromNoreply()
+
+  return betterAuth({
+    database: drizzleAdapter(getDb(), {
+      provider: 'sqlite',
+      schema: authSchema,
+    }),
+    baseURL,
+    secret: getBetterAuthSecret(),
+    advanced: {
+      database: {
+        generateId: () => newCid(),
+      },
+    },
+    plugins: [
+      emailOTP({
+        otpLength: 6,
+        expiresIn: 300,
+        async sendVerificationOTP({ email, otp, type }) {
+          const verifyUrl = `${baseURL}/login/verify?email=${encodeURIComponent(email)}&code=${otp}`
+
+          const subjects: Record<string, string> = {
+            'sign-in': `Sign in to ${SITE_TITLE}`,
+            'email-verification': 'Verify your email',
+            'forget-password': 'Reset your password',
+          }
+
+          await resend.emails.send({
+            from: `${SITE_TITLE} <${fromNoreply}>`,
+            to: email,
+            subject: subjects[type] ?? 'Verification code',
+            html: otpEmailHtml({ otp, verifyUrl, type }),
+          })
+        },
+      }),
+      tanstackStartCookies(),
+    ],
+  })
+}
+
+function otpEmailHtml({
+  otp,
+  verifyUrl,
+  type,
+}: {
+  otp: string
+  verifyUrl: string
+  type: string
+}) {
+  const showLink = type === 'sign-in'
+  return `
+<div style="font-family: -apple-system, sans-serif; max-width: 400px; margin: 0 auto; padding: 32px 0;">
+  <p style="font-size: 15px; color: #1c1c1c; margin: 0 0 24px;">Your verification code:</p>
+  <p style="font-size: 32px; font-weight: 600; letter-spacing: 0.15em; color: #1c1c1c; margin: 0 0 24px;">${otp}</p>
+  <p style="font-size: 13px; color: #828282; margin: 0 0 8px;">This code expires in 5 minutes.</p>
+  ${
+    showLink
+      ? `<p style="font-size: 13px; color: #828282; margin: 16px 0 0;">Or <a href="${verifyUrl}" style="color: #1c1c1c;">click here to sign in</a>.</p>`
+      : ''
+  }
+</div>`
+}
