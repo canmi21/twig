@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
-import { motion } from 'motion/react'
+import { motion, useMotionValue, animate } from 'motion/react'
 import { Undo2, Link as LinkIcon, Check } from 'lucide-react'
 import { SITE_TITLE } from '~/lib/content/metadata'
 import { ThemeToggle } from '~/components/theme-toggle'
@@ -17,6 +17,12 @@ interface SiteNavProps {
 }
 
 const NAV_HEIGHT = 56
+// Mouse wheel events produce large deltas; touchpad events are small and continuous
+// deltaMode 0 = pixel (touchpad), 1 = line (mouse wheel discrete steps)
+// Mouse wheel on most browsers: deltaMode=0 but deltaY is a multiple of ~100
+const WHEEL_ANIM = { duration: 0.3, ease: [0.33, 0, 0.2, 1] as const }
+// Max pixels the strip can move per scroll event (caps fast touchpad swipes)
+const TRACKPAD_MAX_STEP = 4
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -26,24 +32,92 @@ const navLinks = [
 ]
 
 export function SiteNav({ article }: SiteNavProps) {
-  const [articleMode, setArticleMode] = useState(false)
+  const y = useMotionValue(0)
   const [copied, setCopied] = useState(false)
+
   const lastScrollY = useRef(0)
+  const wheelAnimating = useRef(false)
+  const isMouseWheel = useRef(false)
 
   useEffect(() => {
     if (!article) return
+    lastScrollY.current = window.scrollY
 
-    const onScroll = () => {
-      const y = window.scrollY
-      const delta = y - lastScrollY.current
-      lastScrollY.current = y
-      if (Math.abs(delta) < 2) return
-      setArticleMode(delta > 0)
+    function snapToNearest() {
+      const cur = y.get()
+      if (cur === 0 || cur === -NAV_HEIGHT) return
+      const target = cur < -NAV_HEIGHT / 2 ? -NAV_HEIGHT : 0
+      // Borrow the strip's current velocity so snap feels like a
+      // natural continuation of the scroll momentum
+      const vel = y.getVelocity()
+      animate(y, target, {
+        type: 'spring',
+        stiffness: 350,
+        damping: 30,
+        velocity: vel,
+      })
     }
 
+    // Detect input device from wheel events (fires before scroll)
+    function onWheel(e: WheelEvent) {
+      // Mouse wheel: deltaMode=1 (line), or pixel mode with large discrete steps
+      // Touchpad: deltaMode=0 with small continuous deltas
+      isMouseWheel.current =
+        e.deltaMode === 1 || (e.deltaMode === 0 && Math.abs(e.deltaY) >= 50)
+    }
+
+    function onScroll() {
+      const sy = window.scrollY
+      const delta = sy - lastScrollY.current
+      lastScrollY.current = sy
+      if (Math.abs(delta) < 1) return
+
+      // Mouse wheel: 300ms animation
+      if (isMouseWheel.current) {
+        const target = delta > 0 ? -NAV_HEIGHT : 0
+        wheelAnimating.current = true
+        animate(y, target, {
+          ...WHEEL_ANIM,
+          onComplete: () => {
+            wheelAnimating.current = false
+          },
+        })
+        return
+      }
+
+      // Touchpad: follow scroll at 0.5x ratio, capped at max step
+      wheelAnimating.current = false
+      const scaled = delta * 0.5
+      const capped =
+        Math.sign(scaled) * Math.min(Math.abs(scaled), TRACKPAD_MAX_STEP)
+      const cur = y.get()
+      y.set(Math.max(-NAV_HEIGHT, Math.min(0, cur - capped)))
+    }
+
+    function onScrollEnd() {
+      // Mouse wheel animation handles its own completion
+      if (wheelAnimating.current) {
+        wheelAnimating.current = false
+        return
+      }
+      // Touchpad: snap to nearest panel using remaining momentum
+      snapToNearest()
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: true })
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [article])
+    if ('onscrollend' in window) {
+      window.addEventListener('scrollend', onScrollEnd)
+    }
+
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('scroll', onScroll)
+      if ('onscrollend' in window) {
+        window.removeEventListener('scrollend', onScrollEnd)
+      }
+    }
+  }, [article, y])
 
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(window.location.href)
@@ -51,19 +125,12 @@ export function SiteNav({ article }: SiteNavProps) {
     setTimeout(() => setCopied(false), 1500)
   }, [])
 
-  const isArticleMode = !!(article && articleMode)
-
   return (
     <header
       className="sticky top-0 z-40 overflow-hidden border-b border-border bg-chrome/50 backdrop-blur-lg"
       style={{ height: NAV_HEIGHT }}
     >
-      {/* Single strip: normal nav on top, article nav below. Slides up/down as one unit. */}
-      <motion.div
-        initial={false}
-        animate={{ y: isArticleMode ? -NAV_HEIGHT : 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-      >
+      <motion.div style={{ y }}>
         {/* Panel 1: Normal navigation */}
         <div
           className="flex items-center justify-between px-8"
