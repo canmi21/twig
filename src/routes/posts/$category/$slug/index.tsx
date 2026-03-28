@@ -5,7 +5,6 @@ import { createServerFn } from '@tanstack/react-start'
 import { getCache } from '~/server/platform'
 import { readPostKv } from '~/lib/storage/kv'
 import { PostRenderer } from '~/components/post/renderer'
-import { PostBackLink } from '~/components/post/back-link'
 import { PostShareActions } from '~/components/post/share-actions'
 import { Toc } from '~/components/post/toc'
 import { PostActions } from '~/components/post/actions'
@@ -56,8 +55,12 @@ function PostPage() {
 
   return (
     <>
-      <SiteNav />
-      <PostBackLink />
+      <SiteNav
+        article={{
+          title: frontmatter.title,
+          description: frontmatter.description,
+        }}
+      />
       <Toc entries={post.toc} />
       <PostActions />
       {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
