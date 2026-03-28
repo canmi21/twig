@@ -70,5 +70,6 @@ export const comments = sqliteTable(
   (table) => [
     index('comments_post_cid_idx').on(table.postCid),
     index('comments_user_id_idx').on(table.userId),
+    index('comments_parent_id_idx').on(table.parentId),
   ],
 )

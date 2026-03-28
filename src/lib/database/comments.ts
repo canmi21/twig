@@ -1,6 +1,6 @@
 /* src/lib/database/comments.ts */
 
-import { eq, and, desc, asc, count, sql } from 'drizzle-orm'
+import { eq, and, desc, asc, count, sql, inArray } from 'drizzle-orm'
 import type { Db } from './index'
 import { comments, posts } from './schema'
 import { user } from './auth-schema'
@@ -11,6 +11,7 @@ export interface CommentWithUser {
   content: string
   status: string
   createdAt: string
+  parentId: string | null
   userName: string
   userEmail: string
 }
@@ -23,7 +24,12 @@ export interface CommentWithContext extends CommentWithUser {
 
 export async function createComment(
   db: Db,
-  input: { postCid: string; userId: string; content: string },
+  input: {
+    postCid: string
+    userId: string
+    content: string
+    parentId?: string | null
+  },
 ): Promise<string> {
   const id = newCid()
   const now = new Date().toISOString()
@@ -32,6 +38,7 @@ export async function createComment(
     postCid: input.postCid,
     userId: input.userId,
     content: input.content,
+    parentId: input.parentId ?? null,
     status: 'pending',
     createdAt: now,
     updatedAt: now,
@@ -49,6 +56,7 @@ export async function getApprovedComments(
       content: comments.content,
       status: comments.status,
       createdAt: comments.createdAt,
+      parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
     })
@@ -68,6 +76,7 @@ export async function getPendingComments(
       content: comments.content,
       status: comments.status,
       createdAt: comments.createdAt,
+      parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
       postCid: comments.postCid,
@@ -89,6 +98,7 @@ export async function getAllComments(db: Db): Promise<CommentWithContext[]> {
       content: comments.content,
       status: comments.status,
       createdAt: comments.createdAt,
+      parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
       postCid: comments.postCid,
@@ -113,8 +123,20 @@ export async function updateCommentStatus(
     .where(eq(comments.id, id))
 }
 
+/** Delete a comment and all its descendants (cascade). */
 export async function deleteComment(db: Db, id: string): Promise<void> {
-  await db.delete(comments).where(eq(comments.id, id))
+  // Use recursive CTE to find all descendant IDs
+  const rows = await db.all<{ id: string }>(
+    sql`WITH RECURSIVE descendants(id) AS (
+      VALUES (${id})
+      UNION ALL
+      SELECT c.id FROM comments c JOIN descendants d ON c.parent_id = d.id
+    ) SELECT id FROM descendants`,
+  )
+  const ids = rows.map((r) => r.id)
+  if (ids.length > 0) {
+    await db.delete(comments).where(inArray(comments.id, ids))
+  }
 }
 
 export interface CommentStats {
@@ -165,6 +187,7 @@ export async function getRecentComments(
       content: comments.content,
       status: comments.status,
       createdAt: comments.createdAt,
+      parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
       postCid: comments.postCid,

@@ -18,6 +18,7 @@ interface CommentRow {
   content: string
   status: string
   createdAt: string
+  parentId: string | null
   userName: string
   userEmail: string
   postCid: string
@@ -77,6 +78,7 @@ function CommentsPage() {
   const [loading, setLoading] = useState<string | null>(null)
 
   const comments = tab === 'pending' ? data.pending : data.all
+  const commentById = new Map(data.all.map((c) => [c.id, c]))
 
   async function handleApprove(id: string) {
     setLoading(id)
@@ -190,6 +192,12 @@ function CommentsPage() {
                     className="border-b border-border transition-colors hover:bg-raised/50"
                   >
                     <td className="max-w-64 py-3">
+                      {c.parentId && (
+                        <span className="mb-0.5 block text-[11px] text-tertiary">
+                          Reply to{' '}
+                          {commentById.get(c.parentId)?.userName ?? 'deleted'}
+                        </span>
+                      )}
                       <div className="truncate text-[14px]">{c.content}</div>
                     </td>
                     <td className="py-3 text-[13px] text-secondary">

@@ -5,7 +5,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { getDb } from './platform'
 import { getAuth } from './better-auth'
-import { notifyNewComment } from './notify'
+import { notifyNewComment, notifyCommentReply } from './notify'
 import {
   createComment,
   getApprovedComments,
@@ -14,7 +14,8 @@ import {
   updateCommentStatus,
   deleteComment,
 } from '~/lib/database/comments'
-import { posts } from '~/lib/database/schema'
+import { comments, posts } from '~/lib/database/schema'
+import { user } from '~/lib/database/auth-schema'
 
 const MAX_COMMENT_LENGTH = 2000
 
@@ -25,7 +26,9 @@ export const fetchComments = createServerFn()
   })
 
 export const submitComment = createServerFn({ method: 'POST' })
-  .inputValidator((input: { postCid: string; content: string }) => input)
+  .inputValidator(
+    (input: { postCid: string; content: string; parentId?: string }) => input,
+  )
   .handler(async ({ data }) => {
     const session = await getAuth().api.getSession({
       headers: getRequestHeaders(),
@@ -51,13 +54,35 @@ export const submitComment = createServerFn({ method: 'POST' })
       .get()
     if (!post) throw new Error('Post not found')
 
+    // Validate parent comment exists and belongs to the same post
+    let parentComment: {
+      userId: string
+      postCid: string
+    } | null = null
+    if (data.parentId) {
+      const parent = await db
+        .select({
+          userId: comments.userId,
+          postCid: comments.postCid,
+        })
+        .from(comments)
+        .where(eq(comments.id, data.parentId))
+        .get()
+      if (!parent) throw new Error('Parent comment not found')
+      if (parent.postCid !== data.postCid) {
+        throw new Error('Parent comment belongs to a different post')
+      }
+      parentComment = parent
+    }
+
     await createComment(db, {
       postCid: data.postCid,
       userId: session.user.id,
       content,
+      parentId: data.parentId ?? null,
     })
 
-    // Send notification (await so Workers doesn't discard the promise)
+    // Notify site owner
     try {
       await notifyNewComment({
         postTitle: post.title,
@@ -69,6 +94,30 @@ export const submitComment = createServerFn({ method: 'POST' })
       })
     } catch {
       // Notification failure should not block comment creation
+    }
+
+    // Notify parent comment author (if replying and not replying to self)
+    if (parentComment && parentComment.userId !== session.user.id) {
+      try {
+        const parentUser = await db
+          .select({ name: user.name, email: user.email })
+          .from(user)
+          .where(eq(user.id, parentComment.userId))
+          .get()
+        if (parentUser) {
+          await notifyCommentReply({
+            postTitle: post.title,
+            postSlug: post.slug,
+            postCategory: post.category,
+            parentUserName: parentUser.name,
+            parentUserEmail: parentUser.email,
+            replyUserName: session.user.name,
+            replyContent: content,
+          })
+        }
+      } catch {
+        // Reply notification failure should not block comment creation
+      }
     }
   })
 
