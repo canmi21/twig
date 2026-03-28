@@ -12,6 +12,7 @@ import { PostActions } from '~/components/post/actions'
 import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
 import { ThemeToggle } from '~/components/theme-toggle'
+import { SiteNav } from '~/components/site-nav'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -55,11 +56,12 @@ function PostPage() {
 
   return (
     <>
+      <SiteNav />
       <ThemeToggle />
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="mx-auto max-w-180 px-5 pt-28 pb-24">
+      <article className="mx-auto max-w-180 px-5 pt-16 pb-24">
         <ArticleHeader
           title={frontmatter.title}
           createdAt={frontmatter.created_at}

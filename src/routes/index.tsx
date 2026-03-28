@@ -4,6 +4,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCache } from '~/server/platform'
 import { readPostIndex } from '~/lib/storage/kv'
+import { SiteNav } from '~/components/site-nav'
 
 const getPosts = createServerFn().handler(async () => {
   return readPostIndex(getCache())
@@ -35,55 +36,58 @@ function HomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-180 px-5 py-24">
-      <ul className="space-y-6">
-        {posts.map((post) => (
-          <li key={post.slug}>
-            <Link
-              to="/posts/$category/$slug"
-              params={{
-                category: post.category ?? 'uncategorized',
-                slug: post.slug,
-              }}
-              className="group block text-primary"
-            >
-              <div className="flex items-center gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15px] font-medium decoration-border underline-offset-[3px] group-hover:underline">
-                    {post.title}
+    <>
+      <SiteNav />
+      <div className="mx-auto max-w-180 px-5 pt-12 pb-24">
+        <ul className="space-y-6">
+          {posts.map((post) => (
+            <li key={post.slug}>
+              <Link
+                to="/posts/$category/$slug"
+                params={{
+                  category: post.category ?? 'uncategorized',
+                  slug: post.slug,
+                }}
+                className="group block text-primary"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-[15px] font-medium decoration-border underline-offset-[3px] group-hover:underline">
+                      {post.title}
+                    </div>
+                    {post.description && (
+                      <p className="mt-1 truncate text-[13px] text-secondary">
+                        {post.description}
+                      </p>
+                    )}
                   </div>
-                  {post.description && (
-                    <p className="mt-1 truncate text-[13px] text-secondary">
-                      {post.description}
-                    </p>
+                  <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
+                  {post.createdAt && (
+                    <time
+                      dateTime={post.createdAt}
+                      className="shrink-0 text-[13px] text-secondary"
+                    >
+                      {formatDate(post.createdAt)}
+                    </time>
                   )}
                 </div>
-                <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
-                {post.createdAt && (
-                  <time
-                    dateTime={post.createdAt}
-                    className="shrink-0 text-[13px] text-secondary"
-                  >
-                    {formatDate(post.createdAt)}
-                  </time>
-                )}
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-16 text-center text-[12px] text-tertiary">
-        <a
-          href="https://icp.gov.moe/?keyword=20260000"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-secondary"
-        >
-          萌ICP备20260000号
-        </a>
-        {'  '}
-        2023-{new Date().getFullYear()} © Canmi
-      </p>
-    </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-16 text-center text-[12px] text-tertiary">
+          <a
+            href="https://icp.gov.moe/?keyword=20260000"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-secondary"
+          >
+            萌ICP备20260000号
+          </a>
+          {'  '}
+          2023-{new Date().getFullYear()} © Canmi
+        </p>
+      </div>
+    </>
   )
 }
