@@ -59,6 +59,7 @@ function PostPage() {
         article={{
           title: frontmatter.title,
           description: frontmatter.description,
+          category: frontmatter.category,
         }}
       />
       <Toc entries={post.toc} />

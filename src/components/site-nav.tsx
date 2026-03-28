@@ -10,6 +10,7 @@ import { ThemeToggle } from '~/components/theme-toggle'
 export interface ArticleInfo {
   title: string
   description?: string
+  category?: string
 }
 
 interface SiteNavProps {
@@ -34,7 +35,6 @@ const navLinks = [
 export function SiteNav({ article }: SiteNavProps) {
   const y = useMotionValue(0)
   const [copied, setCopied] = useState(false)
-
   const lastScrollY = useRef(0)
   const wheelAnimating = useRef(false)
   const isMouseWheel = useRef(false)
@@ -187,7 +187,7 @@ export function SiteNav({ article }: SiteNavProps) {
           className="relative flex items-center"
           style={{ height: NAV_HEIGHT }}
         >
-          {/* Back + share: absolute so they don't affect title centering */}
+          {/* Back + copy link: absolute, don't affect center layout */}
           <Link
             to="/posts"
             className="absolute left-8 text-secondary transition-colors hover:text-primary"
@@ -207,16 +207,24 @@ export function SiteNav({ article }: SiteNavProps) {
               <LinkIcon className="size-4" strokeWidth={1.8} />
             )}
           </button>
-          {/* Title area: aligns with paper content edge */}
-          <div className="mx-auto w-full max-w-208 min-w-0 px-4 sm:px-7">
-            <div className="truncate text-[13px] font-medium text-primary">
-              {article?.title}
-            </div>
-            {article?.description && (
-              <div className="truncate text-[11px] text-tertiary">
-                {article.description}
+          {/* Title + info area: aligns with paper midpoint */}
+          <div className="mx-auto flex w-full max-w-208 min-w-0 items-center justify-between px-4 sm:px-7">
+            <div className="min-w-0">
+              <div className="truncate text-[13px] font-medium text-primary">
+                {article?.title}
               </div>
-            )}
+              {article?.description && (
+                <div className="truncate text-[11px] text-tertiary">
+                  {article.description}
+                </div>
+              )}
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="text-[11px] text-tertiary">
+                {article?.category ?? 'uncategorized'}
+              </div>
+              <div className="text-[12px] text-secondary">{SITE_TITLE}</div>
+            </div>
           </div>
         </div>
       </motion.div>
