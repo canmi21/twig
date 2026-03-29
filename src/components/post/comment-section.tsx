@@ -1,8 +1,15 @@
 /* src/components/post/comment-section.tsx */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
-import { CornerDownLeft } from 'lucide-react'
+import {
+  CircleSlash,
+  CornerDownLeft,
+  MapPin,
+  MessagesSquare,
+  MonitorSmartphone,
+  TabletSmartphone,
+} from 'lucide-react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
 
@@ -45,6 +52,103 @@ interface Comment {
 
 // -- Components ---------------------------------------------------------------
 
+const MOCK_LOCATIONS = ['Tokyo', 'Osaka', 'Shanghai', 'Singapore', 'Berlin']
+const MOCK_UAS = [
+  'Desktop Chrome',
+  'Desktop Firefox',
+  'iOS Safari',
+  'Android Chrome',
+  'macOS Safari',
+]
+
+function CommentMeta({
+  email,
+  onReply,
+}: {
+  email: string
+  onReply?: () => void
+}) {
+  const hue = hashToHue(email)
+  const isMobile = hue % 2 === 0
+  const location = MOCK_LOCATIONS[hue % MOCK_LOCATIONS.length]
+  const ua = MOCK_UAS[hue % MOCK_UAS.length]
+  const DeviceIcon = isMobile ? TabletSmartphone : MonitorSmartphone
+
+  return (
+    <div className="mt-1.5 flex items-center gap-3 text-[11px] text-dim opacity-0 transition-opacity group-hover:opacity-100">
+      {onReply && (
+        <button
+          type="button"
+          onClick={onReply}
+          className="flex items-center gap-1 transition-colors hover:text-secondary"
+        >
+          <MessagesSquare className="size-3" strokeWidth={1.8} />
+          <span>Reply</span>
+        </button>
+      )}
+      <span className="flex items-center gap-1">
+        <MapPin className="size-3" strokeWidth={1.8} />
+        <span>{location}</span>
+      </span>
+      <span className="flex items-center gap-1">
+        <DeviceIcon className="size-3" strokeWidth={1.8} />
+        <span>{ua}</span>
+      </span>
+      <button
+        type="button"
+        className="flex items-center gap-1 transition-colors hover:text-secondary"
+      >
+        <CircleSlash className="size-3" strokeWidth={1.8} />
+        <span>Hide</span>
+      </button>
+    </div>
+  )
+}
+
+function ReplyInput({ onClose }: { onClose: () => void }) {
+  const [value, setValue] = useState('')
+  const containerRef = useRef<HTMLDivElement>(null)
+  const showSend = value.trim().length >= 3
+
+  const handleBlur = useCallback(
+    (e: React.FocusEvent) => {
+      // Focus moved to send button — keep open
+      if (containerRef.current?.contains(e.relatedTarget as Node)) return
+      // Empty — dismiss
+      if (!value.trim()) onClose()
+    },
+    [value, onClose],
+  )
+
+  const handleSend = useCallback(() => {
+    // TODO: wire up submitComment
+    onClose()
+  }, [onClose])
+
+  return (
+    <div ref={containerRef} className="relative mt-2">
+      <textarea
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleBlur}
+        placeholder="Write a reply..."
+        rows={3}
+        className="w-full resize-none rounded-xl border border-boundary bg-muted px-4 py-3 text-[14px] text-foreground outline-none placeholder:text-dim focus:border-dim/50"
+      />
+      {showSend && (
+        <button
+          type="button"
+          onClick={handleSend}
+          className="absolute right-3 bottom-3 text-dim transition-colors hover:text-secondary"
+        >
+          <CornerDownLeft className="size-4" />
+        </button>
+      )}
+    </div>
+  )
+}
+
 function CommentInput() {
   const [value, setValue] = useState('')
   const showSend = value.trim().length >= 3
@@ -81,6 +185,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
     user: { id: string; name: string }
   } | null>(null)
   const [loaded, setLoaded] = useState(false)
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
 
   const loadComments = useCallback(async () => {
     const result = await fetchComments({ data: { postCid } })
@@ -161,11 +266,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
       )}
 
       {rootComments.length > 0 && (
-        <div className="mt-6 space-y-5">
+        <div className="mt-6 space-y-3">
           {rootComments.map((comment) => (
-            <div key={comment.id}>
+            <div
+              key={comment.id}
+              id={`comment-${commentIndex.get(comment.id) ?? 0}`}
+            >
               {/* Root comment */}
-              <div className="flex gap-3 sm:-ml-11">
+              <div className="group flex gap-3 sm:-ml-11">
                 <div
                   className="mt-0.5 size-8 shrink-0 rounded-full border-2 border-boundary"
                   style={{
@@ -177,11 +285,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     <span className="text-[13px] font-medium text-foreground">
                       {comment.userName || 'Anonymous'}
                     </span>
+                    <a
+                      href={`#comment-${commentIndex.get(comment.id) ?? 0}`}
+                      className="text-[11px] text-dim transition-colors hover:text-secondary"
+                    >
+                      #{commentIndex.get(comment.id) ?? 0}
+                    </a>
                     <span className="text-[11px] text-dim">
                       {timeAgo(comment.createdAt)}
-                    </span>
-                    <span className="text-[11px] text-dim">
-                      #{commentIndex.get(comment.id) ?? 0}
                     </span>
                   </div>
                   <div className="mt-1.5 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
@@ -189,13 +300,24 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       {comment.content}
                     </p>
                   </div>
+                  <CommentMeta
+                    email={comment.userEmail}
+                    onReply={() => setReplyingTo(comment.id)}
+                  />
+                  {replyingTo === comment.id && (
+                    <ReplyInput onClose={() => setReplyingTo(null)} />
+                  )}
                 </div>
               </div>
               {/* Replies (flattened under root) */}
               {repliesByRoot.get(comment.id)?.map((reply) => (
-                <div key={reply.id} className="mt-3 flex gap-2.5">
+                <div
+                  key={reply.id}
+                  id={`comment-${commentIndex.get(reply.id) ?? 0}`}
+                  className="group mt-2 flex gap-2.5"
+                >
                   <div
-                    className="mt-0.5 size-6 shrink-0 rounded-full border-2 border-boundary"
+                    className="mt-0.5 size-7 shrink-0 rounded-full border-2 border-boundary"
                     style={{
                       backgroundColor: `hsl(${hashToHue(reply.userEmail)}, 40%, 55%)`,
                     }}
@@ -205,11 +327,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       <span className="text-[13px] font-medium text-foreground">
                         {reply.userName || 'Anonymous'}
                       </span>
+                      <a
+                        href={`#comment-${commentIndex.get(reply.id) ?? 0}`}
+                        className="text-[11px] text-dim transition-colors hover:text-secondary"
+                      >
+                        #{commentIndex.get(reply.id) ?? 0}
+                      </a>
                       <span className="text-[11px] text-dim">
                         {timeAgo(reply.createdAt)}
-                      </span>
-                      <span className="text-[11px] text-dim">
-                        #{commentIndex.get(reply.id) ?? 0}
                       </span>
                     </div>
                     <div className="mt-1 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
@@ -217,6 +342,13 @@ export function CommentSection({ postCid }: { postCid: string }) {
                         {reply.content}
                       </p>
                     </div>
+                    <CommentMeta
+                      email={reply.userEmail}
+                      onReply={() => setReplyingTo(reply.id)}
+                    />
+                    {replyingTo === reply.id && (
+                      <ReplyInput onClose={() => setReplyingTo(null)} />
+                    )}
                   </div>
                 </div>
               ))}
