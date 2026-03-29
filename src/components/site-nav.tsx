@@ -213,7 +213,7 @@ export function SiteNav({ article }: SiteNavProps) {
         >
           <Link
             to="/"
-            className="shrink-0 text-[13px] font-medium text-primary transition-colors hover:text-secondary"
+            className="shrink-0 text-[14px] font-medium text-primary transition-colors hover:text-secondary"
           >
             {SITE_TITLE}
           </Link>
@@ -222,7 +222,7 @@ export function SiteNav({ article }: SiteNavProps) {
               <a
                 key={href}
                 href={href}
-                className="text-[13px] text-secondary transition-colors hover:text-primary"
+                className="text-[14px] text-secondary transition-colors hover:text-primary"
               >
                 {label}
               </a>

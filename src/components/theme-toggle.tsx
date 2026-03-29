@@ -36,7 +36,7 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
         `
       }
     >
-      <span className="relative block size-4">
+      <span className="relative block size-[18px]">
         <span
           className="
             absolute inset-0 inline-flex items-center justify-center
@@ -44,7 +44,7 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
             dark:scale-75 dark:rotate-90 dark:opacity-0
           "
         >
-          <Moon size={16} />
+          <Moon size={18} />
         </span>
         <span
           className="
@@ -53,7 +53,7 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
             dark:scale-100 dark:rotate-0 dark:opacity-100
           "
         >
-          <Sun size={16} />
+          <Sun size={18} />
         </span>
       </span>
     </button>
