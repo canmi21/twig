@@ -38,6 +38,7 @@ export function SiteNav({ article }: SiteNavProps) {
   const lastScrollY = useRef(0)
   const wheelAnimating = useRef(false)
   const isMouseWheel = useRef(false)
+  const deviceDetected = useRef(false)
   const initAnimating = useRef(false)
   const mountedAt = useRef(0)
 
@@ -70,9 +71,12 @@ export function SiteNav({ article }: SiteNavProps) {
 
     function onWheel(e: WheelEvent) {
       // Mouse wheel: deltaMode=1 (line), or pixel mode with large discrete steps
-      // Touchpad: deltaMode=0 with small continuous deltas
-      isMouseWheel.current =
-        e.deltaMode === 1 || (e.deltaMode === 0 && Math.abs(e.deltaY) >= 50)
+      // Only classify once per scroll session — first event decides
+      if (!deviceDetected.current) {
+        deviceDetected.current = true
+        isMouseWheel.current =
+          e.deltaMode === 1 || (e.deltaMode === 0 && Math.abs(e.deltaY) >= 50)
+      }
     }
 
     function onScroll() {
@@ -80,6 +84,9 @@ export function SiteNav({ article }: SiteNavProps) {
       const delta = sy - lastScrollY.current
       lastScrollY.current = sy
       if (Math.abs(delta) < 1) return
+
+      // Animation already in flight — don't restart it
+      if (wheelAnimating.current || initAnimating.current) return
 
       // First scroll after mount (e.g. browser jumping to hash):
       // always animate fully to the direction, 300ms, then resume normal logic
@@ -120,6 +127,8 @@ export function SiteNav({ article }: SiteNavProps) {
     }
 
     function onScrollEnd() {
+      // Reset device detection for next scroll session
+      deviceDetected.current = false
       // Programmatic animations handle their own completion
       if (wheelAnimating.current) {
         wheelAnimating.current = false
