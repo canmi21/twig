@@ -114,6 +114,27 @@ export function CommentSection({ postCid }: { postCid: string }) {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
 
+  // Group replies by root ancestor (flatten deep nesting into one level)
+  const repliesByRoot = new Map<string, Comment[]>()
+  const parentToRoot = new Map<string, string>()
+  for (const c of rootComments) parentToRoot.set(c.id, c.id)
+
+  // Resolve root ancestor for each reply
+  const replies = comments
+    .filter((c) => c.parentId)
+    .toSorted(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    )
+  for (const c of replies) {
+    const pid = c.parentId ?? ''
+    const rootId = parentToRoot.get(pid) ?? pid
+    parentToRoot.set(c.id, rootId)
+    const group = repliesByRoot.get(rootId)
+    if (group) group.push(c)
+    else repliesByRoot.set(rootId, [c])
+  }
+
   return (
     <div>
       {!session ? (
@@ -134,28 +155,57 @@ export function CommentSection({ postCid }: { postCid: string }) {
       {rootComments.length > 0 && (
         <div className="mt-6 space-y-5">
           {rootComments.map((comment) => (
-            <div key={comment.id} className="flex gap-3 sm:-ml-11">
-              <div
-                className="mt-0.5 size-8 shrink-0 rounded-full border-2 border-boundary"
-                style={{
-                  backgroundColor: `hsl(${hashToHue(comment.userEmail)}, 40%, 55%)`,
-                }}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-medium text-foreground">
-                    {comment.userName || 'Anonymous'}
-                  </span>
-                  <span className="text-[11px] text-dim">
-                    {timeAgo(comment.createdAt)}
-                  </span>
-                </div>
-                <div className="mt-1.5 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
-                  <p className="text-[13.5px] leading-relaxed text-foreground/80">
-                    {comment.content}
-                  </p>
+            <div key={comment.id}>
+              {/* Root comment */}
+              <div className="flex gap-3 sm:-ml-11">
+                <div
+                  className="mt-0.5 size-8 shrink-0 rounded-full border-2 border-boundary"
+                  style={{
+                    backgroundColor: `hsl(${hashToHue(comment.userEmail)}, 40%, 55%)`,
+                  }}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium text-foreground">
+                      {comment.userName || 'Anonymous'}
+                    </span>
+                    <span className="text-[11px] text-dim">
+                      {timeAgo(comment.createdAt)}
+                    </span>
+                  </div>
+                  <div className="mt-1.5 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
+                    <p className="text-[13.5px] leading-relaxed text-foreground/80">
+                      {comment.content}
+                    </p>
+                  </div>
                 </div>
               </div>
+              {/* Replies (flattened under root) */}
+              {repliesByRoot.get(comment.id)?.map((reply) => (
+                <div key={reply.id} className="mt-3 flex gap-2.5">
+                  <div
+                    className="mt-0.5 size-6 shrink-0 rounded-full border-2 border-boundary"
+                    style={{
+                      backgroundColor: `hsl(${hashToHue(reply.userEmail)}, 40%, 55%)`,
+                    }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-medium text-foreground">
+                        {reply.userName || 'Anonymous'}
+                      </span>
+                      <span className="text-[11px] text-dim">
+                        {timeAgo(reply.createdAt)}
+                      </span>
+                    </div>
+                    <div className="mt-1 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
+                      <p className="text-[13.5px] leading-relaxed text-foreground/80">
+                        {reply.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ))}
         </div>
