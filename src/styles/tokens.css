@@ -30,18 +30,18 @@
 
 @theme {
   /* Neutral scale — oklch(L C H), H=80 (warm amber), higher chroma for visible warmth */
-  --color-surface: oklch(0.975 0.008 80);
-  --color-base: oklch(0.955 0.010 80);
-  --color-subtle: oklch(0.935 0.011 80);
-  --color-muted: oklch(0.910 0.012 80);
-  --color-tint: oklch(0.880 0.012 80);
-  --color-boundary: oklch(0.810 0.012 80);
-  --color-edge: oklch(0.720 0.011 80);
-  --color-rim: oklch(0.620 0.012 80);
-  --color-faint: oklch(0.530 0.010 80);
-  --color-dim: oklch(0.440 0.009 80);
-  --color-secondary: oklch(0.350 0.008 80);
-  --color-foreground: oklch(0.200 0.008 80);
+  --color-surface: oklch(0.978 0.009 84);
+  --color-base: oklch(0.958 0.010 84);
+  --color-subtle: oklch(0.938 0.011 84);
+  --color-muted: oklch(0.913 0.012 84);
+  --color-tint: oklch(0.884 0.012 84);
+  --color-boundary: oklch(0.814 0.011 84);
+  --color-edge: oklch(0.724 0.010 84);
+  --color-rim: oklch(0.624 0.011 84);
+  --color-faint: oklch(0.534 0.009 84);
+  --color-dim: oklch(0.444 0.008 84);
+  --color-secondary: oklch(0.354 0.007 84);
+  --color-foreground: oklch(0.205 0.007 84);
 
   /* Functional colors — base values, mode-independent */
   --color-danger: oklch(0.65 0.22 25);
@@ -68,25 +68,25 @@
 
 /* Overscroll background — pre-blended subtle over base */
 :root {
-  background-color: oklch(0.95 0.006 80);
+  background-color: oklch(0.953 0.007 84);
 }
 
 /* ── Dark mode (inverted symmetry) ──────────────── */
 
 .dark {
-  background-color: oklch(0.185 0.009 80);
-  --color-surface: oklch(0.165 0.008 80);
-  --color-base: oklch(0.192 0.010 80);
-  --color-subtle: oklch(0.222 0.011 80);
-  --color-muted: oklch(0.252 0.012 80);
-  --color-tint: oklch(0.287 0.012 80);
-  --color-boundary: oklch(0.352 0.012 80);
-  --color-edge: oklch(0.430 0.011 80);
-  --color-rim: oklch(0.515 0.012 80);
-  --color-faint: oklch(0.585 0.010 80);
-  --color-dim: oklch(0.665 0.009 80);
-  --color-secondary: oklch(0.765 0.008 80);
-  --color-foreground: oklch(0.925 0.008 80);
+  background-color: oklch(0.188 0.010 244);
+  --color-surface: oklch(0.168 0.009 244);
+  --color-base: oklch(0.195 0.010 244);
+  --color-subtle: oklch(0.224 0.011 244);
+  --color-muted: oklch(0.255 0.012 244);
+  --color-tint: oklch(0.291 0.013 244);
+  --color-boundary: oklch(0.356 0.012 244);
+  --color-edge: oklch(0.434 0.011 244);
+  --color-rim: oklch(0.519 0.012 244);
+  --color-faint: oklch(0.589 0.010 244);
+  --color-dim: oklch(0.669 0.009 244);
+  --color-secondary: oklch(0.769 0.008 244);
+  --color-foreground: oklch(0.928 0.007 244);
 }
 
 /* ── Auto-mixed variants ────────────────────────
