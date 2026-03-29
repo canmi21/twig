@@ -10,6 +10,7 @@ import {
   MonitorSmartphone,
   TabletSmartphone,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
 
@@ -126,7 +127,14 @@ function ReplyInput({ onClose }: { onClose: () => void }) {
   }, [onClose])
 
   return (
-    <div ref={containerRef} className="relative mt-2">
+    <motion.div
+      ref={containerRef}
+      className="relative mt-2 overflow-hidden"
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+    >
       <textarea
         autoFocus
         value={value}
@@ -145,7 +153,7 @@ function ReplyInput({ onClose }: { onClose: () => void }) {
           <CornerDownLeft className="size-4" />
         </button>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -267,10 +275,13 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
       {rootComments.length > 0 && (
         <div className="mt-6 space-y-3">
-          {rootComments.map((comment) => (
-            <div
+          {rootComments.map((comment, i) => (
+            <motion.div
               key={comment.id}
               id={`comment-${commentIndex.get(comment.id) ?? 0}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: i * 0.04 }}
             >
               {/* Root comment */}
               <div className="group flex gap-3 sm:-ml-11">
@@ -304,17 +315,25 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     email={comment.userEmail}
                     onReply={() => setReplyingTo(comment.id)}
                   />
-                  {replyingTo === comment.id && (
-                    <ReplyInput onClose={() => setReplyingTo(null)} />
-                  )}
+                  <AnimatePresence>
+                    {replyingTo === comment.id && (
+                      <ReplyInput onClose={() => setReplyingTo(null)} />
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
               {/* Replies (flattened under root) */}
-              {repliesByRoot.get(comment.id)?.map((reply) => (
-                <div
+              {repliesByRoot.get(comment.id)?.map((reply, ri) => (
+                <motion.div
                   key={reply.id}
                   id={`comment-${commentIndex.get(reply.id) ?? 0}`}
                   className="group mt-2 flex gap-2.5"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.2,
+                    delay: (i + 1) * 0.04 + ri * 0.03,
+                  }}
                 >
                   <div
                     className="mt-0.5 size-7 shrink-0 rounded-full border-2 border-boundary"
@@ -346,13 +365,15 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       email={reply.userEmail}
                       onReply={() => setReplyingTo(reply.id)}
                     />
-                    {replyingTo === reply.id && (
-                      <ReplyInput onClose={() => setReplyingTo(null)} />
-                    )}
+                    <AnimatePresence>
+                      {replyingTo === reply.id && (
+                        <ReplyInput onClose={() => setReplyingTo(null)} />
+                      )}
+                    </AnimatePresence>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
