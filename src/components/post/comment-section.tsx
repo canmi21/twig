@@ -114,6 +114,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
 
+  // Global chronological index (#0, #1, ...) across all comments
+  const chronological = comments.toSorted(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  )
+  const commentIndex = new Map<string, number>()
+  for (let i = 0; i < chronological.length; i++)
+    commentIndex.set(chronological[i].id, i)
+
   // Group replies by root ancestor (flatten deep nesting into one level)
   const repliesByRoot = new Map<string, Comment[]>()
   const parentToRoot = new Map<string, string>()
@@ -172,6 +180,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     <span className="text-[11px] text-dim">
                       {timeAgo(comment.createdAt)}
                     </span>
+                    <span className="text-[11px] text-dim">
+                      #{commentIndex.get(comment.id) ?? 0}
+                    </span>
                   </div>
                   <div className="mt-1.5 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
                     <p className="text-[13.5px] leading-relaxed text-foreground/80">
@@ -196,6 +207,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       </span>
                       <span className="text-[11px] text-dim">
                         {timeAgo(reply.createdAt)}
+                      </span>
+                      <span className="text-[11px] text-dim">
+                        #{commentIndex.get(reply.id) ?? 0}
                       </span>
                     </div>
                     <div className="mt-1 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
