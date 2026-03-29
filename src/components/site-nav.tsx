@@ -17,7 +17,7 @@ interface SiteNavProps {
   article?: ArticleInfo
 }
 
-const NAV_HEIGHT = 56
+const NAV_HEIGHT = 64
 // Mouse wheel events produce large deltas; touchpad events are small and continuous
 // deltaMode 0 = pixel (touchpad), 1 = line (mouse wheel discrete steps)
 // Mouse wheel on most browsers: deltaMode=0 but deltaY is a multiple of ~100
@@ -242,7 +242,7 @@ export function SiteNav({ article }: SiteNavProps) {
             className="absolute left-8 text-secondary transition-colors hover:text-primary"
             aria-label="Back to posts"
           >
-            <Undo2 className="size-4" strokeWidth={1.8} />
+            <Undo2 className="size-[18px]" strokeWidth={1.8} />
           </Link>
           <button
             type="button"
@@ -251,28 +251,28 @@ export function SiteNav({ article }: SiteNavProps) {
             aria-label="Copy link"
           >
             {copied ? (
-              <Check className="size-4" strokeWidth={1.8} />
+              <Check className="size-[18px]" strokeWidth={1.8} />
             ) : (
-              <Forward className="size-4" strokeWidth={1.8} />
+              <Forward className="size-[18px]" strokeWidth={1.8} />
             )}
           </button>
           {/* Title + info area: aligns with paper midpoint */}
           <div className="mx-auto flex w-full max-w-208 min-w-0 items-center justify-between px-4 sm:px-7">
             <div className="min-w-0">
-              <div className="truncate text-[13px] font-medium text-primary">
+              <div className="truncate text-[14px] font-medium text-primary">
                 {article?.title}
               </div>
               {article?.description && (
-                <div className="truncate text-[11px] text-tertiary">
+                <div className="truncate text-[12px] text-tertiary">
                   {article.description}
                 </div>
               )}
             </div>
             <div className="shrink-0 text-right">
-              <div className="text-[11px] text-tertiary">
+              <div className="text-[12px] text-tertiary">
                 {article?.category ?? 'uncategorized'}
               </div>
-              <div className="text-[12px] text-secondary">{SITE_TITLE}</div>
+              <div className="text-[13px] text-secondary">{SITE_TITLE}</div>
             </div>
           </div>
         </div>
