@@ -37,9 +37,9 @@ function HomePage() {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-surface">
       <SiteNav />
-      <main className="min-h-screen bg-surface">
+      <main className="min-h-[calc(100dvh-56px)]">
         <div className="mx-auto max-w-180 px-5 pt-12 pb-24">
           <ul className="space-y-6">
             {posts.map((post) => (
@@ -80,6 +80,6 @@ function HomePage() {
         </div>
       </main>
       <SiteFooter />
-    </>
+    </div>
   )
 }

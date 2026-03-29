@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import { motion, useMotionValue, animate } from 'motion/react'
-import { Undo2, Link as LinkIcon, Check } from 'lucide-react'
+import { Undo2, Forward, Check } from 'lucide-react'
 import { SITE_TITLE } from '~/lib/content/metadata'
 import { ThemeToggle } from '~/components/theme-toggle'
 
@@ -213,7 +213,7 @@ export function SiteNav({ article }: SiteNavProps) {
             {copied ? (
               <Check className="size-4" strokeWidth={1.8} />
             ) : (
-              <LinkIcon className="size-4" strokeWidth={1.8} />
+              <Forward className="size-4" strokeWidth={1.8} />
             )}
           </button>
           {/* Title + info area: aligns with paper midpoint */}
