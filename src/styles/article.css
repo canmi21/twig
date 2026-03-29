@@ -1,5 +1,30 @@
 /* src/styles/article.css */
 
+/* ── Ambient glow — soft spotlight on the reading area ── */
+
+.noise-bg::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 30%,
+    oklch(1 0.005 84 / 0.045),
+    transparent
+  );
+}
+
+.dark .noise-bg::after {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 30%,
+    oklch(0.3 0.012 244 / 0.15),
+    transparent
+  );
+}
+
+/* ── Article typography ─────────────────────── */
+
 .article {
   font-size: 14.5px;
   line-height: 1.7;

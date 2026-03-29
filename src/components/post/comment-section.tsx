@@ -117,7 +117,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
   return (
     <div>
       {!session ? (
-        <div className="rounded-lg border border-dashed border-boundary px-8 py-10 sm:px-14">
+        <div className="rounded-lg border border-dashed border-boundary py-10">
           <div className="py-6 text-center">
             <Link
               to="/login"
@@ -134,7 +134,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
       {rootComments.length > 0 && (
         <div className="mt-6 space-y-5">
           {rootComments.map((comment) => (
-            <div key={comment.id} className="flex gap-3">
+            <div key={comment.id} className="flex gap-3 sm:-ml-11">
               <div
                 className="mt-0.5 size-8 shrink-0 rounded-full border-2 border-boundary"
                 style={{

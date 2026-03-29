@@ -31,12 +31,12 @@
 @theme {
   /* Neutral scale — oklch(L C H), H=80 (warm amber), higher chroma for visible warmth */
   --color-surface: oklch(0.978 0.009 84);
-  --color-base: oklch(0.958 0.010 84);
+  --color-base: oklch(0.958 0.01 84);
   --color-subtle: oklch(0.938 0.011 84);
   --color-muted: oklch(0.913 0.012 84);
   --color-tint: oklch(0.884 0.012 84);
   --color-boundary: oklch(0.814 0.011 84);
-  --color-edge: oklch(0.724 0.010 84);
+  --color-edge: oklch(0.724 0.01 84);
   --color-rim: oklch(0.624 0.011 84);
   --color-faint: oklch(0.534 0.009 84);
   --color-dim: oklch(0.444 0.008 84);
@@ -74,16 +74,16 @@
 /* ── Dark mode (inverted symmetry) ──────────────── */
 
 .dark {
-  background-color: oklch(0.188 0.010 244);
+  background-color: oklch(0.188 0.01 244);
   --color-surface: oklch(0.168 0.009 244);
-  --color-base: oklch(0.195 0.010 244);
+  --color-base: oklch(0.195 0.01 244);
   --color-subtle: oklch(0.224 0.011 244);
   --color-muted: oklch(0.255 0.012 244);
   --color-tint: oklch(0.291 0.013 244);
   --color-boundary: oklch(0.356 0.012 244);
   --color-edge: oklch(0.434 0.011 244);
   --color-rim: oklch(0.519 0.012 244);
-  --color-faint: oklch(0.589 0.010 244);
+  --color-faint: oklch(0.589 0.01 244);
   --color-dim: oklch(0.669 0.009 244);
   --color-secondary: oklch(0.769 0.008 244);
   --color-foreground: oklch(0.928 0.007 244);

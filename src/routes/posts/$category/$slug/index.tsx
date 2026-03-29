@@ -66,7 +66,7 @@ function PostPage() {
       <Toc entries={post.toc} />
       <PostActions />
       <main className="py-14">
-        <article className="relative z-10 mx-auto max-w-208 rounded-lg border border-boundary bg-surface px-8 pt-12 pb-14 shadow-sm sm:px-14">
+        <article className="relative z-10 mx-auto max-w-208 px-8 pt-12 pb-14 sm:px-14">
           <ArticleHeader
             title={frontmatter.title}
             createdAt={frontmatter.created_at}
@@ -104,7 +104,7 @@ function PostPage() {
           )}
         </article>
         {frontmatter.cid && (
-          <div className="relative z-10 mx-auto mt-6 max-w-208">
+          <div className="relative z-10 mx-auto mt-6 max-w-208 px-8 sm:px-14">
             <CommentSection postCid={frontmatter.cid} />
           </div>
         )}

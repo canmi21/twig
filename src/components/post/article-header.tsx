@@ -68,7 +68,7 @@ export function ArticleHeader({
   return (
     <header className="mb-10 flex items-start justify-between gap-3">
       <div className="min-w-0 flex-1">
-        <h1 className="text-[17px] font-medium text-foreground">{title}</h1>
+        <h1 className="text-[20px] font-medium text-foreground">{title}</h1>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-secondary">
           {createdAt && (
             <time dateTime={createdAt}>{formatDate(createdAt)}</time>
