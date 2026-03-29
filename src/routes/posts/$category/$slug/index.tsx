@@ -54,7 +54,8 @@ function PostPage() {
       new Date(frontmatter.created_at).getFullYear()
 
   return (
-    <>
+    // eslint-disable-next-line better-tailwindcss/no-unknown-classes
+    <div className="noise-bg relative min-h-screen bg-canvas">
       <SiteNav
         article={{
           title: frontmatter.title,
@@ -64,9 +65,8 @@ function PostPage() {
       />
       <Toc entries={post.toc} />
       <PostActions />
-      {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
-      <main className="noise-bg relative bg-canvas py-14">
-        <article className="relative z-10 mx-auto max-w-208 rounded-lg border border-border bg-surface px-8 py-16 shadow-sm sm:px-14">
+      <main className="py-14">
+        <article className="relative z-10 mx-auto max-w-208 rounded-lg border border-border bg-surface px-8 pt-12 pb-14 shadow-sm sm:px-14">
           <ArticleHeader
             title={frontmatter.title}
             createdAt={frontmatter.created_at}
@@ -110,6 +110,6 @@ function PostPage() {
         )}
       </main>
       <SiteFooter />
-    </>
+    </div>
   )
 }

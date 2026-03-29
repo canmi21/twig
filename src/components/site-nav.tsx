@@ -162,7 +162,7 @@ export function SiteNav({ article }: SiteNavProps) {
 
   return (
     <header
-      className="sticky top-0 z-40 overflow-hidden border-b border-border bg-chrome/50 backdrop-blur-lg"
+      className="sticky top-0 z-40 overflow-hidden border-b border-border bg-chrome/50 backdrop-blur-sm"
       style={{ height: NAV_HEIGHT }}
     >
       <motion.div style={{ y }}>
