@@ -169,7 +169,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
                 {isActive && isOpen && (
                   <motion.div
                     layoutId="toc-indicator"
-                    className="absolute top-[3px] left-0 h-3 w-0.5 rounded-full bg-primary"
+                    className="absolute top-[3px] left-0 h-3 w-0.5 rounded-full bg-foreground"
                     initial={{ opacity: 0, x: -4 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -4 }}
@@ -180,7 +180,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
               <a
                 href={`#${entry.id}`}
                 onClick={(e) => handleClick(e, entry.id)}
-                className={`relative block pl-2 ${isActive ? 'text-primary' : 'text-secondary'}`}
+                className={`relative block pl-2 ${isActive ? 'text-foreground' : 'text-secondary'}`}
               >
                 {/* Bar — leads the morph, starts immediately */}
                 <motion.span

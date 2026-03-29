@@ -14,7 +14,7 @@ export function PostBackLink() {
         inline-flex items-center justify-center
         rounded-full p-2
         text-secondary
-        hover:text-primary
+        hover:text-foreground
         xl:fixed
         xl:top-40 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:justify-start xl:gap-1.5

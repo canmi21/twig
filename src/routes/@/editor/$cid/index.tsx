@@ -68,7 +68,7 @@ function ToolbarThemeButton() {
       onClick={toggleDocumentTheme}
       aria-label="Toggle theme"
       title="Toggle theme"
-      className="rounded-full p-2 text-secondary transition-colors hover:text-primary"
+      className="rounded-full p-2 text-secondary transition-colors hover:text-foreground"
     >
       {isDark ? (
         <Sun className="size-3.5" strokeWidth={1.8} />
@@ -410,7 +410,7 @@ function EditorPage() {
   }
 
   const inputClass =
-    'rounded-sm border border-border bg-surface px-2 py-1 text-sm text-primary outline-none focus:border-secondary'
+    'rounded-sm border border-boundary bg-surface px-2 py-1 text-sm text-foreground outline-none focus:border-secondary'
 
   const leftPercent = `${splitRatio * 100}%`
   const rightPercent = `${(1 - splitRatio) * 100}%`
@@ -418,10 +418,10 @@ function EditorPage() {
   return (
     <div className="relative flex h-screen flex-col bg-surface">
       {/* Toolbar */}
-      <header className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-1.5">
+      <header className="flex shrink-0 items-center gap-1 border-b border-boundary px-3 py-1.5">
         <Link
           to="/@/contents"
-          className="rounded-sm p-1.5 text-secondary hover:bg-raised hover:text-primary"
+          className="rounded-sm p-1.5 text-secondary hover:bg-muted hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" strokeWidth={1.8} />
         </Link>
@@ -446,7 +446,7 @@ function EditorPage() {
           className="flex min-w-0 flex-col overflow-hidden"
           style={{ width: leftPercent }}
         >
-          <div className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-2">
+          <div className="flex shrink-0 items-center gap-2 border-b border-boundary px-4 py-2">
             <input
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
@@ -464,7 +464,7 @@ function EditorPage() {
             value={source}
             onChange={(e) => setSource(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="min-h-0 flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-primary outline-none"
+            className="min-h-0 flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-foreground outline-none"
             spellCheck={false}
           />
         </div>
@@ -478,7 +478,7 @@ function EditorPage() {
             onPointerUp={handleDragEnd}
           />
           <motion.div
-            className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 bg-border group-hover:bg-secondary group-active:bg-secondary"
+            className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 bg-boundary group-hover:bg-secondary group-active:bg-secondary"
             initial={false}
             animate={{ width: 1 }}
             whileHover={{ width: 3 }}
@@ -552,14 +552,14 @@ function EditorPage() {
           </div>
           {/* Floating pill toolbar */}
           <div className="pointer-events-none absolute inset-x-0 bottom-6 flex justify-center">
-            <div className="pointer-events-auto flex items-center gap-px rounded-full border border-border bg-surface px-0.5 shadow-sm">
+            <div className="pointer-events-auto flex items-center gap-px rounded-full border border-boundary bg-surface px-0.5 shadow-sm">
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
                 aria-label="Save"
                 title={saving ? 'Saving...' : 'Save'}
-                className="rounded-full p-2 text-secondary transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-full p-2 text-secondary transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save className="size-3.5" strokeWidth={1.8} />
               </button>
@@ -576,7 +576,7 @@ function EditorPage() {
                     replace: true,
                   })
                 }
-                className="rounded-full p-2 text-secondary transition-colors hover:text-primary"
+                className="rounded-full p-2 text-secondary transition-colors hover:text-foreground"
               >
                 {previewMode === 'rendered' ? (
                   <Eye className="size-3.5" strokeWidth={1.8} />
@@ -689,7 +689,7 @@ function HtmlSourceView({
 
   return (
     <div className="flex h-full min-h-0 flex-col font-mono text-[13px]/6">
-      <div className="flex shrink-0 items-center gap-4 border-b border-border bg-surface px-3 py-1.5">
+      <div className="flex shrink-0 items-center gap-4 border-b border-boundary bg-surface px-3 py-1.5">
         <label className="flex items-center gap-2 text-[10px] text-secondary select-none">
           <input
             type="checkbox"
@@ -726,7 +726,7 @@ function HtmlSourceView({
               gridTemplateColumns: `calc(${gutterWidth}ch + 0.5rem) minmax(0, 1fr)`,
             }}
           >
-            <div className="h-1 border-r border-border bg-raised" />
+            <div className="h-1 border-r border-boundary bg-muted" />
             <div />
           </div>
           {lines.map((line, i) => {
@@ -742,13 +742,13 @@ function HtmlSourceView({
                 }}
               >
                 <div
-                  className={`border-r border-border bg-raised pr-1 text-right text-tertiary tabular-nums select-none ${edgePadding}`}
+                  className={`border-r border-boundary bg-muted pr-1 text-right text-dim tabular-nums select-none ${edgePadding}`}
                   style={gutterStyle}
                 >
                   {String(i + 1)}
                 </div>
                 <div
-                  className={`min-w-0 px-4 text-primary ${prettyPrint ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'} ${edgePadding}`}
+                  className={`min-w-0 px-4 text-foreground ${prettyPrint ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'} ${edgePadding}`}
                   style={
                     highlighted?.fg
                       ? ({ color: highlighted.fg } as CSSProperties)

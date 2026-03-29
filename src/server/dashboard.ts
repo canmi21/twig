@@ -1,9 +1,11 @@
 /* src/server/dashboard.ts */
 
+import { count } from 'drizzle-orm'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { getDb } from './platform'
 import { getAuth } from './better-auth'
+import { user } from '~/lib/database/auth-schema'
 import {
   getPostStats,
   getRecentPosts,
@@ -26,27 +28,38 @@ export interface DashboardOverview {
   userCount: number
 }
 
+async function getUserCount(db: ReturnType<typeof getDb>): Promise<number> {
+  // In dev without a real session, auth.api.listUsers fails.
+  // Query the user table directly as a reliable fallback.
+  if (import.meta.env.DEV) {
+    const [row] = await db.select({ n: count() }).from(user).all()
+    return row?.n ?? 0
+  }
+
+  const auth = getAuth()
+  const headers = getRequestHeaders()
+  const result = await auth.api.listUsers({
+    headers,
+    query: { limit: 1, sortBy: 'createdAt', sortDirection: 'desc' },
+  })
+  return (
+    (result as unknown as { total?: number }).total ??
+    (result as unknown as { users: unknown[] }).users.length
+  )
+}
+
 export const fetchDashboardOverview = createServerFn().handler(
   async (): Promise<DashboardOverview> => {
     const db = getDb()
-    const auth = getAuth()
-    const headers = getRequestHeaders()
 
-    const [postStats, commentStats, recentPosts, recentComments, usersResult] =
+    const [postStats, commentStats, recentPosts, recentComments, userCount] =
       await Promise.all([
         getPostStats(db),
         getCommentStats(db),
         getRecentPosts(db),
         getRecentComments(db),
-        auth.api.listUsers({
-          headers,
-          query: { limit: 1, sortBy: 'createdAt', sortDirection: 'desc' },
-        }),
+        getUserCount(db),
       ])
-
-    const userCount =
-      (usersResult as unknown as { total?: number }).total ??
-      (usersResult as unknown as { users: unknown[] }).users.length
 
     return { postStats, commentStats, recentPosts, recentComments, userCount }
   },

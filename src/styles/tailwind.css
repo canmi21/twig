@@ -1,0 +1,31 @@
+/* src/styles/tailwind.css */
+
+@import 'tailwindcss';
+
+/* Class-based dark mode instead of prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  scroll-behavior: smooth;
+  font-family:
+    'Noto Sans',
+    'Noto Sans SC',
+    'Noto Sans JP',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* Text selection highlight — hand-tuned, not part of the token system */
+::selection {
+  background-color: #fef9b2;
+}
+
+.dark ::selection {
+  background-color: #4a605f;
+}

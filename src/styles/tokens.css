@@ -1,0 +1,157 @@
+/* src/styles/tokens.css */
+
+/* src/styles/tokens.css — Design token definitions
+ *
+ * Three-layer color architecture:
+ *   1. Neutral scale — 12-step OKLCH warm gray (hue 80), inverted symmetry
+ *   2. Functional colors — danger/success/caution/accent + auto-mixed variants
+ *   3. Theme color — single seed, auto-derived via color-mix()
+ *
+ * Philosophy: light mode whitest = elevated, dark mode darkest = recessed.
+ * The absolute perceptual distance from the extreme is symmetric across modes.
+ *
+ * ── Neutral token roles ──────────────────────────
+ *  surface    step 1   most extreme face (lightest / darkest)
+ *  base       step 2   page background
+ *  subtle     step 3   nav, footer, component backgrounds
+ *  muted      step 4   input bg, code blocks, recessed areas
+ *  tint       step 5   hover/active fills, chat bubbles
+ *  boundary   step 6   subtle borders, dividers
+ *  edge       step 7   standard borders
+ *  rim        step 8   strong borders, focus rings
+ *  faint      step 9   placeholder text, disabled state
+ *  dim        step 10  footnotes, weakest visible text
+ *  secondary  step 11  meta text, dates, captions
+ *  foreground step 12  body text, headings
+ * ─────────────────────────────────────────────────
+ */
+
+/* ── Light mode ─────────────────────────────────── */
+
+@theme {
+  /* Neutral scale — oklch(L C H), H=80 (warm amber), higher chroma for visible warmth */
+  --color-surface: oklch(0.975 0.008 80);
+  --color-base: oklch(0.955 0.010 80);
+  --color-subtle: oklch(0.935 0.011 80);
+  --color-muted: oklch(0.910 0.012 80);
+  --color-tint: oklch(0.880 0.012 80);
+  --color-boundary: oklch(0.810 0.012 80);
+  --color-edge: oklch(0.720 0.011 80);
+  --color-rim: oklch(0.620 0.012 80);
+  --color-faint: oklch(0.530 0.010 80);
+  --color-dim: oklch(0.440 0.009 80);
+  --color-secondary: oklch(0.350 0.008 80);
+  --color-foreground: oklch(0.200 0.008 80);
+
+  /* Functional colors — base values, mode-independent */
+  --color-danger: oklch(0.65 0.22 25);
+  --color-success: oklch(0.65 0.18 155);
+  --color-caution: oklch(0.75 0.15 85);
+  --color-accent: oklch(0.62 0.15 250);
+
+  /* Theme color — single seed */
+  --color-theme: oklch(0.64 0.11 48);
+
+  /* Variant placeholders — actual values set via color-mix() below */
+  --color-danger-subtle: oklch(0.95 0.02 25);
+  --color-danger-text: oklch(0.45 0.18 25);
+  --color-success-subtle: oklch(0.95 0.02 155);
+  --color-success-text: oklch(0.45 0.14 155);
+  --color-caution-subtle: oklch(0.95 0.02 85);
+  --color-caution-text: oklch(0.55 0.12 85);
+  --color-accent-subtle: oklch(0.95 0.02 250);
+  --color-accent-text: oklch(0.45 0.12 250);
+  --color-theme-subtle: oklch(0.95 0.01 48);
+  --color-theme-muted: oklch(0.9 0.02 48);
+  --color-theme-text: oklch(0.45 0.08 48);
+}
+
+/* Overscroll background — pre-blended subtle over base */
+:root {
+  background-color: oklch(0.95 0.006 80);
+}
+
+/* ── Dark mode (inverted symmetry) ──────────────── */
+
+.dark {
+  background-color: oklch(0.185 0.009 80);
+  --color-surface: oklch(0.165 0.008 80);
+  --color-base: oklch(0.192 0.010 80);
+  --color-subtle: oklch(0.222 0.011 80);
+  --color-muted: oklch(0.252 0.012 80);
+  --color-tint: oklch(0.287 0.012 80);
+  --color-boundary: oklch(0.352 0.012 80);
+  --color-edge: oklch(0.430 0.011 80);
+  --color-rim: oklch(0.515 0.012 80);
+  --color-faint: oklch(0.585 0.010 80);
+  --color-dim: oklch(0.665 0.009 80);
+  --color-secondary: oklch(0.765 0.008 80);
+  --color-foreground: oklch(0.925 0.008 80);
+}
+
+/* ── Auto-mixed variants ────────────────────────
+ * color-mix() adapts automatically when the neutral scale inverts.
+ * No separate light/dark definitions needed.
+ * ─────────────────────────────────────────────── */
+
+:root,
+.dark {
+  /* Functional color variants */
+  --color-danger-subtle: color-mix(
+    in oklch,
+    var(--color-danger) 12%,
+    var(--color-surface)
+  );
+  --color-danger-text: color-mix(
+    in oklch,
+    var(--color-danger) 75%,
+    var(--color-foreground)
+  );
+  --color-success-subtle: color-mix(
+    in oklch,
+    var(--color-success) 12%,
+    var(--color-surface)
+  );
+  --color-success-text: color-mix(
+    in oklch,
+    var(--color-success) 75%,
+    var(--color-foreground)
+  );
+  --color-caution-subtle: color-mix(
+    in oklch,
+    var(--color-caution) 12%,
+    var(--color-surface)
+  );
+  --color-caution-text: color-mix(
+    in oklch,
+    var(--color-caution) 75%,
+    var(--color-foreground)
+  );
+  --color-accent-subtle: color-mix(
+    in oklch,
+    var(--color-accent) 12%,
+    var(--color-surface)
+  );
+  --color-accent-text: color-mix(
+    in oklch,
+    var(--color-accent) 75%,
+    var(--color-foreground)
+  );
+
+  /* Theme color variants */
+  --color-theme-subtle: color-mix(
+    in oklch,
+    var(--color-theme) 10%,
+    var(--color-surface)
+  );
+  --color-theme-muted: color-mix(
+    in oklch,
+    var(--color-theme) 18%,
+    var(--color-muted)
+  );
+  --color-theme-text: color-mix(
+    in oklch,
+    var(--color-theme) 70%,
+    var(--color-foreground)
+  );
+}

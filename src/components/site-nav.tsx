@@ -202,7 +202,7 @@ export function SiteNav({ article }: SiteNavProps) {
 
   return (
     <header
-      className="sticky top-0 z-40 overflow-hidden border-b border-border bg-chrome/50 backdrop-blur-sm"
+      className="sticky top-0 z-40 overflow-hidden border-b border-boundary bg-subtle/50 backdrop-blur-sm"
       style={{ height: NAV_HEIGHT }}
     >
       <motion.div style={{ y }}>
@@ -213,7 +213,7 @@ export function SiteNav({ article }: SiteNavProps) {
         >
           <Link
             to="/"
-            className="shrink-0 text-[14px] font-medium text-primary transition-colors hover:text-secondary"
+            className="shrink-0 text-[14px] font-medium text-foreground transition-colors hover:text-secondary"
           >
             {SITE_TITLE}
           </Link>
@@ -222,13 +222,13 @@ export function SiteNav({ article }: SiteNavProps) {
               <a
                 key={href}
                 href={href}
-                className="text-[14px] text-secondary transition-colors hover:text-primary"
+                className="text-[14px] text-secondary transition-colors hover:text-foreground"
               >
                 {label}
               </a>
             ))}
           </nav>
-          <ThemeToggle className="shrink-0 cursor-pointer text-secondary transition-colors hover:text-primary" />
+          <ThemeToggle className="shrink-0 cursor-pointer text-secondary transition-colors hover:text-foreground" />
         </div>
 
         {/* Panel 2: Article mode */}
@@ -239,7 +239,7 @@ export function SiteNav({ article }: SiteNavProps) {
           {/* Back + copy link: absolute, don't affect center layout */}
           <Link
             to="/posts"
-            className="absolute left-8 text-secondary transition-colors hover:text-primary"
+            className="absolute left-8 text-secondary transition-colors hover:text-foreground"
             aria-label="Back to posts"
           >
             <Undo2 className="size-[18px]" strokeWidth={1.8} />
@@ -247,7 +247,7 @@ export function SiteNav({ article }: SiteNavProps) {
           <button
             type="button"
             onClick={handleCopyLink}
-            className="absolute right-8 text-secondary transition-colors hover:text-primary"
+            className="absolute right-8 text-secondary transition-colors hover:text-foreground"
             aria-label="Copy link"
           >
             {copied ? (
@@ -259,17 +259,17 @@ export function SiteNav({ article }: SiteNavProps) {
           {/* Title + info area: aligns with paper midpoint */}
           <div className="mx-auto flex w-full max-w-208 min-w-0 items-center justify-between px-4 sm:px-7">
             <div className="min-w-0">
-              <div className="truncate text-[14px] font-medium text-primary">
+              <div className="truncate text-[14px] font-medium text-foreground">
                 {article?.title}
               </div>
               {article?.description && (
-                <div className="truncate text-[12px] text-tertiary">
+                <div className="truncate text-[12px] text-dim">
                   {article.description}
                 </div>
               )}
             </div>
             <div className="shrink-0 text-right">
-              <div className="text-[12px] text-tertiary">
+              <div className="text-[12px] text-dim">
                 {article?.category ?? 'uncategorized'}
               </div>
               <div className="text-[13px] text-secondary">{SITE_TITLE}</div>

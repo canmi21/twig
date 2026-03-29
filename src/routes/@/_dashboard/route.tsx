@@ -64,21 +64,21 @@ function DashboardLayout() {
   return (
     <div className="flex h-screen">
       <motion.aside
-        className="flex shrink-0 flex-col border-r border-border bg-surface"
+        className="flex shrink-0 flex-col border-r border-boundary bg-surface"
         initial={false}
         animate={{ width: collapsed ? 56 : 208 }}
         transition={springStandard}
       >
         <div className="flex items-center justify-between px-4 py-5">
           <span
-            className={`text-sm font-medium whitespace-nowrap text-primary transition-opacity duration-200 ${collapsed ? 'w-0 overflow-hidden opacity-0' : 'opacity-100'}`}
+            className={`text-sm font-medium whitespace-nowrap text-foreground transition-opacity duration-200 ${collapsed ? 'w-0 overflow-hidden opacity-0' : 'opacity-100'}`}
           >
             Console
           </span>
           <button
             type="button"
             onClick={toggle}
-            className="text-secondary transition-colors hover:text-primary"
+            className="text-secondary transition-colors hover:text-foreground"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? (
@@ -98,13 +98,13 @@ function DashboardLayout() {
               <Link
                 key={to}
                 to={to}
-                className={`relative flex items-center rounded-sm text-sm transition-colors ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'} ${isActive ? 'font-medium text-primary' : 'text-secondary hover:text-primary'}`}
+                className={`relative flex items-center rounded-sm text-sm transition-colors ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'} ${isActive ? 'font-medium text-foreground' : 'text-secondary hover:text-foreground'}`}
                 title={collapsed ? label : undefined}
               >
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active-indicator"
-                    className="absolute inset-0 rounded-sm bg-raised"
+                    className="absolute inset-0 rounded-sm bg-muted"
                     transition={springStandard}
                   />
                 )}
@@ -119,7 +119,7 @@ function DashboardLayout() {
                   {label}
                 </span>
                 {showBadge && !collapsed && (
-                  <span className="relative z-10 ml-auto rounded-full bg-caution/15 px-1.5 py-0.5 text-[11px] leading-none text-caution">
+                  <span className="relative z-10 ml-auto rounded-full bg-caution-subtle px-1.5 py-0.5 text-[11px] leading-none text-caution">
                     {pendingComments}
                   </span>
                 )}
@@ -132,20 +132,20 @@ function DashboardLayout() {
         </nav>
 
         {/* User info + back link */}
-        <div className="border-t border-border px-2 py-3">
+        <div className="border-t border-boundary px-2 py-3">
           {auth.session && !collapsed && (
             <div className="mb-2 px-3 py-1">
-              <div className="truncate text-[13px] font-medium text-primary">
+              <div className="truncate text-[13px] font-medium text-foreground">
                 {auth.session.user.name}
               </div>
-              <div className="truncate text-[11px] text-tertiary">
+              <div className="truncate text-[11px] text-dim">
                 {auth.session.user.email}
               </div>
             </div>
           )}
           <Link
             to="/"
-            className={`flex items-center text-sm text-secondary transition-colors hover:text-primary ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'}`}
+            className={`flex items-center text-sm text-secondary transition-colors hover:text-foreground ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'}`}
             title={collapsed ? 'Back to site' : undefined}
           >
             <ArrowLeft size={15} strokeWidth={1.7} className="shrink-0" />

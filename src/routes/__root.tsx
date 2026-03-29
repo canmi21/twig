@@ -103,7 +103,7 @@ function NotFound() {
   return (
     <div className="flex h-screen items-center justify-center">
       <span className="text-xl font-medium">404</span>
-      <span className="mx-4 h-8 w-px bg-border" />
+      <span className="mx-4 h-8 w-px bg-boundary" />
       <span className="text-sm text-secondary">Not Found</span>
     </div>
   )
@@ -147,7 +147,7 @@ function RootDocument({
           }}
         />
       </head>
-      <body className="bg-canvas text-primary">
+      <body className="bg-base text-foreground">
         {children}
         <Scripts />
       </body>

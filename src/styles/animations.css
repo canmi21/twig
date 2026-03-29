@@ -1,0 +1,18 @@
+/* src/styles/animations.css */
+
+@keyframes toc-bar-intro {
+  from {
+    transform: scaleX(0.42);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-toc-bar-intro='true'] {
+    transform-origin: left center;
+    animation: toc-bar-intro 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}

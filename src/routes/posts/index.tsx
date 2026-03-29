@@ -50,11 +50,11 @@ function PostsPage() {
                     category: post.category ?? 'uncategorized',
                     slug: post.slug,
                   }}
-                  className="group block text-primary"
+                  className="group block text-foreground"
                 >
                   <div className="flex items-center gap-3">
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[15px] font-medium decoration-border underline-offset-[3px] group-hover:underline">
+                      <div className="truncate text-[15px] font-medium decoration-boundary underline-offset-[3px] group-hover:underline">
                         {post.title}
                       </div>
                       {post.description && (
@@ -63,7 +63,7 @@ function PostsPage() {
                         </p>
                       )}
                     </div>
-                    <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
+                    <div className="hidden min-w-8 flex-1 border-t border-dashed border-boundary sm:block" />
                     {post.createdAt && (
                       <time
                         dateTime={post.createdAt}

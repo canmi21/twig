@@ -22,10 +22,25 @@ const checkAuth = createServerFn().handler(async (): Promise<AdminAuth> => {
     email = identity.email
   }
 
-  // 2. Better Auth session (may be null)
-  const session = await getAuth().api.getSession({
-    headers: getRequestHeaders(),
-  })
+  // 2. Better Auth session (may be null, may throw in dev without DB)
+  const session = await getAuth()
+    .api.getSession({ headers: getRequestHeaders() })
+    .catch(() => null)
+
+  // 3. In dev, auto-login as seed admin if no session
+  if (import.meta.env.DEV && !session) {
+    return {
+      email,
+      session: {
+        user: {
+          id: 'dev-user-admin',
+          name: 'Admin',
+          email: 'admin@dev.local',
+          role: 'admin',
+        },
+      },
+    }
+  }
 
   return {
     email,
@@ -56,7 +71,7 @@ export const Route = createFileRoute('/@')({
   errorComponent: () => (
     <div className="flex h-screen items-center justify-center">
       <span className="text-xl font-medium">401</span>
-      <span className="mx-4 h-8 w-px bg-border" />
+      <span className="mx-4 h-8 w-px bg-boundary" />
       <span className="text-sm text-secondary">Unauthorized</span>
     </div>
   ),
@@ -75,7 +90,7 @@ function AdminGate() {
           </p>
           <Link
             to="/login"
-            className="mt-3 inline-block rounded-sm bg-primary px-4 py-1.5 text-sm text-surface"
+            className="mt-3 inline-block rounded-sm bg-foreground px-4 py-1.5 text-sm text-surface"
           >
             Sign in
           </Link>
@@ -88,7 +103,7 @@ function AdminGate() {
     return (
       <div className="flex h-screen items-center justify-center">
         <span className="text-xl font-medium">403</span>
-        <span className="mx-4 h-8 w-px bg-border" />
+        <span className="mx-4 h-8 w-px bg-boundary" />
         <span className="text-sm text-secondary">No permission</span>
       </div>
     )

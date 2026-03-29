@@ -32,7 +32,7 @@ function ImageComponent({ url, alt }: { url: string; alt: string }) {
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="
         aspect-21/9 w-full rounded-xl
-        border-2 border-border object-cover
+        border-2 border-boundary object-cover
         shadow-sm
       "
     />

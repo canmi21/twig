@@ -134,7 +134,7 @@ function UsersList() {
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-secondary">
+            <tr className="border-b border-boundary text-left text-secondary">
               <th className="pb-2 font-normal">Name</th>
               <th className="pb-2 font-normal">Email</th>
               <th className="pb-2 font-normal">Role</th>
@@ -150,7 +150,7 @@ function UsersList() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.05 }}
-                className="border-b border-border transition-colors hover:bg-raised/50"
+                className="border-b border-boundary transition-colors hover:bg-muted/50"
               >
                 <td className="py-3 text-[14px] font-medium">{u.name}</td>
                 <td className="py-3 text-[13px] text-secondary">{u.email}</td>
@@ -158,8 +158,8 @@ function UsersList() {
                   <span
                     className={`rounded-sm px-2 py-0.5 text-xs ${
                       u.role === 'admin'
-                        ? 'bg-accent/10 text-accent'
-                        : 'bg-raised text-secondary'
+                        ? 'bg-accent-subtle text-accent'
+                        : 'bg-muted text-secondary'
                     }`}
                   >
                     {u.role ?? 'user'}
@@ -174,7 +174,7 @@ function UsersList() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="rounded-sm bg-danger/10 px-2 py-0.5 text-xs text-danger"
+                        className="rounded-sm bg-danger-subtle px-2 py-0.5 text-xs text-danger"
                         title={u.banReason ?? undefined}
                       >
                         Banned
@@ -186,7 +186,7 @@ function UsersList() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="rounded-sm bg-success/10 px-2 py-0.5 text-xs text-success"
+                        className="rounded-sm bg-success-subtle px-2 py-0.5 text-xs text-success"
                       >
                         Active
                       </motion.span>
@@ -203,7 +203,7 @@ function UsersList() {
                         type="button"
                         disabled={loading === u.id}
                         onClick={() => handleUnban(u.id)}
-                        className="text-secondary transition-colors hover:text-primary disabled:opacity-50"
+                        className="text-secondary transition-colors hover:text-foreground disabled:opacity-50"
                       >
                         Unban
                       </button>

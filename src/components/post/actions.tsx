@@ -71,7 +71,7 @@ function ReadingProgress() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className="text-border"
+          className="text-boundary"
         />
         <circle
           ref={circleRef}
@@ -84,12 +84,12 @@ function ReadingProgress() {
           strokeDasharray={circumference}
           strokeDashoffset={circumference}
           strokeLinecap="round"
-          className="text-primary"
+          className="text-foreground"
         />
       </svg>
       <span
         ref={arrowRef}
-        className="absolute inset-0 flex items-center justify-center text-primary opacity-0 group-hover:opacity-(--arrow-opacity)"
+        className="absolute inset-0 flex items-center justify-center text-foreground opacity-0 group-hover:opacity-(--arrow-opacity)"
         style={{ '--arrow-opacity': 0, scale: '0.5' } as React.CSSProperties}
       >
         <ArrowUp size={10} strokeWidth={2} />
@@ -118,7 +118,7 @@ export function PostActions() {
       "
     >
       <ReadingProgress />
-      <div className="my-1 h-px w-4 bg-border" />
+      <div className="my-1 h-px w-4 bg-boundary" />
       {actions.map(({ icon: Icon, label }) => (
         <button
           key={label}
@@ -128,7 +128,7 @@ export function PostActions() {
           className="
             cursor-pointer rounded-full p-1.5
             text-secondary transition-colors
-            hover:text-primary
+            hover:text-foreground
           "
         >
           <Icon size={15} strokeWidth={1.6} />

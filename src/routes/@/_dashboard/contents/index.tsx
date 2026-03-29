@@ -195,7 +195,7 @@ function PostsList() {
         <button
           type="button"
           onClick={handleNewPost}
-          className="rounded-sm bg-primary px-3 py-1.5 text-sm text-surface"
+          className="rounded-sm bg-foreground px-3 py-1.5 text-sm text-surface"
         >
           New Post
         </button>
@@ -209,14 +209,14 @@ function PostsList() {
           className="py-16 text-center"
         >
           <p className="text-[14px] text-secondary">No posts yet.</p>
-          <p className="mt-1 text-[12px] text-tertiary">
+          <p className="mt-1 text-[12px] text-dim">
             Create your first post to get started.
           </p>
         </motion.div>
       ) : (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-secondary">
+            <tr className="border-b border-boundary text-left text-secondary">
               <th className="pb-2 font-normal">Title</th>
               <th className="pb-2 font-normal">Category</th>
               <th className="pb-2 font-normal">Status</th>
@@ -231,11 +231,11 @@ function PostsList() {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.05 }}
-                className="border-b border-border transition-colors hover:bg-raised/50"
+                className="border-b border-boundary transition-colors hover:bg-muted/50"
               >
                 <td className="py-3">
                   <div className="text-[14px] font-medium">{post.title}</div>
-                  <div className="text-[12px] text-tertiary">{post.slug}</div>
+                  <div className="text-[12px] text-dim">{post.slug}</div>
                 </td>
                 <td className="py-3 text-[13px] text-secondary">
                   {post.category ?? '-'}
@@ -252,8 +252,8 @@ function PostsList() {
                       transition={{ duration: 0.15 }}
                       className={`rounded-sm px-2 py-0.5 text-xs ${
                         post.published === 1
-                          ? 'bg-success/10 text-success'
-                          : 'bg-raised text-secondary'
+                          ? 'bg-success-subtle text-success'
+                          : 'bg-muted text-secondary'
                       }`}
                     >
                       {post.published === 1 ? 'Published' : 'Draft'}
@@ -274,7 +274,7 @@ function PostsList() {
                         format: true,
                         highlight: true,
                       }}
-                      className="text-secondary transition-colors hover:text-primary"
+                      className="text-secondary transition-colors hover:text-foreground"
                     >
                       Edit
                     </Link>

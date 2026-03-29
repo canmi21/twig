@@ -27,7 +27,7 @@ function LogoutPage() {
         <div className="mx-auto max-w-72 text-center">
           <Link
             to="/"
-            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-foreground"
           >
             {SITE_TITLE}
           </Link>
@@ -40,12 +40,12 @@ function LogoutPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <p className="text-[15px] font-medium text-primary">
+                <p className="text-[15px] font-medium text-foreground">
                   Signed out
                 </p>
                 <Link
                   to="/"
-                  className="mt-4 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+                  className="mt-4 inline-block text-[13px] text-secondary transition-colors hover:text-foreground"
                 >
                   Back to site
                 </Link>
@@ -58,14 +58,14 @@ function LogoutPage() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
               >
-                <p className="text-[15px] text-primary">
+                <p className="text-[15px] text-foreground">
                   Sign out of your account?
                 </p>
                 <button
                   type="button"
                   onClick={handleLogout}
                   disabled={loading}
-                  className="mt-4 rounded-md bg-primary px-4 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                  className="mt-4 rounded-md bg-foreground px-4 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                 >
                   {loading ? 'Signing out...' : 'Sign out'}
                 </button>

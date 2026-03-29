@@ -31,7 +31,7 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
           absolute top-5 right-5 z-50
           cursor-pointer rounded-full p-2
           text-secondary
-          hover:text-primary
+          hover:text-foreground
           xl:fixed
         `
       }

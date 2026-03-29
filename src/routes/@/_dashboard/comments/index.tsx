@@ -52,13 +52,13 @@ function formatDate(iso: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    pending: 'bg-caution/10 text-caution',
-    approved: 'bg-success/10 text-success',
-    rejected: 'bg-danger/10 text-danger',
+    pending: 'bg-caution-subtle text-caution',
+    approved: 'bg-success-subtle text-success',
+    rejected: 'bg-danger-subtle text-danger',
   }
   return (
     <span
-      className={`rounded-sm px-2 py-0.5 text-xs ${styles[status] ?? 'bg-raised text-secondary'}`}
+      className={`rounded-sm px-2 py-0.5 text-xs ${styles[status] ?? 'bg-muted text-secondary'}`}
     >
       {status}
     </span>
@@ -124,14 +124,14 @@ function CommentsPage() {
             onClick={() => setTab(t.key)}
             className={`relative rounded-sm px-3 py-1 text-sm ${
               tab === t.key
-                ? 'font-medium text-primary'
-                : 'text-secondary hover:text-primary'
+                ? 'font-medium text-foreground'
+                : 'text-secondary hover:text-foreground'
             }`}
           >
             {tab === t.key && (
               <motion.div
                 layoutId="comment-tab-indicator"
-                className="absolute inset-0 rounded-sm bg-raised"
+                className="absolute inset-0 rounded-sm bg-muted"
                 transition={{
                   type: 'spring',
                   stiffness: 300,
@@ -162,7 +162,7 @@ function CommentsPage() {
                   ? 'No pending comments.'
                   : 'No comments yet.'}
               </p>
-              <p className="mt-1 text-[12px] text-tertiary">
+              <p className="mt-1 text-[12px] text-dim">
                 {tab === 'pending'
                   ? 'All caught up.'
                   : 'Comments will appear here once readers engage.'}
@@ -171,7 +171,7 @@ function CommentsPage() {
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-secondary">
+                <tr className="border-b border-boundary text-left text-secondary">
                   <th className="pb-2 font-normal">Comment</th>
                   <th className="pb-2 font-normal">Author</th>
                   <th className="pb-2 font-normal">Post</th>
@@ -189,11 +189,11 @@ function CommentsPage() {
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, delay: i * 0.05 }}
-                    className="border-b border-border transition-colors hover:bg-raised/50"
+                    className="border-b border-boundary transition-colors hover:bg-muted/50"
                   >
                     <td className="max-w-64 py-3">
                       {c.parentId && (
-                        <span className="mb-0.5 block text-[11px] text-tertiary">
+                        <span className="mb-0.5 block text-[11px] text-dim">
                           Reply to{' '}
                           {commentById.get(c.parentId)?.userName ?? 'deleted'}
                         </span>

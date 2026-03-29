@@ -68,16 +68,16 @@ function StatCard({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="rounded-lg border border-border p-5"
+      className="rounded-lg border border-boundary p-5"
     >
       <div className="text-[13px] text-secondary">{label}</div>
       <div
-        className={`mt-1 text-2xl font-medium ${highlight ? 'text-caution' : 'text-primary'}`}
+        className={`mt-1 text-2xl font-medium ${highlight ? 'text-caution' : 'text-foreground'}`}
       >
         {value}
       </div>
       {secondary && (
-        <div className="mt-1 text-[12px] text-tertiary">{secondary}</div>
+        <div className="mt-1 text-[12px] text-dim">{secondary}</div>
       )}
     </motion.div>
   )
@@ -164,13 +164,13 @@ function DashboardOverview() {
                       format: true,
                       highlight: true,
                     }}
-                    className="group flex items-center justify-between rounded-sm px-3 py-2.5 transition-colors hover:bg-raised/50"
+                    className="group flex items-center justify-between rounded-sm px-3 py-2.5 transition-colors hover:bg-muted/50"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[14px] font-medium text-primary">
+                      <div className="truncate text-[14px] font-medium text-foreground">
                         {post.title}
                       </div>
-                      <div className="mt-0.5 text-[12px] text-tertiary">
+                      <div className="mt-0.5 text-[12px] text-dim">
                         {timeAgo(post.updatedAt)}
                         {' — '}
                         <span
@@ -208,12 +208,12 @@ function DashboardOverview() {
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15, delay: 0.25 + i * 0.04 }}
-                  className="rounded-sm px-3 py-2.5 transition-colors hover:bg-raised/50"
+                  className="rounded-sm px-3 py-2.5 transition-colors hover:bg-muted/50"
                 >
-                  <div className="truncate text-[14px] text-primary">
+                  <div className="truncate text-[14px] text-foreground">
                     {c.content}
                   </div>
-                  <div className="mt-0.5 text-[12px] text-tertiary">
+                  <div className="mt-0.5 text-[12px] text-dim">
                     {c.userName} on{' '}
                     <span className="text-secondary">{c.postTitle}</span>
                     {' — '}
@@ -236,7 +236,7 @@ function DashboardOverview() {
         <button
           type="button"
           onClick={handleNewPost}
-          className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[13px] font-medium text-surface transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-surface transition-opacity hover:opacity-90"
         >
           <Plus size={14} strokeWidth={2} />
           New Post
@@ -244,7 +244,7 @@ function DashboardOverview() {
         {data.commentStats.pending > 0 && (
           <Link
             to="/@/comments"
-            className="inline-flex items-center gap-1.5 rounded-full border border-caution/30 bg-caution/10 px-4 py-1.5 text-[13px] font-medium text-caution transition-colors hover:bg-caution/15"
+            className="inline-flex items-center gap-1.5 rounded-full border border-caution/30 bg-caution-subtle px-4 py-1.5 text-[13px] font-medium text-caution transition-colors hover:bg-caution-subtle"
           >
             <MessageSquare size={14} strokeWidth={1.7} />
             {data.commentStats.pending} pending

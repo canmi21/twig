@@ -32,7 +32,7 @@ function VerifyPage() {
             </p>
             <Link
               to="/login"
-              className="mt-4 inline-block text-[13px] text-primary hover:underline"
+              className="mt-4 inline-block text-[13px] text-foreground hover:underline"
             >
               Back to sign in
             </Link>
@@ -76,11 +76,11 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
         <div className="mx-auto max-w-72">
           <Link
             to="/"
-            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-foreground"
           >
             {SITE_TITLE}
           </Link>
-          <h1 className="text-[17px] font-medium text-primary">
+          <h1 className="text-[17px] font-medium text-foreground">
             Confirm sign in
           </h1>
           <p className="mt-1.5 text-[13px] text-secondary">
@@ -106,14 +106,14 @@ function VerifyForm({ email, code }: { email: string; code: string }) {
             type="button"
             onClick={handleConfirm}
             disabled={loading}
-            className="mt-6 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+            className="mt-6 w-full rounded-md bg-foreground px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
 
           <Link
             to="/login"
-            className="mt-3 block w-full text-center text-[13px] text-secondary transition-colors hover:text-primary"
+            className="mt-3 block w-full text-center text-[13px] text-secondary transition-colors hover:text-foreground"
           >
             Back to sign in
           </Link>

@@ -237,7 +237,7 @@ export function PostShareActions() {
               className="
                 inline-flex cursor-pointer items-center justify-center rounded-full p-1
                 text-secondary transition-colors
-                hover:text-primary
+                hover:text-foreground
               "
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -260,7 +260,7 @@ export function PostShareActions() {
               align="center"
               sideOffset={2}
               className="
-                z-10 flex items-center gap-px rounded-full border border-border
+                z-10 flex items-center gap-px rounded-full border border-boundary
                 bg-surface p-0.5 shadow-sm
               "
             >
@@ -277,7 +277,7 @@ export function PostShareActions() {
                   className="
                     inline-flex cursor-pointer items-center justify-center rounded-full p-1
                     text-secondary transition-colors
-                    hover:text-primary
+                    hover:text-foreground
                   "
                 >
                   {getAiProviderIcon(provider)}
@@ -309,7 +309,7 @@ export function PostShareActions() {
         className="
           inline-flex cursor-pointer items-center justify-center rounded-full p-1
           text-secondary transition-colors
-          hover:text-primary
+          hover:text-foreground
         "
       >
         {isXHovered ? (
@@ -328,8 +328,8 @@ export function PostShareActions() {
               transition={{ duration: 0.15 }}
               className="
                 pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-1/2 z-10
-                -translate-x-1/2 rounded-full border border-border bg-surface
-                px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
+                -translate-x-1/2 rounded-full border border-boundary bg-surface
+                px-2.5 py-1.5 text-[11px] leading-none text-foreground shadow-sm
               "
             >
               {copyToastLabel}
@@ -346,7 +346,7 @@ export function PostShareActions() {
           className="
             inline-flex cursor-pointer items-center justify-center rounded-full p-1
             text-secondary transition-colors
-            hover:text-primary
+            hover:text-foreground
           "
         >
           <Link

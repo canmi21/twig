@@ -90,7 +90,7 @@ function LoginPage() {
         <div className="mx-auto max-w-72">
           <Link
             to="/"
-            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-primary"
+            className="mb-8 inline-block text-[13px] text-secondary transition-colors hover:text-foreground"
           >
             {SITE_TITLE}
           </Link>
@@ -104,7 +104,7 @@ function LoginPage() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
               >
-                <h1 className="text-[17px] font-medium text-primary">
+                <h1 className="text-[17px] font-medium text-foreground">
                   Sign in
                 </h1>
                 <p className="mt-1.5 text-[13px] text-secondary">
@@ -129,7 +129,7 @@ function LoginPage() {
                 <form onSubmit={handleSendOtp} className="mt-8">
                   <label
                     htmlFor="email"
-                    className="block text-[13px] font-medium text-primary"
+                    className="block text-[13px] font-medium text-foreground"
                   >
                     Email
                   </label>
@@ -141,12 +141,12 @@ function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="mt-1.5 w-full rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary transition-colors outline-none placeholder:text-tertiary focus:border-primary"
+                    className="mt-1.5 w-full rounded-md border border-boundary bg-surface px-3 py-2 text-[14px] text-foreground transition-colors outline-none placeholder:text-dim focus:border-foreground"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                    className="mt-4 w-full rounded-md bg-foreground px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                   >
                     {loading ? 'Sending...' : 'Send code'}
                   </button>
@@ -160,7 +160,7 @@ function LoginPage() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
               >
-                <h1 className="text-[17px] font-medium text-primary">
+                <h1 className="text-[17px] font-medium text-foreground">
                   Sign in
                 </h1>
                 <p className="mt-1.5 text-[13px] text-secondary">
@@ -185,7 +185,7 @@ function LoginPage() {
                 <form onSubmit={handleVerifyOtp} className="mt-8">
                   <label
                     htmlFor="otp"
-                    className="block text-[13px] font-medium text-primary"
+                    className="block text-[13px] font-medium text-foreground"
                   >
                     Verification code
                   </label>
@@ -200,12 +200,12 @@ function LoginPage() {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="000000"
-                    className="mt-1.5 w-full rounded-md border border-border bg-surface px-3 py-2 text-center text-[20px] tracking-[0.25em] text-primary transition-colors outline-none placeholder:text-tertiary focus:border-primary"
+                    className="mt-1.5 w-full rounded-md border border-boundary bg-surface px-3 py-2 text-center text-[20px] tracking-[0.25em] text-foreground transition-colors outline-none placeholder:text-dim focus:border-foreground"
                   />
                   <button
                     type="submit"
                     disabled={loading || otp.length < 6}
-                    className="mt-4 w-full rounded-md bg-primary px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                    className="mt-4 w-full rounded-md bg-foreground px-3 py-2 text-[14px] font-medium text-surface transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
                   >
                     {loading ? 'Verifying...' : 'Sign in'}
                   </button>
@@ -216,7 +216,7 @@ function LoginPage() {
                       setOtp('')
                       setError(null)
                     }}
-                    className="mt-3 w-full text-[13px] text-secondary transition-colors hover:text-primary"
+                    className="mt-3 w-full text-[13px] text-secondary transition-colors hover:text-foreground"
                   >
                     Use a different email
                   </button>

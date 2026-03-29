@@ -55,7 +55,7 @@ function PostPage() {
 
   return (
     // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-    <div className="noise-bg relative min-h-screen bg-canvas">
+    <div className="noise-bg relative min-h-screen bg-base">
       <SiteNav
         article={{
           title: frontmatter.title,
@@ -66,7 +66,7 @@ function PostPage() {
       <Toc entries={post.toc} />
       <PostActions />
       <main className="py-14">
-        <article className="relative z-10 mx-auto max-w-208 rounded-lg border border-border bg-surface px-8 pt-12 pb-14 shadow-sm sm:px-14">
+        <article className="relative z-10 mx-auto max-w-208 rounded-lg border border-boundary bg-surface px-8 pt-12 pb-14 shadow-sm sm:px-14">
           <ArticleHeader
             title={frontmatter.title}
             createdAt={frontmatter.created_at}
@@ -80,7 +80,7 @@ function PostPage() {
           </div>
           {frontmatter.tags && frontmatter.tags.length > 0 && (
             <>
-              <div className="mt-14 border-t border-dashed border-border pt-6">
+              <div className="mt-14 border-t border-dashed border-boundary pt-6">
                 <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[13px] text-secondary">
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {frontmatter.tags.map((tag) => (
@@ -104,7 +104,7 @@ function PostPage() {
           )}
         </article>
         {frontmatter.cid && (
-          <div className="relative z-10 mx-auto max-w-180 px-5">
+          <div className="relative z-10 mx-auto mt-6 max-w-208">
             <CommentSection postCid={frontmatter.cid} />
           </div>
         )}
