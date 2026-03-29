@@ -80,6 +80,7 @@ function CommentMeta({
       {onReply && (
         <button
           type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onReply}
           className="flex items-center gap-1 transition-colors hover:text-secondary"
         >
@@ -106,39 +107,46 @@ function CommentMeta({
   )
 }
 
-function ReplyInput({ onClose }: { onClose: () => void }) {
-  const [value, setValue] = useState('')
+function ReplyInput({
+  commentId,
+  value,
+  onValueChange,
+  onClose,
+}: {
+  commentId: string
+  value: string
+  onValueChange: (v: string) => void
+  onClose: (closingId: string) => void
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const showSend = value.trim().length >= 3
 
   const handleBlur = useCallback(
     (e: React.FocusEvent) => {
-      // Focus moved to send button — keep open
       if (containerRef.current?.contains(e.relatedTarget as Node)) return
-      // Empty — dismiss
-      if (!value.trim()) onClose()
+      if (!value.trim()) onClose(commentId)
     },
-    [value, onClose],
+    [commentId, value, onClose],
   )
 
   const handleSend = useCallback(() => {
     // TODO: wire up submitComment
-    onClose()
-  }, [onClose])
+    onClose(commentId)
+  }, [commentId, onClose])
 
   return (
     <motion.div
       ref={containerRef}
       className="relative mt-2 overflow-hidden"
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
+      initial={{ height: 0, opacity: 0 }}
+      animate={{ height: 'auto', opacity: 1 }}
+      exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
       <textarea
         autoFocus
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => onValueChange(e.target.value)}
         onBlur={handleBlur}
         placeholder="Write a reply..."
         rows={3}
@@ -194,6 +202,44 @@ export function CommentSection({ postCid }: { postCid: string }) {
   } | null>(null)
   const [loaded, setLoaded] = useState(false)
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
+  const [replyDraft, setReplyDraft] = useState('')
+  const closedAt = useRef<{ id: string; ts: number } | null>(null)
+
+  const handleReply = useCallback(
+    (commentId: string) => {
+      const closed = closedAt.current
+      const elapsed = closed ? Date.now() - closed.ts : null
+
+      if (
+        closed &&
+        closed.id === commentId &&
+        elapsed !== null &&
+        elapsed < 100
+      )
+        return
+
+      if (replyingTo === commentId) {
+        if (!replyDraft.trim()) {
+          closedAt.current = { id: commentId, ts: Date.now() }
+          setReplyingTo(null)
+        }
+        return
+      }
+      setReplyingTo(commentId)
+      setReplyDraft('')
+    },
+    [replyingTo, replyDraft],
+  )
+
+  const closeReply = useCallback(
+    (closingId: string) => {
+      if (replyingTo !== closingId) return
+      closedAt.current = { id: closingId, ts: Date.now() }
+      setReplyingTo(null)
+      setReplyDraft('')
+    },
+    [replyingTo],
+  )
 
   const loadComments = useCallback(async () => {
     const result = await fetchComments({ data: { postCid } })
@@ -313,11 +359,16 @@ export function CommentSection({ postCid }: { postCid: string }) {
                   </div>
                   <CommentMeta
                     email={comment.userEmail}
-                    onReply={() => setReplyingTo(comment.id)}
+                    onReply={() => handleReply(comment.id)}
                   />
                   <AnimatePresence>
                     {replyingTo === comment.id && (
-                      <ReplyInput onClose={() => setReplyingTo(null)} />
+                      <ReplyInput
+                        commentId={comment.id}
+                        value={replyDraft}
+                        onValueChange={setReplyDraft}
+                        onClose={closeReply}
+                      />
                     )}
                   </AnimatePresence>
                 </div>
@@ -363,11 +414,16 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     </div>
                     <CommentMeta
                       email={reply.userEmail}
-                      onReply={() => setReplyingTo(reply.id)}
+                      onReply={() => handleReply(reply.id)}
                     />
                     <AnimatePresence>
                       {replyingTo === reply.id && (
-                        <ReplyInput onClose={() => setReplyingTo(null)} />
+                        <ReplyInput
+                          commentId={reply.id}
+                          value={replyDraft}
+                          onValueChange={setReplyDraft}
+                          onClose={closeReply}
+                        />
                       )}
                     </AnimatePresence>
                   </div>
