@@ -41,6 +41,7 @@ export function SiteNav({ article }: SiteNavProps) {
   const deviceDetected = useRef(false)
   const initAnimating = useRef(false)
   const mountedAt = useRef(0)
+  const lastDir = useRef(0)
 
   useEffect(() => {
     if (!article) return
@@ -84,6 +85,7 @@ export function SiteNav({ article }: SiteNavProps) {
       const delta = sy - lastScrollY.current
       lastScrollY.current = sy
       if (Math.abs(delta) < 1) return
+      lastDir.current = delta > 0 ? 1 : -1
 
       // Animation already in flight — don't restart it
       if (wheelAnimating.current || initAnimating.current) return
@@ -123,7 +125,24 @@ export function SiteNav({ article }: SiteNavProps) {
       const capped =
         Math.sign(scaled) * Math.min(Math.abs(scaled), TRACKPAD_MAX_STEP)
       const cur = y.get()
-      y.set(Math.max(-NAV_HEIGHT, Math.min(0, cur - capped)))
+      const next = Math.max(-NAV_HEIGHT, Math.min(0, cur - capped))
+      y.set(next)
+
+      // Hit page boundary — snap immediately instead of waiting for scrollend
+      const maxSy = document.documentElement.scrollHeight - window.innerHeight
+      if ((sy <= 0 || sy >= maxSy - 1) && next !== 0 && next !== -NAV_HEIGHT) {
+        const target = delta > 0 ? -NAV_HEIGHT : 0
+        wheelAnimating.current = true
+        animate(y, target, {
+          type: 'spring',
+          stiffness: 350,
+          damping: 30,
+          velocity: y.getVelocity(),
+          onComplete: () => {
+            wheelAnimating.current = false
+          },
+        })
+      }
     }
 
     function onScrollEnd() {
@@ -135,7 +154,28 @@ export function SiteNav({ article }: SiteNavProps) {
         return
       }
       if (initAnimating.current) return
-      // Touchpad: snap to nearest panel using remaining momentum
+
+      // At page boundary the scroll delta stream stops but user intent
+      // continues — snap in the direction they were scrolling
+      const sy = window.scrollY
+      const maxSy = document.documentElement.scrollHeight - window.innerHeight
+      const atBoundary = sy <= 0 || sy >= maxSy - 1
+
+      if (atBoundary && lastDir.current !== 0) {
+        const cur = y.get()
+        const target = lastDir.current > 0 ? -NAV_HEIGHT : 0
+        if (cur !== target) {
+          animate(y, target, {
+            type: 'spring',
+            stiffness: 350,
+            damping: 30,
+            velocity: lastDir.current > 0 ? -200 : 200,
+          })
+        }
+        return
+      }
+
+      // Normal case: snap to nearest panel using remaining momentum
       snapToNearest()
     }
 
