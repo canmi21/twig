@@ -14,10 +14,10 @@ import { getCdnPublicUrl } from '~/server/get-cdn-url'
 import { getPublicUrlFn } from '~/server/get-public-url'
 import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
+import { ThemeToggle } from '~/components/theme-toggle'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
 import { fontFallbackScript } from '~/lib/theme/font-fallback-script'
 import appCss from '~/styles/app.css?url'
-import noiseCss from '~/styles/noise.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({
   head: () => ({
@@ -60,7 +60,6 @@ export const Route = createRootRouteWithContext<RootContext>()({
         href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
       },
       { rel: 'stylesheet', href: appCss },
-      { rel: 'stylesheet', href: noiseCss },
       {
         rel: 'icon',
         type: 'image/svg+xml',
@@ -91,9 +90,16 @@ export const Route = createRootRouteWithContext<RootContext>()({
 
 function RootComponent() {
   const { initialTheme, canonicalUrl } = useRouteContext({ from: '__root__' })
+  const hideGlobalThemeToggle = new URL(canonicalUrl).pathname.startsWith(
+    '/@/editor/',
+  )
 
   return (
-    <RootDocument initialTheme={initialTheme} canonicalUrl={canonicalUrl}>
+    <RootDocument
+      initialTheme={initialTheme}
+      canonicalUrl={canonicalUrl}
+      hideGlobalThemeToggle={hideGlobalThemeToggle}
+    >
       <Outlet />
     </RootDocument>
   )
@@ -103,7 +109,7 @@ function NotFound() {
   return (
     <div className="flex h-screen items-center justify-center">
       <span className="text-xl font-medium">404</span>
-      <span className="mx-4 h-8 w-px bg-boundary" />
+      <span className="mx-4 h-8 w-px bg-border" />
       <span className="text-sm text-secondary">Not Found</span>
     </div>
   )
@@ -113,10 +119,12 @@ function RootDocument({
   children,
   initialTheme,
   canonicalUrl,
+  hideGlobalThemeToggle,
 }: Readonly<{
   children: ReactNode
   initialTheme: RootContext['initialTheme']
   canonicalUrl: string
+  hideGlobalThemeToggle: boolean
 }>) {
   return (
     <html
@@ -147,7 +155,8 @@ function RootDocument({
           }}
         />
       </head>
-      <body className="bg-base text-foreground">
+      <body className="bg-surface text-primary">
+        {hideGlobalThemeToggle ? null : <ThemeToggle />}
         {children}
         <Scripts />
       </body>

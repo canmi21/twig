@@ -1,8 +1,257 @@
 /* src/styles/app.css */
 
-@import './tailwind.css';
-@import './tokens.css';
-@import './geist.css';
-@import './article.css';
-@import './shiki.css';
-@import './animations.css';
+@import 'tailwindcss';
+
+/* Class-based dark mode instead of prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Browser native controls and scrollbars follow the theme */
+:root {
+  color-scheme: light;
+  scroll-behavior: smooth;
+  font-family:
+    'Noto Sans',
+    'Noto Sans SC',
+    'Noto Sans JP',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* Text selection highlight */
+::selection {
+  background-color: #fef9b2;
+}
+
+.dark ::selection {
+  background-color: #4a605f;
+}
+
+/* ── Color tokens ───────────────────────────────
+ * surface   — page background
+ * primary   — main text, headings, links
+ * secondary — meta text, dates, muted info
+ * tertiary  — footnotes, disclaimers, very subdued text
+ * border    — dividers, separators
+ * raised    — elevated surface (code blocks, tags)
+ * ─────────────────────────────────────────────── */
+@theme {
+  --color-surface: rgb(255, 255, 255);
+  --color-primary: rgb(28, 28, 28);
+  --color-secondary: rgb(130, 130, 130);
+  --color-tertiary: rgb(180, 180, 180);
+  --color-border: rgb(234, 234, 234);
+  --color-raised: rgb(246, 246, 246);
+}
+
+.dark {
+  color-scheme: dark;
+  --color-surface: rgb(22, 22, 22);
+  --color-primary: rgb(212, 212, 212);
+  --color-secondary: rgb(130, 130, 130);
+  --color-tertiary: rgb(80, 80, 80);
+  --color-border: rgb(40, 40, 40);
+  --color-raised: rgb(30, 30, 30);
+}
+
+/* ── Article typography ─────────────────────────── */
+
+.article {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--color-primary);
+}
+
+.article h2 {
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+  position: relative;
+  scroll-margin-top: 7rem;
+}
+
+.article h3 {
+  font-size: 14.5px;
+  font-weight: 500;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  position: relative;
+  scroll-margin-top: 7rem;
+}
+
+.article h4 {
+  font-size: 14.5px;
+  font-weight: 500;
+  margin-top: 1.3em;
+  margin-bottom: 0.4em;
+  position: relative;
+  scroll-margin-top: 7rem;
+}
+
+.article .heading-link {
+  position: absolute;
+  top: 50%;
+  left: -1.35rem;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-secondary);
+  opacity: 0;
+  transform: translateY(-50%);
+  transition:
+    opacity 140ms ease,
+    color 140ms ease;
+}
+
+.article h2:hover .heading-link,
+.article h2:focus-within .heading-link,
+.article h3:hover .heading-link,
+.article h3:focus-within .heading-link,
+.article h4:hover .heading-link,
+.article h4:focus-within .heading-link {
+  opacity: 1;
+}
+
+.article .heading-link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.article .heading-link-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
+.article p {
+  margin-bottom: 1.2em;
+}
+
+.article a {
+  text-decoration: none;
+}
+
+.article a:hover {
+  text-decoration: underline;
+}
+
+.article strong {
+  font-weight: 600;
+}
+
+.article em {
+  font-style: italic;
+}
+
+/* Lists */
+.article ul {
+  list-style: disc;
+  padding-left: 1.4em;
+  margin-bottom: 1.2em;
+}
+
+.article ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+  margin-bottom: 1.2em;
+}
+
+.article li {
+  margin-bottom: 0.3em;
+}
+
+.article li > ul,
+.article li > ol {
+  margin-top: 0.3em;
+  margin-bottom: 0;
+}
+
+/* Blockquote */
+.article blockquote {
+  border-left: 2px solid var(--color-border);
+  padding-left: 1em;
+  color: var(--color-secondary);
+  margin-bottom: 1.2em;
+}
+
+/* Horizontal rule */
+.article hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2em 0;
+}
+
+/* Code blocks */
+.article pre {
+  border-radius: 6px;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  margin-bottom: 1.2em;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.article pre:not(.shiki) {
+  background-color: var(--color-raised);
+}
+
+/* Inline code */
+.article :not(pre) > code {
+  background-color: var(--color-raised);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Images */
+.article img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+}
+
+/* Tables */
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.2em;
+  font-size: 14px;
+}
+
+.article th,
+.article td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.5em 0.8em;
+  text-align: left;
+}
+
+.article th {
+  font-weight: 500;
+}
+
+/* Shiki dual-theme: follow class-based dark mode instead of prefers-color-scheme */
+html.dark .shiki,
+html.dark .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+@keyframes toc-bar-intro {
+  from {
+    transform: scaleX(0.42);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-toc-bar-intro='true'] {
+    transform-origin: left center;
+    animation: toc-bar-intro 440ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}

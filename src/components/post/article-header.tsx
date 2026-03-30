@@ -68,7 +68,7 @@ export function ArticleHeader({
   return (
     <header className="mb-10 flex items-start justify-between gap-3">
       <div className="min-w-0 flex-1">
-        <h1 className="text-[20px] font-medium text-foreground">{title}</h1>
+        <h1 className="text-[17px] font-medium text-primary">{title}</h1>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-secondary">
           {createdAt && (
             <time dateTime={createdAt}>{formatDate(createdAt)}</time>
@@ -78,7 +78,7 @@ export function ArticleHeader({
               <Tooltip.Trigger asChild>
                 <span
                   aria-label="CC BY-NC-SA 4.0 license"
-                  className="inline-flex cursor-default items-center text-secondary transition-colors hover:text-foreground"
+                  className="inline-flex cursor-default items-center text-secondary transition-colors hover:text-primary"
                 >
                   <CreativeCommons
                     className="size-[0.8rem]"
@@ -90,13 +90,13 @@ export function ArticleHeader({
                 <Tooltip.Content
                   side="top"
                   sideOffset={4}
-                  className="z-10 rounded-full border border-boundary bg-surface px-2.5 py-1.5 text-[11px] leading-none shadow-sm"
+                  className="z-10 rounded-full border border-border bg-surface px-2.5 py-1.5 text-[11px] leading-none shadow-sm"
                 >
                   <a
                     href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-foreground hover:underline"
+                    className="text-primary hover:underline"
                   >
                     CC BY-NC-SA 4.0
                   </a>

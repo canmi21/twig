@@ -5,13 +5,12 @@ import { createServerFn } from '@tanstack/react-start'
 import { getCache } from '~/server/platform'
 import { readPostKv } from '~/lib/storage/kv'
 import { PostRenderer } from '~/components/post/renderer'
+import { PostBackLink } from '~/components/post/back-link'
 import { PostShareActions } from '~/components/post/share-actions'
 import { Toc } from '~/components/post/toc'
 import { PostActions } from '~/components/post/actions'
 import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
-import { SiteNav } from '~/components/site-nav'
-import { SiteFooter } from '~/components/site-footer'
 
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
@@ -54,62 +53,48 @@ function PostPage() {
       new Date(frontmatter.created_at).getFullYear()
 
   return (
-    // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-    <div className="noise-bg relative min-h-screen bg-base">
-      <SiteNav
-        article={{
-          title: frontmatter.title,
-          description: frontmatter.description,
-          category: frontmatter.category,
-        }}
-      />
+    <>
+      <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <main className="py-14">
-        <article className="relative z-10 mx-auto max-w-208 px-8 pt-12 pb-14 sm:px-14">
-          <ArticleHeader
-            title={frontmatter.title}
-            createdAt={frontmatter.created_at}
-            html={post.html}
-          >
-            <PostShareActions />
-          </ArticleHeader>
-          {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
-          <div className="article">
-            <PostRenderer html={post.html} components={post.components} />
-          </div>
-          {frontmatter.tags && frontmatter.tags.length > 0 && (
-            <>
-              <div className="mt-14 border-t border-dashed border-boundary pt-6">
-                <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[13px] text-secondary">
-                  <div className="flex flex-wrap gap-x-3 gap-y-1">
-                    {frontmatter.tags.map((tag) => (
-                      <span key={tag} className="capitalize">
-                        #{tag}
-                      </span>
-                    ))}
+      <article className="mx-auto max-w-180 px-5 pt-28 pb-24">
+        <ArticleHeader
+          title={frontmatter.title}
+          createdAt={frontmatter.created_at}
+          html={post.html}
+        >
+          <PostShareActions />
+        </ArticleHeader>
+        {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+        <div className="article">
+          <PostRenderer html={post.html} components={post.components} />
+        </div>
+        {frontmatter.tags && frontmatter.tags.length > 0 && (
+          <>
+            <div className="mt-14 border-t border-dashed border-border pt-6">
+              <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[13px] text-secondary">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  {frontmatter.tags.map((tag) => (
+                    <span key={tag} className="capitalize">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+                {frontmatter.updated_at && (
+                  <div className="text-[12px] text-secondary">
+                    Updated on{' '}
+                    {formatShortDate(
+                      frontmatter.updated_at,
+                      shouldShowUpdatedYear,
+                    )}
                   </div>
-                  {frontmatter.updated_at && (
-                    <div className="text-[12px] text-secondary">
-                      Updated on{' '}
-                      {formatShortDate(
-                        frontmatter.updated_at,
-                        shouldShowUpdatedYear,
-                      )}
-                    </div>
-                  )}
-                </footer>
-              </div>
-            </>
-          )}
-        </article>
-        {frontmatter.cid && (
-          <div className="relative z-10 mx-auto mt-6 max-w-208 px-8 sm:px-14">
-            <CommentSection postCid={frontmatter.cid} />
-          </div>
+                )}
+              </footer>
+            </div>
+          </>
         )}
-      </main>
-      <SiteFooter />
-    </div>
+        {frontmatter.cid && <CommentSection postCid={frontmatter.cid} />}
+      </article>
+    </>
   )
 }

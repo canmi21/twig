@@ -31,29 +31,29 @@ export function ThemeToggle({ className }: ThemeToggleProps = {}) {
           absolute top-5 right-5 z-50
           cursor-pointer rounded-full p-2
           text-secondary
-          hover:text-foreground
+          hover:text-primary
           xl:fixed
         `
       }
     >
-      <span className="relative block size-[18px]">
+      <span className="relative block size-4">
         <span
           className="
             absolute inset-0 inline-flex items-center justify-center
-            opacity-100 transition-all duration-500
+            opacity-100 transition-all duration-200
             dark:scale-75 dark:rotate-90 dark:opacity-0
           "
         >
-          <Moon size={18} />
+          <Moon size={16} />
         </span>
         <span
           className="
             absolute inset-0 inline-flex scale-75 -rotate-90
-            items-center justify-center opacity-0 transition-all duration-500
+            items-center justify-center opacity-0 transition-all duration-200
             dark:scale-100 dark:rotate-0 dark:opacity-100
           "
         >
-          <Sun size={18} />
+          <Sun size={16} />
         </span>
       </span>
     </button>

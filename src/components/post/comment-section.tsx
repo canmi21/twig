@@ -1,21 +1,50 @@
 /* src/components/post/comment-section.tsx */
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from '@tanstack/react-router'
-import {
-  CircleSlash,
-  CornerDownLeft,
-  MapPin,
-  MessagesSquare,
-  MonitorSmartphone,
-  TabletSmartphone,
-} from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
-import { useFitBubble } from './use-fit-bubble'
 
-// -- Helpers ------------------------------------------------------------------
+function gravatarUrl(email: string, size = 80): string {
+  // Simple hash for Gravatar — use SubtleCrypto on client
+  // Fallback: encode email directly, actual md5 computed in useEffect
+  return `https://www.gravatar.com/avatar/?d=mp&s=${size}`
+}
+
+function GravatarImg({
+  email,
+  size = 80,
+  className,
+}: {
+  email: string
+  size?: number
+  className?: string
+}) {
+  const [src, setSrc] = useState(gravatarUrl('', size))
+
+  useEffect(() => {
+    const encoder = new TextEncoder()
+    crypto.subtle
+      .digest('SHA-256', encoder.encode(email.trim().toLowerCase()))
+      .then((buf) => {
+        const hex = Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('')
+        setSrc(`https://www.gravatar.com/avatar/${hex}?d=mp&s=${size}`)
+      })
+  }, [email, size])
+
+  return (
+    <img
+      src={src}
+      alt=""
+      width={size}
+      height={size}
+      className={className}
+      loading="lazy"
+    />
+  )
+}
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -33,207 +62,13 @@ function timeAgo(iso: string): string {
   })
 }
 
-function hashToHue(str: string): number {
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return Math.abs(hash) % 360
-}
-
-// -- Types --------------------------------------------------------------------
-
 interface Comment {
   id: string
   content: string
   createdAt: string
-  parentId: string | null
   userName: string
   userEmail: string
-  userAgent: string
-  location: string
 }
-
-// -- Components ---------------------------------------------------------------
-
-function parseUA(raw: string): { label: string; mobile: boolean } {
-  if (!raw) return { label: '', mobile: false }
-
-  const mobile = /Mobile|Android|iPhone|iPad|iPod/i.test(raw)
-
-  let browser = ''
-  if (/Edg\//i.test(raw)) browser = 'Edge'
-  else if (/OPR\//i.test(raw)) browser = 'Opera'
-  else if (/Firefox\//i.test(raw)) browser = 'Firefox'
-  else if (/Chrome\//i.test(raw) && !/Edg\//i.test(raw)) browser = 'Chrome'
-  else if (/Safari\//i.test(raw) && !/Chrome\//i.test(raw)) browser = 'Safari'
-  else browser = 'Browser'
-
-  let os = ''
-  if (/iPhone|iPad|iPod/i.test(raw)) os = 'iOS'
-  else if (/Android/i.test(raw)) os = 'Android'
-  else if (/Mac OS X/i.test(raw)) os = 'macOS'
-  else if (/Windows/i.test(raw)) os = 'Windows'
-  else if (/Linux/i.test(raw)) os = 'Linux'
-
-  return { label: os ? `${browser} ${os}` : browser, mobile }
-}
-
-function CommentBubble({
-  content,
-  className,
-}: {
-  content: string
-  className?: string
-}) {
-  const { ref } = useFitBubble(content)
-  return (
-    <div
-      ref={ref}
-      className={`inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2 ${className ?? ''}`}
-    >
-      <p className="text-[13.5px] leading-relaxed text-foreground/80">
-        {content}
-      </p>
-    </div>
-  )
-}
-
-function CommentMeta({
-  userAgent,
-  location,
-  onReply,
-}: {
-  userAgent: string
-  location: string
-  onReply?: () => void
-}) {
-  const ua = parseUA(userAgent)
-  const DeviceIcon = ua.mobile ? TabletSmartphone : MonitorSmartphone
-
-  return (
-    <div className="mt-1.5 flex items-center gap-3 text-[11px] text-dim opacity-0 transition-opacity group-hover:opacity-100">
-      {onReply && (
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={onReply}
-          className="flex items-center gap-1 transition-colors hover:text-secondary"
-        >
-          <MessagesSquare className="size-3" strokeWidth={1.8} />
-          <span>Reply</span>
-        </button>
-      )}
-      {location && (
-        <span className="flex items-center gap-1">
-          <MapPin className="size-3" strokeWidth={1.8} />
-          <span>{location}</span>
-        </span>
-      )}
-      {ua.label && (
-        <span className="flex items-center gap-1">
-          <DeviceIcon className="size-3" strokeWidth={1.8} />
-          <span>{ua.label}</span>
-        </span>
-      )}
-      <button
-        type="button"
-        className="flex items-center gap-1 transition-colors hover:text-secondary"
-      >
-        <CircleSlash className="size-3" strokeWidth={1.8} />
-        <span>Hide</span>
-      </button>
-    </div>
-  )
-}
-
-function ReplyInput({
-  commentId,
-  value,
-  onValueChange,
-  onClose,
-}: {
-  commentId: string
-  value: string
-  onValueChange: (v: string) => void
-  onClose: (closingId: string) => void
-}) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const showSend = value.trim().length >= 3
-
-  const handleBlur = useCallback(
-    (e: React.FocusEvent) => {
-      if (containerRef.current?.contains(e.relatedTarget as Node)) return
-      if (!value.trim()) onClose(commentId)
-    },
-    [commentId, value, onClose],
-  )
-
-  const handleSend = useCallback(() => {
-    // TODO: wire up submitComment
-    onClose(commentId)
-  }, [commentId, onClose])
-
-  return (
-    <motion.div
-      ref={containerRef}
-      className="relative mt-2 overflow-hidden"
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 'auto', opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-    >
-      <textarea
-        autoFocus
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        onBlur={handleBlur}
-        placeholder="Write a reply..."
-        rows={3}
-        className="w-full resize-none rounded-xl border border-boundary bg-muted px-4 py-3 text-[14px] text-foreground outline-none placeholder:text-dim focus:border-dim/50"
-      />
-      {showSend && (
-        <button
-          type="button"
-          onClick={handleSend}
-          className="absolute right-3 bottom-3 text-dim transition-colors hover:text-secondary"
-        >
-          <CornerDownLeft className="size-4" />
-        </button>
-      )}
-    </motion.div>
-  )
-}
-
-function CommentInput() {
-  const [value, setValue] = useState('')
-  const showSend = value.trim().length >= 3
-
-  return (
-    <div className="relative">
-      <textarea
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder="Write a comment..."
-        rows={6}
-        className="w-full resize-none rounded-xl border border-boundary bg-muted px-4 py-3 text-[14px] text-foreground outline-none placeholder:text-dim focus:border-dim/50"
-      />
-      <span className="absolute bottom-4 left-4 text-[11px] text-dim">
-        Markdown &amp; GFM
-      </span>
-      {showSend && (
-        <button
-          type="button"
-          className="absolute right-3 bottom-4 text-dim transition-colors hover:text-secondary"
-        >
-          <CornerDownLeft className="size-4" />
-        </button>
-      )}
-    </div>
-  )
-}
-
-// -- Main Component -----------------------------------------------------------
 
 export function CommentSection({ postCid }: { postCid: string }) {
   const [comments, setComments] = useState<Comment[]>([])
@@ -241,45 +76,10 @@ export function CommentSection({ postCid }: { postCid: string }) {
     user: { id: string; name: string }
   } | null>(null)
   const [loaded, setLoaded] = useState(false)
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyDraft, setReplyDraft] = useState('')
-  const closedAt = useRef<{ id: string; ts: number } | null>(null)
-
-  const handleReply = useCallback(
-    (commentId: string) => {
-      const closed = closedAt.current
-      const elapsed = closed ? Date.now() - closed.ts : null
-
-      if (
-        closed &&
-        closed.id === commentId &&
-        elapsed !== null &&
-        elapsed < 100
-      )
-        return
-
-      if (replyingTo === commentId) {
-        if (!replyDraft.trim()) {
-          closedAt.current = { id: commentId, ts: Date.now() }
-          setReplyingTo(null)
-        }
-        return
-      }
-      setReplyingTo(commentId)
-      setReplyDraft('')
-    },
-    [replyingTo, replyDraft],
-  )
-
-  const closeReply = useCallback(
-    (closingId: string) => {
-      if (replyingTo !== closingId) return
-      closedAt.current = { id: closingId, ts: Date.now() }
-      setReplyingTo(null)
-      setReplyDraft('')
-    },
-    [replyingTo],
-  )
+  const [content, setContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const loadComments = useCallback(async () => {
     const result = await fetchComments({ data: { postCid } })
@@ -287,7 +87,6 @@ export function CommentSection({ postCid }: { postCid: string }) {
   }, [postCid])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount
     Promise.all([loadComments(), getSession()]).then(([, sess]) => {
       setSession(
         sess ? { user: { id: sess.user.id, name: sess.user.name } } : null,
@@ -296,189 +95,109 @@ export function CommentSection({ postCid }: { postCid: string }) {
     })
   }, [loadComments])
 
-  // Scroll to comment anchor after async load
-  useEffect(() => {
-    if (!loaded) return
-    const hash = window.location.hash
-    if (!hash.startsWith('#comment-')) return
-    requestAnimationFrame(() => {
-      document
-        .getElementById(hash.slice(1))
-        ?.scrollIntoView({ behavior: 'smooth' })
-    })
-  }, [loaded])
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!content.trim()) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await submitComment({ data: { postCid, content: content.trim() } })
+      setContent('')
+      setSubmitted(true)
+    } catch {
+      setError('Failed to submit comment')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   if (!loaded) {
     return (
-      <div>
-        <p className="text-[13px] text-dim">Loading comments...</p>
+      <div className="mt-14 border-t border-border pt-8">
+        <p className="text-[13px] text-tertiary">Loading comments...</p>
       </div>
     )
   }
 
-  void submitComment
-
-  const rootComments = comments
-    .filter((c) => !c.parentId)
-    .toSorted(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-
-  // Global chronological index (#0, #1, ...) across all comments
-  const chronological = comments.toSorted(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  )
-  const commentIndex = new Map<string, number>()
-  for (let i = 0; i < chronological.length; i++)
-    commentIndex.set(chronological[i].id, i)
-
-  // Group replies by root ancestor (flatten deep nesting into one level)
-  const repliesByRoot = new Map<string, Comment[]>()
-  const parentToRoot = new Map<string, string>()
-  for (const c of rootComments) parentToRoot.set(c.id, c.id)
-
-  // Resolve root ancestor for each reply
-  const replies = comments
-    .filter((c) => c.parentId)
-    .toSorted(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    )
-  for (const c of replies) {
-    const pid = c.parentId ?? ''
-    const rootId = parentToRoot.get(pid) ?? pid
-    parentToRoot.set(c.id, rootId)
-    const group = repliesByRoot.get(rootId)
-    if (group) group.push(c)
-    else repliesByRoot.set(rootId, [c])
-  }
-
   return (
-    <div>
-      {!session ? (
-        <div className="rounded-lg border border-dashed border-boundary py-10">
-          <div className="py-6 text-center">
-            <Link
-              to="/login"
-              className="text-[13px] text-secondary transition-colors hover:text-foreground"
-            >
-              Log in to comment
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <CommentInput />
+    <div className="mt-14 border-t border-border pt-8">
+      <h2 className="text-[15px] font-medium text-primary">
+        Comments{comments.length > 0 ? ` (${comments.length})` : ''}
+      </h2>
+
+      {comments.length === 0 && !submitted && (
+        <p className="mt-4 text-[13px] text-secondary">No comments yet.</p>
       )}
 
-      {rootComments.length > 0 && (
-        <div className="mt-6 space-y-3">
-          {rootComments.map((comment, i) => (
-            <motion.div
-              key={comment.id}
-              id={`comment-${commentIndex.get(comment.id) ?? 0}`}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: i * 0.04 }}
-            >
-              {/* Root comment */}
-              <div className="group flex gap-3 sm:-ml-11">
-                <div
-                  className="mt-0.5 size-8 shrink-0 rounded-full border-2 border-boundary"
-                  style={{
-                    backgroundColor: `hsl(${hashToHue(comment.userEmail)}, 40%, 55%)`,
-                  }}
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-medium text-foreground">
-                      {comment.userName || 'Anonymous'}
-                    </span>
-                    <a
-                      href={`#comment-${commentIndex.get(comment.id) ?? 0}`}
-                      className="text-[11px] text-dim transition-colors hover:text-secondary"
-                    >
-                      #{commentIndex.get(comment.id) ?? 0}
-                    </a>
-                    <span className="text-[11px] text-dim">
-                      {timeAgo(comment.createdAt)}
-                    </span>
-                  </div>
-                  <CommentBubble content={comment.content} className="mt-1.5" />
-                  <CommentMeta
-                    userAgent={comment.userAgent}
-                    location={comment.location}
-                    onReply={() => handleReply(comment.id)}
-                  />
-                  <AnimatePresence>
-                    {replyingTo === comment.id && (
-                      <ReplyInput
-                        commentId={comment.id}
-                        value={replyDraft}
-                        onValueChange={setReplyDraft}
-                        onClose={closeReply}
-                      />
-                    )}
-                  </AnimatePresence>
+      {comments.length > 0 && (
+        <div className="mt-6 space-y-6">
+          {comments.map((c) => (
+            <div key={c.id} className="flex gap-3">
+              <GravatarImg
+                email={c.userEmail}
+                size={36}
+                className="size-9 shrink-0 rounded-full"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[13px] font-medium text-primary">
+                    {c.userName}
+                  </span>
+                  <span className="text-[12px] text-tertiary">
+                    {timeAgo(c.createdAt)}
+                  </span>
                 </div>
+                <p className="mt-1 text-[14px] leading-relaxed text-primary">
+                  {c.content}
+                </p>
               </div>
-              {/* Replies (flattened under root) */}
-              {repliesByRoot.get(comment.id)?.map((reply, ri) => (
-                <motion.div
-                  key={reply.id}
-                  id={`comment-${commentIndex.get(reply.id) ?? 0}`}
-                  className="group mt-2 flex gap-2.5"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.2,
-                    delay: (i + 1) * 0.04 + ri * 0.03,
-                  }}
-                >
-                  <div
-                    className="mt-0.5 size-7 shrink-0 rounded-full border-2 border-boundary"
-                    style={{
-                      backgroundColor: `hsl(${hashToHue(reply.userEmail)}, 40%, 55%)`,
-                    }}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-foreground">
-                        {reply.userName || 'Anonymous'}
-                      </span>
-                      <a
-                        href={`#comment-${commentIndex.get(reply.id) ?? 0}`}
-                        className="text-[11px] text-dim transition-colors hover:text-secondary"
-                      >
-                        #{commentIndex.get(reply.id) ?? 0}
-                      </a>
-                      <span className="text-[11px] text-dim">
-                        {timeAgo(reply.createdAt)}
-                      </span>
-                    </div>
-                    <CommentBubble content={reply.content} className="mt-1" />
-                    <CommentMeta
-                      userAgent={reply.userAgent}
-                      location={reply.location}
-                      onReply={() => handleReply(reply.id)}
-                    />
-                    <AnimatePresence>
-                      {replyingTo === reply.id && (
-                        <ReplyInput
-                          commentId={reply.id}
-                          value={replyDraft}
-                          onValueChange={setReplyDraft}
-                          onClose={closeReply}
-                        />
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
+            </div>
           ))}
         </div>
       )}
+
+      <div className="mt-8">
+        {!session ? (
+          <p className="text-[13px] text-secondary">
+            <Link to="/login" className="text-primary hover:underline">
+              Sign in
+            </Link>{' '}
+            to leave a comment.
+          </p>
+        ) : submitted ? (
+          <p className="text-[13px] text-secondary">
+            Comment submitted, pending review.
+          </p>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Write a comment..."
+              maxLength={2000}
+              rows={3}
+              className="w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
+            />
+            {error && (
+              <p className="mt-2 text-[13px] text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            )}
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-[12px] text-tertiary">
+                {content.length}/2000
+              </span>
+              <button
+                type="submit"
+                disabled={submitting || !content.trim()}
+                className="rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-surface disabled:opacity-50"
+              >
+                {submitting ? 'Submitting...' : 'Submit'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   )
 }
