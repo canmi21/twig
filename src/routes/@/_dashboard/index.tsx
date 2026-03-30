@@ -59,7 +59,7 @@ const statConfig = [
 ] as const
 
 function DashboardOverviewPage() {
-  const data = Route.useLoaderData()
+  const overview = Route.useLoaderData()
   const navigate = useNavigate()
 
   async function handleNewPost() {
@@ -78,55 +78,68 @@ function DashboardOverviewPage() {
 
   const statValues: Record<string, { value: number; sub?: string }> = {
     total: {
-      value: data.postStats.total,
-      sub: `${data.postStats.published} published, ${data.postStats.draft} draft`,
+      value: overview.postStats.total,
+      sub: `${overview.postStats.published} published, ${overview.postStats.draft} draft`,
     },
-    published: { value: data.postStats.published },
+    published: { value: overview.postStats.published },
     pending: {
-      value: data.commentStats.pending,
-      sub: `${data.commentStats.total} total`,
+      value: overview.commentStats.pending,
+      sub: `${overview.commentStats.total} total`,
     },
-    users: { value: data.userCount },
+    users: { value: overview.userCount },
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[15px] font-semibold text-geist-1000">Overview</h1>
+        <div>
+          <h1 className="text-[20px] font-semibold tracking-tight text-foreground">
+            Overview
+          </h1>
+          <p className="text-[13px] text-secondary">
+            Manage your content and interactions.
+          </p>
+        </div>
         <button
           type="button"
           onClick={handleNewPost}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-geist-1000 px-3 text-[13px] font-medium text-geist-bg transition-opacity hover:opacity-90"
+          className="inline-flex h-9 items-center gap-2 rounded-full bg-foreground px-4 text-[13px] font-medium text-surface transition-transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          <Plus size={14} strokeWidth={2} />
+          <Plus size={16} strokeWidth={2.5} />
           New Post
         </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {statConfig.map(({ key, label, icon: Icon }) => {
           const { value, sub } = statValues[key]
-          const highlight = key === 'pending' && value > 0
+          const isWarning = key === 'pending' && value > 0
           return (
             <div
               key={key}
-              className="rounded-lg bg-geist-bg-2 p-4 shadow-geist-border"
+              className="group relative overflow-hidden rounded-2xl bg-subtle/40 p-5 ring-1 ring-boundary/50 transition-all hover:bg-subtle/60 hover:ring-boundary"
             >
-              <div className="flex items-center gap-1.5 text-geist-600">
-                <Icon size={13} strokeWidth={1.5} />
-                <span className="text-[11px] font-medium tracking-wider uppercase">
-                  {label}
-                </span>
+              <div className="flex items-center justify-between">
+                <div className="rounded-lg bg-tint p-2 text-secondary group-hover:text-foreground">
+                  <Icon size={18} strokeWidth={1.5} />
+                </div>
               </div>
-              <div
-                className={`geist-mono mt-2 text-[22px] font-semibold tabular-nums ${highlight ? 'text-geist-error' : 'text-geist-1000'}`}
-              >
-                {value}
+              <div className="mt-4">
+                <div
+                  className={`text-2xl font-semibold tracking-tight ${isWarning ? 'text-danger' : 'text-foreground'}`}
+                >
+                  {value}
+                </div>
+                <div className="text-[12px] font-medium text-secondary uppercase tracking-wider">
+                  {label}
+                </div>
               </div>
               {sub && (
-                <div className="mt-0.5 text-[11px] text-geist-600">{sub}</div>
+                <div className="mt-2 text-[11px] text-dim line-clamp-1">
+                  {sub}
+                </div>
               )}
             </div>
           )
@@ -134,29 +147,34 @@ function DashboardOverviewPage() {
       </div>
 
       {/* Activity */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent posts */}
-        <div className="overflow-hidden rounded-lg bg-geist-bg-2 shadow-geist-border">
-          <div className="flex items-center justify-between border-b border-geist-200 px-4 py-2.5">
-            <span className="text-[12px] font-medium tracking-wider text-geist-600 uppercase">
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[14px] font-semibold text-foreground">
               Recent Posts
-            </span>
+            </h2>
             <Link
               to="/@/contents"
-              className="flex items-center gap-0.5 text-[11px] text-geist-600 transition-colors hover:text-geist-1000"
+              className="group flex items-center gap-1 text-[12px] text-secondary hover:text-theme"
             >
-              View all <ArrowRight size={11} />
+              View all
+              <ArrowRight
+                size={12}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
-          {data.recentPosts.length === 0 ? (
-            <div className="px-4 py-8 text-center text-[12px] text-geist-600">
-              No posts yet.
-            </div>
-          ) : (
-            <ul className="divide-y divide-geist-200">
-              {data.recentPosts.map((post) => (
-                <li key={post.cid}>
+          <div className="overflow-hidden rounded-2xl bg-subtle/40 ring-1 ring-boundary/50">
+            {overview.recentPosts.length === 0 ? (
+              <div className="p-8 text-center text-[13px] text-dim">
+                No posts yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-boundary/30">
+                {overview.recentPosts.map((post) => (
                   <Link
+                    key={post.cid}
                     to="/@/editor/$cid"
                     params={{ cid: post.cid }}
                     search={{
@@ -165,81 +183,98 @@ function DashboardOverviewPage() {
                       format: true,
                       highlight: true,
                     }}
-                    className="flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-geist-100/50"
+                    className="flex items-center justify-between p-4 transition-colors hover:bg-tint/50"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-medium text-geist-1000">
+                      <div className="truncate text-[13px] font-medium text-foreground">
                         {post.title}
                       </div>
-                      <div className="geist-mono mt-0.5 text-[11px] text-geist-600">
+                      <div className="mt-0.5 text-[11px] text-dim">
                         {timeAgo(post.updatedAt)}
                       </div>
                     </div>
-                    <span
-                      className={`ml-3 shrink-0 rounded-sm px-1.5 py-0.5 text-[11px] font-medium ${post.published === 1 ? 'bg-geist-success-light text-geist-success-dark' : 'bg-geist-100 text-geist-600'}`}
-                    >
-                      {post.published === 1 ? 'published' : 'draft'}
-                    </span>
+                    <div className="ml-4 shrink-0">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          post.published === 1
+                            ? 'bg-success-subtle text-success-text'
+                            : 'bg-muted text-secondary'
+                        }`}
+                      >
+                        {post.published === 1 ? 'Live' : 'Draft'}
+                      </span>
+                    </div>
                   </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* Recent comments */}
-        <div className="overflow-hidden rounded-lg bg-geist-bg-2 shadow-geist-border">
-          <div className="flex items-center justify-between border-b border-geist-200 px-4 py-2.5">
-            <span className="text-[12px] font-medium tracking-wider text-geist-600 uppercase">
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[14px] font-semibold text-foreground">
               Recent Comments
-            </span>
+            </h2>
             <Link
               to="/@/comments"
-              className="flex items-center gap-0.5 text-[11px] text-geist-600 transition-colors hover:text-geist-1000"
+              className="group flex items-center gap-1 text-[12px] text-secondary hover:text-theme"
             >
-              View all <ArrowRight size={11} />
+              View all
+              <ArrowRight
+                size={12}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
             </Link>
           </div>
-          {data.recentComments.length === 0 ? (
-            <div className="px-4 py-8 text-center text-[12px] text-geist-600">
-              No comments yet.
-            </div>
-          ) : (
-            <ul className="divide-y divide-geist-200">
-              {data.recentComments.map((c) => (
-                <li key={c.id} className="px-4 py-2.5">
-                  <div className="truncate text-[13px] text-geist-1000">
-                    {c.content}
+          <div className="overflow-hidden rounded-2xl bg-subtle/40 ring-1 ring-boundary/50">
+            {overview.recentComments.length === 0 ? (
+              <div className="p-8 text-center text-[13px] text-dim">
+                No comments yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-boundary/30">
+                {overview.recentComments.map((c) => (
+                  <div key={c.id} className="p-4">
+                    <div className="line-clamp-1 text-[13px] text-foreground">
+                      {c.content}
+                    </div>
+                    <div className="mt-1 flex items-center gap-2 text-[11px] text-dim">
+                      <span className="font-semibold text-secondary">
+                        {c.userName}
+                      </span>
+                      <span>•</span>
+                      <span className="truncate">{c.postTitle}</span>
+                      <span className="ml-auto shrink-0">
+                        {timeAgo(c.createdAt)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="mt-0.5 text-[11px] text-geist-600">
-                    <span className="font-medium text-geist-900">
-                      {c.userName}
-                    </span>
-                    {' on '}
-                    <span className="text-geist-900">{c.postTitle}</span>
-                    <span className="geist-mono ml-1.5">
-                      {timeAgo(c.createdAt)}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
       {/* Pending alert */}
-      {data.commentStats.pending > 0 && (
-        <div className="flex items-center justify-between rounded-lg bg-geist-warning-light px-4 py-2.5 shadow-geist-border">
-          <span className="text-[13px] text-geist-warning-dark">
-            <span className="font-semibold">{data.commentStats.pending}</span>{' '}
-            comment{data.commentStats.pending > 1 ? 's' : ''} awaiting review
-          </span>
+      {overview.commentStats.pending > 0 && (
+        <div className="flex items-center justify-between rounded-2xl bg-theme-subtle p-4 ring-1 ring-theme/20">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-theme/10 p-2 text-theme-text">
+              <MessageSquare size={18} />
+            </div>
+            <span className="text-[13px] text-theme-text font-medium">
+              You have {overview.commentStats.pending} comment
+              {overview.commentStats.pending > 1 ? 's' : ''} awaiting review.
+            </span>
+          </div>
           <Link
             to="/@/comments"
-            className="rounded-md border border-geist-400 bg-geist-bg px-3 py-1 text-[12px] font-medium text-geist-1000 transition-colors hover:bg-geist-100"
+            className="rounded-full bg-theme px-4 py-1.5 text-[12px] font-bold text-surface transition-opacity hover:opacity-90"
           >
-            Review
+            Review Now
           </Link>
         </div>
       )}

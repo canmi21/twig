@@ -65,24 +65,33 @@ function DashboardLayout() {
   const matchRoute = useMatchRoute()
 
   return (
-    <div className="geist flex h-screen bg-geist-bg">
+    <div className="noise-bg relative flex h-screen overflow-hidden bg-base text-[14px] text-foreground select-none">
+      {/* Ambient Glow */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-theme/5 blur-[120px]" />
+        <div className="absolute -right-24 -bottom-24 h-96 w-96 rounded-full bg-accent/5 blur-[120px]" />
+      </div>
+
       {/* Sidebar */}
       <aside
-        className={`flex shrink-0 flex-col border-r border-geist-200 bg-geist-bg-2 transition-[width] duration-150 ease-in-out ${collapsed ? 'w-[48px]' : 'w-[200px]'}`}
+        className={`relative z-10 flex shrink-0 flex-col bg-subtle/40 backdrop-blur-md transition-[width] duration-200 ease-in-out ${collapsed ? 'w-16' : 'w-56'}`}
       >
         {/* Brand */}
         <div
-          className={`flex h-12 shrink-0 items-center border-b border-geist-200 ${collapsed ? 'justify-center' : 'px-4'}`}
+          className={`flex h-16 shrink-0 items-center ${collapsed ? 'justify-center' : 'px-6'}`}
         >
           {!collapsed && (
-            <span className="text-[13px] font-semibold text-geist-1000">
+            <span className="text-[14px] font-medium tracking-tight text-foreground/80">
               Console
             </span>
+          )}
+          {collapsed && (
+            <div className="size-2 rounded-full bg-theme animate-pulse" />
           )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 space-y-px overflow-y-auto px-1.5 py-2">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {navItems.map(({ to, label, icon: Icon, exact }) => {
             const isActive = exact
               ? !!matchRoute({ to })
@@ -93,22 +102,31 @@ function DashboardLayout() {
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-2.5 rounded-md text-[13px] transition-colors ${collapsed ? 'justify-center px-0 py-1.5' : 'px-2.5 py-1.5'} ${isActive ? 'bg-geist-1000 font-medium text-geist-bg' : 'text-geist-900 hover:bg-geist-100'}`}
+                className={`group relative flex items-center gap-3 rounded-lg py-2 transition-all duration-200 ${collapsed ? 'justify-center px-0' : 'px-3'} ${
+                  isActive
+                    ? 'bg-theme-subtle text-theme-text shadow-sm'
+                    : 'text-secondary hover:bg-tint hover:text-foreground'
+                }`}
                 title={collapsed ? label : undefined}
               >
                 <Icon
-                  size={15}
-                  strokeWidth={isActive ? 1.8 : 1.5}
-                  className="shrink-0"
+                  size={18}
+                  strokeWidth={isActive ? 2 : 1.5}
+                  className={`shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
                 />
-                {!collapsed && <span>{label}</span>}
+                {!collapsed && (
+                  <span className="font-medium tracking-wide">{label}</span>
+                )}
                 {showBadge && !collapsed && (
-                  <span className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-geist-error px-1 text-[10px] leading-none font-semibold text-white">
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[10px] font-bold text-surface ring-2 ring-surface">
                     {pendingComments}
                   </span>
                 )}
                 {showBadge && collapsed && (
-                  <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-geist-error" />
+                  <span className="absolute top-2 right-2 size-2 rounded-full bg-danger ring-2 ring-surface" />
+                )}
+                {isActive && !collapsed && (
+                  <div className="absolute left-0 h-4 w-1 rounded-r-full bg-theme" />
                 )}
               </Link>
             )
@@ -116,41 +134,41 @@ function DashboardLayout() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-geist-200 px-1.5 py-2">
+        <div className="space-y-1 p-3">
           {auth.session && !collapsed && (
-            <div className="mb-2 px-2.5">
-              <div className="truncate text-[12px] font-medium text-geist-1000">
+            <div className="mb-4 px-3">
+              <div className="truncate text-[13px] font-semibold text-foreground">
                 {auth.session.user.name}
               </div>
-              <div className="truncate text-[11px] text-geist-600">
+              <div className="truncate text-[11px] text-dim">
                 {auth.session.user.email}
               </div>
             </div>
           )}
           <Link
             to="/"
-            className={`flex items-center gap-2.5 rounded-md text-[13px] text-geist-600 transition-colors hover:bg-geist-100 hover:text-geist-1000 ${collapsed ? 'justify-center px-0 py-1.5' : 'px-2.5 py-1.5'}`}
+            className={`flex items-center gap-3 rounded-lg text-secondary transition-all hover:bg-tint hover:text-foreground ${collapsed ? 'justify-center py-2' : 'px-3 py-2'}`}
             title={collapsed ? 'Back to site' : undefined}
           >
-            <ArrowLeft size={15} strokeWidth={1.5} className="shrink-0" />
-            {!collapsed && <span>Back to site</span>}
+            <ArrowLeft size={18} strokeWidth={1.5} className="shrink-0" />
+            {!collapsed && <span className="font-medium">Exit</span>}
           </Link>
           <button
             type="button"
             onClick={toggle}
-            className={`flex w-full items-center gap-2.5 rounded-md text-[13px] text-geist-600 transition-colors hover:bg-geist-100 hover:text-geist-1000 ${collapsed ? 'justify-center px-0 py-1.5' : 'px-2.5 py-1.5'}`}
+            className={`flex w-full items-center gap-3 rounded-lg text-secondary transition-all hover:bg-tint hover:text-foreground ${collapsed ? 'justify-center py-2' : 'px-3 py-2'}`}
             title={collapsed ? 'Expand' : 'Collapse'}
           >
             {collapsed ? (
-              <ChevronsRight size={15} strokeWidth={1.5} />
+              <ChevronsRight size={18} strokeWidth={1.5} />
             ) : (
               <>
                 <ChevronsLeft
-                  size={15}
+                  size={18}
                   strokeWidth={1.5}
                   className="shrink-0"
                 />
-                <span>Collapse</span>
+                <span className="font-medium">Minimize</span>
               </>
             )}
           </button>
@@ -158,8 +176,8 @@ function DashboardLayout() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl p-6">
+      <main className="relative z-10 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="mx-auto max-w-208 px-8 pt-12 pb-24 lg:px-12">
           <Outlet />
         </div>
       </main>

@@ -8,7 +8,15 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  FileText,
+  Globe,
+  Lock,
+} from 'lucide-react'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { getDb, getCache, getBucket } from '~/server/platform'
 import {
@@ -139,9 +147,9 @@ export const Route = createFileRoute('/@/_dashboard/contents/')({
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
-    year: 'numeric',
     month: 'short',
     day: 'numeric',
+    year: 'numeric',
   })
 }
 
@@ -181,138 +189,127 @@ function PostsPage() {
     router.invalidate()
   }
 
-  const published = posts.filter((p) => p.published === 1).length
-  const draft = posts.length - published
+  const publishedCount = posts.filter((p) => p.published === 1).length
+  const draftCount = posts.length - publishedCount
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[15px] font-semibold text-geist-1000">Posts</h1>
-          <p className="mt-0.5 text-[12px] text-geist-600">
-            {posts.length} total &middot; {published} published &middot; {draft}{' '}
-            draft
+          <h1 className="text-[20px] font-semibold tracking-tight text-foreground">
+            Posts
+          </h1>
+          <p className="text-[13px] text-secondary">
+            {posts.length} stories &middot; {publishedCount} live &middot;{' '}
+            {draftCount} drafts
           </p>
         </div>
         <button
           type="button"
           onClick={handleNewPost}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-geist-1000 px-3 text-[13px] font-medium text-geist-bg transition-opacity hover:opacity-90"
+          className="inline-flex h-9 items-center gap-2 rounded-full bg-foreground px-4 text-[13px] font-medium text-surface transition-transform hover:scale-[1.02] active:scale-[0.98]"
         >
-          <Plus size={14} strokeWidth={2} />
+          <Plus size={16} strokeWidth={2.5} />
           New Post
         </button>
       </div>
 
-      {/* Table */}
+      {/* List */}
       {posts.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-geist-400 py-16 text-center">
-          <p className="text-[13px] font-medium text-geist-900">No posts yet</p>
-          <p className="mt-1 text-[12px] text-geist-600">
-            Create your first post to get started.
+        <div className="rounded-2xl border-2 border-dashed border-boundary/40 py-20 text-center">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-subtle text-dim">
+            <FileText size={24} strokeWidth={1.5} />
+          </div>
+          <p className="mt-4 text-[14px] font-medium text-secondary">
+            No posts found
           </p>
+          <button
+            type="button"
+            onClick={handleNewPost}
+            className="mt-2 text-[13px] text-theme font-medium hover:underline"
+          >
+            Create your first story
+          </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg bg-geist-bg-2 shadow-geist-border">
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="border-b border-geist-200 bg-geist-100 text-left">
-                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
-                  Title
-                </th>
-                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
-                  Category
-                </th>
-                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
-                  Date
-                </th>
-                <th className="w-20 px-3 py-2" />
-              </tr>
-            </thead>
-            <tbody>
-              {posts.map((post) => {
-                const isBusy = busy === post.cid
-                return (
-                  <tr
-                    key={post.cid}
-                    className={`border-b border-geist-200 transition-colors last:border-0 hover:bg-geist-100/50 ${isBusy ? 'opacity-50' : ''}`}
-                  >
-                    <td className="px-3 py-2.5">
+        <div className="overflow-hidden rounded-2xl bg-subtle/40 ring-1 ring-boundary/50">
+          <div className="divide-y divide-boundary/30">
+            {posts.map((post) => {
+              const isBusy = busy === post.cid
+              const isPublished = post.published === 1
+              return (
+                <div
+                  key={post.cid}
+                  className={`group relative flex items-center justify-between p-5 transition-all hover:bg-tint/40 ${isBusy ? 'opacity-50' : ''}`}
+                >
+                  <div className="min-w-0 flex-1 pr-8">
+                    <div className="flex items-center gap-3">
                       <Link
                         to="/@/editor/$cid"
                         params={{ cid: post.cid }}
-                        search={{
-                          preview: 'rendered',
-                          pretty: undefined,
-                          format: true,
-                          highlight: true,
-                        }}
-                        className="group"
+                        className="truncate text-[15px] font-semibold text-foreground decoration-boundary/50 underline-offset-[3px] group-hover:underline"
                       >
-                        <div className="font-medium text-geist-1000 group-hover:underline">
-                          {post.title}
-                        </div>
-                        <div className="geist-mono mt-0.5 text-[11px] text-geist-600">
-                          /{post.slug}
-                        </div>
+                        {post.title}
                       </Link>
-                    </td>
-                    <td className="px-3 py-2.5 text-geist-900">
-                      {post.category ?? (
-                        <span className="text-geist-500">--</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2.5">
                       <button
                         type="button"
                         onClick={() => handleToggle(post.cid, post.published)}
                         disabled={isBusy}
-                        className="cursor-pointer disabled:cursor-wait"
+                        className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                          isPublished
+                            ? 'bg-success-subtle text-success-text hover:bg-success/20'
+                            : 'bg-muted text-secondary hover:bg-boundary/50'
+                        }`}
+                        title={isPublished ? 'Unpublish' : 'Publish'}
                       >
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[11px] font-medium ${post.published === 1 ? 'bg-geist-success-light text-geist-success-dark' : 'bg-geist-100 text-geist-600'}`}
-                        >
-                          {isBusy && (
-                            <Loader2 size={10} className="animate-spin" />
-                          )}
-                          {post.published === 1 ? 'Published' : 'Draft'}
-                        </span>
+                        {isBusy ? (
+                          <Loader2 size={10} className="animate-spin" />
+                        ) : isPublished ? (
+                          <Globe size={10} />
+                        ) : (
+                          <Lock size={10} />
+                        )}
+                        {isPublished ? 'Live' : 'Draft'}
                       </button>
-                    </td>
-                    <td className="geist-mono px-3 py-2.5 text-[12px] whitespace-nowrap text-geist-600 tabular-nums">
-                      {formatDate(post.createdAt)}
-                    </td>
-                    <td className="px-3 py-2.5 text-right">
-                      <div className="flex items-center justify-end gap-0.5">
-                        <Link
-                          to="/@/editor/$cid"
-                          params={{ cid: post.cid }}
-                          search={{
-                            preview: 'rendered',
-                            pretty: undefined,
-                            format: true,
-                            highlight: true,
-                          }}
-                          className="inline-flex size-7 items-center justify-center rounded-md text-geist-600 transition-colors hover:bg-geist-100 hover:text-geist-1000"
-                          title="Edit"
-                        >
-                          <Pencil size={14} strokeWidth={1.5} />
-                        </Link>
-                        <DeletePostDialog
-                          title={post.title}
-                          onConfirm={() => handleDelete(post.cid)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                    </div>
+                    <div className="mt-1 flex items-center gap-3 text-[12px] text-dim">
+                      <span className="font-medium text-secondary">
+                        {post.category || 'Uncategorized'}
+                      </span>
+                      <span>&middot;</span>
+                      <span className="truncate">/{post.slug}</span>
+                      <span>&middot;</span>
+                      <time className="shrink-0">
+                        {formatDate(post.createdAt)}
+                      </time>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Link
+                      to="/@/editor/$cid"
+                      params={{ cid: post.cid }}
+                      search={{
+                        preview: 'rendered',
+                        pretty: undefined,
+                        format: true,
+                        highlight: true,
+                      }}
+                      className="inline-flex size-9 items-center justify-center rounded-full text-secondary transition-colors hover:bg-tint hover:text-foreground"
+                      title="Edit Story"
+                    >
+                      <Pencil size={16} strokeWidth={1.8} />
+                    </Link>
+                    <DeletePostDialog
+                      title={post.title}
+                      onConfirm={() => handleDelete(post.cid)}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -333,31 +330,35 @@ function DeletePostDialog({
       <AlertDialog.Trigger asChild>
         <button
           type="button"
-          className="inline-flex size-7 items-center justify-center rounded-md text-geist-600 transition-colors hover:bg-geist-error-light hover:text-geist-error"
-          title="Delete"
+          className="inline-flex size-9 items-center justify-center rounded-full text-secondary transition-colors hover:bg-danger-subtle hover:text-danger"
+          title="Delete Story"
         >
-          <Trash2 size={14} strokeWidth={1.5} />
+          <Trash2 size={16} strokeWidth={1.8} />
         </button>
       </AlertDialog.Trigger>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
-        <AlertDialog.Content className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-1/2 rounded-lg bg-geist-bg p-6 shadow-geist-md">
-          <AlertDialog.Title className="text-[15px] font-semibold text-geist-1000">
-            Delete post
+        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-base/80 backdrop-blur-sm animate-in fade-in duration-200" />
+        <AlertDialog.Content className="noise-bg fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-1/2 rounded-3xl bg-surface p-8 shadow-2xl ring-1 ring-boundary/50 animate-in zoom-in-95 fade-in duration-200">
+          <AlertDialog.Title className="text-[18px] font-semibold tracking-tight text-foreground">
+            Delete story?
           </AlertDialog.Title>
-          <AlertDialog.Description className="mt-2 text-[13px] leading-relaxed text-geist-900">
-            Permanently delete &ldquo;{title}&rdquo; and all associated media?
-            This cannot be undone.
+          <AlertDialog.Description className="mt-3 text-[14px] leading-relaxed text-secondary">
+            You are about to permanently delete{' '}
+            <span className="font-semibold text-foreground">
+              &ldquo;{title}&rdquo;
+            </span>
+            . All associated images and data will be lost. This action cannot be
+            undone.
           </AlertDialog.Description>
-          <div className="mt-5 flex justify-end gap-2">
-            <AlertDialog.Cancel className="h-8 rounded-md border border-geist-400 bg-geist-bg px-3 text-[13px] font-medium text-geist-1000 transition-colors hover:bg-geist-100">
-              Cancel
+          <div className="mt-8 flex justify-end gap-3">
+            <AlertDialog.Cancel className="h-10 rounded-full bg-tint px-5 text-[13px] font-semibold text-foreground transition-colors hover:bg-boundary/50">
+              Go back
             </AlertDialog.Cancel>
             <AlertDialog.Action
               onClick={onConfirm}
-              className="h-8 rounded-md bg-geist-error px-3 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+              className="h-10 rounded-full bg-danger px-5 text-[13px] font-semibold text-surface transition-opacity hover:opacity-90"
             >
-              Delete
+              Delete forever
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>
