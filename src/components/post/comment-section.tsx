@@ -256,6 +256,18 @@ export function CommentSection({ postCid }: { postCid: string }) {
     })
   }, [loadComments])
 
+  // Scroll to comment anchor after async load
+  useEffect(() => {
+    if (!loaded) return
+    const hash = window.location.hash
+    if (!hash.startsWith('#comment-')) return
+    requestAnimationFrame(() => {
+      document
+        .getElementById(hash.slice(1))
+        ?.scrollIntoView({ behavior: 'smooth' })
+    })
+  }, [loaded])
+
   if (!loaded) {
     return (
       <div>
