@@ -14,6 +14,8 @@ export interface CommentWithUser {
   parentId: string | null
   userName: string
   userEmail: string
+  userAgent: string
+  location: string
 }
 
 export interface CommentWithContext extends CommentWithUser {
@@ -29,6 +31,8 @@ export async function createComment(
     userId: string
     content: string
     parentId?: string | null
+    userAgent?: string
+    location?: string
   },
 ): Promise<string> {
   const id = newCid()
@@ -40,6 +44,8 @@ export async function createComment(
     content: input.content,
     parentId: input.parentId ?? null,
     status: 'pending',
+    userAgent: input.userAgent ?? '',
+    location: input.location ?? '',
     createdAt: now,
     updatedAt: now,
   })
@@ -59,6 +65,8 @@ export async function getApprovedComments(
       parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
+      userAgent: comments.userAgent,
+      location: comments.location,
     })
     .from(comments)
     .innerJoin(user, eq(comments.userId, user.id))
@@ -79,6 +87,8 @@ export async function getPendingComments(
       parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
+      userAgent: comments.userAgent,
+      location: comments.location,
       postCid: comments.postCid,
       postTitle: posts.title,
       postSlug: posts.slug,
@@ -101,6 +111,8 @@ export async function getAllComments(db: Db): Promise<CommentWithContext[]> {
       parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
+      userAgent: comments.userAgent,
+      location: comments.location,
       postCid: comments.postCid,
       postTitle: posts.title,
       postSlug: posts.slug,
@@ -190,6 +202,8 @@ export async function getRecentComments(
       parentId: comments.parentId,
       userName: user.name,
       userEmail: user.email,
+      userAgent: comments.userAgent,
+      location: comments.location,
       postCid: comments.postCid,
       postTitle: posts.title,
       postSlug: posts.slug,

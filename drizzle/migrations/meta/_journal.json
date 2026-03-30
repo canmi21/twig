@@ -43,6 +43,13 @@
       "when": 1774716561718,
       "tag": "0005_little_nightmare",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1774832534760,
+      "tag": "0006_material_joystick",
+      "breakpoints": true
     }
   ]
 }

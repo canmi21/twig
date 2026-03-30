@@ -2,7 +2,7 @@
 
 import { eq } from 'drizzle-orm'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
+import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
 import { getDb } from './platform'
 import { getAuth } from './better-auth'
 import { notifyNewComment, notifyCommentReply } from './notify'
@@ -34,6 +34,9 @@ export const submitComment = createServerFn({ method: 'POST' })
       headers: getRequestHeaders(),
     })
     if (!session) throw new Error('Unauthorized')
+
+    const headers = getRequestHeaders()
+    const rawUa = headers.get('user-agent') ?? ''
 
     const content = data.content.trim()
     if (!content) throw new Error('Comment cannot be empty')
@@ -75,11 +78,20 @@ export const submitComment = createServerFn({ method: 'POST' })
       parentComment = parent
     }
 
+    // Read geo from Cloudflare request object (unavailable in dev)
+    const cf = (getRequest() as { cf?: { city?: string; country?: string } }).cf
+    const country = cf?.country ?? ''
+    const city = cf?.city ?? ''
+    const location =
+      country && city && country !== city ? `${country} ${city}` : country || ''
+
     await createComment(db, {
       postCid: data.postCid,
       userId: session.user.id,
       content,
       parentId: data.parentId ?? null,
+      userAgent: rawUa,
+      location,
     })
 
     // Notify site owner

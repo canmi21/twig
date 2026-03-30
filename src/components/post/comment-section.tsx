@@ -49,31 +49,46 @@ interface Comment {
   parentId: string | null
   userName: string
   userEmail: string
+  userAgent: string
+  location: string
 }
 
 // -- Components ---------------------------------------------------------------
 
-const MOCK_LOCATIONS = ['Tokyo', 'Osaka', 'Shanghai', 'Singapore', 'Berlin']
-const MOCK_UAS = [
-  'Desktop Chrome',
-  'Desktop Firefox',
-  'iOS Safari',
-  'Android Chrome',
-  'macOS Safari',
-]
+function parseUA(raw: string): { label: string; mobile: boolean } {
+  if (!raw) return { label: '', mobile: false }
+
+  const mobile = /Mobile|Android|iPhone|iPad|iPod/i.test(raw)
+
+  let browser = ''
+  if (/Edg\//i.test(raw)) browser = 'Edge'
+  else if (/OPR\//i.test(raw)) browser = 'Opera'
+  else if (/Firefox\//i.test(raw)) browser = 'Firefox'
+  else if (/Chrome\//i.test(raw) && !/Edg\//i.test(raw)) browser = 'Chrome'
+  else if (/Safari\//i.test(raw) && !/Chrome\//i.test(raw)) browser = 'Safari'
+  else browser = 'Browser'
+
+  let os = ''
+  if (/iPhone|iPad|iPod/i.test(raw)) os = 'iOS'
+  else if (/Android/i.test(raw)) os = 'Android'
+  else if (/Mac OS X/i.test(raw)) os = 'macOS'
+  else if (/Windows/i.test(raw)) os = 'Windows'
+  else if (/Linux/i.test(raw)) os = 'Linux'
+
+  return { label: os ? `${browser} ${os}` : browser, mobile }
+}
 
 function CommentMeta({
-  email,
+  userAgent,
+  location,
   onReply,
 }: {
-  email: string
+  userAgent: string
+  location: string
   onReply?: () => void
 }) {
-  const hue = hashToHue(email)
-  const isMobile = hue % 2 === 0
-  const location = MOCK_LOCATIONS[hue % MOCK_LOCATIONS.length]
-  const ua = MOCK_UAS[hue % MOCK_UAS.length]
-  const DeviceIcon = isMobile ? TabletSmartphone : MonitorSmartphone
+  const ua = parseUA(userAgent)
+  const DeviceIcon = ua.mobile ? TabletSmartphone : MonitorSmartphone
 
   return (
     <div className="mt-1.5 flex items-center gap-3 text-[11px] text-dim opacity-0 transition-opacity group-hover:opacity-100">
@@ -88,14 +103,18 @@ function CommentMeta({
           <span>Reply</span>
         </button>
       )}
-      <span className="flex items-center gap-1">
-        <MapPin className="size-3" strokeWidth={1.8} />
-        <span>{location}</span>
-      </span>
-      <span className="flex items-center gap-1">
-        <DeviceIcon className="size-3" strokeWidth={1.8} />
-        <span>{ua}</span>
-      </span>
+      {location && (
+        <span className="flex items-center gap-1">
+          <MapPin className="size-3" strokeWidth={1.8} />
+          <span>{location}</span>
+        </span>
+      )}
+      {ua.label && (
+        <span className="flex items-center gap-1">
+          <DeviceIcon className="size-3" strokeWidth={1.8} />
+          <span>{ua.label}</span>
+        </span>
+      )}
       <button
         type="button"
         className="flex items-center gap-1 transition-colors hover:text-secondary"
@@ -370,7 +389,8 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     </p>
                   </div>
                   <CommentMeta
-                    email={comment.userEmail}
+                    userAgent={comment.userAgent}
+                    location={comment.location}
                     onReply={() => handleReply(comment.id)}
                   />
                   <AnimatePresence>
@@ -425,7 +445,8 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       </p>
                     </div>
                     <CommentMeta
-                      email={reply.userEmail}
+                      userAgent={reply.userAgent}
+                      location={reply.location}
                       onReply={() => handleReply(reply.id)}
                     />
                     <AnimatePresence>

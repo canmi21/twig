@@ -64,6 +64,8 @@ export const comments = sqliteTable(
     content: text('content').notNull(),
     parentId: text('parent_id'),
     status: text('status').notNull().default('pending'),
+    userAgent: text('user_agent').notNull().default(''),
+    location: text('location').notNull().default(''),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
   },
