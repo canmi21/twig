@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
+import { useFitBubble } from './use-fit-bubble'
 
 // -- Helpers ------------------------------------------------------------------
 
@@ -76,6 +77,26 @@ function parseUA(raw: string): { label: string; mobile: boolean } {
   else if (/Linux/i.test(raw)) os = 'Linux'
 
   return { label: os ? `${browser} ${os}` : browser, mobile }
+}
+
+function CommentBubble({
+  content,
+  className,
+}: {
+  content: string
+  className?: string
+}) {
+  const { ref } = useFitBubble(content)
+  return (
+    <div
+      ref={ref}
+      className={`inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2 ${className ?? ''}`}
+    >
+      <p className="text-[13.5px] leading-relaxed text-foreground/80">
+        {content}
+      </p>
+    </div>
+  )
 }
 
 function CommentMeta({
@@ -383,11 +404,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       {timeAgo(comment.createdAt)}
                     </span>
                   </div>
-                  <div className="mt-1.5 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
-                    <p className="text-[13.5px] leading-relaxed text-foreground/80">
-                      {comment.content}
-                    </p>
-                  </div>
+                  <CommentBubble content={comment.content} className="mt-1.5" />
                   <CommentMeta
                     userAgent={comment.userAgent}
                     location={comment.location}
@@ -439,11 +456,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                         {timeAgo(reply.createdAt)}
                       </span>
                     </div>
-                    <div className="mt-1 inline-block rounded-lg rounded-tl-sm border border-foreground/3 bg-tint px-3 py-2">
-                      <p className="text-[13.5px] leading-relaxed text-foreground/80">
-                        {reply.content}
-                      </p>
-                    </div>
+                    <CommentBubble content={reply.content} className="mt-1" />
                     <CommentMeta
                       userAgent={reply.userAgent}
                       location={reply.location}
