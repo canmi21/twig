@@ -78,7 +78,7 @@ function DashboardLayout() {
           <button
             type="button"
             onClick={toggle}
-            className="text-secondary transition-colors hover:text-foreground"
+            className="rounded-sm p-1 text-secondary transition-colors hover:bg-muted hover:text-foreground active:scale-95"
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? (
@@ -98,13 +98,13 @@ function DashboardLayout() {
               <Link
                 key={to}
                 to={to}
-                className={`relative flex items-center rounded-sm text-sm transition-colors ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'} ${isActive ? 'font-medium text-foreground' : 'text-secondary hover:text-foreground'}`}
+                className={`relative flex items-center rounded-sm text-sm transition-colors ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'} ${isActive ? 'font-medium text-foreground' : 'text-secondary hover:bg-muted/50 hover:text-foreground'}`}
                 title={collapsed ? label : undefined}
               >
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active-indicator"
-                    className="absolute inset-0 rounded-sm bg-muted"
+                    className="absolute inset-0 rounded-sm bg-tint"
                     transition={springStandard}
                   />
                 )}
@@ -145,7 +145,7 @@ function DashboardLayout() {
           )}
           <Link
             to="/"
-            className={`flex items-center text-sm text-secondary transition-colors hover:text-foreground ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'}`}
+            className={`flex items-center rounded-sm text-sm text-secondary transition-colors hover:bg-muted/50 hover:text-foreground ${collapsed ? 'justify-center px-0 py-1.5' : 'gap-2 px-3 py-1.5'}`}
             title={collapsed ? 'Back to site' : undefined}
           >
             <ArrowLeft size={15} strokeWidth={1.7} className="shrink-0" />
@@ -158,7 +158,7 @@ function DashboardLayout() {
         </div>
       </motion.aside>
 
-      <main className="flex-1 overflow-y-auto bg-surface">
+      <main className="flex-1 overflow-y-auto bg-base">
         <div className="mx-auto max-w-240 p-8">
           <Outlet />
         </div>

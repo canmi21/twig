@@ -104,17 +104,12 @@ function CommentsPage() {
 
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="mb-8"
-      >
+      <div className="mb-8">
         <h1 className="text-[17px] font-medium">Comments</h1>
         <p className="mt-1 text-[13px] text-secondary">
           {data.all.length} total, {data.pending.length} pending
         </p>
-      </motion.div>
+      </div>
 
       <div className="relative mb-4 flex gap-1">
         {tabs.map((t) => (
@@ -147,31 +142,28 @@ function CommentsPage() {
         ))}
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={tab}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.15 }}
-        >
-          {comments.length === 0 ? (
-            <div className="py-16 text-center">
-              <p className="text-[14px] text-secondary">
-                {tab === 'pending'
-                  ? 'No pending comments.'
-                  : 'No comments yet.'}
-              </p>
-              <p className="mt-1 text-[12px] text-dim">
-                {tab === 'pending'
-                  ? 'All caught up.'
-                  : 'Comments will appear here once readers engage.'}
-              </p>
-            </div>
-          ) : (
+      <motion.div
+        key={tab}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1 }}
+      >
+        {comments.length === 0 ? (
+          <div className="py-16 text-center">
+            <p className="text-[14px] text-secondary">
+              {tab === 'pending' ? 'No pending comments.' : 'No comments yet.'}
+            </p>
+            <p className="mt-1 text-[12px] text-dim">
+              {tab === 'pending'
+                ? 'All caught up.'
+                : 'Comments will appear here once readers engage.'}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-lg border border-boundary bg-surface">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-boundary text-left text-secondary">
+                <tr className="border-b border-boundary bg-subtle/50 text-left text-secondary">
                   <th className="pb-2 font-normal">Comment</th>
                   <th className="pb-2 font-normal">Author</th>
                   <th className="pb-2 font-normal">Post</th>
@@ -183,12 +175,9 @@ function CommentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {comments.map((c, i) => (
-                  <motion.tr
+                {comments.map((c) => (
+                  <tr
                     key={c.id}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: i * 0.05 }}
                     className="border-b border-boundary transition-colors hover:bg-muted/50"
                   >
                     <td className="max-w-64 py-3">
@@ -279,13 +268,13 @@ function CommentsPage() {
                         </AnimatePresence>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </motion.div>
-      </AnimatePresence>
+          </div>
+        )}
+      </motion.div>
     </div>
   )
 }

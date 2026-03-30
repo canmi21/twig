@@ -2,7 +2,6 @@
 
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { motion } from 'motion/react'
 import { Plus, MessageSquare } from 'lucide-react'
 import {
   fetchDashboardOverview,
@@ -53,23 +52,11 @@ interface StatCardProps {
   value: number
   secondary?: string
   highlight?: boolean
-  index: number
 }
 
-function StatCard({
-  label,
-  value,
-  secondary,
-  highlight,
-  index,
-}: StatCardProps) {
+function StatCard({ label, value, secondary, highlight }: StatCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="rounded-lg border border-boundary p-5"
-    >
+    <div className="rounded-lg border border-boundary bg-surface p-5">
       <div className="text-[13px] text-secondary">{label}</div>
       <div
         className={`mt-1 text-2xl font-medium ${highlight ? 'text-caution' : 'text-foreground'}`}
@@ -79,7 +66,7 @@ function StatCard({
       {secondary && (
         <div className="mt-1 text-[12px] text-dim">{secondary}</div>
       )}
-    </motion.div>
+    </div>
   )
 }
 
@@ -103,14 +90,9 @@ function DashboardOverview() {
 
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="mb-8"
-      >
+      <div className="mb-8">
         <h1 className="text-[17px] font-medium">Overview</h1>
-      </motion.div>
+      </div>
 
       {/* Stats cards */}
       <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -118,43 +100,34 @@ function DashboardOverview() {
           label="Total Posts"
           value={data.postStats.total}
           secondary={`${data.postStats.published} published, ${data.postStats.draft} draft`}
-          index={0}
         />
-        <StatCard
-          label="Published"
-          value={data.postStats.published}
-          index={1}
-        />
+        <StatCard label="Published" value={data.postStats.published} />
         <StatCard
           label="Pending Comments"
           value={data.commentStats.pending}
           highlight={data.commentStats.pending > 0}
           secondary={`${data.commentStats.total} total`}
-          index={2}
         />
-        <StatCard label="Users" value={data.userCount} index={3} />
+        <StatCard label="Users" value={data.userCount} />
       </div>
 
       {/* Recent activity */}
       <div className="mb-10 grid gap-8 lg:grid-cols-2">
         {/* Recent posts */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.2 }}
-        >
-          <h2 className="text-[15px] font-medium">Recent Posts</h2>
+        <div className="overflow-hidden rounded-lg border border-boundary bg-surface">
+          <h2 className="border-b border-boundary px-4 py-3 text-[15px] font-medium">
+            Recent Posts
+          </h2>
           {data.recentPosts.length === 0 ? (
-            <p className="mt-4 text-[13px] text-secondary">No posts yet.</p>
+            <div className="p-1">
+              <p className="px-3 py-2.5 text-[13px] text-secondary">
+                No posts yet.
+              </p>
+            </div>
           ) : (
-            <div className="mt-4 space-y-1">
-              {data.recentPosts.map((post, i) => (
-                <motion.div
-                  key={post.cid}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15, delay: 0.25 + i * 0.04 }}
-                >
+            <div className="space-y-1 p-1">
+              {data.recentPosts.map((post) => (
+                <div key={post.cid}>
                   <Link
                     to="/@/editor/$cid"
                     params={{ cid: post.cid }}
@@ -185,29 +158,28 @@ function DashboardOverview() {
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Recent comments */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.2 }}
-        >
-          <h2 className="text-[15px] font-medium">Recent Comments</h2>
+        <div className="overflow-hidden rounded-lg border border-boundary bg-surface">
+          <h2 className="border-b border-boundary px-4 py-3 text-[15px] font-medium">
+            Recent Comments
+          </h2>
           {data.recentComments.length === 0 ? (
-            <p className="mt-4 text-[13px] text-secondary">No comments yet.</p>
+            <div className="p-1">
+              <p className="px-3 py-2.5 text-[13px] text-secondary">
+                No comments yet.
+              </p>
+            </div>
           ) : (
-            <div className="mt-4 space-y-1">
-              {data.recentComments.map((c, i) => (
-                <motion.div
+            <div className="space-y-1 p-1">
+              {data.recentComments.map((c) => (
+                <div
                   key={c.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15, delay: 0.25 + i * 0.04 }}
                   className="rounded-sm px-3 py-2.5 transition-colors hover:bg-muted/50"
                 >
                   <div className="truncate text-[14px] text-foreground">
@@ -219,24 +191,19 @@ function DashboardOverview() {
                     {' — '}
                     {timeAgo(c.createdAt)}
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Quick actions */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.3 }}
-        className="flex flex-wrap gap-3"
-      >
+      <div className="flex flex-wrap gap-3">
         <button
           type="button"
           onClick={handleNewPost}
-          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-surface transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[13px] font-medium text-surface transition-opacity hover:opacity-90 active:scale-[0.97]"
         >
           <Plus size={14} strokeWidth={2} />
           New Post
@@ -244,13 +211,13 @@ function DashboardOverview() {
         {data.commentStats.pending > 0 && (
           <Link
             to="/@/comments"
-            className="inline-flex items-center gap-1.5 rounded-full border border-caution/30 bg-caution-subtle px-4 py-1.5 text-[13px] font-medium text-caution transition-colors hover:bg-caution-subtle"
+            className="inline-flex items-center gap-1.5 rounded-full border border-caution/30 bg-caution-subtle px-4 py-1.5 text-[13px] font-medium text-caution transition-colors hover:bg-caution-subtle active:scale-[0.97]"
           >
             <MessageSquare size={14} strokeWidth={1.7} />
             {data.commentStats.pending} pending
           </Link>
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }

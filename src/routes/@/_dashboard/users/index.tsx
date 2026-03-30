@@ -112,158 +112,147 @@ function UsersList() {
 
   return (
     <div>
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="mb-8"
-      >
+      <div className="mb-8">
         <h1 className="text-[17px] font-medium">Users</h1>
         <p className="mt-1 text-[13px] text-secondary">{users.length} total</p>
-      </motion.div>
+      </div>
 
       {users.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="py-16 text-center"
-        >
+        <div className="py-16 text-center">
           <p className="text-[14px] text-secondary">No users yet.</p>
-        </motion.div>
+        </div>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-boundary text-left text-secondary">
-              <th className="pb-2 font-normal">Name</th>
-              <th className="pb-2 font-normal">Email</th>
-              <th className="pb-2 font-normal">Role</th>
-              <th className="pb-2 font-normal">Status</th>
-              <th className="pb-2 font-normal">Created</th>
-              <th className="pb-2 text-right font-normal">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u, i) => (
-              <motion.tr
-                key={u.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: i * 0.05 }}
-                className="border-b border-boundary transition-colors hover:bg-muted/50"
-              >
-                <td className="py-3 text-[14px] font-medium">{u.name}</td>
-                <td className="py-3 text-[13px] text-secondary">{u.email}</td>
-                <td className="py-3">
-                  <span
-                    className={`rounded-sm px-2 py-0.5 text-xs ${
-                      u.role === 'admin'
-                        ? 'bg-accent-subtle text-accent'
-                        : 'bg-muted text-secondary'
-                    }`}
-                  >
-                    {u.role ?? 'user'}
-                  </span>
-                </td>
-                <td className="py-3">
-                  <AnimatePresence mode="wait">
-                    {u.banned ? (
-                      <motion.span
-                        key="banned"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="rounded-sm bg-danger-subtle px-2 py-0.5 text-xs text-danger"
-                        title={u.banReason ?? undefined}
-                      >
-                        Banned
-                      </motion.span>
-                    ) : (
-                      <motion.span
-                        key="active"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="rounded-sm bg-success-subtle px-2 py-0.5 text-xs text-success"
-                      >
-                        Active
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </td>
-                <td className="py-3 text-[13px] text-secondary">
-                  {formatDate(u.createdAt)}
-                </td>
-                <td className="py-3 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    {u.banned ? (
-                      <button
-                        type="button"
-                        disabled={loading === u.id}
-                        onClick={() => handleUnban(u.id)}
-                        className="text-secondary transition-colors hover:text-foreground disabled:opacity-50"
-                      >
-                        Unban
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={loading === u.id}
-                        onClick={() => handleBan(u.id)}
-                        className="text-secondary transition-colors hover:text-danger disabled:opacity-50"
-                      >
-                        Ban
-                      </button>
-                    )}
+        <div className="overflow-hidden rounded-lg border border-boundary bg-surface">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-boundary bg-subtle/50 text-left text-secondary">
+                <th className="pb-2 font-normal">Name</th>
+                <th className="pb-2 font-normal">Email</th>
+                <th className="pb-2 font-normal">Role</th>
+                <th className="pb-2 font-normal">Status</th>
+                <th className="pb-2 font-normal">Created</th>
+                <th className="pb-2 text-right font-normal">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => (
+                <tr
+                  key={u.id}
+                  className="border-b border-boundary transition-colors hover:bg-muted/50"
+                >
+                  <td className="py-3 text-[14px] font-medium">{u.name}</td>
+                  <td className="py-3 text-[13px] text-secondary">{u.email}</td>
+                  <td className="py-3">
+                    <span
+                      className={`rounded-sm px-2 py-0.5 text-xs ${
+                        u.role === 'admin'
+                          ? 'bg-accent-subtle text-accent'
+                          : 'bg-muted text-secondary'
+                      }`}
+                    >
+                      {u.role ?? 'user'}
+                    </span>
+                  </td>
+                  <td className="py-3">
                     <AnimatePresence mode="wait">
-                      {deleting === u.id ? (
+                      {u.banned ? (
                         <motion.span
-                          key="confirm"
-                          className="flex items-center gap-2"
-                          initial={{ opacity: 0, x: 4 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -4 }}
+                          key="banned"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.15 }}
+                          className="rounded-sm bg-danger-subtle px-2 py-0.5 text-xs text-danger"
+                          title={u.banReason ?? undefined}
                         >
-                          <button
-                            type="button"
-                            disabled={loading === u.id}
-                            onClick={() => handleDelete(u.id)}
-                            className="text-danger disabled:opacity-50"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setDeleting(null)}
-                            className="text-secondary"
-                          >
-                            Cancel
-                          </button>
+                          Banned
                         </motion.span>
                       ) : (
-                        <motion.button
-                          key="delete"
-                          type="button"
-                          onClick={() => setDeleting(u.id)}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
+                        <motion.span
+                          key="active"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
                           transition={{ duration: 0.15 }}
-                          className="text-secondary transition-colors hover:text-danger"
+                          className="rounded-sm bg-success-subtle px-2 py-0.5 text-xs text-success"
                         >
-                          Delete
-                        </motion.button>
+                          Active
+                        </motion.span>
                       )}
                     </AnimatePresence>
-                  </div>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="py-3 text-[13px] text-secondary">
+                    {formatDate(u.createdAt)}
+                  </td>
+                  <td className="py-3 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      {u.banned ? (
+                        <button
+                          type="button"
+                          disabled={loading === u.id}
+                          onClick={() => handleUnban(u.id)}
+                          className="text-secondary transition-colors hover:text-foreground disabled:opacity-50"
+                        >
+                          Unban
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={loading === u.id}
+                          onClick={() => handleBan(u.id)}
+                          className="text-secondary transition-colors hover:text-danger disabled:opacity-50"
+                        >
+                          Ban
+                        </button>
+                      )}
+                      <AnimatePresence mode="wait">
+                        {deleting === u.id ? (
+                          <motion.span
+                            key="confirm"
+                            className="flex items-center gap-2"
+                            initial={{ opacity: 0, x: 4 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -4 }}
+                            transition={{ duration: 0.15 }}
+                          >
+                            <button
+                              type="button"
+                              disabled={loading === u.id}
+                              onClick={() => handleDelete(u.id)}
+                              className="text-danger disabled:opacity-50"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleting(null)}
+                              className="text-secondary"
+                            >
+                              Cancel
+                            </button>
+                          </motion.span>
+                        ) : (
+                          <motion.button
+                            key="delete"
+                            type="button"
+                            onClick={() => setDeleting(u.id)}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="text-secondary transition-colors hover:text-danger"
+                          >
+                            Delete
+                          </motion.button>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )
