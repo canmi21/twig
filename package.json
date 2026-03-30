@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -30,7 +30,12 @@
     "deploy": "wrangler d1 migrations apply taki-sql --remote && wrangler deploy"
   },
   "dependencies": {
+    "@chenglou/pretext": "^0.0.3",
+    "@fontsource/geist-mono": "^5.2.7",
+    "@fontsource/geist-sans": "^5.2.5",
     "@mingcute/react": "^1.4.1",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@shikijs/langs": "^4.0.2",
     "@shikijs/rehype": "^4.0.2",

@@ -2,6 +2,7 @@
 
 @import './tailwind.css';
 @import './tokens.css';
+@import './geist.css';
 @import './article.css';
 @import './shiki.css';
 @import './animations.css';

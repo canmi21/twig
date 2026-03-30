@@ -8,7 +8,8 @@ import {
   useNavigate,
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { motion, AnimatePresence } from 'motion/react'
+import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
+import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { getDb, getCache, getBucket } from '~/server/platform'
 import {
   getAllPosts,
@@ -29,6 +30,8 @@ import { storageKey } from '~/lib/storage/storage-key'
 import { newCid } from '~/lib/utils/uuid'
 import { computeContentHash } from '~/lib/utils/hash'
 import type { PostIndexEntry } from '~/lib/storage/kv'
+
+/* ── Server functions ─────────────────────────── */
 
 const listPosts = createServerFn().handler(async () => {
   const db = getDb()
@@ -55,12 +58,9 @@ const togglePublished = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const db = getDb()
     const kv = getCache()
-
     await setPublished(db, data.cid, data.published)
-
     const post = await getPostByCid(db, data.cid)
     if (!post) return
-
     if (data.published) {
       const compiled = await compile(post.content)
       await writePostKv(kv, post.slug, {
@@ -81,7 +81,6 @@ const togglePublished = createServerFn({ method: 'POST' })
     } else {
       await deletePostKv(kv, post.slug)
     }
-
     await rebuildPostIndex(db, kv)
   })
 
@@ -91,10 +90,8 @@ const removePost = createServerFn({ method: 'POST' })
     const db = getDb()
     const kv = getCache()
     const r2 = getBucket()
-
     const post = await getPostByCid(db, data.cid)
     if (!post) return
-
     const hashes = await deleteMediaRefsForPost(db, data.cid)
     const refCounts = await Promise.all(
       hashes.map((hash) =>
@@ -113,7 +110,6 @@ const removePost = createServerFn({ method: 'POST' })
           deleteMedia(db, row.hash),
         ]),
     )
-
     await deletePost(db, data.cid)
     await deletePostKv(kv, post.slug)
     await rebuildPostIndex(db, kv)
@@ -134,9 +130,11 @@ async function rebuildPostIndex(db: ReturnType<typeof getDb>, kv: KVNamespace) {
   await writePostIndex(kv, index)
 }
 
+/* ── Route ────────────────────────────────────── */
+
 export const Route = createFileRoute('/@/_dashboard/contents/')({
   loader: () => listPosts(),
-  component: PostsList,
+  component: PostsPage,
 })
 
 function formatDate(iso: string): string {
@@ -147,11 +145,13 @@ function formatDate(iso: string): string {
   })
 }
 
-function PostsList() {
+/* ── Component ────────────────────────────────── */
+
+function PostsPage() {
   const posts = Route.useLoaderData()
   const router = useRouter()
   const navigate = useNavigate()
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
 
   async function handleNewPost() {
     const { cid } = await createDraft()
@@ -168,91 +168,80 @@ function PostsList() {
   }
 
   async function handleToggle(cid: string, current: number) {
+    setBusy(cid)
     await togglePublished({ data: { cid, published: current === 0 } })
+    setBusy(null)
     router.invalidate()
   }
 
   async function handleDelete(cid: string) {
+    setBusy(cid)
     await removePost({ data: { cid } })
-    setDeleting(null)
+    setBusy(null)
     router.invalidate()
   }
 
+  const published = posts.filter((p) => p.published === 1).length
+  const draft = posts.length - published
+
   return (
-    <div>
-      <div className="mb-8 flex items-center justify-between">
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[17px] font-medium">Posts</h1>
-          <p className="mt-1 text-[13px] text-secondary">
-            {posts.length} total
+          <h1 className="text-[15px] font-semibold text-geist-1000">Posts</h1>
+          <p className="mt-0.5 text-[12px] text-geist-600">
+            {posts.length} total &middot; {published} published &middot; {draft}{' '}
+            draft
           </p>
         </div>
         <button
           type="button"
           onClick={handleNewPost}
-          className="rounded-sm bg-foreground px-3 py-1.5 text-sm text-surface active:scale-[0.97]"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md bg-geist-1000 px-3 text-[13px] font-medium text-geist-bg transition-opacity hover:opacity-90"
         >
+          <Plus size={14} strokeWidth={2} />
           New Post
         </button>
       </div>
 
+      {/* Table */}
       {posts.length === 0 ? (
-        <div className="py-16 text-center">
-          <p className="text-[14px] text-secondary">No posts yet.</p>
-          <p className="mt-1 text-[12px] text-dim">
+        <div className="rounded-lg border border-dashed border-geist-400 py-16 text-center">
+          <p className="text-[13px] font-medium text-geist-900">No posts yet</p>
+          <p className="mt-1 text-[12px] text-geist-600">
             Create your first post to get started.
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-boundary bg-surface">
-          <table className="w-full text-sm">
+        <div className="overflow-hidden rounded-lg bg-geist-bg-2 shadow-geist-border">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-boundary bg-subtle/50 text-left text-secondary">
-                <th className="pb-2 font-normal">Title</th>
-                <th className="pb-2 font-normal">Category</th>
-                <th className="pb-2 font-normal">Status</th>
-                <th className="pb-2 font-normal">Created</th>
-                <th className="pb-2 text-right font-normal">Actions</th>
+              <tr className="border-b border-geist-200 bg-geist-100 text-left">
+                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
+                  Title
+                </th>
+                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
+                  Category
+                </th>
+                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
+                  Status
+                </th>
+                <th className="px-3 py-2 text-[11px] font-medium tracking-wider text-geist-600 uppercase">
+                  Date
+                </th>
+                <th className="w-20 px-3 py-2" />
               </tr>
             </thead>
             <tbody>
-              {posts.map((post) => (
-                <tr
-                  key={post.cid}
-                  className="border-b border-boundary transition-colors hover:bg-muted/50"
-                >
-                  <td className="py-3">
-                    <div className="text-[14px] font-medium">{post.title}</div>
-                    <div className="text-[12px] text-dim">{post.slug}</div>
-                  </td>
-                  <td className="py-3 text-[13px] text-secondary">
-                    {post.category ?? '-'}
-                  </td>
-                  <td className="py-3">
-                    <AnimatePresence mode="wait">
-                      <motion.button
-                        key={post.published}
-                        type="button"
-                        onClick={() => handleToggle(post.cid, post.published)}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className={`rounded-sm px-2 py-0.5 text-xs ${
-                          post.published === 1
-                            ? 'bg-success-subtle text-success'
-                            : 'bg-muted text-secondary'
-                        }`}
-                      >
-                        {post.published === 1 ? 'Published' : 'Draft'}
-                      </motion.button>
-                    </AnimatePresence>
-                  </td>
-                  <td className="py-3 text-[13px] text-secondary">
-                    {formatDate(post.createdAt)}
-                  </td>
-                  <td className="py-3 text-right">
-                    <div className="flex items-center justify-end gap-3">
+              {posts.map((post) => {
+                const isBusy = busy === post.cid
+                return (
+                  <tr
+                    key={post.cid}
+                    className={`border-b border-geist-200 transition-colors last:border-0 hover:bg-geist-100/50 ${isBusy ? 'opacity-50' : ''}`}
+                  >
+                    <td className="px-3 py-2.5">
                       <Link
                         to="/@/editor/$cid"
                         params={{ cid: post.cid }}
@@ -262,58 +251,117 @@ function PostsList() {
                           format: true,
                           highlight: true,
                         }}
-                        className="text-secondary transition-colors hover:text-foreground"
+                        className="group"
                       >
-                        Edit
+                        <div className="font-medium text-geist-1000 group-hover:underline">
+                          {post.title}
+                        </div>
+                        <div className="geist-mono mt-0.5 text-[11px] text-geist-600">
+                          /{post.slug}
+                        </div>
                       </Link>
-                      <AnimatePresence mode="wait">
-                        {deleting === post.cid ? (
-                          <motion.span
-                            key="confirm"
-                            className="flex items-center gap-2"
-                            initial={{ opacity: 0, x: 4 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -4 }}
-                            transition={{ duration: 0.15 }}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(post.cid)}
-                              className="text-danger"
-                            >
-                              Confirm
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setDeleting(null)}
-                              className="text-secondary"
-                            >
-                              Cancel
-                            </button>
-                          </motion.span>
-                        ) : (
-                          <motion.button
-                            key="delete"
-                            type="button"
-                            onClick={() => setDeleting(post.cid)}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="text-secondary transition-colors hover:text-danger"
-                          >
-                            Delete
-                          </motion.button>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-3 py-2.5 text-geist-900">
+                      {post.category ?? (
+                        <span className="text-geist-500">--</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggle(post.cid, post.published)}
+                        disabled={isBusy}
+                        className="cursor-pointer disabled:cursor-wait"
+                      >
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[11px] font-medium ${post.published === 1 ? 'bg-geist-success-light text-geist-success-dark' : 'bg-geist-100 text-geist-600'}`}
+                        >
+                          {isBusy && (
+                            <Loader2 size={10} className="animate-spin" />
+                          )}
+                          {post.published === 1 ? 'Published' : 'Draft'}
+                        </span>
+                      </button>
+                    </td>
+                    <td className="geist-mono px-3 py-2.5 text-[12px] whitespace-nowrap text-geist-600 tabular-nums">
+                      {formatDate(post.createdAt)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right">
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Link
+                          to="/@/editor/$cid"
+                          params={{ cid: post.cid }}
+                          search={{
+                            preview: 'rendered',
+                            pretty: undefined,
+                            format: true,
+                            highlight: true,
+                          }}
+                          className="inline-flex size-7 items-center justify-center rounded-md text-geist-600 transition-colors hover:bg-geist-100 hover:text-geist-1000"
+                          title="Edit"
+                        >
+                          <Pencil size={14} strokeWidth={1.5} />
+                        </Link>
+                        <DeletePostDialog
+                          title={post.title}
+                          onConfirm={() => handleDelete(post.cid)}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
       )}
     </div>
+  )
+}
+
+/* ── Delete dialog ────────────────────────────── */
+
+function DeletePostDialog({
+  title,
+  onConfirm,
+}: {
+  title: string
+  onConfirm: () => void
+}) {
+  return (
+    <AlertDialog.Root>
+      <AlertDialog.Trigger asChild>
+        <button
+          type="button"
+          className="inline-flex size-7 items-center justify-center rounded-md text-geist-600 transition-colors hover:bg-geist-error-light hover:text-geist-error"
+          title="Delete"
+        >
+          <Trash2 size={14} strokeWidth={1.5} />
+        </button>
+      </AlertDialog.Trigger>
+      <AlertDialog.Portal>
+        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+        <AlertDialog.Content className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-1/2 rounded-lg bg-geist-bg p-6 shadow-geist-md">
+          <AlertDialog.Title className="text-[15px] font-semibold text-geist-1000">
+            Delete post
+          </AlertDialog.Title>
+          <AlertDialog.Description className="mt-2 text-[13px] leading-relaxed text-geist-900">
+            Permanently delete &ldquo;{title}&rdquo; and all associated media?
+            This cannot be undone.
+          </AlertDialog.Description>
+          <div className="mt-5 flex justify-end gap-2">
+            <AlertDialog.Cancel className="h-8 rounded-md border border-geist-400 bg-geist-bg px-3 text-[13px] font-medium text-geist-1000 transition-colors hover:bg-geist-100">
+              Cancel
+            </AlertDialog.Cancel>
+            <AlertDialog.Action
+              onClick={onConfirm}
+              className="h-8 rounded-md bg-geist-error px-3 text-[13px] font-medium text-white transition-opacity hover:opacity-90"
+            >
+              Delete
+            </AlertDialog.Action>
+          </div>
+        </AlertDialog.Content>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
   )
 }

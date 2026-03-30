@@ -1,0 +1,117 @@
+/* src/styles/geist.css */
+
+/* src/styles/geist.css — Vercel Geist design tokens for the admin panel.
+ *
+ * All tokens are prefixed with `geist-` to avoid collision with the frontend's
+ * OKLCH warm-gray system in tokens.css. These tokens are globally registered
+ * via @theme (Tailwind v4 requirement) but only *used* in admin route files.
+ *
+ * Color source: https://vercel.com/geist/colors
+ * Gray scale: pure neutral (hue=0, saturation=0%), 10-step.
+ * Semantic: red (error), green (success), amber (warning).
+ */
+
+@import '@fontsource/geist-sans/400.css';
+@import '@fontsource/geist-sans/500.css';
+@import '@fontsource/geist-sans/600.css';
+@import '@fontsource/geist-sans/700.css';
+@import '@fontsource/geist-mono/400.css';
+
+/* ── Light mode tokens (default) ──────────────── */
+
+@theme {
+  /* Background */
+  --color-geist-bg: #ffffff;
+  --color-geist-bg-2: #fafafa;
+
+  /* Gray scale (100=lightest component bg, 1000=primary text) */
+  --color-geist-100: #f2f2f2;
+  --color-geist-200: #ebebeb;
+  --color-geist-300: #e6e6e6;
+  --color-geist-400: #ebebeb;
+  --color-geist-500: #c9c9c9;
+  --color-geist-600: #a8a8a8;
+  --color-geist-700: #8f8f8f;
+  --color-geist-800: #7d7d7d;
+  --color-geist-900: #666666;
+  --color-geist-1000: #171717;
+
+  /* Error (red) */
+  --color-geist-error: hsl(358, 75%, 59%);
+  --color-geist-error-light: hsl(0, 100%, 97%);
+  --color-geist-error-dark: hsl(358, 66%, 48%);
+
+  /* Success (green) */
+  --color-geist-success: hsl(131, 41%, 46%);
+  --color-geist-success-light: hsl(120, 60%, 96%);
+  --color-geist-success-dark: hsl(133, 50%, 32%);
+
+  /* Warning (amber) */
+  --color-geist-warning: hsl(39, 100%, 57%);
+  --color-geist-warning-light: hsl(39, 100%, 95%);
+  --color-geist-warning-dark: hsl(30, 100%, 32%);
+
+  /* Blue (focus / info) */
+  --color-geist-blue: hsl(212, 100%, 48%);
+  --color-geist-blue-light: hsl(212, 100%, 97%);
+  --color-geist-blue-dark: hsl(211, 100%, 42%);
+
+  /* Shadows — Vercel signature 1px inset border + subtle drop */
+  --shadow-geist-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --shadow-geist-sm:
+    0 0 0 1px rgba(0, 0, 0, 0.08), 0px 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-geist-md:
+    0 0 0 1px rgba(0, 0, 0, 0.08), 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Dark mode overrides ──────────────────────── */
+
+.dark {
+  --color-geist-bg: #0a0a0a;
+  --color-geist-bg-2: #000000;
+
+  --color-geist-100: #1a1a1a;
+  --color-geist-200: #1f1f1f;
+  --color-geist-300: #292929;
+  --color-geist-400: #2e2e2e;
+  --color-geist-500: #454545;
+  --color-geist-600: #878787;
+  --color-geist-700: #8f8f8f;
+  --color-geist-800: #7d7d7d;
+  --color-geist-900: #a1a1a1;
+  --color-geist-1000: #ededed;
+
+  --color-geist-error: hsl(358, 75%, 59%);
+  --color-geist-error-light: hsl(357, 37%, 12%);
+  --color-geist-error-dark: hsl(358, 100%, 69%);
+
+  --color-geist-success: hsl(131, 41%, 46%);
+  --color-geist-success-light: hsl(136, 50%, 9%);
+  --color-geist-success-dark: hsl(131, 43%, 57%);
+
+  --color-geist-warning: hsl(39, 100%, 57%);
+  --color-geist-warning-light: hsl(35, 100%, 8%);
+  --color-geist-warning-dark: hsl(39, 90%, 50%);
+
+  --color-geist-blue: hsl(212, 100%, 48%);
+  --color-geist-blue-light: hsl(216, 50%, 12%);
+  --color-geist-blue-dark: hsl(210, 100%, 66%);
+
+  --shadow-geist-border: 0 0 0 1px hsla(0, 0%, 100%, 0.145);
+  --shadow-geist-sm: 0 0 0 1px hsla(0, 0%, 100%, 0.145);
+  --shadow-geist-md: 0 0 0 1px hsla(0, 0%, 100%, 0.145);
+}
+
+/* ── Admin font scoping ───────────────────────── */
+
+.geist {
+  font-family:
+    'Geist Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.geist-mono {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+}

@@ -49,6 +49,10 @@ export default [
       ...tailwindcss.configs.recommended.rules,
       // Conflicts with oxfmt JSX attribute line-breaking
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+      'better-tailwindcss/no-unknown-classes': [
+        'error',
+        { ignore: ['^geist', '^geist-mono$'] },
+      ],
     },
     settings: {
       ...tailwindcss.configs.recommended.settings,
