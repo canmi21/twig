@@ -310,24 +310,70 @@ html:not(.dark) .post-page__body th {
 
 html:not(.dark) .post-page__footer-wrap {
   margin-top: 3.6rem;
-  border-top-color: #e9e9e9;
 }
 
 html:not(.dark) .post-page__footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 0.72rem;
+  margin-top: 0.08rem;
+  padding-right: 5.75rem;
+}
+
+html:not(.dark) .post-page__footer-main {
   color: #333333;
   opacity: 0.56;
+  align-items: center;
+  gap: 0.25rem 0.52rem;
+  line-height: 1;
+}
+
+html:not(.dark) .post-page__footer-line {
+  min-width: 0;
+  flex: 1;
+  border-bottom: 1px dashed #e9e9e9;
+}
+
+html:not(.dark) .post-page__signature-wrap {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 0.35rem;
+  background: #ffffff;
 }
 
 html:not(.dark) .post-page__tags {
+  padding-top: 0;
   gap: 0.45rem 0.8rem;
 }
 
-html:not(.dark) .post-page__tag {
+html:not(.dark) .post-page__tag,
+html:not(.dark) .post-page__license {
+  color: #333333;
+  opacity: 0.56;
+  transition:
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+html:not(.dark) .post-page__updated {
   color: #333333;
   opacity: 0.56;
 }
 
-html:not(.dark) .post-page__updated {
+html:not(.dark) .post-page__tag:hover,
+html:not(.dark) .post-page__license:hover {
+  color: #333333;
+  opacity: 1;
+}
+
+html:not(.dark) .post-page__signature {
   color: #333333;
   opacity: 0.56;
 }
@@ -481,6 +527,17 @@ html:not(.dark) .post-back-link:hover {
   html:not(.dark) .post-page .article-header__title {
     font-size: 1.05rem;
     line-height: 1.5;
+  }
+
+  html:not(.dark) .post-page__footer {
+    gap: 0.4rem;
+    height: 0.64rem;
+    margin-top: 0.06rem;
+    padding-right: 5.2rem;
+  }
+
+  html:not(.dark) .post-page__signature-wrap {
+    padding-left: 0.25rem;
   }
 
   html:not(.dark) .post-page__body {

@@ -2,8 +2,7 @@
 
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
-import * as Tooltip from '@radix-ui/react-tooltip'
-import { CreativeCommons, Type } from 'lucide-react'
+import { Type } from 'lucide-react'
 
 export function formatDate(iso: string): string {
   const d = new Date(iso)
@@ -79,37 +78,6 @@ export function ArticleHeader({
               {formatDate(createdAt)}
             </time>
           )}
-          <Tooltip.Provider delayDuration={480} skipDelayDuration={0}>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <span
-                  aria-label="CC BY-NC-SA 4.0 license"
-                  className="article-header__license inline-flex cursor-default items-center text-secondary transition-colors hover:text-primary"
-                >
-                  <CreativeCommons
-                    className="size-[0.8rem]"
-                    strokeWidth={1.8}
-                  />
-                </span>
-              </Tooltip.Trigger>
-              <Tooltip.Portal>
-                <Tooltip.Content
-                  side="top"
-                  sideOffset={4}
-                  className="article-header__tooltip z-10 rounded-full border border-border bg-surface px-2.5 py-1.5 text-[11px] leading-none shadow-sm"
-                >
-                  <a
-                    href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="article-header__tooltip-link text-primary hover:underline"
-                  >
-                    CC BY-NC-SA 4.0
-                  </a>
-                </Tooltip.Content>
-              </Tooltip.Portal>
-            </Tooltip.Root>
-          </Tooltip.Provider>
           {contentCount && (
             <span className="article-header__count inline-flex items-center gap-1">
               <Type className="size-[0.8rem]" strokeWidth={1.8} />

@@ -14,6 +14,7 @@ import { PostActions } from '~/components/post/actions'
 import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
 import { ThemeToggle } from '~/components/theme-toggle'
+import { Signature } from '~/components/post/signature'
 import postPageCss from '~/styles/post-page.css?url'
 
 const getPost = createServerFn()
@@ -76,25 +77,39 @@ function PostPage() {
         </div>
         {frontmatter.tags && frontmatter.tags.length > 0 && (
           <>
-            <div className="post-page__footer-wrap mt-14 border-t border-dashed border-border pt-6">
-              <footer className="post-page__footer flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-[13px] text-secondary">
-                <div className="post-page__tags flex flex-wrap gap-x-3 gap-y-1">
-                  {frontmatter.tags.map((tag) => (
-                    <span key={tag} className="post-page__tag capitalize">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+            <div className="post-page__footer-wrap">
+              <div className="post-page__footer-main flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-secondary">
                 {frontmatter.updated_at && (
-                  <div className="post-page__updated text-[12px] text-secondary">
+                  <span className="post-page__updated">
                     Updated on{' '}
                     {formatShortDate(
                       frontmatter.updated_at,
                       shouldShowUpdatedYear,
                     )}
-                  </div>
+                  </span>
                 )}
-              </footer>
+                <a
+                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="post-page__license"
+                >
+                  CC BY-NC-SA 4.0
+                </a>
+              </div>
+              <div className="post-page__footer text-[12px] text-secondary">
+                <div className="post-page__footer-line" aria-hidden="true" />
+                <div className="post-page__signature-wrap">
+                  <Signature className="post-page__signature h-[54px] select-none" />
+                </div>
+              </div>
+              <div className="post-page__tags flex flex-wrap gap-x-3 gap-y-1 pt-3 text-[12px] text-secondary">
+                {frontmatter.tags.map((tag) => (
+                  <span key={tag} className="post-page__tag capitalize">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
             </div>
           </>
         )}
