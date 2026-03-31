@@ -127,16 +127,31 @@ export function CommentSection({ postCid }: { postCid: string }) {
     setExpandedThreads((current) => {
       const next = new Set(current)
       if (next.has(commentId)) {
-        next.delete(commentId)
+        const stack = [commentId]
+        while (stack.length > 0) {
+          const id = stack.pop()
+          if (!id) continue
+          next.delete(id)
+          const replies: Comment[] = commentsByParent[id] ?? []
+          for (const reply of replies) {
+            stack.push(reply.id)
+          }
+        }
       } else {
-        next.add(commentId)
+        let currentId: string | null = commentId
+        while (currentId) {
+          next.add(currentId)
+          const replies: Comment[] = commentsByParent[currentId] ?? []
+          if (replies.length !== 1) break
+          currentId = replies[0].id
+        }
       }
       return next
     })
   }
 
   function renderReplies(parentId: string, depth = 1) {
-    const replies = commentsByParent[parentId]
+    const replies: Comment[] = commentsByParent[parentId] ?? []
     if (!replies?.length) return null
 
     const shouldCollapse = depth >= 2
@@ -153,7 +168,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
           className="post-comments__thread-toggle"
           onClick={() => toggleThread(parentId)}
         >
-          {toggleLabel}
+          <span className="post-comments__thread-toggle-label">
+            {toggleLabel}
+          </span>
         </button>
       )
     }
@@ -193,7 +210,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
             className="post-comments__thread-toggle"
             onClick={() => toggleThread(parentId)}
           >
-            Hide replies
+            <span className="post-comments__thread-toggle-label">
+              Hide replies
+            </span>
           </button>
         )}
       </div>
