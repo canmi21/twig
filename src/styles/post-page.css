@@ -462,6 +462,13 @@ html:not(.dark) .post-comments__replies {
   padding-left: 0.85rem;
 }
 
+html:not(.dark) .post-comments__replies[data-depth='3'],
+html:not(.dark) .post-comments__replies[data-depth='4'],
+html:not(.dark) .post-comments__replies[data-depth='5'],
+html:not(.dark) .post-comments__replies[data-depth='6'] {
+  padding-left: 0;
+}
+
 html:not(.dark) .post-comments__thread-block {
   margin-top: 0.82rem;
 }
@@ -471,7 +478,7 @@ html:not(.dark) .post-comments__reply {
   align-items: flex-start;
 }
 
-html:not(.dark) .post-comments__reply + .post-comments__reply {
+html:not(.dark) .post-comments__reply-node + .post-comments__reply-node {
   margin-top: 0.95rem;
 }
 
@@ -483,9 +490,8 @@ html:not(.dark) .post-comments__avatar--nested {
 }
 
 html:not(.dark) .post-comments__reply[data-depth='2'],
-html:not(.dark) .post-comments__reply[data-depth='3'],
-html:not(.dark) .post-comments__reply[data-depth='4'] {
-  margin-left: 0.4rem;
+html:not(.dark) .post-comments__reply[data-depth='3'] {
+  margin-left: 2rem;
 }
 
 html:not(.dark) .post-comments__thread-toggle {
@@ -637,6 +643,13 @@ html:not(.dark) .post-back-link:hover {
 
   html:not(.dark) .post-comments__replies {
     padding-left: 0.35rem;
+  }
+
+  html:not(.dark) .post-comments__replies[data-depth='3'],
+  html:not(.dark) .post-comments__replies[data-depth='4'],
+  html:not(.dark) .post-comments__replies[data-depth='5'],
+  html:not(.dark) .post-comments__replies[data-depth='6'] {
+    padding-left: 0;
   }
 
   html:not(.dark) .post-comments__thread-block,

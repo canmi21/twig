@@ -15,6 +15,10 @@ const AVATAR_COLORS = [
   '#EFE4C9',
   '#DCE8E4',
 ] as const
+// Total visible nesting is capped at 3 layers:
+// top-level comment + first reply layer + all deeper replies flattened together.
+const MAX_VISUAL_REPLY_DEPTH = 2
+const COLLAPSE_START_DEPTH = 2
 
 function getAvatarColor(seed: string): string {
   let hash = 0
@@ -150,16 +154,27 @@ export function CommentSection({ postCid }: { postCid: string }) {
     })
   }
 
+  function countThreadReplies(parentId: string): number {
+    const replies: Comment[] = commentsByParent[parentId] ?? []
+    let total = replies.length
+    for (const reply of replies) {
+      total += countThreadReplies(reply.id)
+    }
+    return total
+  }
+
   function renderReplies(parentId: string, depth = 1) {
     const replies: Comment[] = commentsByParent[parentId] ?? []
     if (!replies?.length) return null
 
-    const shouldCollapse = depth >= 2
+    const visualDepth = Math.min(depth, MAX_VISUAL_REPLY_DEPTH)
+    const shouldCollapse = depth === COLLAPSE_START_DEPTH
     const isExpanded = expandedThreads.has(parentId)
+    const hiddenReplyCount = countThreadReplies(parentId)
     const toggleLabel =
-      replies.length === 1
+      hiddenReplyCount === 1
         ? 'View 1 more reply'
-        : `View ${replies.length} more replies`
+        : `View ${hiddenReplyCount} more replies`
 
     if (shouldCollapse && !isExpanded) {
       return (
@@ -177,31 +192,36 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
     return (
       <div className="post-comments__thread-block">
-        <div className="post-comments__replies">
+        <div className="post-comments__replies" data-depth={depth}>
           {replies.map((reply) => (
-            <article
+            <div
               key={reply.id}
-              className="post-comments__reply flex gap-3"
-              data-depth={depth}
+              className="post-comments__reply-node"
+              data-depth={visualDepth}
             >
-              <NestedCommentAvatar
-                seed={`${reply.userEmail}:${reply.userName}`}
-              />
-              <div className="post-comments__content min-w-0 flex-1">
-                <div className="post-comments__meta flex items-baseline gap-2">
-                  <span className="post-comments__author text-[13px] font-medium text-primary">
-                    {reply.userName}
-                  </span>
-                  <span className="post-comments__time text-[12px] text-tertiary">
-                    {timeAgo(reply.createdAt)}
-                  </span>
+              <article
+                className="post-comments__reply flex gap-3"
+                data-depth={visualDepth}
+              >
+                <NestedCommentAvatar
+                  seed={`${reply.userEmail}:${reply.userName}`}
+                />
+                <div className="post-comments__content min-w-0 flex-1">
+                  <div className="post-comments__meta flex items-baseline gap-2">
+                    <span className="post-comments__author text-[13px] font-medium text-primary">
+                      {reply.userName}
+                    </span>
+                    <span className="post-comments__time text-[12px] text-tertiary">
+                      {timeAgo(reply.createdAt)}
+                    </span>
+                  </div>
+                  <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                    {reply.content}
+                  </p>
                 </div>
-                <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
-                  {reply.content}
-                </p>
-                {renderReplies(reply.id, depth + 1)}
-              </div>
-            </article>
+              </article>
+              {renderReplies(reply.id, depth + 1)}
+            </div>
           ))}
         </div>
         {shouldCollapse && (
