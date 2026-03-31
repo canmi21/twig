@@ -79,6 +79,14 @@ function PostPage() {
           <>
             <div className="post-page__footer-wrap">
               <div className="post-page__footer-main flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-secondary">
+                <a
+                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="post-page__license"
+                >
+                  CC BY-NC-SA 4.0
+                </a>
                 {frontmatter.updated_at && (
                   <span className="post-page__updated">
                     Updated on{' '}
@@ -88,14 +96,6 @@ function PostPage() {
                     )}
                   </span>
                 )}
-                <a
-                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="post-page__license"
-                >
-                  CC BY-NC-SA 4.0
-                </a>
               </div>
               <div className="post-page__footer text-[12px] text-secondary">
                 <div className="post-page__footer-line" aria-hidden="true" />

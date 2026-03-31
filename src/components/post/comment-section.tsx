@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from '@tanstack/react-router'
+import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
 
@@ -176,65 +177,80 @@ export function CommentSection({ postCid }: { postCid: string }) {
         ? 'View 1 more reply'
         : `View ${hiddenReplyCount} more replies`
 
-    if (shouldCollapse && !isExpanded) {
-      return (
+    const repliesContent = (
+      <div className="post-comments__replies" data-depth={depth}>
+        {replies.map((reply) => (
+          <div
+            key={reply.id}
+            className="post-comments__reply-node"
+            data-depth={visualDepth}
+          >
+            <article
+              className="post-comments__reply flex gap-3"
+              data-depth={visualDepth}
+            >
+              <NestedCommentAvatar
+                seed={`${reply.userEmail}:${reply.userName}`}
+              />
+              <div className="post-comments__content min-w-0 flex-1">
+                <div className="post-comments__meta flex items-baseline gap-2">
+                  <span className="post-comments__author text-[13px] font-medium text-primary">
+                    {reply.userName}
+                  </span>
+                  <span className="post-comments__time text-[12px] text-tertiary">
+                    {timeAgo(reply.createdAt)}
+                  </span>
+                </div>
+                <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                  {reply.content}
+                </p>
+              </div>
+            </article>
+            {renderReplies(reply.id, depth + 1)}
+          </div>
+        ))}
+      </div>
+    )
+
+    if (!shouldCollapse) {
+      return repliesContent
+    }
+
+    return (
+      <div className="post-comments__thread-block">
         <button
           type="button"
           className="post-comments__thread-toggle"
           onClick={() => toggleThread(parentId)}
         >
           <span className="post-comments__thread-toggle-label">
-            {toggleLabel}
+            {isExpanded ? 'Hide replies' : toggleLabel}
           </span>
         </button>
-      )
-    }
-
-    return (
-      <div className="post-comments__thread-block">
-        <div className="post-comments__replies" data-depth={depth}>
-          {replies.map((reply) => (
-            <div
-              key={reply.id}
-              className="post-comments__reply-node"
-              data-depth={visualDepth}
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              key="thread-panel"
+              className="post-comments__thread-panel"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{
+                height: {
+                  duration: 0.24,
+                  ease: [0.22, 1, 0.36, 1],
+                },
+                opacity: {
+                  duration: 0.14,
+                  ease: 'easeOut',
+                },
+              }}
+              style={{ overflow: 'hidden' }}
             >
-              <article
-                className="post-comments__reply flex gap-3"
-                data-depth={visualDepth}
-              >
-                <NestedCommentAvatar
-                  seed={`${reply.userEmail}:${reply.userName}`}
-                />
-                <div className="post-comments__content min-w-0 flex-1">
-                  <div className="post-comments__meta flex items-baseline gap-2">
-                    <span className="post-comments__author text-[13px] font-medium text-primary">
-                      {reply.userName}
-                    </span>
-                    <span className="post-comments__time text-[12px] text-tertiary">
-                      {timeAgo(reply.createdAt)}
-                    </span>
-                  </div>
-                  <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
-                    {reply.content}
-                  </p>
-                </div>
-              </article>
-              {renderReplies(reply.id, depth + 1)}
-            </div>
-          ))}
-        </div>
-        {shouldCollapse && (
-          <button
-            type="button"
-            className="post-comments__thread-toggle"
-            onClick={() => toggleThread(parentId)}
-          >
-            <span className="post-comments__thread-toggle-label">
-              Hide replies
-            </span>
-          </button>
-        )}
+              {repliesContent}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     )
   }

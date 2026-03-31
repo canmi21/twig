@@ -473,6 +473,10 @@ html:not(.dark) .post-comments__thread-block {
   margin-top: 0.82rem;
 }
 
+html:not(.dark) .post-comments__thread-panel {
+  margin-top: 0.72rem;
+}
+
 html:not(.dark) .post-comments__reply {
   gap: 0.68rem;
   align-items: flex-start;
@@ -655,6 +659,10 @@ html:not(.dark) .post-back-link:hover {
   html:not(.dark) .post-comments__thread-block,
   html:not(.dark) .post-comments__thread-toggle {
     margin-top: 0.7rem;
+  }
+
+  html:not(.dark) .post-comments__thread-panel {
+    margin-top: 0.62rem;
   }
 
   html:not(.dark) .post-page__body .heading-link {
