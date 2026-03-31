@@ -1,5 +1,7 @@
 /* src/components/post/actions.tsx */
 
+/* eslint-disable better-tailwindcss/no-unknown-classes */
+
 import { useRef, useEffect, useCallback } from 'react'
 import {
   ArrowUp,
@@ -61,7 +63,7 @@ function ReadingProgress() {
       onClick={scrollToTop}
       aria-label="Back to top"
       title="Back to top"
-      className="group relative flex cursor-pointer items-center justify-center p-1.5"
+      className="post-actions__progress group relative flex cursor-pointer items-center justify-center p-1.5"
     >
       <svg width="24" height="24" viewBox="0 0 24 24" className="-rotate-90">
         <circle
@@ -89,10 +91,10 @@ function ReadingProgress() {
       </svg>
       <span
         ref={arrowRef}
-        className="absolute inset-0 flex items-center justify-center text-primary opacity-0 group-hover:opacity-(--arrow-opacity)"
+        className="post-actions__progress-arrow absolute inset-0 flex items-center justify-center text-primary opacity-0 group-hover:opacity-(--arrow-opacity)"
         style={{ '--arrow-opacity': 0, scale: '0.5' } as React.CSSProperties}
       >
-        <ArrowUp size={10} strokeWidth={2} />
+        <ArrowUp size={10} strokeWidth={2.25} />
       </span>
     </button>
   )
@@ -111,6 +113,7 @@ export function PostActions() {
     <aside
       aria-label="Post actions"
       className="
+        post-actions
         hidden
         xl:fixed xl:top-1/2 xl:right-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:flex xl:max-h-[calc(100vh-16rem)] xl:w-10
@@ -118,7 +121,7 @@ export function PostActions() {
       "
     >
       <ReadingProgress />
-      <div className="my-1 h-px w-4 bg-border" />
+      <div className="post-actions__separator my-1 h-px w-4 bg-border" />
       {actions.map(({ icon: Icon, label }) => (
         <button
           key={label}
@@ -126,12 +129,13 @@ export function PostActions() {
           aria-label={label}
           title={label}
           className="
+            post-actions__button
             cursor-pointer rounded-full p-1.5
             text-secondary transition-colors
             hover:text-primary
           "
         >
-          <Icon size={15} strokeWidth={1.6} />
+          <Icon size={15} strokeWidth={2.25} />
         </button>
       ))}
     </aside>

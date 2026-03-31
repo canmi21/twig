@@ -1,5 +1,7 @@
 /* src/components/post/comment-section.tsx */
 
+/* eslint-disable better-tailwindcss/no-unknown-classes */
+
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from '@tanstack/react-router'
 import { getSession } from '~/server/session'
@@ -113,41 +115,45 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
   if (!loaded) {
     return (
-      <div className="mt-14 border-t border-border pt-8">
-        <p className="text-[13px] text-tertiary">Loading comments...</p>
+      <div className="post-comments mt-14 border-t border-border pt-8">
+        <p className="post-comments__status text-[13px] text-tertiary">
+          Loading comments...
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="mt-14 border-t border-border pt-8">
-      <h2 className="text-[15px] font-medium text-primary">
+    <div className="post-comments mt-14 border-t border-border pt-8">
+      <h2 className="post-comments__title text-[15px] font-medium text-primary">
         Comments{comments.length > 0 ? ` (${comments.length})` : ''}
       </h2>
 
       {comments.length === 0 && !submitted && (
-        <p className="mt-4 text-[13px] text-secondary">No comments yet.</p>
+        <p className="post-comments__status mt-4 text-[13px] text-secondary">
+          No comments yet.
+        </p>
       )}
 
       {comments.length > 0 && (
-        <div className="mt-6 space-y-6">
+        <div className="post-comments__list mt-6 space-y-6">
           {comments.map((c) => (
-            <div key={c.id} className="flex gap-3">
+            <div key={c.id} className="post-comments__item flex gap-3">
               <GravatarImg
                 email={c.userEmail}
                 size={36}
-                className="size-9 shrink-0 rounded-full"
+                className="post-comments__avatar size-9 shrink-0 rounded-full"
               />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-[13px] font-medium text-primary">
+              <div className="post-comments__content min-w-0 flex-1">
+                <div className="post-comments__meta flex items-baseline gap-2">
+                  <span className="post-comments__author text-[13px] font-medium text-primary">
                     {c.userName}
                   </span>
-                  <span className="text-[12px] text-tertiary">
+                  <span className="post-comments__time text-[12px] text-tertiary">
                     {timeAgo(c.createdAt)}
                   </span>
                 </div>
-                <p className="mt-1 text-[14px] leading-relaxed text-primary">
+                <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
                   {c.content}
                 </p>
               </div>
@@ -158,39 +164,42 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
       <div className="mt-8">
         {!session ? (
-          <p className="text-[13px] text-secondary">
-            <Link to="/login" className="text-primary hover:underline">
+          <p className="post-comments__signin text-[13px] text-secondary">
+            <Link
+              to="/login"
+              className="post-comments__signin-link text-primary hover:underline"
+            >
               Sign in
             </Link>{' '}
             to leave a comment.
           </p>
         ) : submitted ? (
-          <p className="text-[13px] text-secondary">
+          <p className="post-comments__status text-[13px] text-secondary">
             Comment submitted, pending review.
           </p>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form className="post-comments__form" onSubmit={handleSubmit}>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Write a comment..."
               maxLength={2000}
               rows={3}
-              className="w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
+              className="post-comments__textarea w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
             />
             {error && (
-              <p className="mt-2 text-[13px] text-red-600 dark:text-red-400">
+              <p className="post-comments__error mt-2 text-[13px] text-red-600 dark:text-red-400">
                 {error}
               </p>
             )}
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-[12px] text-tertiary">
+            <div className="post-comments__form-footer mt-2 flex items-center justify-between">
+              <span className="post-comments__count text-[12px] text-tertiary">
                 {content.length}/2000
               </span>
               <button
                 type="submit"
                 disabled={submitting || !content.trim()}
-                className="rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-surface disabled:opacity-50"
+                className="post-comments__submit rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-surface disabled:opacity-50"
               >
                 {submitting ? 'Submitting...' : 'Submit'}
               </button>

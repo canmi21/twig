@@ -14,7 +14,6 @@ import { getCdnPublicUrl } from '~/server/get-cdn-url'
 import { getPublicUrlFn } from '~/server/get-public-url'
 import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
-import { ThemeToggle } from '~/components/theme-toggle'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
 import { fontFallbackScript } from '~/lib/theme/font-fallback-script'
 import appCss from '~/styles/app.css?url'
@@ -57,7 +56,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
       },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans+SC:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap',
       },
       { rel: 'stylesheet', href: appCss },
       {
@@ -90,16 +89,9 @@ export const Route = createRootRouteWithContext<RootContext>()({
 
 function RootComponent() {
   const { initialTheme, canonicalUrl } = useRouteContext({ from: '__root__' })
-  const hideGlobalThemeToggle = new URL(canonicalUrl).pathname.startsWith(
-    '/@/editor/',
-  )
 
   return (
-    <RootDocument
-      initialTheme={initialTheme}
-      canonicalUrl={canonicalUrl}
-      hideGlobalThemeToggle={hideGlobalThemeToggle}
-    >
+    <RootDocument initialTheme={initialTheme} canonicalUrl={canonicalUrl}>
       <Outlet />
     </RootDocument>
   )
@@ -119,12 +111,10 @@ function RootDocument({
   children,
   initialTheme,
   canonicalUrl,
-  hideGlobalThemeToggle,
 }: Readonly<{
   children: ReactNode
   initialTheme: RootContext['initialTheme']
   canonicalUrl: string
-  hideGlobalThemeToggle: boolean
 }>) {
   return (
     <html
@@ -156,7 +146,6 @@ function RootDocument({
         />
       </head>
       <body className="bg-surface text-primary">
-        {hideGlobalThemeToggle ? null : <ThemeToggle />}
         {children}
         <Scripts />
       </body>

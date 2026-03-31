@@ -42,7 +42,7 @@ describe('compile', () => {
 
     expect(result.html).toContain('<a href="https://example.com">link</a>')
     expect(result.html).toContain(
-      '<h2 id="getting-started">Getting Started</h2>',
+      '<h2 id="getting-started"><a href="#getting-started" class="heading-link" aria-label="Link to section" data-heading-link="true" data-heading-id="getting-started"></a>Getting Started</h2>',
     )
     expect(result.html).not.toContain('title: Hello World')
     expect(result.html).not.toContain('---')
@@ -62,7 +62,9 @@ describe('compile', () => {
     const result = await compile('## Just a heading\n\nSome text.')
 
     expect(result.frontmatter.title).toBe('')
-    expect(result.html).toContain('<h2 id="just-a-heading">Just a heading</h2>')
+    expect(result.html).toContain(
+      '<h2 id="just-a-heading"><a href="#just-a-heading" class="heading-link" aria-label="Link to section" data-heading-link="true" data-heading-id="just-a-heading"></a>Just a heading</h2>',
+    )
     expect(result.toc).toHaveLength(1)
     expect(result.components).toEqual([])
   })

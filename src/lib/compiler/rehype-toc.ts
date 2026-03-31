@@ -22,42 +22,6 @@ function extractText(node: Element): string {
   return text
 }
 
-function createHeadingLinkIcon(): Element {
-  return {
-    type: 'element',
-    tagName: 'svg',
-    properties: {
-      xmlns: 'http://www.w3.org/2000/svg',
-      viewBox: '0 0 24 24',
-      fill: 'none',
-      stroke: 'currentColor',
-      strokeWidth: '2',
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      ariaHidden: 'true',
-      className: ['heading-link-icon'],
-    },
-    children: [
-      {
-        type: 'element',
-        tagName: 'path',
-        properties: {
-          d: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71',
-        },
-        children: [],
-      },
-      {
-        type: 'element',
-        tagName: 'path',
-        properties: {
-          d: 'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
-        },
-        children: [],
-      },
-    ],
-  }
-}
-
 function createHeadingLink(id: string): Element {
   return {
     type: 'element',
@@ -69,7 +33,7 @@ function createHeadingLink(id: string): Element {
       dataHeadingLink: 'true',
       dataHeadingId: id,
     },
-    children: [createHeadingLinkIcon()],
+    children: [],
   }
 }
 

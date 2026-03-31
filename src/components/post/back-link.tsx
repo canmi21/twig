@@ -1,5 +1,7 @@
 /* src/components/post/back-link.tsx */
 
+/* eslint-disable better-tailwindcss/no-unknown-classes */
+
 import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { Undo2 } from 'lucide-react'
@@ -10,6 +12,7 @@ export function PostBackLink() {
       to="/posts"
       aria-label="Back to posts"
       className="
+        post-back-link
         absolute top-5 left-5 z-50
         inline-flex items-center justify-center
         rounded-full p-2
@@ -22,13 +25,15 @@ export function PostBackLink() {
       "
     >
       <motion.span
-        className="inline-flex"
+        className="post-back-link__icon inline-flex"
         whileHover={{ x: -2 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       >
-        <Undo2 className="size-4" strokeWidth={1.8} />
+        <Undo2 className="size-4" strokeWidth={2.25} />
       </motion.span>
-      <span className="hidden text-[12px] leading-none xl:inline">Back</span>
+      <span className="post-back-link__label hidden text-[13px] leading-none xl:inline">
+        Back
+      </span>
     </Link>
   )
 }

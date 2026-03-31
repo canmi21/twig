@@ -1,13 +1,15 @@
 /* src/components/post/share-actions.tsx */
 
+/* eslint-disable better-tailwindcss/no-unknown-classes */
+
 import * as Tooltip from '@radix-ui/react-tooltip'
-import { Link } from 'lucide-react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   ClaudeLine,
   GoogleGeminiFill,
   Grok2Fill,
+  Link2Line,
   OpenaiLine,
   SocialXLine,
   TwitterLine,
@@ -20,7 +22,8 @@ const AI_PROVIDER_STORAGE_KEY = 'ai-provider'
 const AI_PROVIDER_CHANGE_EVENT = 'ai-provider-change'
 const AI_PROVIDERS: AiProvider[] = ['claude', 'chatgpt', 'gemini', 'grok']
 const MINGCUTE_ICON_CLASS = 'size-[1.15rem]'
-const LUCIDE_ICON_CLASS = 'size-[1.05rem]'
+const ICON_SLOT_CLASS =
+  'post-share-actions__icon-slot relative inline-flex size-[1.15rem] items-center justify-center'
 
 async function copyText(text: string) {
   if (navigator.clipboard?.writeText) {
@@ -219,7 +222,7 @@ export function PostShareActions() {
   )
 
   return (
-    <div className="mt-0.5 flex shrink-0 items-center gap-px">
+    <div className="post-share-actions mt-0.5 flex shrink-0 items-center gap-px">
       <Tooltip.Provider delayDuration={480} skipDelayDuration={0}>
         <Tooltip.Root
           open={isAiSelectorOpen}
@@ -240,18 +243,20 @@ export function PostShareActions() {
                 hover:text-primary
               "
             >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.span
-                  key={aiProvider}
-                  initial={{ opacity: 0, rotate: -90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 90 }}
-                  transition={{ duration: 0.2 }}
-                  className="inline-flex"
-                >
-                  {getAiProviderIcon(aiProvider)}
-                </motion.span>
-              </AnimatePresence>
+              <span className={ICON_SLOT_CLASS}>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={aiProvider}
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 inline-flex items-center justify-center"
+                  >
+                    {getAiProviderIcon(aiProvider)}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
             </button>
           </Tooltip.Trigger>
           <Tooltip.Portal>
@@ -260,6 +265,7 @@ export function PostShareActions() {
               align="center"
               sideOffset={2}
               className="
+                post-share-actions__menu
                 z-10 flex items-center gap-px rounded-full border border-border
                 bg-surface p-0.5 shadow-sm
               "
@@ -312,13 +318,26 @@ export function PostShareActions() {
           hover:text-primary
         "
       >
-        {isXHovered ? (
-          <TwitterLine className={MINGCUTE_ICON_CLASS} />
-        ) : (
-          <SocialXLine className={MINGCUTE_ICON_CLASS} />
-        )}
+        <span className={ICON_SLOT_CLASS}>
+          <AnimatePresence initial={false}>
+            <motion.span
+              key={isXHovered ? 'twitter' : 'x'}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.11, ease: 'easeOut' }}
+              className="absolute inset-0 inline-flex items-center justify-center"
+            >
+              {isXHovered ? (
+                <TwitterLine className={MINGCUTE_ICON_CLASS} />
+              ) : (
+                <SocialXLine className={MINGCUTE_ICON_CLASS} />
+              )}
+            </motion.span>
+          </AnimatePresence>
+        </span>
       </button>
-      <div className="relative">
+      <div className="post-share-actions__copy relative">
         <AnimatePresence>
           {copyStatus !== 'idle' && (
             <motion.div
@@ -327,6 +346,7 @@ export function PostShareActions() {
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
               className="
+                post-share-actions__toast
                 pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-1/2 z-10
                 -translate-x-1/2 rounded-full border border-border bg-surface
                 px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
@@ -349,10 +369,9 @@ export function PostShareActions() {
             hover:text-primary
           "
         >
-          <Link
-            className={`${LUCIDE_ICON_CLASS} translate-y-px`}
-            strokeWidth={1.8}
-          />
+          <span className={ICON_SLOT_CLASS}>
+            <Link2Line className={`${MINGCUTE_ICON_CLASS} translate-y-px`} />
+          </span>
         </button>
       </div>
     </div>

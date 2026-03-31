@@ -1,5 +1,7 @@
 /* src/components/post/article-header.tsx */
 
+/* eslint-disable better-tailwindcss/no-unknown-classes */
+
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { CreativeCommons, Type } from 'lucide-react'
 
@@ -66,19 +68,23 @@ export function ArticleHeader({
 }) {
   const contentCount = html ? formatCount(countContentUnits(html)) : undefined
   return (
-    <header className="mb-10 flex items-start justify-between gap-3">
+    <header className="article-header mb-10 flex items-start justify-between gap-3">
       <div className="min-w-0 flex-1">
-        <h1 className="text-[17px] font-medium text-primary">{title}</h1>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-secondary">
+        <h1 className="article-header__title text-[17px] font-medium text-primary">
+          {title}
+        </h1>
+        <div className="article-header__meta mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-secondary">
           {createdAt && (
-            <time dateTime={createdAt}>{formatDate(createdAt)}</time>
+            <time className="article-header__date" dateTime={createdAt}>
+              {formatDate(createdAt)}
+            </time>
           )}
           <Tooltip.Provider delayDuration={480} skipDelayDuration={0}>
             <Tooltip.Root>
               <Tooltip.Trigger asChild>
                 <span
                   aria-label="CC BY-NC-SA 4.0 license"
-                  className="inline-flex cursor-default items-center text-secondary transition-colors hover:text-primary"
+                  className="article-header__license inline-flex cursor-default items-center text-secondary transition-colors hover:text-primary"
                 >
                   <CreativeCommons
                     className="size-[0.8rem]"
@@ -90,13 +96,13 @@ export function ArticleHeader({
                 <Tooltip.Content
                   side="top"
                   sideOffset={4}
-                  className="z-10 rounded-full border border-border bg-surface px-2.5 py-1.5 text-[11px] leading-none shadow-sm"
+                  className="article-header__tooltip z-10 rounded-full border border-border bg-surface px-2.5 py-1.5 text-[11px] leading-none shadow-sm"
                 >
                   <a
                     href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-primary hover:underline"
+                    className="article-header__tooltip-link text-primary hover:underline"
                   >
                     CC BY-NC-SA 4.0
                   </a>
@@ -105,7 +111,7 @@ export function ArticleHeader({
             </Tooltip.Root>
           </Tooltip.Provider>
           {contentCount && (
-            <span className="inline-flex items-center gap-1">
+            <span className="article-header__count inline-flex items-center gap-1">
               <Type className="size-[0.8rem]" strokeWidth={1.8} />
               <span>{contentCount}</span>
             </span>

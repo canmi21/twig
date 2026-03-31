@@ -10,9 +10,24 @@
   color-scheme: light;
   scroll-behavior: smooth;
   font-family:
-    'Noto Sans',
+    'Source Sans 3',
     'Noto Sans SC',
-    'Noto Sans JP',
+    'Roboto',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family:
+    'Roboto',
+    'Noto Sans SC',
+    'Source Sans 3',
     system-ui,
     -apple-system,
     sans-serif;
@@ -95,29 +110,19 @@
   left: -1.35rem;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   color: var(--color-secondary);
-  opacity: 0;
   transform: translateY(-50%);
-  transition:
-    opacity 140ms ease,
-    color 140ms ease;
-}
-
-.article h2:hover .heading-link,
-.article h2:focus-within .heading-link,
-.article h3:hover .heading-link,
-.article h3:focus-within .heading-link,
-.article h4:hover .heading-link,
-.article h4:focus-within .heading-link {
-  opacity: 1;
-}
-
-.article .heading-link:hover {
-  color: var(--color-primary);
   text-decoration: none;
 }
 
 .article .heading-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.article .heading-link-icon svg {
   display: block;
   width: 14px;
   height: 14px;
