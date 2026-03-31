@@ -3,6 +3,7 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
 import { useState, useEffect, useCallback } from 'react'
+import { CornerDownLeft } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
@@ -314,31 +315,32 @@ export function CommentSection({ postCid }: { postCid: string }) {
           </p>
         ) : (
           <form className="post-comments__form" onSubmit={handleSubmit}>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write a comment..."
-              maxLength={2000}
-              rows={3}
-              className="post-comments__textarea w-full resize-none rounded-md border border-border bg-surface px-3 py-2 text-[14px] text-primary outline-none placeholder:text-tertiary focus:border-secondary"
-            />
-            {error && (
-              <p className="post-comments__error mt-2 text-[13px] text-red-600 dark:text-red-400">
-                {error}
-              </p>
-            )}
-            <div className="post-comments__form-footer mt-2 flex items-center justify-between">
-              <span className="post-comments__count text-[12px] text-tertiary">
-                {content.length}/2000
-              </span>
-              <button
-                type="submit"
-                disabled={submitting || !content.trim()}
-                className="post-comments__submit rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-surface disabled:opacity-50"
-              >
-                {submitting ? 'Submitting...' : 'Submit'}
-              </button>
+            <div className="post-comments__field">
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write a comment..."
+                maxLength={2000}
+                rows={3}
+                className="post-comments__textarea"
+              />
+              <div className="post-comments__field-footer">
+                <span className="post-comments__count">
+                  {content.length}/2000
+                </span>
+                <button
+                  type="submit"
+                  aria-label={
+                    submitting ? 'Submitting comment' : 'Submit comment'
+                  }
+                  disabled={submitting || !content.trim()}
+                  className="post-comments__submit"
+                >
+                  <CornerDownLeft className="post-comments__submit-icon" />
+                </button>
+              </div>
             </div>
+            {error && <p className="post-comments__error">{error}</p>}
           </form>
         )}
       </div>
