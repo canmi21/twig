@@ -7,43 +7,39 @@ import { Link } from '@tanstack/react-router'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
 
-function gravatarUrl(email: string, size = 80): string {
-  // Simple hash for Gravatar — use SubtleCrypto on client
-  // Fallback: encode email directly, actual md5 computed in useEffect
-  return `https://www.gravatar.com/avatar/?d=mp&s=${size}`
+const AVATAR_COLORS = [
+  '#DCE7F8',
+  '#EFD9CF',
+  '#DDEBD7',
+  '#E8DDF6',
+  '#EFE4C9',
+  '#DCE8E4',
+] as const
+
+function getAvatarColor(seed: string): string {
+  let hash = 0
+  for (const char of seed) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  }
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length]
 }
 
-function GravatarImg({
-  email,
-  size = 80,
-  className,
-}: {
-  email: string
-  size?: number
-  className?: string
-}) {
-  const [src, setSrc] = useState(gravatarUrl('', size))
-
-  useEffect(() => {
-    const encoder = new TextEncoder()
-    crypto.subtle
-      .digest('SHA-256', encoder.encode(email.trim().toLowerCase()))
-      .then((buf) => {
-        const hex = Array.from(new Uint8Array(buf))
-          .map((b) => b.toString(16).padStart(2, '0'))
-          .join('')
-        setSrc(`https://www.gravatar.com/avatar/${hex}?d=mp&s=${size}`)
-      })
-  }, [email, size])
-
+function CommentAvatar({ seed }: { seed: string }) {
   return (
-    <img
-      src={src}
-      alt=""
-      width={size}
-      height={size}
-      className={className}
-      loading="lazy"
+    <span
+      aria-hidden="true"
+      className="post-comments__avatar shrink-0 rounded-full"
+      style={{ backgroundColor: getAvatarColor(seed) }}
+    />
+  )
+}
+
+function NestedCommentAvatar({ seed }: { seed: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="post-comments__avatar post-comments__avatar--nested shrink-0 rounded-full"
+      style={{ backgroundColor: getAvatarColor(seed) }}
     />
   )
 }
@@ -68,6 +64,7 @@ interface Comment {
   id: string
   content: string
   createdAt: string
+  parentId: string | null
   userName: string
   userEmail: string
 }
@@ -82,6 +79,19 @@ export function CommentSection({ postCid }: { postCid: string }) {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(
+    () => new Set(),
+  )
+  const rootComments = comments.filter((comment) => comment.parentId === null)
+  const commentsByParent = comments.reduce<Record<string, Comment[]>>(
+    (groups, comment) => {
+      if (!comment.parentId) return groups
+      groups[comment.parentId] ??= []
+      groups[comment.parentId].push(comment)
+      return groups
+    },
+    {},
+  )
 
   const loadComments = useCallback(async () => {
     const result = await fetchComments({ data: { postCid } })
@@ -113,9 +123,86 @@ export function CommentSection({ postCid }: { postCid: string }) {
     }
   }
 
+  function toggleThread(commentId: string) {
+    setExpandedThreads((current) => {
+      const next = new Set(current)
+      if (next.has(commentId)) {
+        next.delete(commentId)
+      } else {
+        next.add(commentId)
+      }
+      return next
+    })
+  }
+
+  function renderReplies(parentId: string, depth = 1) {
+    const replies = commentsByParent[parentId]
+    if (!replies?.length) return null
+
+    const shouldCollapse = depth >= 2
+    const isExpanded = expandedThreads.has(parentId)
+    const toggleLabel =
+      replies.length === 1
+        ? 'View 1 more reply'
+        : `View ${replies.length} more replies`
+
+    if (shouldCollapse && !isExpanded) {
+      return (
+        <button
+          type="button"
+          className="post-comments__thread-toggle"
+          onClick={() => toggleThread(parentId)}
+        >
+          {toggleLabel}
+        </button>
+      )
+    }
+
+    return (
+      <div className="post-comments__thread-block">
+        <div className="post-comments__replies">
+          {replies.map((reply) => (
+            <article
+              key={reply.id}
+              className="post-comments__reply flex gap-3"
+              data-depth={depth}
+            >
+              <NestedCommentAvatar
+                seed={`${reply.userEmail}:${reply.userName}`}
+              />
+              <div className="post-comments__content min-w-0 flex-1">
+                <div className="post-comments__meta flex items-baseline gap-2">
+                  <span className="post-comments__author text-[13px] font-medium text-primary">
+                    {reply.userName}
+                  </span>
+                  <span className="post-comments__time text-[12px] text-tertiary">
+                    {timeAgo(reply.createdAt)}
+                  </span>
+                </div>
+                <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                  {reply.content}
+                </p>
+                {renderReplies(reply.id, depth + 1)}
+              </div>
+            </article>
+          ))}
+        </div>
+        {shouldCollapse && (
+          <button
+            type="button"
+            className="post-comments__thread-toggle"
+            onClick={() => toggleThread(parentId)}
+          >
+            Hide replies
+          </button>
+        )}
+      </div>
+    )
+  }
+
   if (!loaded) {
     return (
-      <div className="post-comments mt-14 border-t border-border pt-8">
+      <div className="post-comments mt-14">
         <p className="post-comments__status text-[13px] text-tertiary">
           Loading comments...
         </p>
@@ -124,26 +211,18 @@ export function CommentSection({ postCid }: { postCid: string }) {
   }
 
   return (
-    <div className="post-comments mt-14 border-t border-border pt-8">
-      <h2 className="post-comments__title text-[15px] font-medium text-primary">
-        Comments{comments.length > 0 ? ` (${comments.length})` : ''}
-      </h2>
-
-      {comments.length === 0 && !submitted && (
-        <p className="post-comments__status mt-4 text-[13px] text-secondary">
+    <div className="post-comments mt-14">
+      {rootComments.length === 0 && !submitted && (
+        <p className="post-comments__status text-[13px] text-secondary">
           No comments yet.
         </p>
       )}
 
-      {comments.length > 0 && (
-        <div className="post-comments__list mt-6 space-y-6">
-          {comments.map((c) => (
-            <div key={c.id} className="post-comments__item flex gap-3">
-              <GravatarImg
-                email={c.userEmail}
-                size={36}
-                className="post-comments__avatar size-9 shrink-0 rounded-full"
-              />
+      {rootComments.length > 0 && (
+        <div className="post-comments__list">
+          {rootComments.map((c) => (
+            <article key={c.id} className="post-comments__item flex gap-3">
+              <CommentAvatar seed={`${c.userEmail}:${c.userName}`} />
               <div className="post-comments__content min-w-0 flex-1">
                 <div className="post-comments__meta flex items-baseline gap-2">
                   <span className="post-comments__author text-[13px] font-medium text-primary">
@@ -156,13 +235,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
                   {c.content}
                 </p>
+                {renderReplies(c.id)}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
 
-      <div className="mt-8">
+      <div className="post-comments__composer">
         {!session ? (
           <p className="post-comments__signin text-[13px] text-secondary">
             <Link
