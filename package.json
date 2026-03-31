@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -30,6 +30,7 @@
     "deploy": "wrangler d1 migrations apply taki-sql --remote && wrangler deploy"
   },
   "dependencies": {
+    "@chenglou/pretext": "^0.0.3",
     "@mingcute/react": "^1.4.1",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@shikijs/langs": "^4.0.2",

@@ -3,6 +3,7 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { prepareWithSegments, walkLineRanges } from '@chenglou/pretext'
 import { motion } from 'motion/react'
 import type { TocEntry } from '~/lib/compiler/rehype-toc'
 
@@ -46,15 +47,65 @@ function estimateTextWidths(texts: string[]): Map<string, number> {
   return widths
 }
 
+function getCanvasFont(style: CSSStyleDeclaration): string {
+  const stretch =
+    style.fontStretch === 'normal' || style.fontStretch === '100%'
+      ? ''
+      : style.fontStretch
+  const parts = [
+    style.fontStyle,
+    style.fontVariant,
+    style.fontWeight,
+    stretch,
+    style.fontSize,
+    style.fontFamily,
+  ].filter(Boolean)
+  return parts.join(' ')
+}
+
+function measureTextWidth(text: string, font: string): number {
+  const prepared = prepareWithSegments(text, font)
+  let width = 0
+  walkLineRanges(prepared, 10_000, (line) => {
+    width = Math.max(width, line.width)
+  })
+  return width
+}
+
+function normalizeBarWidths(widths: Map<string, number>): Map<string, number> {
+  const values = [...widths.values()]
+  if (values.length === 0) return widths
+
+  const minWidth = Math.min(...values)
+  const maxWidth = Math.max(...values)
+  const normalized = new Map<string, number>()
+
+  for (const [text, width] of widths) {
+    if (maxWidth - minWidth < 1) {
+      normalized.set(text, 38)
+      continue
+    }
+
+    const ratio = (width - minWidth) / (maxWidth - minWidth)
+    normalized.set(text, Math.round(20 + ratio * 36))
+  }
+
+  return normalized
+}
+
 type Phase = 'collapsed' | 'expanded' | 'revealed'
 
 export function Toc({ entries }: { entries: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>('')
   const [phase, setPhase] = useState<Phase>('collapsed')
+  const [barWidths, setBarWidths] = useState<Map<string, number>>(() =>
+    estimateTextWidths(entries.map((e) => e.text)),
+  )
   const observerRef = useRef<IntersectionObserver | null>(null)
+  const navRef = useRef<HTMLElement | null>(null)
   const isClickScrollingRef = useRef(false)
   const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const barWidths = useMemo(
+  const fallbackBarWidths = useMemo(
     () => estimateTextWidths(entries.map((e) => e.text)),
     [entries],
   )
@@ -71,6 +122,40 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
     if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current)
     setPhase('collapsed')
   }, [])
+
+  useEffect(() => {
+    setBarWidths(fallbackBarWidths)
+  }, [fallbackBarWidths])
+
+  useEffect(() => {
+    const nav = navRef.current
+    const sample = nav?.querySelector('.post-toc__text')
+    if (!(sample instanceof HTMLElement) || entries.length === 0) return
+
+    let cancelled = false
+
+    const measure = () => {
+      if (cancelled) return
+      const font = getCanvasFont(getComputedStyle(sample))
+      const measured = new Map<string, number>()
+      for (const entry of entries) {
+        measured.set(entry.text, measureTextWidth(entry.text, font))
+      }
+      if (!cancelled) setBarWidths(normalizeBarWidths(measured))
+    }
+
+    measure()
+
+    if (document.fonts) {
+      document.fonts.ready.then(measure)
+    }
+
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelled = true
+      window.removeEventListener('resize', measure)
+    }
+  }, [entries])
 
   useEffect(() => {
     return () => {
@@ -147,6 +232,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
   return (
     <nav
+      ref={navRef}
       aria-label="Table of contents"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
