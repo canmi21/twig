@@ -3,7 +3,13 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
 import { useState, useEffect, useCallback } from 'react'
-import { CornerDownLeft } from 'lucide-react'
+import {
+  CornerDownLeft,
+  Map,
+  MessagesSquare,
+  MonitorSmartphone,
+  TabletSmartphone,
+} from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
@@ -73,6 +79,72 @@ interface Comment {
   parentId: string | null
   userName: string
   userEmail: string
+  userAgent: string
+  location: string
+}
+
+function formatCommentLocation(location: string): string | null {
+  const trimmed = location.trim()
+  if (!trimmed) return null
+
+  const parts = trimmed.split(/\s+/)
+  if (parts.length >= 2 && parts[0] === parts.at(-1)) {
+    return parts[0]
+  }
+
+  return trimmed
+}
+
+function getClientLabel(userAgent: string): {
+  device: 'desktop' | 'portable'
+  label: string
+} | null {
+  const ua = userAgent.trim()
+  if (!ua) return null
+
+  const lower = ua.toLowerCase()
+  const isTablet = /ipad|tablet/.test(lower)
+  const isMobile = /iphone|android|mobile/.test(lower)
+  const device: 'desktop' | 'portable' =
+    isTablet || isMobile ? 'portable' : 'desktop'
+
+  let browser = 'Browser'
+  if (lower.includes('edg/')) {
+    browser = 'Edge'
+  } else if (lower.includes('opr/') || lower.includes('opera')) {
+    browser = 'Opera'
+  } else if (lower.includes('firefox') || lower.includes('fxios')) {
+    browser = 'Firefox'
+  } else if (lower.includes('crios') || lower.includes('chrome')) {
+    browser = 'Chrome'
+  } else if (lower.includes('safari')) {
+    browser = 'Safari'
+  }
+
+  let os = ''
+  if (/iphone|ipad|cpu iphone os|cpu os/.test(lower)) {
+    os = 'iOS'
+  } else if (lower.includes('android')) {
+    os = 'Android'
+  } else if (lower.includes('mac os x') || lower.includes('macintosh')) {
+    os = 'MacOS'
+  } else if (lower.includes('windows')) {
+    os = 'Windows'
+  } else if (lower.includes('linux')) {
+    os = 'Linux'
+  }
+
+  if (device === 'portable') {
+    if (os === 'iOS') return { device, label: `iOS ${browser}` }
+    if (os === 'Android') return { device, label: `Android ${browser}` }
+    return {
+      device,
+      label: isTablet ? `Tablet ${browser}` : `Mobile ${browser}`,
+    }
+  }
+
+  if (os === 'MacOS') return { device, label: `MacOS ${browser}` }
+  return { device, label: `Desktop ${browser}` }
 }
 
 export function CommentSection({ postCid }: { postCid: string }) {
@@ -88,6 +160,13 @@ export function CommentSection({ postCid }: { postCid: string }) {
   const [expandedThreads, setExpandedThreads] = useState<Set<string>>(
     () => new Set(),
   )
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null)
+  const [replyContent, setReplyContent] = useState('')
+  const [replySubmittingId, setReplySubmittingId] = useState<string | null>(
+    null,
+  )
+  const [replyError, setReplyError] = useState<string | null>(null)
+  const [replyNoticeFor, setReplyNoticeFor] = useState<string | null>(null)
   const rootComments = comments.filter((comment) => comment.parentId === null)
   const commentsByParent = comments.reduce<Record<string, Comment[]>>(
     (groups, comment) => {
@@ -127,6 +206,152 @@ export function CommentSection({ postCid }: { postCid: string }) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  async function handleReplySubmit(e: React.FormEvent, parentId: string) {
+    e.preventDefault()
+    if (!replyContent.trim()) return
+    setReplySubmittingId(parentId)
+    setReplyError(null)
+    try {
+      await submitComment({
+        data: { postCid, content: replyContent.trim(), parentId },
+      })
+      setReplyContent('')
+      setActiveReplyId(null)
+      setReplyNoticeFor(parentId)
+      await loadComments()
+    } catch {
+      setReplyError('Failed to submit reply')
+    } finally {
+      setReplySubmittingId(null)
+    }
+  }
+
+  function toggleReplyComposer(commentId: string) {
+    setReplyError(null)
+    setReplyNoticeFor(null)
+    setActiveReplyId((current) => {
+      if (current === commentId) return null
+      setReplyContent('')
+      return commentId
+    })
+  }
+
+  function renderReplyTrigger(comment: Comment) {
+    const isReplying = activeReplyId === comment.id
+    const locationLabel = formatCommentLocation(comment.location)
+    const clientLabel = getClientLabel(comment.userAgent)
+    const DeviceIcon =
+      clientLabel?.device === 'portable' ? TabletSmartphone : MonitorSmartphone
+
+    return (
+      <div className="post-comments__reply-meta">
+        {session && (
+          <button
+            type="button"
+            className="post-comments__reply-trigger"
+            data-active={isReplying}
+            aria-label={
+              isReplying
+                ? `Hide reply composer for ${comment.userName}`
+                : `Reply to ${comment.userName}`
+            }
+            onClick={() => toggleReplyComposer(comment.id)}
+          >
+            <MessagesSquare className="post-comments__reply-trigger-icon" />
+            <span className="post-comments__reply-trigger-text">Reply</span>
+          </button>
+        )}
+        {locationLabel && (
+          <span className="post-comments__reply-meta-item">
+            <Map className="post-comments__reply-meta-icon" />
+            <span>{locationLabel}</span>
+          </span>
+        )}
+        {clientLabel && (
+          <span className="post-comments__reply-meta-item">
+            <DeviceIcon className="post-comments__reply-meta-icon" />
+            <span>{clientLabel.label}</span>
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  function renderReplyComposer(comment: Comment) {
+    const isReplying = activeReplyId === comment.id
+    const isSubmittingReply = replySubmittingId === comment.id
+
+    return (
+      <>
+        {replyNoticeFor === comment.id && !isReplying && (
+          <p className="post-comments__reply-status">
+            Reply submitted, pending review.
+          </p>
+        )}
+        <AnimatePresence initial={false}>
+          {session && isReplying && (
+            <motion.div
+              key={`reply-panel:${comment.id}`}
+              className="post-comments__reply-panel"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{
+                height: {
+                  duration: 0.24,
+                  ease: [0.22, 1, 0.36, 1],
+                },
+                opacity: {
+                  duration: 0.14,
+                  ease: 'easeOut',
+                },
+              }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div className="post-comments__reply-panel-inner">
+                <form
+                  className="post-comments__reply-form"
+                  onSubmit={(e) => handleReplySubmit(e, comment.id)}
+                >
+                  <div className="post-comments__field post-comments__field--reply">
+                    <textarea
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      placeholder={`Reply to ${comment.userName}...`}
+                      maxLength={2000}
+                      rows={2}
+                      className="post-comments__textarea post-comments__textarea--reply"
+                    />
+                    <div className="post-comments__field-footer post-comments__field-footer--reply">
+                      <span className="post-comments__count">
+                        {replyContent.length}/2000
+                      </span>
+                      <button
+                        type="submit"
+                        aria-label={
+                          isSubmittingReply
+                            ? 'Submitting reply'
+                            : 'Submit reply'
+                        }
+                        disabled={isSubmittingReply || !replyContent.trim()}
+                        className="post-comments__submit"
+                      >
+                        <CornerDownLeft className="post-comments__submit-icon" />
+                      </button>
+                    </div>
+                  </div>
+                  {replyError && (
+                    <p className="post-comments__error">{replyError}</p>
+                  )}
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    )
   }
 
   function toggleThread(commentId: string) {
@@ -194,17 +419,26 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 seed={`${reply.userEmail}:${reply.userName}`}
               />
               <div className="post-comments__content min-w-0 flex-1">
-                <div className="post-comments__meta flex items-baseline gap-2">
-                  <span className="post-comments__author text-[13px] font-medium text-primary">
-                    {reply.userName}
-                  </span>
-                  <span className="post-comments__time text-[12px] text-tertiary">
-                    {timeAgo(reply.createdAt)}
-                  </span>
+                <div className="post-comments__body">
+                  <div className="post-comments__meta flex items-baseline gap-2">
+                    <span className="post-comments__author text-[13px] font-medium text-primary">
+                      {reply.userName}
+                    </span>
+                    <span className="post-comments__time text-[12px] text-tertiary">
+                      {timeAgo(reply.createdAt)}
+                    </span>
+                  </div>
+                  <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                    {reply.content}
+                  </p>
+                  <div
+                    className="post-comments__actions"
+                    data-active={activeReplyId === reply.id}
+                  >
+                    {renderReplyTrigger(reply)}
+                  </div>
+                  {renderReplyComposer(reply)}
                 </div>
-                <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
-                  {reply.content}
-                </p>
               </div>
             </article>
             {renderReplies(reply.id, depth + 1)}
@@ -280,17 +514,26 @@ export function CommentSection({ postCid }: { postCid: string }) {
             <article key={c.id} className="post-comments__item flex gap-3">
               <CommentAvatar seed={`${c.userEmail}:${c.userName}`} />
               <div className="post-comments__content min-w-0 flex-1">
-                <div className="post-comments__meta flex items-baseline gap-2">
-                  <span className="post-comments__author text-[13px] font-medium text-primary">
-                    {c.userName}
-                  </span>
-                  <span className="post-comments__time text-[12px] text-tertiary">
-                    {timeAgo(c.createdAt)}
-                  </span>
+                <div className="post-comments__body">
+                  <div className="post-comments__meta flex items-baseline gap-2">
+                    <span className="post-comments__author text-[13px] font-medium text-primary">
+                      {c.userName}
+                    </span>
+                    <span className="post-comments__time text-[12px] text-tertiary">
+                      {timeAgo(c.createdAt)}
+                    </span>
+                  </div>
+                  <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                    {c.content}
+                  </p>
+                  <div
+                    className="post-comments__actions"
+                    data-active={activeReplyId === c.id}
+                  >
+                    {renderReplyTrigger(c)}
+                  </div>
+                  {renderReplyComposer(c)}
                 </div>
-                <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
-                  {c.content}
-                </p>
                 {renderReplies(c.id)}
               </div>
             </article>
