@@ -224,8 +224,8 @@ function UsersList() {
       const base64 = await imageToWebpBase64(file)
       await adminUploadAvatar({ data: { userId: avatarTarget, base64 } })
       router.invalidate()
-    } catch {
-      // silently fail — toast would be better but out of scope
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : 'Upload failed')
     } finally {
       setLoading(null)
       setAvatarTarget(null)

@@ -12,6 +12,7 @@ export interface CommentWithUser {
   status: string
   createdAt: string
   parentId: string | null
+  userId: string
   userName: string
   userEmail: string
   userAgent: string
@@ -63,6 +64,7 @@ export async function getApprovedComments(
       status: comments.status,
       createdAt: comments.createdAt,
       parentId: comments.parentId,
+      userId: comments.userId,
       userName: user.name,
       userEmail: user.email,
       userAgent: comments.userAgent,
@@ -85,6 +87,7 @@ export async function getPendingComments(
       status: comments.status,
       createdAt: comments.createdAt,
       parentId: comments.parentId,
+      userId: comments.userId,
       userName: user.name,
       userEmail: user.email,
       userAgent: comments.userAgent,
@@ -109,6 +112,7 @@ export async function getAllComments(db: Db): Promise<CommentWithContext[]> {
       status: comments.status,
       createdAt: comments.createdAt,
       parentId: comments.parentId,
+      userId: comments.userId,
       userName: user.name,
       userEmail: user.email,
       userAgent: comments.userAgent,
@@ -200,6 +204,7 @@ export async function getRecentComments(
       status: comments.status,
       createdAt: comments.createdAt,
       parentId: comments.parentId,
+      userId: comments.userId,
       userName: user.name,
       userEmail: user.email,
       userAgent: comments.userAgent,

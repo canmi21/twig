@@ -10,7 +10,7 @@ import {
   MonitorSmartphone,
   TabletSmartphone,
 } from 'lucide-react'
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link, useLocation, useRouteContext } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
@@ -36,23 +36,59 @@ function getAvatarColor(seed: string): string {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length]
 }
 
-function CommentAvatar({ seed }: { seed: string }) {
+function useAvatarUrl(userId: string) {
+  const { cdnPublicUrl } = useRouteContext({ from: '__root__' })
+  const prefix = import.meta.env.DEV ? '/api/object' : cdnPublicUrl
+  return `${prefix}/avatar/${userId}.webp`
+}
+
+function CommentAvatar({ seed, userId }: { seed: string; userId: string }) {
+  const [imgError, setImgError] = useState(false)
+  const src = useAvatarUrl(userId)
+
   return (
     <span
       aria-hidden="true"
-      className="post-comments__avatar shrink-0 rounded-full"
+      className="post-comments__avatar shrink-0 overflow-hidden rounded-full"
       style={{ backgroundColor: getAvatarColor(seed) }}
-    />
+    >
+      {!imgError && (
+        <img
+          src={src}
+          alt=""
+          className="size-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      )}
+    </span>
   )
 }
 
-function NestedCommentAvatar({ seed }: { seed: string }) {
+function NestedCommentAvatar({
+  seed,
+  userId,
+}: {
+  seed: string
+  userId: string
+}) {
+  const [imgError, setImgError] = useState(false)
+  const src = useAvatarUrl(userId)
+
   return (
     <span
       aria-hidden="true"
-      className="post-comments__avatar post-comments__avatar--nested shrink-0 rounded-full"
+      className="post-comments__avatar post-comments__avatar--nested shrink-0 overflow-hidden rounded-full"
       style={{ backgroundColor: getAvatarColor(seed) }}
-    />
+    >
+      {!imgError && (
+        <img
+          src={src}
+          alt=""
+          className="size-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      )}
+    </span>
   )
 }
 
@@ -77,6 +113,7 @@ interface Comment {
   content: string
   createdAt: string
   parentId: string | null
+  userId: string
   userName: string
   userEmail: string
   userAgent: string
@@ -428,6 +465,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
             >
               <NestedCommentAvatar
                 seed={`${reply.userEmail}:${reply.userName}`}
+                userId={reply.userId}
               />
               <div className="post-comments__content min-w-0 flex-1">
                 <div className="post-comments__body">
@@ -517,7 +555,10 @@ export function CommentSection({ postCid }: { postCid: string }) {
         <div className="post-comments__list">
           {rootComments.map((c) => (
             <article key={c.id} className="post-comments__item flex gap-3">
-              <CommentAvatar seed={`${c.userEmail}:${c.userName}`} />
+              <CommentAvatar
+                seed={`${c.userEmail}:${c.userName}`}
+                userId={c.userId}
+              />
               <div className="post-comments__content min-w-0 flex-1">
                 <div className="post-comments__body">
                   <div className="post-comments__meta flex items-baseline gap-2">
