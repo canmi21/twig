@@ -370,7 +370,9 @@ export function PostShareActions() {
           "
         >
           <span className={ICON_SLOT_CLASS}>
-            <Link2Line className={`${MINGCUTE_ICON_CLASS} translate-y-px`} />
+            <Link2Line
+              className={`${MINGCUTE_ICON_CLASS} translate-y-[1.5px] -rotate-45`}
+            />
           </span>
         </button>
       </div>

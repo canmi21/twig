@@ -10,7 +10,7 @@ import {
   MonitorSmartphone,
   TabletSmartphone,
 } from 'lucide-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
@@ -148,6 +148,7 @@ function getClientLabel(userAgent: string): {
 }
 
 export function CommentSection({ postCid }: { postCid: string }) {
+  const location = useLocation()
   const [comments, setComments] = useState<Comment[]>([])
   const [session, setSession] = useState<{
     user: { id: string; name: string }
@@ -282,6 +283,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
   function renderReplyComposer(comment: Comment) {
     const isReplying = activeReplyId === comment.id
     const isSubmittingReply = replySubmittingId === comment.id
+    const canSubmitReply = replyContent.trim().length >= 3
 
     return (
       <>
@@ -328,18 +330,27 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       <span className="post-comments__count">
                         {replyContent.length}/2000
                       </span>
-                      <button
-                        type="submit"
-                        aria-label={
-                          isSubmittingReply
-                            ? 'Submitting reply'
-                            : 'Submit reply'
-                        }
-                        disabled={isSubmittingReply || !replyContent.trim()}
-                        className="post-comments__submit"
-                      >
-                        <CornerDownLeft className="post-comments__submit-icon" />
-                      </button>
+                      <AnimatePresence initial={false}>
+                        {canSubmitReply && (
+                          <motion.button
+                            key="reply-submit"
+                            type="submit"
+                            aria-label={
+                              isSubmittingReply
+                                ? 'Submitting reply'
+                                : 'Submit reply'
+                            }
+                            disabled={isSubmittingReply}
+                            className="post-comments__submit"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.16, ease: 'easeOut' }}
+                          >
+                            <CornerDownLeft className="post-comments__submit-icon" />
+                          </motion.button>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
                   {replyError && (
@@ -546,6 +557,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
           <p className="post-comments__signin text-[13px] text-secondary">
             <Link
               to="/login"
+              search={{ callback: location.pathname }}
               className="post-comments__signin-link text-primary hover:underline"
             >
               Sign in
@@ -571,16 +583,25 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 <span className="post-comments__count">
                   {content.length}/2000
                 </span>
-                <button
-                  type="submit"
-                  aria-label={
-                    submitting ? 'Submitting comment' : 'Submit comment'
-                  }
-                  disabled={submitting || !content.trim()}
-                  className="post-comments__submit"
-                >
-                  <CornerDownLeft className="post-comments__submit-icon" />
-                </button>
+                <AnimatePresence initial={false}>
+                  {content.trim().length >= 3 && (
+                    <motion.button
+                      key="comment-submit"
+                      type="submit"
+                      aria-label={
+                        submitting ? 'Submitting comment' : 'Submit comment'
+                      }
+                      disabled={submitting}
+                      className="post-comments__submit"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.16, ease: 'easeOut' }}
+                    >
+                      <CornerDownLeft className="post-comments__submit-icon" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
             {error && <p className="post-comments__error">{error}</p>}
