@@ -434,7 +434,7 @@ body:has(.post-page) {
   height: 1.95rem;
   position: absolute;
   top: 0.08rem;
-  left: -3.15rem;
+  left: -2.55rem;
   border: 1px solid var(--color-border);
   flex: none;
 }
