@@ -66,6 +66,37 @@ const removeUser = createServerFn({ method: 'POST' })
     })
   })
 
+const updateUserAdmin = createServerFn({ method: 'POST' })
+  .inputValidator(
+    (input: { userId: string; name?: string; email?: string; role?: string }) =>
+      input,
+  )
+  .handler(async ({ data }) => {
+    const auth = getAuth()
+    const body: Record<string, unknown> = { userId: data.userId }
+    if (data.name !== undefined) body.name = data.name
+    if (data.email !== undefined) body.email = data.email
+    if (data.role !== undefined) body.role = data.role
+    await auth.api.setRole({
+      headers: getRequestHeaders(),
+      body: {
+        userId: data.userId,
+        role: (data.role ?? 'user') as 'user' | 'admin',
+      },
+    })
+    // Better Auth admin plugin doesn't have a generic updateUser for name/email,
+    // so we update those fields directly via the internal adapter.
+    if (data.name !== undefined || data.email !== undefined) {
+      const updates: Record<string, string> = {}
+      if (data.name !== undefined) updates.name = data.name
+      if (data.email !== undefined) updates.email = data.email
+      await auth.api.updateUser({
+        headers: getRequestHeaders(),
+        body: updates,
+      })
+    }
+  })
+
 export const Route = createFileRoute('/@/_dashboard/users/')({
   loader: () => listUsers(),
   component: UsersList,
@@ -81,11 +112,18 @@ function formatDate(value: string): string {
   })
 }
 
+interface EditState {
+  userId: string
+  name: string
+  email: string
+  role: string
+}
+
 function UsersList() {
   const users = Route.useLoaderData()
   const router = useRouter()
-  const [deleting, setDeleting] = useState<string | null>(null)
   const [loading, setLoading] = useState<string | null>(null)
+  const [editing, setEditing] = useState<EditState | null>(null)
 
   async function handleBan(userId: string) {
     setLoading(userId)
@@ -102,9 +140,34 @@ function UsersList() {
   }
 
   async function handleDelete(userId: string) {
+    if (!window.confirm('Delete this user? This cannot be undone.')) return
     setLoading(userId)
     await removeUser({ data: { userId } })
-    setDeleting(null)
+    setLoading(null)
+    router.invalidate()
+  }
+
+  function startEdit(user: UserRow) {
+    setEditing({
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role ?? 'user',
+    })
+  }
+
+  async function handleSaveEdit() {
+    if (!editing) return
+    setLoading(editing.userId)
+    await updateUserAdmin({
+      data: {
+        userId: editing.userId,
+        name: editing.name,
+        email: editing.email,
+        role: editing.role,
+      },
+    })
+    setEditing(null)
     setLoading(null)
     router.invalidate()
   }
@@ -112,110 +175,187 @@ function UsersList() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-lg font-medium">Users</h1>
+        <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
+          Users
+        </h1>
       </div>
 
       {users.length === 0 ? (
-        <p className="text-sm text-secondary">No users yet.</p>
+        <p className="text-[14px] text-primary opacity-(--opacity-muted)">
+          No users yet.
+        </p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-secondary">
-              <th className="pb-2 font-normal">Name</th>
-              <th className="pb-2 font-normal">Email</th>
-              <th className="pb-2 font-normal">Role</th>
-              <th className="pb-2 font-normal">Status</th>
-              <th className="pb-2 font-normal">Created</th>
-              <th className="pb-2 text-right font-normal">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-b border-border">
-                <td className="py-3 font-medium">{user.name}</td>
-                <td className="py-3 text-secondary">{user.email}</td>
-                <td className="py-3">
-                  <span
-                    className={`rounded-sm px-2 py-0.5 text-xs ${
-                      user.role === 'admin'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-raised text-secondary'
-                    }`}
-                  >
-                    {user.role ?? 'user'}
-                  </span>
-                </td>
-                <td className="py-3">
-                  {user.banned ? (
-                    <span
-                      className="rounded-sm bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      title={user.banReason ?? undefined}
-                    >
-                      Banned
-                    </span>
-                  ) : (
-                    <span className="rounded-sm bg-green-100 px-2 py-0.5 text-xs text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                      Active
-                    </span>
-                  )}
-                </td>
-                <td className="py-3 text-secondary">
-                  {formatDate(user.createdAt)}
-                </td>
-                <td className="py-3 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    {user.banned ? (
-                      <button
-                        type="button"
-                        disabled={loading === user.id}
-                        onClick={() => handleUnban(user.id)}
-                        className="text-secondary hover:text-primary disabled:opacity-50"
-                      >
-                        Unban
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={loading === user.id}
-                        onClick={() => handleBan(user.id)}
-                        className="text-secondary hover:text-red-500 disabled:opacity-50"
-                      >
-                        Ban
-                      </button>
-                    )}
-                    {deleting === user.id ? (
-                      <span className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={loading === user.id}
-                          onClick={() => handleDelete(user.id)}
-                          className="text-red-500 disabled:opacity-50"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleting(null)}
-                          className="text-secondary"
-                        >
-                          Cancel
-                        </button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setDeleting(user.id)}
-                        className="text-secondary hover:text-red-500"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                </td>
+        <div className="overflow-hidden rounded-md border border-border">
+          <table className="w-full text-[14px]">
+            <thead>
+              <tr className="border-b border-border bg-raised">
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Name
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Email
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Role
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Status
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Created
+                </th>
+                <th className="px-4 py-2.5 text-right text-[12px] font-[560] text-primary">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user) => {
+                const isEditing = editing?.userId === user.id
+                return (
+                  <tr
+                    key={user.id}
+                    className="border-b border-border last:border-0"
+                  >
+                    <td className="px-4 py-3">
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editing.name}
+                          onChange={(e) =>
+                            setEditing({ ...editing, name: e.target.value })
+                          }
+                          className="w-full rounded-sm border border-border bg-raised px-2 py-1 text-[13px] text-primary outline-none focus:border-focus"
+                        />
+                      ) : (
+                        <span className="text-[14px] font-[560] text-primary">
+                          {user.name || '-'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isEditing ? (
+                        <input
+                          type="email"
+                          value={editing.email}
+                          onChange={(e) =>
+                            setEditing({ ...editing, email: e.target.value })
+                          }
+                          className="w-full rounded-sm border border-border bg-raised px-2 py-1 text-[13px] text-primary outline-none focus:border-focus"
+                        />
+                      ) : (
+                        <span className="text-[13px] text-primary opacity-(--opacity-muted)">
+                          {user.email}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {isEditing ? (
+                        <select
+                          value={editing.role}
+                          onChange={(e) =>
+                            setEditing({ ...editing, role: e.target.value })
+                          }
+                          className="rounded-sm border border-border bg-raised px-2 py-1 text-[12px] text-primary outline-none focus:border-focus"
+                        >
+                          <option value="user">user</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      ) : (
+                        <span
+                          className={`text-[12px] text-primary ${
+                            user.role === 'admin'
+                              ? 'font-[560]'
+                              : 'opacity-(--opacity-muted)'
+                          }`}
+                        >
+                          {user.role ?? 'user'}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {user.banned ? (
+                        <span
+                          className="text-[12px] text-primary line-through opacity-(--opacity-faint)"
+                          title={user.banReason ?? undefined}
+                        >
+                          Banned
+                        </span>
+                      ) : (
+                        <span className="text-[12px] text-primary opacity-(--opacity-soft)">
+                          Active
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
+                      {formatDate(user.createdAt)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        {isEditing ? (
+                          <>
+                            <button
+                              type="button"
+                              disabled={loading === user.id}
+                              onClick={handleSaveEdit}
+                              className="text-[13px] text-primary transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditing(null)}
+                              className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startEdit(user)}
+                              className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+                            >
+                              Edit
+                            </button>
+                            {user.banned ? (
+                              <button
+                                type="button"
+                                disabled={loading === user.id}
+                                onClick={() => handleUnban(user.id)}
+                                className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
+                              >
+                                Unban
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={loading === user.id}
+                                onClick={() => handleBan(user.id)}
+                                className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
+                              >
+                                Ban
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              disabled={loading === user.id}
+                              onClick={() => handleDelete(user.id)}
+                              className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

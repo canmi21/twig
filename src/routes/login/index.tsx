@@ -1,10 +1,12 @@
 /* src/routes/login/index.tsx */
 
 import { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
+import { Undo2 } from 'lucide-react'
 import { authClient } from '~/lib/auth-client'
+import { ThemeToggle } from '~/components/theme-toggle'
 import { user as userTable } from '~/lib/database/auth-schema'
 import { getDb, getPublicUrl } from '~/server/platform'
 
@@ -129,7 +131,14 @@ function LoginPage() {
         : 'Choose a display name for your comments.'
 
   return (
-    <div className="mx-auto max-w-180 px-5 py-24">
+    <div className="relative flex min-h-screen items-center justify-center px-5">
+      <Link
+        to={redirectTo}
+        className="absolute top-5 left-5 inline-flex items-center justify-center rounded-full p-2 text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+      >
+        <Undo2 className="size-4" strokeWidth={2.25} />
+      </Link>
+      <ThemeToggle />
       <div className="mx-auto max-w-72">
         <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
           {heading}

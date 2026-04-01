@@ -16,6 +16,7 @@ import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as AtRouteRouteImport } from './routes/@/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SitemapIndexRouteImport } from './routes/sitemap/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as RssIndexRouteImport } from './routes/rss/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as LogoutIndexRouteImport } from './routes/logout/index'
@@ -66,6 +67,11 @@ const IndexRoute = IndexRouteImport.update({
 const SitemapIndexRoute = SitemapIndexRouteImport.update({
   id: '/sitemap/',
   path: '/sitemap/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RssIndexRoute = RssIndexRouteImport.update({
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/logout/': typeof LogoutIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/logout': typeof LogoutIndexRoute
   '/posts': typeof PostsIndexRoute
   '/rss': typeof RssIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/sitemap': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/logout/': typeof LogoutIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/rss/': typeof RssIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/sitemap/': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/logout/'
     | '/posts/'
     | '/rss/'
+    | '/settings/'
     | '/sitemap/'
     | '/api/auth/$'
     | '/api/auth/me'
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/logout'
     | '/posts'
     | '/rss'
+    | '/settings'
     | '/sitemap'
     | '/api/auth/$'
     | '/api/auth/me'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/logout/'
     | '/posts/'
     | '/rss/'
+    | '/settings/'
     | '/sitemap/'
     | '/api/auth/$'
     | '/api/auth/me'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   LogoutIndexRoute: typeof LogoutIndexRoute
   PostsIndexRoute: typeof PostsIndexRoute
   RssIndexRoute: typeof RssIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
   SitemapIndexRoute: typeof SitemapIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
@@ -367,6 +380,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap'
       fullPath: '/sitemap/'
       preLoaderRoute: typeof SitemapIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rss/': {
@@ -526,6 +546,7 @@ const rootRouteChildren: RootRouteChildren = {
   LogoutIndexRoute: LogoutIndexRoute,
   PostsIndexRoute: PostsIndexRoute,
   RssIndexRoute: RssIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
   SitemapIndexRoute: SitemapIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,

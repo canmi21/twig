@@ -1,56 +1,74 @@
 /* src/routes/@/_dashboard/route.tsx */
 
 import { Outlet, Link, createFileRoute } from '@tanstack/react-router'
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  MessageSquare,
+  Undo2,
+} from 'lucide-react'
+import { fetchSidebarData } from '~/server/dashboard'
 
 export const Route = createFileRoute('/@/_dashboard')({
+  loader: () => fetchSidebarData(),
   component: DashboardLayout,
 })
 
+const iconClass = 'size-[18px]'
+const linkClass =
+  'relative flex items-center justify-center rounded-sm p-2 text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100'
+const activeLinkClass =
+  'relative flex items-center justify-center rounded-sm p-2 text-primary opacity-100'
+
 function DashboardLayout() {
+  const { pendingComments: _pending } = Route.useLoaderData()
+
   return (
     <div className="flex h-screen">
-      <aside className="flex w-52 shrink-0 flex-col border-r border-border bg-surface">
-        <div className="px-4 py-5">
-          <span className="text-sm font-medium text-primary">Console</span>
-        </div>
-        <nav className="flex-1 px-2">
+      <aside className="flex w-12 shrink-0 flex-col items-center border-r border-border">
+        <nav className="flex flex-1 flex-col items-center gap-1 pt-4">
+          <Link
+            to="/@"
+            activeOptions={{ exact: true }}
+            className={linkClass}
+            activeProps={{ className: activeLinkClass }}
+            title="Overview"
+          >
+            <LayoutDashboard className={iconClass} strokeWidth={1.8} />
+          </Link>
           <Link
             to="/@/contents"
-            className="block rounded-sm px-3 py-1.5 text-sm text-secondary hover:bg-raised hover:text-primary"
-            activeProps={{
-              className:
-                'block rounded-sm px-3 py-1.5 text-sm bg-raised text-primary font-medium',
-            }}
+            className={linkClass}
+            activeProps={{ className: activeLinkClass }}
+            title="Posts"
           >
-            Posts
+            <FileText className={iconClass} strokeWidth={1.8} />
           </Link>
           <Link
             to="/@/users"
-            className="block rounded-sm px-3 py-1.5 text-sm text-secondary hover:bg-raised hover:text-primary"
-            activeProps={{
-              className:
-                'block rounded-sm px-3 py-1.5 text-sm bg-raised text-primary font-medium',
-            }}
+            className={linkClass}
+            activeProps={{ className: activeLinkClass }}
+            title="Users"
           >
-            Users
+            <Users className={iconClass} strokeWidth={1.8} />
           </Link>
           <Link
             to="/@/comments"
-            className="block rounded-sm px-3 py-1.5 text-sm text-secondary hover:bg-raised hover:text-primary"
-            activeProps={{
-              className:
-                'block rounded-sm px-3 py-1.5 text-sm bg-raised text-primary font-medium',
-            }}
+            className={linkClass}
+            activeProps={{ className: activeLinkClass }}
+            title="Comments"
           >
-            Comments
+            <MessageSquare className={iconClass} strokeWidth={1.8} />
           </Link>
         </nav>
-        <div className="border-t border-border px-2 py-3">
+        <div className="border-t border-border py-3">
           <Link
             to="/"
-            className="block px-3 py-1.5 text-sm text-secondary hover:text-primary"
+            className="flex items-center justify-center rounded-sm p-2 text-primary opacity-(--opacity-faint) transition-opacity duration-140 hover:opacity-100"
+            title="Back to site"
           >
-            Back to site
+            <Undo2 className={iconClass} strokeWidth={1.8} />
           </Link>
         </div>
       </aside>

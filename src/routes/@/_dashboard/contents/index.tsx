@@ -1,6 +1,5 @@
 /* src/routes/@/_dashboard/contents/index.tsx */
 
-import { useState } from 'react'
 import {
   createFileRoute,
   Link,
@@ -150,7 +149,6 @@ function PostsList() {
   const posts = Route.useLoaderData()
   const router = useRouter()
   const navigate = useNavigate()
-  const [deleting, setDeleting] = useState<string | null>(null)
 
   async function handleNewPost() {
     const { cid } = await createDraft()
@@ -172,108 +170,114 @@ function PostsList() {
   }
 
   async function handleDelete(cid: string) {
+    if (!window.confirm('Delete this post? This cannot be undone.')) return
     await removePost({ data: { cid } })
-    setDeleting(null)
     router.invalidate()
   }
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-lg font-medium">Posts</h1>
+        <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
+          Posts
+        </h1>
         <button
           type="button"
           onClick={handleNewPost}
-          className="rounded-sm bg-primary px-3 py-1.5 text-sm text-surface"
+          className="rounded-sm bg-primary px-3 py-1.5 text-[13px] font-[560] text-surface"
         >
           New Post
         </button>
       </div>
 
       {posts.length === 0 ? (
-        <p className="text-sm text-secondary">No posts yet.</p>
+        <p className="text-[14px] text-primary opacity-(--opacity-muted)">
+          No posts yet.
+        </p>
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border text-left text-secondary">
-              <th className="pb-2 font-normal">Title</th>
-              <th className="pb-2 font-normal">Category</th>
-              <th className="pb-2 font-normal">Status</th>
-              <th className="pb-2 font-normal">Created</th>
-              <th className="pb-2 text-right font-normal">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((post) => (
-              <tr key={post.cid} className="border-b border-border">
-                <td className="py-3">
-                  <div className="font-medium">{post.title}</div>
-                  <div className="text-xs text-secondary">{post.slug}</div>
-                </td>
-                <td className="py-3 text-secondary">{post.category ?? '-'}</td>
-                <td className="py-3">
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(post.cid, post.published)}
-                    className={`rounded-sm px-2 py-0.5 text-xs ${
-                      post.published === 1
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-raised text-secondary'
-                    }`}
-                  >
-                    {post.published === 1 ? 'Published' : 'Draft'}
-                  </button>
-                </td>
-                <td className="py-3 text-secondary">
-                  {formatDate(post.createdAt)}
-                </td>
-                <td className="py-3 text-right">
-                  <div className="flex items-center justify-end gap-3">
-                    <Link
-                      to="/@/editor/$cid"
-                      params={{ cid: post.cid }}
-                      search={{
-                        preview: 'rendered',
-                        pretty: undefined,
-                        format: true,
-                        highlight: true,
-                      }}
-                      className="text-secondary hover:text-primary"
+        <div className="overflow-hidden rounded-md border border-border">
+          <table className="w-full text-[14px]">
+            <thead>
+              <tr className="border-b border-border bg-raised">
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Title
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Category
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Status
+                </th>
+                <th className="px-4 py-2.5 text-left text-[12px] font-[560] text-primary">
+                  Created
+                </th>
+                <th className="px-4 py-2.5 text-right text-[12px] font-[560] text-primary">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {posts.map((post) => (
+                <tr
+                  key={post.cid}
+                  className="border-b border-border last:border-0"
+                >
+                  <td className="px-4 py-3">
+                    <div className="text-[14px] font-[560] text-primary">
+                      {post.title}
+                    </div>
+                    <div className="mt-0.5 text-[12px] text-primary opacity-(--opacity-faint)">
+                      {post.slug}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
+                    {post.category ?? '-'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => handleToggle(post.cid, post.published)}
+                      className={`cursor-pointer text-[12px] text-primary transition-opacity duration-140 hover:opacity-100 ${
+                        post.published === 1
+                          ? 'opacity-(--opacity-soft)'
+                          : 'opacity-(--opacity-faint)'
+                      }`}
                     >
-                      Edit
-                    </Link>
-                    {deleting === post.cid ? (
-                      <span className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(post.cid)}
-                          className="text-red-500"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleting(null)}
-                          className="text-secondary"
-                        >
-                          Cancel
-                        </button>
-                      </span>
-                    ) : (
+                      {post.published === 1 ? 'Published' : 'Draft'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
+                    {formatDate(post.createdAt)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        to="/@/editor/$cid"
+                        params={{ cid: post.cid }}
+                        search={{
+                          preview: 'rendered',
+                          pretty: undefined,
+                          format: true,
+                          highlight: true,
+                        }}
+                        className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+                      >
+                        Edit
+                      </Link>
                       <button
                         type="button"
-                        onClick={() => setDeleting(post.cid)}
-                        className="text-secondary hover:text-red-500"
+                        onClick={() => handleDelete(post.cid)}
+                        className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
                       >
                         Delete
                       </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

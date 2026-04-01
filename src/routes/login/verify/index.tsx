@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Undo2 } from 'lucide-react'
 import { authClient } from '~/lib/auth-client'
+import { ThemeToggle } from '~/components/theme-toggle'
 
 interface VerifySearch {
   email?: string
@@ -19,13 +21,34 @@ export const Route = createFileRoute('/login/verify/')({
   component: VerifyPage,
 })
 
+function AuthShell({
+  backTo,
+  children,
+}: {
+  backTo: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="relative flex min-h-screen items-center justify-center px-5">
+      <Link
+        to={backTo}
+        className="absolute top-5 left-5 inline-flex items-center justify-center rounded-full p-2 text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+      >
+        <Undo2 className="size-4" strokeWidth={2.25} />
+      </Link>
+      <ThemeToggle />
+      {children}
+    </div>
+  )
+}
+
 function VerifyPage() {
   const { email, code, callback } = Route.useSearch()
 
   if (!email || !code) {
     return (
-      <div className="mx-auto max-w-180 px-5 py-24">
-        <div className="mx-auto max-w-72">
+      <AuthShell backTo={callback ?? '/'}>
+        <div className="max-w-72">
           <p className="text-[14px] text-primary opacity-(--opacity-muted)">
             Invalid verification link.
           </p>
@@ -36,7 +59,7 @@ function VerifyPage() {
             Back to sign in
           </Link>
         </div>
-      </div>
+      </AuthShell>
     )
   }
 
@@ -109,8 +132,8 @@ function VerifyForm({
 
   if (step === 'name') {
     return (
-      <div className="mx-auto max-w-180 px-5 py-24">
-        <div className="mx-auto max-w-72">
+      <AuthShell backTo={redirectTo}>
+        <div className="max-w-72">
           <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
             One more thing
           </h1>
@@ -151,13 +174,13 @@ function VerifyForm({
             </button>
           </form>
         </div>
-      </div>
+      </AuthShell>
     )
   }
 
   return (
-    <div className="mx-auto max-w-180 px-5 py-24">
-      <div className="mx-auto max-w-72">
+    <AuthShell backTo={redirectTo}>
+      <div className="max-w-72">
         <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
           Confirm sign in
         </h1>
@@ -185,6 +208,6 @@ function VerifyForm({
           Back to sign in
         </Link>
       </div>
-    </div>
+    </AuthShell>
   )
 }

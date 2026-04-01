@@ -14,6 +14,7 @@ import {
   getBetterAuthSecret,
   getResendApiKey,
   getEmailFromNoreply,
+  getEmailOwner,
   getSkipOtpVerify,
 } from './platform'
 
@@ -49,6 +50,11 @@ export function getAuth() {
       user: {
         create: {
           async before(user) {
+            // Owner email always gets admin role
+            const ownerEmail = getEmailOwner()
+            if (user.email === ownerEmail) {
+              return { data: { ...user, role: 'admin' } }
+            }
             // First registered user becomes admin (bootstrap)
             const db = getDb()
             const existing = await db

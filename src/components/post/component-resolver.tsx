@@ -34,7 +34,7 @@ function ImageComponent({ url, alt }: { url: string; alt: string }) {
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="
         post-page-media post-page-media--image
-        aspect-21/9 w-full rounded-xl
+        aspect-video w-full rounded-xl
         border-2 border-border object-cover
         shadow-sm
       "
