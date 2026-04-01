@@ -4,8 +4,10 @@ import { useState, useRef } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+import { eq } from 'drizzle-orm'
 import { getAuth } from '~/server/better-auth'
-import { getBucket } from '~/server/platform'
+import { getDb, getBucket } from '~/server/platform'
+import { user as userTable } from '~/lib/database/auth-schema'
 
 interface UserRow {
   id: string
@@ -69,32 +71,25 @@ const removeUser = createServerFn({ method: 'POST' })
 
 const updateUserAdmin = createServerFn({ method: 'POST' })
   .inputValidator(
-    (input: { userId: string; name?: string; email?: string; role?: string }) =>
-      input,
+    (input: { userId: string; name?: string; role?: string }) => input,
   )
   .handler(async ({ data }) => {
     const auth = getAuth()
-    const body: Record<string, unknown> = { userId: data.userId }
-    if (data.name !== undefined) body.name = data.name
-    if (data.email !== undefined) body.email = data.email
-    if (data.role !== undefined) body.role = data.role
-    await auth.api.setRole({
-      headers: getRequestHeaders(),
-      body: {
-        userId: data.userId,
-        role: (data.role ?? 'user') as 'user' | 'admin',
-      },
-    })
-    // Better Auth admin plugin doesn't have a generic updateUser for name/email,
-    // so we update those fields directly via the internal adapter.
-    if (data.name !== undefined || data.email !== undefined) {
-      const updates: Record<string, string> = {}
-      if (data.name !== undefined) updates.name = data.name
-      if (data.email !== undefined) updates.email = data.email
-      await auth.api.updateUser({
+    if (data.role !== undefined) {
+      await auth.api.setRole({
         headers: getRequestHeaders(),
-        body: updates,
+        body: {
+          userId: data.userId,
+          role: (data.role ?? 'user') as 'user' | 'admin',
+        },
       })
+    }
+    if (data.name !== undefined) {
+      const db = getDb()
+      await db
+        .update(userTable)
+        .set({ name: data.name })
+        .where(eq(userTable.id, data.userId))
     }
   })
 
@@ -129,7 +124,6 @@ function formatDate(value: string): string {
 interface EditState {
   userId: string
   name: string
-  email: string
   role: string
 }
 
@@ -198,7 +192,6 @@ function UsersList() {
     setEditing({
       userId: user.id,
       name: user.name,
-      email: user.email,
       role: user.role ?? 'user',
     })
   }
@@ -210,7 +203,6 @@ function UsersList() {
       data: {
         userId: editing.userId,
         name: editing.name,
-        email: editing.email,
         role: editing.role,
       },
     })
@@ -311,20 +303,9 @@ function UsersList() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {isEditing ? (
-                        <input
-                          type="email"
-                          value={editing.email}
-                          onChange={(e) =>
-                            setEditing({ ...editing, email: e.target.value })
-                          }
-                          className="w-full rounded-sm border border-border bg-raised px-2 py-1 text-[13px] text-primary outline-none focus:border-focus"
-                        />
-                      ) : (
-                        <span className="text-[13px] text-primary opacity-(--opacity-muted)">
-                          {user.email}
-                        </span>
-                      )}
+                      <span className="text-[13px] text-primary opacity-(--opacity-muted)">
+                        {user.email}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       {isEditing ? (
