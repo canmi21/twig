@@ -5,6 +5,7 @@ import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import {
+  SocialXLine,
   TwitterLine,
   GithubLine,
   TelegramLine,
@@ -98,12 +99,16 @@ function HomePage() {
 
             {/* Social links */}
             <div className="mt-4 flex items-center gap-2.5">
+              <a
+                href="https://twitter.com/intent/follow?screen_name=canmi21"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex size-8 items-center justify-center rounded-full border border-border bg-black transition-opacity duration-140 hover:opacity-80"
+              >
+                <SocialXLine className="absolute size-[18px] text-white transition-opacity duration-140 group-hover:opacity-0" />
+                <TwitterLine className="absolute size-[18px] text-white opacity-0 transition-opacity duration-140 group-hover:opacity-100" />
+              </a>
               {[
-                {
-                  Icon: TwitterLine,
-                  href: 'https://twitter.com/intent/follow?screen_name=canmi21',
-                  bg: '#000000',
-                },
                 {
                   Icon: GithubLine,
                   href: 'https://github.com/canmi21',
