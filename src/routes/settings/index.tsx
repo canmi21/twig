@@ -1,7 +1,7 @@
 /* src/routes/settings/index.tsx */
 
 import { useState, useRef } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { Undo2 } from 'lucide-react'
@@ -100,9 +100,10 @@ function imageToWebpBase64(file: File): Promise<string> {
   })
 }
 
-function avatarSrc(userId: string, bust?: string) {
-  const key = `avatar/${userId}.webp`
-  const base = import.meta.env.DEV ? `/api/object/${key}` : key
+function useAvatarSrc(userId: string, bust?: string) {
+  const { cdnPublicUrl } = useRouteContext({ from: '__root__' })
+  const prefix = import.meta.env.DEV ? '/api/object' : cdnPublicUrl
+  const base = `${prefix}/avatar/${userId}.webp`
   return bust ? `${base}?t=${bust}` : base
 }
 
@@ -122,7 +123,7 @@ function SettingsPage() {
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const avatarUrl = avatarSrc(profile.id, avatarBust ?? undefined)
+  const avatarUrl = useAvatarSrc(profile.id, avatarBust ?? undefined)
   const showAvatar = !avatarError || avatarBust !== null
 
   async function handleSaveName(e: React.FormEvent) {

@@ -1,7 +1,7 @@
 /* src/routes/index.tsx */
 
 import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import {
@@ -40,7 +40,9 @@ export const Route = createFileRoute('/')({
 
 function OwnerAvatar({ avatarKey }: { avatarKey: string }) {
   const [imgError, setImgError] = useState(false)
-  const src = import.meta.env.DEV ? `/api/object/${avatarKey}` : avatarKey
+  const { cdnPublicUrl } = useRouteContext({ from: '__root__' })
+  const prefix = import.meta.env.DEV ? '/api/object' : cdnPublicUrl
+  const src = `${prefix}/${avatarKey}`
 
   return (
     <span className="inline-block size-[65px] shrink-0 overflow-hidden rounded-full border border-border bg-raised">
