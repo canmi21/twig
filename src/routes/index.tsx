@@ -1,90 +1,149 @@
 /* src/routes/index.tsx */
 
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Navbar } from '~/components/navbar'
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getCache } from '~/server/platform'
-import { readPostIndex } from '~/lib/storage/kv'
+import { eq } from 'drizzle-orm'
+import {
+  TwitterLine,
+  GithubLine,
+  TelegramLine,
+  MailLine,
+  RssLine,
+} from '@mingcute/react'
+import { Navbar } from '~/components/navbar'
+import { getDb, getEmailOwner } from '~/server/platform'
+import { user as userTable } from '~/lib/database/auth-schema'
 
-const getPosts = createServerFn().handler(async () => {
-  return readPostIndex(getCache())
-})
+interface OwnerData {
+  avatarKey: string
+  email: string
+}
+
+const getOwner = createServerFn().handler(
+  async (): Promise<OwnerData | null> => {
+    const ownerEmail = getEmailOwner()
+    const row = await getDb()
+      .select({ id: userTable.id })
+      .from(userTable)
+      .where(eq(userTable.email, ownerEmail))
+      .get()
+    if (!row) return null
+    return { avatarKey: `avatar/${row.id}.webp`, email: ownerEmail }
+  },
+)
 
 export const Route = createFileRoute('/')({
-  loader: () => getPosts(),
+  loader: () => getOwner(),
   component: HomePage,
 })
 
-function formatDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+function OwnerAvatar({ avatarKey }: { avatarKey: string }) {
+  const [imgError, setImgError] = useState(false)
+  const src = import.meta.env.DEV ? `/api/object/${avatarKey}` : avatarKey
+
+  return (
+    <span className="inline-block size-[65px] shrink-0 overflow-hidden rounded-full border border-border bg-raised">
+      {!imgError ? (
+        <img
+          src={src}
+          alt="Canmi"
+          className="size-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <span className="flex size-full items-center justify-center text-[20px] font-[560] text-primary opacity-(--opacity-faint)">
+          C
+        </span>
+      )}
+    </span>
+  )
 }
 
 function HomePage() {
-  const posts = Route.useLoaderData()
-
-  if (posts.length === 0) {
-    return (
-      <div className="mx-auto max-w-180 px-5 pt-24">
-        <p className="text-secondary">No posts yet.</p>
-      </div>
-    )
-  }
+  const owner = Route.useLoaderData()
 
   return (
     <>
       <Navbar />
-      <div className="mx-auto max-w-180 px-5 pt-16 pb-24">
-        <ul className="space-y-6">
-          {posts.map((post) => (
-            <li key={post.slug}>
-              <Link
-                to="/posts/$category/$slug"
-                params={{
-                  category: post.category ?? 'uncategorized',
-                  slug: post.slug,
-                }}
-                className="
-                block
-                text-primary
-                hover:text-primary
-              "
-              >
-                <div className="flex items-center gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-medium">
-                      {post.title}
-                    </div>
-                    {post.description && (
-                      <p className="mt-1 truncate text-[13px] text-secondary">
-                        {post.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="hidden min-w-8 flex-1 border-t border-dashed border-border sm:block" />
-                  {post.createdAt && (
-                    <time
-                      dateTime={post.createdAt}
-                      className="shrink-0 text-[13px] text-secondary"
-                    >
-                      {formatDate(post.createdAt)}
-                    </time>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-16 text-center text-[12px] text-tertiary">
+      <div className="flex min-h-screen flex-col items-center justify-center px-5">
+        <div className="w-full max-w-180 rounded-md border border-border bg-raised px-7 py-6">
+          {/* Header: avatar + name/handle */}
+          <div className="flex items-center gap-4">
+            {owner && <OwnerAvatar avatarKey={owner.avatarKey} />}
+            <div className="min-w-0">
+              <div className="text-[24px] font-[560] text-primary">Canmi</div>
+              <div className="text-[13px] text-primary opacity-(--opacity-muted)">
+                @canmi21
+              </div>
+            </div>
+          </div>
+
+          {/* Body */}
+          <div className="mt-5">
+            <div className="text-[14px] text-primary opacity-(--opacity-muted)">
+              初めまして
+            </div>
+            <span className="mt-1 text-[15px] text-primary opacity-(--opacity-soft)">
+              /ˈkæ.mi/
+            </span>
+            <span className="ml-3 text-[13px] text-primary opacity-(--opacity-muted)">
+              silent "n" pls!
+            </span>
+            <div className="mt-1 text-[13px] text-primary opacity-(--opacity-muted)">
+              ENTP / (INFJ?)
+            </div>
+
+            {/* Social links */}
+            <div className="mt-4 flex items-center gap-2.5">
+              {[
+                {
+                  Icon: TwitterLine,
+                  href: 'https://twitter.com/intent/follow?screen_name=canmi21',
+                  bg: '#000000',
+                },
+                {
+                  Icon: GithubLine,
+                  href: 'https://github.com/canmi21',
+                  bg: '#24292F',
+                },
+                {
+                  Icon: TelegramLine,
+                  href: 'https://t.me/canmi21',
+                  bg: '#26A5E4',
+                },
+                {
+                  Icon: MailLine,
+                  href: owner ? `mailto:${owner.email}` : '#',
+                  bg: '#F2A93C',
+                },
+                {
+                  Icon: RssLine,
+                  href: '/feed.xml',
+                  bg: '#C45140',
+                },
+              ].map(({ Icon, href, bg }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target={href.startsWith('/') ? undefined : '_blank'}
+                  rel={href.startsWith('/') ? undefined : 'noopener noreferrer'}
+                  className="flex size-8 items-center justify-center rounded-full border border-border transition-opacity duration-140 hover:opacity-80"
+                  style={{ backgroundColor: bg }}
+                >
+                  <Icon className="size-[18px] text-white" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-8 text-center text-[12px] text-primary opacity-(--opacity-faint)">
           <a
             href="https://icp.gov.moe/?keyword=20260000"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-secondary"
+            className="transition-opacity duration-140 hover:opacity-100"
           >
             萌ICP备20260000号
           </a>

@@ -5,13 +5,13 @@ import { ThemeToggle } from './theme-toggle'
 
 const navFont = { fontFamily: "'Fira Code', monospace" } as const
 const linkClass =
-  'text-[13px] font-light text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100'
-const activeLinkClass = 'text-[13px] font-light text-primary opacity-100'
+  'text-[17px] font-light text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100'
+const activeLinkClass = 'text-[17px] font-light text-primary opacity-100'
 
 export function Navbar() {
   return (
     <>
-      <nav className="fixed inset-x-0 top-0 z-40 flex items-center justify-center py-4">
+      <nav className="fixed inset-x-0 top-0 z-40 flex h-[62px] items-center justify-center">
         <div className="flex items-center gap-6" style={navFont}>
           <Link
             to="/"
