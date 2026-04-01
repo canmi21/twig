@@ -1,5 +1,37 @@
 /* src/styles/tokens.css */
 
+/* ── CJK size-adjusted wrappers ────────────────── */
+
+@font-face {
+  font-family: 'CJK Sans';
+  src: local('PingFang SC');
+  size-adjust: 96%;
+}
+
+@font-face {
+  font-family: 'CJK Sans';
+  src: local('HarmonyOS Sans SC');
+  size-adjust: 96%;
+}
+
+@font-face {
+  font-family: 'CJK Sans';
+  src: local('Noto Sans SC');
+  size-adjust: 96%;
+}
+
+@font-face {
+  font-family: 'CJK Sans';
+  src: local('Microsoft YaHei');
+  size-adjust: 96%;
+}
+
+@font-face {
+  font-family: 'CJK Sans';
+  src: local('WenQuanYi Micro Hei');
+  size-adjust: 96%;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
@@ -9,11 +41,7 @@
   font-family:
     'Source Sans 3',
     'Roboto',
-    'PingFang SC',
-    'HarmonyOS Sans SC',
-    'Noto Sans SC',
-    'Microsoft YaHei',
-    'WenQuanYi Micro Hei',
+    'CJK Sans',
     system-ui,
     -apple-system,
     sans-serif;
@@ -55,11 +83,7 @@ h6 {
   font-family:
     'Roboto',
     'Source Sans 3',
-    'PingFang SC',
-    'HarmonyOS Sans SC',
-    'Noto Sans SC',
-    'Microsoft YaHei',
-    'WenQuanYi Micro Hei',
+    'CJK Sans',
     system-ui,
     -apple-system,
     sans-serif;

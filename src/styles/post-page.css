@@ -35,11 +35,7 @@ body:has(.post-page) {
   font-family:
     'Roboto',
     'Source Sans 3',
-    'PingFang SC',
-    'HarmonyOS Sans SC',
-    'Noto Sans SC',
-    'Microsoft YaHei',
-    'WenQuanYi Micro Hei',
+    'CJK Sans',
     system-ui,
     -apple-system,
     sans-serif;
