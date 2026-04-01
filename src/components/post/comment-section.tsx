@@ -513,12 +513,6 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
   return (
     <div className="post-comments mt-14">
-      {rootComments.length === 0 && !submitted && (
-        <p className="post-comments__status text-[13px] text-secondary">
-          No comments yet.
-        </p>
-      )}
-
       {rootComments.length > 0 && (
         <div className="post-comments__list">
           {rootComments.map((c) => (

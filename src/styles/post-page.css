@@ -34,8 +34,12 @@ body:has(.post-page) {
   align-items: center;
   font-family:
     'Roboto',
-    'Noto Sans SC',
     'Source Sans 3',
+    'PingFang SC',
+    'HarmonyOS Sans SC',
+    'Noto Sans SC',
+    'Microsoft YaHei',
+    'WenQuanYi Micro Hei',
     system-ui,
     -apple-system,
     sans-serif;

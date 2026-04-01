@@ -43,6 +43,8 @@ function VerifyPage() {
   return <VerifyForm email={email} code={code} callback={callback} />
 }
 
+type Step = 'confirm' | 'name'
+
 function VerifyForm({
   email,
   code,
@@ -53,6 +55,8 @@ function VerifyForm({
   callback?: string
 }) {
   const navigate = useNavigate()
+  const [step, setStep] = useState<Step>('confirm')
+  const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -70,12 +74,85 @@ function VerifyForm({
         setError(result.error.message ?? 'Verification failed')
         return
       }
-      navigate({ to: redirectTo })
+      const userName = result.data?.user?.name
+      if (!userName) {
+        setStep('name')
+      } else {
+        navigate({ to: redirectTo })
+      }
     } catch {
       setError('Verification failed')
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleSetName(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = displayName.trim()
+    if (!trimmed) return
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await authClient.updateUser({ name: trimmed })
+      if (result.error) {
+        setError(result.error.message ?? 'Failed to set name')
+        return
+      }
+      navigate({ to: redirectTo })
+    } catch {
+      setError('Failed to set name')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (step === 'name') {
+    return (
+      <div className="mx-auto max-w-180 px-5 py-24">
+        <div className="mx-auto max-w-72">
+          <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
+            One more thing
+          </h1>
+          <p className="mt-2 text-[13px] leading-relaxed text-primary opacity-(--opacity-muted)">
+            Choose a display name for your comments.
+          </p>
+
+          {error && (
+            <p className="mt-4 text-[13px] leading-relaxed text-error">
+              {error}
+            </p>
+          )}
+
+          <form onSubmit={handleSetName} className="mt-6">
+            <label
+              htmlFor="display-name"
+              className="block text-[13px] font-[560] text-primary"
+            >
+              Display name
+            </label>
+            <input
+              id="display-name"
+              type="text"
+              required
+              autoFocus
+              maxLength={50}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="How others will see you"
+              className="mt-1.5 w-full rounded-sm border border-border bg-raised px-3 py-2 text-[14px] text-primary outline-none placeholder:text-primary placeholder:opacity-(--opacity-faint) focus:border-focus"
+            />
+            <button
+              type="submit"
+              disabled={loading || !displayName.trim()}
+              className="mt-4 w-full rounded-sm bg-primary px-3 py-2 text-[14px] font-[560] text-surface disabled:opacity-(--opacity-disabled)"
+            >
+              {loading ? 'Saving...' : 'Continue'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   return (

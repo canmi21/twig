@@ -37,12 +37,15 @@ export const Route = createFileRoute('/login/')({
   component: LoginPage,
 })
 
+type Step = 'email' | 'otp' | 'name'
+
 function LoginPage() {
   const navigate = useNavigate()
   const { callback } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
-  const [step, setStep] = useState<'email' | 'otp'>('email')
+  const [displayName, setDisplayName] = useState('')
+  const [step, setStep] = useState<Step>('email')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,7 +87,12 @@ function LoginPage() {
         setError(result.error.message ?? 'Invalid code')
         return
       }
-      navigate({ to: redirectTo })
+      const userName = result.data?.user?.name
+      if (!userName) {
+        setStep('name')
+      } else {
+        navigate({ to: redirectTo })
+      }
     } catch {
       setError('Invalid code')
     } finally {
@@ -92,23 +100,49 @@ function LoginPage() {
     }
   }
 
+  async function handleSetName(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = displayName.trim()
+    if (!trimmed) return
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await authClient.updateUser({ name: trimmed })
+      if (result.error) {
+        setError(result.error.message ?? 'Failed to set name')
+        return
+      }
+      navigate({ to: redirectTo })
+    } catch {
+      setError('Failed to set name')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const heading = step === 'name' ? 'One more thing' : 'Sign in'
+  const subtitle =
+    step === 'email'
+      ? 'Enter your email to receive a verification code.'
+      : step === 'otp'
+        ? `A code has been sent to ${email}.`
+        : 'Choose a display name for your comments.'
+
   return (
     <div className="mx-auto max-w-180 px-5 py-24">
       <div className="mx-auto max-w-72">
         <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
-          Sign in
+          {heading}
         </h1>
         <p className="mt-2 text-[13px] leading-relaxed text-primary opacity-(--opacity-muted)">
-          {step === 'email'
-            ? 'Enter your email to receive a verification code.'
-            : `A code has been sent to ${email}.`}
+          {subtitle}
         </p>
 
         {error && (
           <p className="mt-4 text-[13px] leading-relaxed text-error">{error}</p>
         )}
 
-        {step === 'email' ? (
+        {step === 'email' && (
           <form onSubmit={handleSendOtp} className="mt-6">
             <label
               htmlFor="email"
@@ -134,7 +168,9 @@ function LoginPage() {
               {loading ? 'Sending...' : 'Send code'}
             </button>
           </form>
-        ) : (
+        )}
+
+        {step === 'otp' && (
           <form onSubmit={handleVerifyOtp} className="mt-6">
             <label
               htmlFor="otp"
@@ -172,6 +208,35 @@ function LoginPage() {
               className="mt-3 w-full text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
             >
               Use a different email
+            </button>
+          </form>
+        )}
+
+        {step === 'name' && (
+          <form onSubmit={handleSetName} className="mt-6">
+            <label
+              htmlFor="display-name"
+              className="block text-[13px] font-[560] text-primary"
+            >
+              Display name
+            </label>
+            <input
+              id="display-name"
+              type="text"
+              required
+              autoFocus
+              maxLength={50}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="How others will see you"
+              className="mt-1.5 w-full rounded-sm border border-border bg-raised px-3 py-2 text-[14px] text-primary outline-none placeholder:text-primary placeholder:opacity-(--opacity-faint) focus:border-focus"
+            />
+            <button
+              type="submit"
+              disabled={loading || !displayName.trim()}
+              className="mt-4 w-full rounded-sm bg-primary px-3 py-2 text-[14px] font-[560] text-surface disabled:opacity-(--opacity-disabled)"
+            >
+              {loading ? 'Saving...' : 'Continue'}
             </button>
           </form>
         )}
