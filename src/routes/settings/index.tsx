@@ -14,7 +14,6 @@ interface Profile {
   id: string
   name: string
   email: string
-  image: string | null
 }
 
 const getProfile = createServerFn().handler(async (): Promise<Profile> => {
@@ -27,12 +26,13 @@ const getProfile = createServerFn().handler(async (): Promise<Profile> => {
     id: session.user.id,
     name: session.user.name,
     email: session.user.email,
-    image: session.user.image ?? null,
   }
 })
 
+const MAX_AVATAR_BYTES = 3 * 1024 * 1024
+
 const uploadAvatar = createServerFn({ method: 'POST' })
-  .inputValidator((input: { base64: string; ext: string }) => input)
+  .inputValidator((input: { base64: string; userId?: string }) => input)
   .handler(async ({ data }) => {
     const auth = getAuth()
     const session = await auth.api.getSession({
@@ -40,27 +40,71 @@ const uploadAvatar = createServerFn({ method: 'POST' })
     })
     if (!session) throw new Error('Unauthorized')
 
+    // Admin can upload for other users; regular users only for themselves
+    const targetId = data.userId ?? session.user.id
+    if (
+      targetId !== session.user.id &&
+      (session.user as Record<string, unknown>).role !== 'admin'
+    ) {
+      throw new Error('Forbidden')
+    }
+
     const buf = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0))
-    const key = `avatar/${session.user.id}.${data.ext}`
-    const mime =
-      {
-        jpg: 'image/jpeg',
-        jpeg: 'image/jpeg',
-        png: 'image/png',
-        webp: 'image/webp',
-        gif: 'image/gif',
-      }[data.ext.toLowerCase()] ?? 'application/octet-stream'
+    if (buf.byteLength > MAX_AVATAR_BYTES) {
+      throw new Error('Avatar must be under 3MB')
+    }
 
+    const key = `avatar/${targetId}.webp`
     const r2 = getBucket()
-    await r2.put(key, buf, { httpMetadata: { contentType: mime } })
-
-    await auth.api.updateUser({
-      headers: getRequestHeaders(),
-      body: { image: key },
-    })
+    await r2.put(key, buf, { httpMetadata: { contentType: 'image/webp' } })
 
     return { key }
   })
+
+/** Convert an image file to webp base64 (95% quality) in the browser. */
+function imageToWebpBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      canvas.getContext('2d')?.drawImage(img, 0, 0)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error('Failed to convert image'))
+            return
+          }
+          if (blob.size > MAX_AVATAR_BYTES) {
+            reject(new Error('Image too large after conversion (max 3MB)'))
+            return
+          }
+          const reader = new FileReader()
+          reader.addEventListener('loadend', () => {
+            resolve((reader.result as string).split(',')[1])
+          })
+          reader.addEventListener('error', () =>
+            reject(new Error('Failed to read image')),
+          )
+          reader.readAsDataURL(blob)
+        },
+        'image/webp',
+        0.95,
+      )
+    })
+    img.addEventListener('error', () =>
+      reject(new Error('Failed to load image')),
+    )
+    img.src = URL.createObjectURL(file)
+  })
+}
+
+function avatarSrc(userId: string, bust?: string) {
+  const key = `avatar/${userId}.webp`
+  const base = import.meta.env.DEV ? `/api/object/${key}` : key
+  return bust ? `${base}?t=${bust}` : base
+}
 
 export const Route = createFileRoute('/settings/')({
   loader: () => getProfile(),
@@ -73,15 +117,13 @@ function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [avatarKey, setAvatarKey] = useState(profile.image)
+  const [avatarBust, setAvatarBust] = useState<string | null>(null)
+  const [avatarError, setAvatarError] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const avatarUrl = avatarKey
-    ? import.meta.env.DEV
-      ? `/api/object/${avatarKey}`
-      : avatarKey
-    : null
+  const avatarUrl = avatarSrc(profile.id, avatarBust ?? undefined)
+  const showAvatar = !avatarError || avatarBust !== null
 
   async function handleSaveName(e: React.FormEvent) {
     e.preventDefault()
@@ -107,14 +149,7 @@ function SettingsPage() {
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-
-    if (file.size > 2 * 1024 * 1024) {
-      setError('Image must be under 2MB')
-      return
-    }
-
-    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-    if (!['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+    if (!file.type.startsWith('image/')) {
       setError('Unsupported image format')
       return
     }
@@ -123,15 +158,13 @@ function SettingsPage() {
     setError(null)
     setSaved(false)
     try {
-      const buf = await file.arrayBuffer()
-      const base64 = btoa(
-        new Uint8Array(buf).reduce((s, b) => s + String.fromCharCode(b), ''),
-      )
-      const { key } = await uploadAvatar({ data: { base64, ext } })
-      setAvatarKey(key)
+      const base64 = await imageToWebpBase64(file)
+      await uploadAvatar({ data: { base64 } })
+      setAvatarError(false)
+      setAvatarBust(String(Date.now()))
       setSaved(true)
-    } catch {
-      setError('Failed to upload avatar')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload avatar')
     } finally {
       setUploading(false)
     }
@@ -156,11 +189,12 @@ function SettingsPage() {
             disabled={uploading}
             className="group relative size-36 cursor-pointer overflow-hidden rounded-full border border-border bg-raised disabled:opacity-(--opacity-disabled)"
           >
-            {avatarUrl ? (
+            {showAvatar ? (
               <img
                 src={avatarUrl}
                 alt="Avatar"
                 className="size-full object-cover"
+                onError={() => setAvatarError(true)}
               />
             ) : (
               <span className="flex size-full items-center justify-center text-[40px] font-[560] text-primary opacity-(--opacity-faint)">

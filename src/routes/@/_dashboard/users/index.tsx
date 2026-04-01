@@ -1,10 +1,11 @@
 /* src/routes/@/_dashboard/users/index.tsx */
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { getAuth } from '~/server/better-auth'
+import { getBucket } from '~/server/platform'
 
 interface UserRow {
   id: string
@@ -97,6 +98,19 @@ const updateUserAdmin = createServerFn({ method: 'POST' })
     }
   })
 
+const adminUploadAvatar = createServerFn({ method: 'POST' })
+  .inputValidator((input: { userId: string; base64: string }) => input)
+  .handler(async ({ data }) => {
+    const buf = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0))
+    if (buf.byteLength > 3 * 1024 * 1024) {
+      throw new Error('Avatar must be under 3MB')
+    }
+    const key = `avatar/${data.userId}.webp`
+    await getBucket().put(key, buf, {
+      httpMetadata: { contentType: 'image/webp' },
+    })
+  })
+
 export const Route = createFileRoute('/@/_dashboard/users/')({
   loader: () => listUsers(),
   component: UsersList,
@@ -119,11 +133,44 @@ interface EditState {
   role: string
 }
 
+function imageToWebpBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.addEventListener('load', () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      canvas.getContext('2d')?.drawImage(img, 0, 0)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error('Conversion failed'))
+          if (blob.size > 3 * 1024 * 1024)
+            return reject(new Error('Image too large (max 3MB)'))
+          const reader = new FileReader()
+          reader.addEventListener('loadend', () =>
+            resolve((reader.result as string).split(',')[1]),
+          )
+          reader.addEventListener('error', () =>
+            reject(new Error('Read failed')),
+          )
+          reader.readAsDataURL(blob)
+        },
+        'image/webp',
+        0.95,
+      )
+    })
+    img.addEventListener('error', () => reject(new Error('Load failed')))
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 function UsersList() {
   const users = Route.useLoaderData()
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [editing, setEditing] = useState<EditState | null>(null)
+  const avatarRef = useRef<HTMLInputElement>(null)
+  const [avatarTarget, setAvatarTarget] = useState<string | null>(null)
 
   async function handleBan(userId: string) {
     setLoading(userId)
@@ -172,6 +219,28 @@ function UsersList() {
     router.invalidate()
   }
 
+  function triggerAvatarUpload(userId: string) {
+    setAvatarTarget(userId)
+    avatarRef.current?.click()
+  }
+
+  async function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !avatarTarget || !file.type.startsWith('image/')) return
+    setLoading(avatarTarget)
+    try {
+      const base64 = await imageToWebpBase64(file)
+      await adminUploadAvatar({ data: { userId: avatarTarget, base64 } })
+      router.invalidate()
+    } catch {
+      // silently fail — toast would be better but out of scope
+    } finally {
+      setLoading(null)
+      setAvatarTarget(null)
+      e.target.value = ''
+    }
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -179,6 +248,14 @@ function UsersList() {
           Users
         </h1>
       </div>
+
+      <input
+        ref={avatarRef}
+        type="file"
+        accept="image/*"
+        onChange={handleAvatarFile}
+        className="hidden"
+      />
 
       {users.length === 0 ? (
         <p className="text-[14px] text-primary opacity-(--opacity-muted)">
@@ -318,6 +395,14 @@ function UsersList() {
                               className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
                             >
                               Edit
+                            </button>
+                            <button
+                              type="button"
+                              disabled={loading === user.id}
+                              onClick={() => triggerAvatarUpload(user.id)}
+                              className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
+                            >
+                              Avatar
                             </button>
                             {user.banned ? (
                               <button

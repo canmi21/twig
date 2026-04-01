@@ -56,7 +56,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
       },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Fira+Code:wght@300&family=Noto+Sans+SC:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap',
       },
       { rel: 'stylesheet', href: appCss },
       {
