@@ -29,6 +29,8 @@ export const Route = createRootRouteWithContext<RootContext>()({
       { title: SITE_TITLE },
       { name: 'description', content: SITE_DESCRIPTION },
       { name: 'baidu-site-verification', content: 'codeva-vxytO6KmID' },
+      { property: 'og:site_name', content: SITE_TITLE },
+      { property: 'og:locale', content: 'zh_CN' },
     ],
     scripts: [
       {
@@ -81,7 +83,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
       getPublicUrlFn(),
     ])
     const canonicalUrl = `${publicUrl}${location.pathname}`
-    return { cdnPublicUrl, canonicalUrl, initialTheme }
+    return { cdnPublicUrl, publicUrl, canonicalUrl, initialTheme }
   },
   component: RootComponent,
   notFoundComponent: NotFound,

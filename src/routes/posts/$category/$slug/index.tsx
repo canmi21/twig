@@ -25,11 +25,12 @@ const getPost = createServerFn()
 
 export const Route = createFileRoute('/posts/$category/$slug/')({
   loader: ({ params }) => getPost({ data: { slug: params.slug } }),
-  head: ({ loaderData, params }) => {
+  head: ({ loaderData, match, params }) => {
     if (!loaderData)
       return { meta: [], links: [{ rel: 'stylesheet', href: postPageCss }] }
     const { title, description } = loaderData.frontmatter
-    const ogImage = `/api/og/${params.slug}`
+    const { publicUrl, canonicalUrl } = match.context
+    const ogImage = `${publicUrl}/api/og/${params.slug}`
     return {
       meta: [
         { title },
@@ -37,6 +38,7 @@ export const Route = createFileRoute('/posts/$category/$slug/')({
         { property: 'og:title', content: title },
         { property: 'og:description', content: description },
         { property: 'og:image', content: ogImage },
+        { property: 'og:url', content: canonicalUrl },
         { property: 'og:type', content: 'article' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:title', content: title },

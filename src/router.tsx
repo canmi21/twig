@@ -5,6 +5,7 @@ import { routeTree } from './routeTree.gen'
 
 export interface RootContext {
   cdnPublicUrl: string
+  publicUrl: string
   canonicalUrl: string
   initialTheme: 'light' | 'dark' | null
 }
@@ -15,6 +16,7 @@ export function getRouter() {
     scrollRestoration: true,
     context: {
       cdnPublicUrl: '',
+      publicUrl: '',
       canonicalUrl: '',
       initialTheme: null,
     },
