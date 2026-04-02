@@ -119,7 +119,7 @@ function PostPage() {
               <div className="post-page__footer text-[12px] text-secondary">
                 <div className="post-page__footer-line" aria-hidden="true" />
                 <div className="post-page__signature-wrap">
-                  <Signature className="post-page__signature h-[54px] select-none" />
+                  <Signature className="post-page__signature h-13.5 select-none" />
                 </div>
               </div>
               <div className="post-page__tags flex flex-wrap gap-x-3 gap-y-1 pt-3 text-[12px] text-secondary">
