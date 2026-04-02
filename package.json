@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && node scripts/patch-wasm-rules.mjs",
     "preview": "vite preview",
     "lint": "bun run lint:oxlint && bun run lint:eslint && knip",
     "lint:fix": "bun run lint:oxlint:fix && bun run lint:eslint:fix",

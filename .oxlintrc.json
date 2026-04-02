@@ -71,7 +71,7 @@
       }
     },
     {
-      "files": ["scripts/**/*.ts"],
+      "files": ["scripts/**/*.{ts,mjs}"],
       "rules": {
         "no-console": "off",
         "typescript/no-non-null-assertion": "off"

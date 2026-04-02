@@ -15,7 +15,7 @@ export default defineConfig({
       output: {
         entryFileNames: `${disguise}/chunks/[hash:21].js`,
         chunkFileNames: `${disguise}/chunks/[hash:21].js`,
-        assetFileNames: `${disguise}/static/[hash:21].[ext]`,
+        assetFileNames: `${disguise}/chunks/[hash:21].[ext]`,
         hashCharacters: 'hex',
         codeSplitting: {
           groups: [
