@@ -7,7 +7,7 @@ const FONT_CDN_URL =
   'https://cdn.jsdelivr.net/gh/lxgw/lxgwwenkai@5dea838/fonts/TTF/LXGWWenKai-Regular.ttf'
 
 // Dev: fetch from Vite dev server (workerd can't reach external CDN through proxy).
-// Requires `public/fonts/lxgw-wenkai-regular.ttf` — run `bun run setup:og-font`.
+// Requires `public/fonts/lxgw-wenkai-regular.ttf` — run `just setup-og-font`.
 const FONT_LOCAL_PATH = '/fonts/lxgw-wenkai-regular.ttf'
 
 let cachedFont: ArrayBuffer | null = null

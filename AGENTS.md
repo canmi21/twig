@@ -16,11 +16,12 @@
 
 ## Toolchain
 
+- Use `just` as the task runner. All project tasks are defined in the `Justfile`. Run `just` to list available recipes.
 - Use Bun as the package manager for this repo.
-- Prefer `bun`, `bun run`, `bunx`, `bun add`, and `bun remove` over `npm`, `npx`, or other package manager commands.
+- Prefer `bun`, `bunx`, `bun add`, and `bun remove` over `npm`, `npx`, or other package manager commands.
 - Do not guess package versions. When adding or updating packages, use Bun to install the current requested version explicitly, usually `@latest` when the user asks for the latest.
 - Respect the repository formatting and analysis toolchain: `oxfmt`, `oxlint`, `eslint`, and `knip`.
-- When writing code (implementing features, fixing bugs, refactoring), `bun run knip` should only gate on unused dependencies. Do not remove or un-export functions/variables/types that knip flags as unused — they may be part of the work in progress or reserved for the next step.
+- When writing code (implementing features, fixing bugs, refactoring), `just lint` should only gate on unused dependencies via knip. Do not remove or un-export functions/variables/types that knip flags as unused — they may be part of the work in progress or reserved for the next step.
 - When the user asks to review or audit code, report knip's unused exports, unused variables, and dead code as findings for discussion.
 - Use tmux for long-running tasks with unknown completion time, such as dev servers, watch processes, or build previews.
 - The dev server tmux session is named `taki-dev`. When asked to start the dev server, first check if `taki-dev` already exists; only create a new session if it does not. The dev server runs on port 26315.
@@ -53,8 +54,8 @@
 - Use a scope only when it materially improves clarity.
 - Do not mention plan phases in commit messages.
 - Do not mention version bumps in commit messages unless the user explicitly asks for that.
-- Before every `git commit`, run `bun run fmt`, `bun run lint`, and `bun run typecheck`, then fix any failures. Husky pre-commit enforces `fmt` (blocks on failure) and runs `lint:oxlint` / `lint:eslint` (blocks only on errors); the commit-msg hook validates Conventional Commit format. These hooks are the safety net — the agent should still run checks explicitly before committing.
-- When routing, build config, generated files, or dependency wiring change, also run `bun run build` and `bun run knip` before commit.
+- Before every `git commit`, run `just fmt`, `just lint`, and `just typecheck`, then fix any failures. Husky pre-commit enforces `fmt` (blocks on failure) and runs `lint-oxlint` / `lint-eslint` (blocks only on errors); the commit-msg hook validates Conventional Commit format. These hooks are the safety net — the agent should still run checks explicitly before committing.
+- When routing, build config, generated files, or dependency wiring change, also run `just build` and `just lint` (includes knip) before commit.
 - If the user provides a full execution plan and the work completes cleanly, commit directly with the required format when requested.
 - If any issue, ambiguity, or suspected breaking change appears, stop and discuss with the user before committing unless the user explicitly asks otherwise.
 - If any issue appears during implementation, stop and do not commit. Wait for the user to confirm the fix before committing.
@@ -93,16 +94,16 @@
 
 ## Testing
 
-- Test runner: vitest (`bun run test`).
+- Test runner: vitest (`just test`).
 - Unit tests live in `__tests__/` subdirectories next to the code they test.
-- Integration tests (`*.integration.test.ts`) are excluded from `bun run test` and run separately.
+- Integration tests (`*.integration.test.ts`) are excluded from `just test` and run separately via `just test-integration`.
 - Tests use `describe`/`test`/`expect` from vitest, not `bun:test`.
 
 ## Content Pipeline
 
-- `bun run push`: validate → diff → execute. Scans `contents/posts/`, syncs to D1 + R2 + KV. Incremental: only writes changes.
-- `bun run pull`: full export from D1 + R2 to `contents/posts/`. Cleans target directory first.
-- `bun run rebuild`: recompile all posts from D1 and refresh KV cache. Does not touch D1 or R2.
+- `just push`: validate → diff → execute. Scans `contents/posts/`, syncs to D1 + R2 + KV. Incremental: only writes changes.
+- `just pull`: full export from D1 + R2 to `contents/posts/`. Cleans target directory first.
+- `just rebuild`: recompile all posts from D1 and refresh KV cache. Does not touch D1 or R2.
 - Markdown uses remark-directive for media: `::image{src="..." alt="..."}` instead of standard `![]()` syntax.
 - Compiler output includes `components` array with placeholder comments `<!--component:N-->` in HTML, resolved at render time by `ComponentResolver`.
 - Media files are content-addressed by sha256 hash. Push replaces relative paths with `{hash}.{ext}` in stored content.
@@ -111,7 +112,7 @@
 
 - The user often says "commit" or "commit 一下" as a standalone request after completing work. Proceed directly with staging, committing, and verifying — do not ask for confirmation.
 - When the user provides a link or specific text for the commit body, include it in the extended description.
-- Run `bun run fmt`, `bun run lint:oxlint`, `bun run lint:eslint`, and `bun run typecheck` before every commit. Fix errors, then commit.
-- When build config, routing, or dependencies change, also run `bun run build` and `bun run knip`.
+- Run `just fmt`, `just lint-oxlint`, `just lint-eslint`, and `just typecheck` before every commit. Fix errors, then commit.
+- When build config, routing, or dependencies change, also run `just build` and `just lint` (includes knip).
 - The user prefers concise commit messages. Lead with the change type, not the implementation details.
-- Versioning: follow semver. For `feat:` or significant `fix:`, run `./scripts/bump-version.sh` (patch). If the user says "+ minor" or there is a breaking change, run `./scripts/bump-version.sh minor`. Do not bump for `chore:`, `docs:`, `test:`, `refactor:`. Do not mention the bump in the commit message unless asked.
+- Versioning: follow semver. For `feat:` or significant `fix:`, run `just bump` (patch). If the user says "+ minor" or there is a breaking change, run `just bump minor`. Do not bump for `chore:`, `docs:`, `test:`, `refactor:`. Do not mention the bump in the commit message unless asked.

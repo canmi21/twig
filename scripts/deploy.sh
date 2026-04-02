@@ -33,7 +33,7 @@ else:
 }
 
 echo "==> Building..."
-bun run build
+vite build
 
 echo "==> Deploying worker..."
 bunx wrangler deploy

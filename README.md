@@ -6,9 +6,9 @@ My personal website, created mainly for fun. A configurable version is planned f
 
 ```bash
 bun install
-bun run dev
-bun run build
-bun run lint
+just dev
+just build
+just lint
 ```
 
 ## Tech Stack

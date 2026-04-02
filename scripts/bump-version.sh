@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Bump version in package.json.
+#
 # Usage:
 #   ./scripts/bump-version.sh          # patch: 0.0.5 -> 0.0.6
 #   ./scripts/bump-version.sh minor    # minor: 0.0.5 -> 0.1.0
@@ -35,7 +37,6 @@ case "${1:-patch}" in
     ;;
 esac
 
-# Platform-safe in-place sed
 if [[ "$OSTYPE" == darwin* ]]; then
   sed -i '' "s/\"version\": \"$CURRENT\"/\"version\": \"$NEXT\"/" "$PKG"
 else

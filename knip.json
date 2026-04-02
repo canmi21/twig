@@ -2,7 +2,7 @@
   "$schema": "./node_modules/knip/schema.json",
   "ignoreBinaries": ["chore"],
   "ignoreDependencies": ["cloudflare"],
-  "entry": ["src/router.tsx"],
+  "entry": ["src/router.tsx", "src/cli/*/index.ts"],
   "project": [
     "src/**/*.{ts,tsx}",
     "src/**/*.css",
