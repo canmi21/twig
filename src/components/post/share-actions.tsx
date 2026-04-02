@@ -23,7 +23,7 @@ const AI_PROVIDER_CHANGE_EVENT = 'ai-provider-change'
 const AI_PROVIDERS: AiProvider[] = ['claude', 'chatgpt', 'gemini', 'grok']
 const ICON_SIZE_CLASS = 'size-[1.15rem]'
 const ICON_SLOT_CLASS =
-  'post-share-actions__icon-slot relative inline-flex size-[1.15rem] items-center justify-center'
+  'relative inline-flex size-[1.15rem] items-center justify-center align-top [&>svg]:block [&>svg]:flex-none'
 
 async function copyText(text: string) {
   if (navigator.clipboard?.writeText) {
@@ -227,7 +227,7 @@ export function PostShareActions({ cid }: { cid?: string }) {
   )
 
   return (
-    <div className="post-share-actions mt-0.5 flex shrink-0 items-center gap-px">
+    <div className="mt-0.5 flex shrink-0 items-center gap-0.5 leading-none [&>button]:leading-none">
       <Tooltip.Provider delayDuration={480} skipDelayDuration={0}>
         <Tooltip.Root
           open={isAiSelectorOpen}
@@ -270,9 +270,8 @@ export function PostShareActions({ cid }: { cid?: string }) {
               align="center"
               sideOffset={2}
               className="
-                post-share-actions__menu
                 z-10 flex items-center gap-px rounded-full border border-border
-                bg-surface p-0.5 shadow-sm
+                bg-raised p-0.5 text-primary shadow-none
               "
             >
               {switchableAiProviders.map((provider) => (
@@ -342,7 +341,7 @@ export function PostShareActions({ cid }: { cid?: string }) {
           </AnimatePresence>
         </span>
       </button>
-      <div className="post-share-actions__copy relative">
+      <div className="relative">
         <AnimatePresence>
           {copyStatus !== 'idle' && (
             <motion.div
@@ -351,10 +350,9 @@ export function PostShareActions({ cid }: { cid?: string }) {
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15 }}
               className="
-                post-share-actions__toast
                 pointer-events-none absolute bottom-[calc(100%+0.25rem)] left-1/2 z-10
-                -translate-x-1/2 rounded-full border border-border bg-surface
-                px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-sm
+                -translate-x-1/2 rounded-full border border-border bg-raised
+                px-2.5 py-1.5 text-[11px] leading-none text-primary shadow-none
               "
             >
               {copyToastLabel}

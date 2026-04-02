@@ -1,7 +1,5 @@
 /* src/components/post/article-header.tsx */
 
-/* eslint-disable better-tailwindcss/no-unknown-classes */
-
 import { Type } from 'lucide-react'
 import { formatDate } from '~/lib/utils/date'
 
@@ -59,19 +57,22 @@ export function ArticleHeader({
 }) {
   const contentCount = html ? formatCount(countContentUnits(html)) : undefined
   return (
-    <header className="article-header mb-10 flex items-start justify-between gap-3">
+    <header className="mb-[2.75rem] flex items-start justify-between gap-4">
       <div className="min-w-0 flex-1">
-        <h1 className="article-header__title text-[17px] font-medium text-primary">
+        <h1 className="text-[1.125rem] font-[560] leading-relaxed -tracking-[0.015em] text-primary">
           {title}
         </h1>
-        <div className="article-header__meta mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-secondary">
+        <div className="mt-2 flex flex-wrap items-center gap-x-[0.52rem] gap-y-1 font-['Roboto','Source_Sans_3','CJK_Sans',system-ui,-apple-system,sans-serif] text-[0.8125rem] leading-none text-primary opacity-(--opacity-muted)">
           {createdAt && (
-            <time className="article-header__date" dateTime={createdAt}>
+            <time
+              className="inline-flex items-center min-h-[0.8rem]"
+              dateTime={createdAt}
+            >
               {formatDate(createdAt)}
             </time>
           )}
           {contentCount && (
-            <span className="article-header__count inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-[0.18rem] min-h-[0.8rem] text-primary [&>svg]:block [&>svg]:flex-none">
               <Type className="size-[0.8rem]" strokeWidth={1.8} />
               <span>{contentCount}</span>
             </span>

@@ -102,11 +102,11 @@ function PostPage() {
 
   return (
     <>
-      <ThemeToggle className="post-page-theme-toggle absolute top-5 right-5 z-50 cursor-pointer rounded-full p-2 xl:fixed" />
+      <ThemeToggle className="absolute top-5 right-5 z-50 cursor-pointer rounded-full p-2 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-[140ms] hover:opacity-100 xl:fixed" />
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="post-page mx-auto max-w-180 px-5 pt-28 pb-24">
+      <article className="post-page mx-auto max-w-180 px-5 pt-[6.75rem] pb-28 text-primary">
         <ArticleHeader
           title={frontmatter.title}
           createdAt={frontmatter.created_at}
@@ -114,23 +114,23 @@ function PostPage() {
         >
           <PostShareActions cid={frontmatter.cid} />
         </ArticleHeader>
-        <div className="article post-page__body">
+        <div className="article post-page__body text-primary font-[450] leading-relaxed tracking-[0.002em]">
           <PostRenderer html={post.html} components={post.components} />
         </div>
         {frontmatter.tags && frontmatter.tags.length > 0 && (
           <>
-            <div className="post-page__footer-wrap">
-              <div className="post-page__footer-main flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-secondary">
+            <div className="mt-14">
+              <div className="flex flex-wrap items-center gap-x-[0.52rem] gap-y-1 text-[12px] leading-none text-primary opacity-(--opacity-muted)">
                 <a
                   href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
                   target="_blank"
                   rel="noreferrer"
-                  className="post-page__license"
+                  className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-[140ms] hover:opacity-100"
                 >
                   CC BY-NC-SA 4.0
                 </a>
                 {frontmatter.updated_at && (
-                  <span className="post-page__updated">
+                  <span className="text-primary opacity-(--opacity-muted)">
                     Updated on{' '}
                     {formatShortDate(
                       frontmatter.updated_at,
@@ -139,15 +139,21 @@ function PostPage() {
                   </span>
                 )}
               </div>
-              <div className="post-page__footer text-[12px] text-secondary">
-                <div className="post-page__footer-line" aria-hidden="true" />
+              <div
+                className="post-page__footer text-[12px] text-secondary"
+                aria-hidden="true"
+              >
+                <div className="min-w-0 flex-1 border-b border-dashed border-border" />
                 <div className="post-page__signature-wrap">
-                  <Signature className="post-page__signature h-13.5 select-none" />
+                  <Signature className="h-13.5 select-none text-primary opacity-(--opacity-muted)" />
                 </div>
               </div>
-              <div className="post-page__tags flex flex-wrap gap-x-3 gap-y-1 pt-3 text-[12px] text-secondary">
+              <div className="flex flex-wrap gap-x-[0.8rem] gap-y-[0.45rem] pt-3 text-[12px] text-secondary">
                 {frontmatter.tags.map((tag) => (
-                  <span key={tag} className="post-page__tag capitalize">
+                  <span
+                    key={tag}
+                    className="capitalize text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-[140ms] hover:opacity-100"
+                  >
                     #{tag}
                   </span>
                 ))}

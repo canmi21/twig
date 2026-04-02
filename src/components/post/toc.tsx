@@ -237,7 +237,6 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       className="
-        post-toc
         hidden
         xl:fixed xl:top-1/2 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:block xl:max-h-[calc(100vh-16rem)]
@@ -249,17 +248,17 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
         style={{ gap: COLLAPSED_GAP_PX }}
         animate={{ gap: isOpen ? EXPANDED_GAP_PX : COLLAPSED_GAP_PX }}
         transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-        className="post-toc__list flex flex-col"
+        className="flex flex-col"
       >
         {entries.map((entry) => {
           const isActive = activeId === entry.id
           const bw = barWidths.get(entry.text) ?? 24
           return (
-            <li key={entry.id} className="post-toc__item relative">
+            <li key={entry.id} className="relative">
               {isActive && showText && (
                 <motion.div
                   layoutId="toc-indicator"
-                  className="post-toc__indicator absolute top-[3px] left-0 h-3 w-0.5 rounded-full bg-primary"
+                  className="absolute top-[3px] left-0 h-3 w-0.5 rounded-full bg-primary"
                   transition={{
                     type: 'spring',
                     stiffness: 300,
@@ -270,12 +269,12 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
               <a
                 href={`#${entry.id}`}
                 onClick={(e) => handleClick(e, entry.id)}
-                className={`post-toc__link relative block pl-2 ${isActive ? 'text-primary' : 'text-secondary'}`}
+                className={`post-toc__link relative block pl-2 opacity-(--opacity-subtle) ${isActive ? 'text-primary' : 'text-secondary'}`}
               >
                 {/* Bar — collapses to zero when text is shown */}
                 <motion.span
                   data-toc-bar-intro="true"
-                  className="post-toc__bar block rounded-full"
+                  className="block rounded-full"
                   initial={false}
                   animate={{
                     width: showText ? 0 : bw,

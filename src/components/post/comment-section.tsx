@@ -249,7 +249,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
       clientLabel?.device === 'portable' ? TabletSmartphone : MonitorSmartphone
 
     return (
-      <div className="post-comments__reply-meta">
+      <div className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary">
         {session && (
           <button
             type="button"
@@ -262,19 +262,19 @@ export function CommentSection({ postCid }: { postCid: string }) {
             }
             onClick={() => toggleReplyComposer(comment.id)}
           >
-            <MessagesSquare className="post-comments__reply-trigger-icon" />
-            <span className="post-comments__reply-trigger-text">Reply</span>
+            <MessagesSquare className="size-[0.88rem] stroke-[1.9]" />
+            <span className="leading-none">Reply</span>
           </button>
         )}
         {locationLabel && (
-          <span className="post-comments__reply-meta-item">
-            <Map className="post-comments__reply-meta-icon" />
+          <span className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-item">
+            <Map className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-icon" />
             <span>{locationLabel}</span>
           </span>
         )}
         {clientLabel && (
-          <span className="post-comments__reply-meta-item">
-            <DeviceIcon className="post-comments__reply-meta-icon" />
+          <span className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-item">
+            <DeviceIcon className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-icon" />
             <span>{clientLabel.label}</span>
           </span>
         )}
@@ -290,7 +290,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
     return (
       <>
         {replyNoticeFor === comment.id && !isReplying && (
-          <p className="post-comments__reply-status">
+          <p className="mt-[0.52rem] text-[12px] leading-[1.4] text-primary opacity-(--opacity-subtle)">
             Reply submitted, pending review.
           </p>
         )}
@@ -298,7 +298,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
           {session && isReplying && (
             <motion.div
               key={`reply-panel:${comment.id}`}
-              className="post-comments__reply-panel"
+              className="overflow-hidden"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -314,9 +314,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
               }}
               style={{ overflow: 'hidden' }}
             >
-              <div className="post-comments__reply-panel-inner">
+              <div className="pt-[0.62rem]">
                 <form
-                  className="post-comments__reply-form"
+                  className="flex flex-col gap-[0.48rem]"
                   onSubmit={(e) => handleReplySubmit(e, comment.id)}
                 >
                   <div className="post-comments__field post-comments__field--reply">
@@ -328,8 +328,8 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       rows={2}
                       className="post-comments__textarea post-comments__textarea--reply"
                     />
-                    <div className="post-comments__field-footer post-comments__field-footer--reply">
-                      <span className="post-comments__count">
+                    <div className="flex items-center justify-between min-h-[1.23rem] mt-[0.34rem] gap-[0.9rem]">
+                      <span className="text-[11.5px] leading-none text-primary opacity-(--opacity-faint)">
                         {replyContent.length}/2000
                       </span>
                       <AnimatePresence initial={false}>
@@ -349,14 +349,16 @@ export function CommentSection({ postCid }: { postCid: string }) {
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.16, ease: 'easeOut' }}
                           >
-                            <CornerDownLeft className="post-comments__submit-icon" />
+                            <CornerDownLeft className="size-[0.95rem] stroke-[2.1]" />
                           </motion.button>
                         )}
                       </AnimatePresence>
                     </div>
                   </div>
                   {replyError && (
-                    <p className="post-comments__error">{replyError}</p>
+                    <p className="text-[13px] leading-[1.35] text-error">
+                      {replyError}
+                    </p>
                   )}
                 </form>
               </div>
@@ -417,7 +419,10 @@ export function CommentSection({ postCid }: { postCid: string }) {
         : `View ${hiddenReplyCount} more replies`
 
     const repliesContent = (
-      <div className="post-comments__replies" data-depth={depth}>
+      <div
+        className="post-comments__replies mt-[0.82rem] pl-[0.85rem]"
+        data-depth={depth}
+      >
         {replies.map((reply) => (
           <div
             key={reply.id}
@@ -433,17 +438,17 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 userId={reply.userId}
                 nested
               />
-              <div className="post-comments__content min-w-0 flex-1">
+              <div className="min-w-0 flex-1">
                 <div className="post-comments__body">
-                  <div className="post-comments__meta flex items-baseline gap-2">
-                    <span className="post-comments__author text-[13px] font-medium text-primary">
+                  <div className="flex items-baseline gap-[0.38rem] leading-none">
+                    <span className="text-[13px] font-[560] text-primary">
                       {reply.userName}
                     </span>
-                    <span className="post-comments__time text-[12px] text-tertiary">
+                    <span className="text-[12px] text-primary opacity-(--opacity-muted)">
                       {timeAgo(reply.createdAt)}
                     </span>
                   </div>
-                  <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                  <p className="mt-[0.24rem] text-[14.5px] leading-[1.66] text-primary">
                     {reply.content}
                   </p>
                   <div
@@ -467,13 +472,13 @@ export function CommentSection({ postCid }: { postCid: string }) {
     }
 
     return (
-      <div className="post-comments__thread-block">
+      <div className="mt-[0.82rem]">
         <button
           type="button"
           className="post-comments__thread-toggle"
           onClick={() => toggleThread(parentId)}
         >
-          <span className="post-comments__thread-toggle-label">
+          <span className="inline-block">
             {isExpanded ? 'Hide replies' : toggleLabel}
           </span>
         </button>
@@ -481,7 +486,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
           {isExpanded && (
             <motion.div
               key="thread-panel"
-              className="post-comments__thread-panel"
+              className="overflow-hidden"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -507,8 +512,8 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
   if (!loaded) {
     return (
-      <div className="post-comments mt-14">
-        <p className="post-comments__status text-[13px] text-tertiary">
+      <div className="mt-14">
+        <p className="text-[13px] text-primary opacity-(--opacity-muted)">
           Loading comments...
         </p>
       </div>
@@ -516,9 +521,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
   }
 
   return (
-    <div className="post-comments mt-14">
+    <div className="mt-14">
       {rootComments.length > 0 && (
-        <div className="post-comments__list">
+        <div className="mt-0">
           {rootComments.map((comment) => (
             <article
               key={comment.id}
@@ -528,17 +533,17 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 seed={`${comment.userEmail}:${comment.userName}`}
                 userId={comment.userId}
               />
-              <div className="post-comments__content min-w-0 flex-1">
+              <div className="min-w-0 flex-1">
                 <div className="post-comments__body">
-                  <div className="post-comments__meta flex items-baseline gap-2">
-                    <span className="post-comments__author text-[13px] font-medium text-primary">
+                  <div className="flex items-baseline gap-[0.38rem] leading-none">
+                    <span className="text-[13px] font-[560] text-primary">
                       {comment.userName}
                     </span>
-                    <span className="post-comments__time text-[12px] text-tertiary">
+                    <span className="text-[12px] text-primary opacity-(--opacity-muted)">
                       {timeAgo(comment.createdAt)}
                     </span>
                   </div>
-                  <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
+                  <p className="mt-[0.24rem] text-[14.5px] leading-[1.66] text-primary">
                     {comment.content}
                   </p>
                   <div
@@ -556,9 +561,9 @@ export function CommentSection({ postCid }: { postCid: string }) {
         </div>
       )}
 
-      <div className="post-comments__composer">
+      <div className="mt-8">
         {!session ? (
-          <p className="post-comments__signin text-[13px] text-secondary">
+          <p className="text-[13px] text-primary opacity-(--opacity-muted)">
             <Link
               to="/login"
               search={{ callback: location.pathname }}
@@ -569,11 +574,11 @@ export function CommentSection({ postCid }: { postCid: string }) {
             to leave a comment.
           </p>
         ) : submitted ? (
-          <p className="post-comments__status text-[13px] text-secondary">
+          <p className="text-[13px] text-primary opacity-(--opacity-muted)">
             Comment submitted, pending review.
           </p>
         ) : (
-          <form className="post-comments__form" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-[0.58rem]" onSubmit={handleSubmit}>
             <div className="post-comments__field">
               <textarea
                 value={content}
@@ -583,8 +588,8 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 rows={3}
                 className="post-comments__textarea"
               />
-              <div className="post-comments__field-footer">
-                <span className="post-comments__count">
+              <div className="flex items-center justify-between min-h-[1.23rem] mt-[0.44rem] gap-[0.9rem]">
+                <span className="text-[11.5px] leading-none text-primary opacity-(--opacity-faint)">
                   {content.length}/2000
                 </span>
                 <AnimatePresence initial={false}>
@@ -602,13 +607,15 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.16, ease: 'easeOut' }}
                     >
-                      <CornerDownLeft className="post-comments__submit-icon" />
+                      <CornerDownLeft className="size-[0.95rem] stroke-[2.1]" />
                     </motion.button>
                   )}
                 </AnimatePresence>
               </div>
             </div>
-            {error && <p className="post-comments__error">{error}</p>}
+            {error && (
+              <p className="text-[13px] leading-[1.35] text-error">{error}</p>
+            )}
           </form>
         )}
       </div>
