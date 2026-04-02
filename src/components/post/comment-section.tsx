@@ -253,7 +253,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
         {session && (
           <button
             type="button"
-            className="post-comments__reply-trigger"
+            className="post-comments__reply-trigger inline-flex items-center gap-[0.22rem]"
             data-active={isReplying}
             aria-label={
               isReplying
