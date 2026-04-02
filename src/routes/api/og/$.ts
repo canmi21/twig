@@ -1,8 +1,8 @@
 /* src/routes/api/og/$.ts */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { getCache } from '~/server/platform'
-import { readPostKv } from '~/lib/storage/kv'
+import { getPublishedPostMetaBySlug } from '~/lib/database/posts'
+import { getDb } from '~/server/platform'
 
 export const Route = createFileRoute('/api/og/$')({
   server: {
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/api/og/$')({
           return new Response('Not found', { status: 404 })
         }
 
-        const post = await readPostKv(getCache(), slug)
+        const post = await getPublishedPostMetaBySlug(getDb(), slug)
         if (!post) {
           return new Response('Not found', { status: 404 })
         }
@@ -21,10 +21,10 @@ export const Route = createFileRoute('/api/og/$')({
         // Lazy import to avoid loading WASM at Worker startup
         const { generateOgImage } = await import('~/server/og')
         const png = await generateOgImage(
-          post.frontmatter.title,
-          post.frontmatter.description,
-          post.frontmatter.category,
-          post.frontmatter.created_at,
+          post.title,
+          post.description ?? undefined,
+          post.category ?? undefined,
+          post.createdAt,
         )
 
         return new Response(png.buffer as ArrayBuffer, {

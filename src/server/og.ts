@@ -13,9 +13,22 @@ const FONT_CACHE_PATH = 'node_modules/.cache/lxgw-wenkai-regular.ttf'
 let initialized = false
 let cachedFont: ArrayBuffer | null = null
 
+async function loadYogaWasm(): Promise<ArrayBuffer | WebAssembly.Module> {
+  if (typeof yogaWasm !== 'string') {
+    return yogaWasm as WebAssembly.Module
+  }
+
+  const fs = await import('node:fs/promises')
+  const buf = await fs.readFile(yogaWasm)
+  return buf.buffer.slice(
+    buf.byteOffset,
+    buf.byteOffset + buf.byteLength,
+  ) as ArrayBuffer
+}
+
 async function fetchFont(): Promise<ArrayBuffer> {
   // Dev mode: cache font to disk to avoid re-downloading on every restart.
-  // workerd blocks node:fs, so guard with try/catch.
+  // workerd blocks node:fs, so disk cache must stay best-effort.
   if (import.meta.env.DEV) {
     try {
       const fs = await import('node:fs')
@@ -27,13 +40,16 @@ async function fetchFont(): Promise<ArrayBuffer> {
           buf.byteOffset + buf.byteLength,
         ) as ArrayBuffer
       }
-      const res = await fetch(FONT_URL)
-      const ab = await res.arrayBuffer()
-      fs.mkdirSync(path.dirname(FONT_CACHE_PATH), { recursive: true })
-      fs.writeFileSync(FONT_CACHE_PATH, Buffer.from(ab))
+      const ab = await fetch(FONT_URL).then((r) => r.arrayBuffer())
+      try {
+        fs.mkdirSync(path.dirname(FONT_CACHE_PATH), { recursive: true })
+        fs.writeFileSync(FONT_CACHE_PATH, Buffer.from(ab))
+      } catch {
+        // Local cache write is optional.
+      }
       return ab
     } catch {
-      // workerd: fs not available, fall through to fetch
+      // workerd: fs not available, fall through to fetch-only mode
     }
   }
   return fetch(FONT_URL).then((r) => r.arrayBuffer())
@@ -42,8 +58,9 @@ async function fetchFont(): Promise<ArrayBuffer> {
 async function ensureInit() {
   if (initialized) return
   const fontPromise = fetchFont()
+  const yogaWasmInput = loadYogaWasm()
   try {
-    await init(yogaWasm as WebAssembly.Module)
+    await init(await yogaWasmInput)
   } catch {
     // Already initialized (HMR)
   }

@@ -1,6 +1,6 @@
 /* src/lib/database/posts.ts */
 
-import { eq, count, desc, sql } from 'drizzle-orm'
+import { and, eq, count, desc, sql } from 'drizzle-orm'
 import type { Db } from './index'
 import { contents, posts } from './schema'
 import { newCid } from '../utils/uuid'
@@ -233,4 +233,28 @@ export async function getRecentPosts(db: Db, limit = 5): Promise<RecentPost[]> {
     .orderBy(desc(contents.updatedAt))
     .limit(limit)
     .all()
+}
+
+export interface OgPostMeta {
+  title: string
+  description: string | null
+  category: string | null
+  createdAt: string
+}
+
+export async function getPublishedPostMetaBySlug(
+  db: Db,
+  slug: string,
+): Promise<OgPostMeta | undefined> {
+  return db
+    .select({
+      title: posts.title,
+      description: posts.description,
+      category: posts.category,
+      createdAt: contents.createdAt,
+    })
+    .from(posts)
+    .innerJoin(contents, eq(posts.cid, contents.cid))
+    .where(and(eq(posts.slug, slug), eq(contents.published, 1)))
+    .get()
 }
