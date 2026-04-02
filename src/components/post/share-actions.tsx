@@ -1,7 +1,5 @@
 /* src/components/post/share-actions.tsx */
 
-/* eslint-disable better-tailwindcss/no-unknown-classes */
-
 import * as Tooltip from '@radix-ui/react-tooltip'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { motion, AnimatePresence } from 'motion/react'

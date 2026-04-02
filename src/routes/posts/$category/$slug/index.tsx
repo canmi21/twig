@@ -102,11 +102,11 @@ function PostPage() {
 
   return (
     <>
-      <ThemeToggle className="absolute top-5 right-5 z-50 cursor-pointer rounded-full p-2 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-[140ms] hover:opacity-100 xl:fixed" />
+      <ThemeToggle className="absolute top-5 right-5 z-50 cursor-pointer rounded-full p-2 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-140 hover:opacity-100 xl:fixed" />
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="post-page mx-auto max-w-180 px-5 pt-[6.75rem] pb-28 text-primary">
+      <article className="post-page mx-auto max-w-180 px-5 pt-27 pb-28 text-primary">
         <ArticleHeader
           title={frontmatter.title}
           createdAt={frontmatter.created_at}
@@ -114,7 +114,7 @@ function PostPage() {
         >
           <PostShareActions cid={frontmatter.cid} />
         </ArticleHeader>
-        <div className="article post-page__body text-primary font-[450] leading-relaxed tracking-[0.002em]">
+        <div className="article post-page__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
           <PostRenderer html={post.html} components={post.components} />
         </div>
         {frontmatter.tags && frontmatter.tags.length > 0 && (
@@ -125,7 +125,7 @@ function PostPage() {
                   href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-[140ms] hover:opacity-100"
+                  className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
                 >
                   CC BY-NC-SA 4.0
                 </a>
@@ -145,14 +145,14 @@ function PostPage() {
               >
                 <div className="min-w-0 flex-1 border-b border-dashed border-border" />
                 <div className="post-page__signature-wrap">
-                  <Signature className="h-13.5 select-none text-primary opacity-(--opacity-muted)" />
+                  <Signature className="h-13.5 text-primary opacity-(--opacity-muted) select-none" />
                 </div>
               </div>
               <div className="flex flex-wrap gap-x-[0.8rem] gap-y-[0.45rem] pt-3 text-[12px] text-secondary">
                 {frontmatter.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="capitalize text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-[140ms] hover:opacity-100"
+                    className="text-primary capitalize opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
                   >
                     #{tag}
                   </span>

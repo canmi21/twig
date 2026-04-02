@@ -14,7 +14,7 @@ export function PostBackLink() {
         inline-flex items-center justify-center
         rounded-full p-2
         text-primary opacity-(--opacity-subtle)
-        transition-[color,opacity] duration-[140ms]
+        transition-[color,opacity] duration-140
         hover:opacity-100
         xl:fixed
         xl:top-28 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]

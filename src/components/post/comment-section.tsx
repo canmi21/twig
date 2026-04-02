@@ -267,14 +267,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
           </button>
         )}
         {locationLabel && (
-          <span className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-item">
-            <Map className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-icon" />
+          <span className="inline-flex items-center gap-[0.22rem] text-primary opacity-(--opacity-subtle)">
+            <Map className="size-[0.82rem] stroke-[1.9]" />
             <span>{locationLabel}</span>
           </span>
         )}
         {clientLabel && (
-          <span className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-item">
-            <DeviceIcon className="flex flex-wrap items-center gap-x-[0.78rem] gap-y-[0.42rem] text-[11.5px] leading-[1.2] text-primary-icon" />
+          <span className="inline-flex items-center gap-[0.22rem] text-primary opacity-(--opacity-subtle)">
+            <DeviceIcon className="size-[0.82rem] stroke-[1.9]" />
             <span>{clientLabel.label}</span>
           </span>
         )}
@@ -328,7 +328,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                       rows={2}
                       className="post-comments__textarea post-comments__textarea--reply"
                     />
-                    <div className="flex items-center justify-between min-h-[1.23rem] mt-[0.34rem] gap-[0.9rem]">
+                    <div className="mt-[0.34rem] flex min-h-[1.23rem] items-center justify-between gap-[0.9rem]">
                       <span className="text-[11.5px] leading-none text-primary opacity-(--opacity-faint)">
                         {replyContent.length}/2000
                       </span>
@@ -588,7 +588,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 rows={3}
                 className="post-comments__textarea"
               />
-              <div className="flex items-center justify-between min-h-[1.23rem] mt-[0.44rem] gap-[0.9rem]">
+              <div className="mt-[0.44rem] flex min-h-[1.23rem] items-center justify-between gap-[0.9rem]">
                 <span className="text-[11.5px] leading-none text-primary opacity-(--opacity-faint)">
                   {content.length}/2000
                 </span>

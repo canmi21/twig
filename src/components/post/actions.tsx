@@ -61,7 +61,7 @@ function ReadingProgress() {
       onClick={scrollToTop}
       aria-label="Back to top"
       title="Back to top"
-      className="group relative flex cursor-pointer items-center justify-center p-1.5 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-[140ms] hover:opacity-100"
+      className="group relative flex cursor-pointer items-center justify-center p-1.5 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-140 hover:opacity-100"
     >
       <svg width="24" height="24" viewBox="0 0 24 24" className="-rotate-90">
         <circle
@@ -128,7 +128,7 @@ export function PostActions() {
           className="
             cursor-pointer rounded-full p-1.5
             text-primary opacity-(--opacity-subtle)
-            transition-[color,opacity] duration-[140ms]
+            transition-[color,opacity] duration-140
             hover:opacity-100
           "
         >
