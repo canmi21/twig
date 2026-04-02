@@ -1,19 +1,19 @@
 /* src/routes/api/og/$.ts */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { getPublishedPostMetaBySlug } from '~/lib/database/posts'
+import { getPublishedPostMetaByCid } from '~/lib/database/posts'
 import { getDb } from '~/server/platform'
 
 export const Route = createFileRoute('/api/og/$')({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const slug = params._splat
-        if (!slug) {
+        const cid = params._splat
+        if (!cid) {
           return new Response('Not found', { status: 404 })
         }
 
-        const post = await getPublishedPostMetaBySlug(getDb(), slug)
+        const post = await getPublishedPostMetaByCid(getDb(), cid)
         if (!post) {
           return new Response('Not found', { status: 404 })
         }

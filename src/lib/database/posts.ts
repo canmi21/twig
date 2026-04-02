@@ -242,9 +242,9 @@ export interface OgPostMeta {
   createdAt: string
 }
 
-export async function getPublishedPostMetaBySlug(
+export async function getPublishedPostMetaByCid(
   db: Db,
-  slug: string,
+  cid: string,
 ): Promise<OgPostMeta | undefined> {
   return db
     .select({
@@ -255,6 +255,6 @@ export async function getPublishedPostMetaBySlug(
     })
     .from(posts)
     .innerJoin(contents, eq(posts.cid, contents.cid))
-    .where(and(eq(posts.slug, slug), eq(contents.published, 1)))
+    .where(and(eq(posts.cid, cid), eq(contents.published, 1)))
     .get()
 }
