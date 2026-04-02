@@ -1,0 +1,67 @@
+/* src/styles/post-actions.css */
+
+/* ── Tooltip & share menus ─────────────────────── */
+
+.article-header__tooltip,
+.post-share-actions__menu,
+.post-share-actions__toast {
+  border-color: var(--color-border);
+  background: var(--color-raised);
+  color: var(--color-primary);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.article-header__tooltip-link {
+  color: var(--color-primary);
+  text-decoration-color: var(--color-border);
+  text-underline-offset: 0.16em;
+}
+
+.article-header__tooltip-link:hover {
+  text-decoration-color: var(--color-accent);
+}
+
+.post-share-actions {
+  gap: 0.125rem;
+}
+
+.post-share-actions button {
+  line-height: 0;
+}
+
+.post-share-actions__icon-slot {
+  vertical-align: top;
+}
+
+.post-share-actions__icon-slot svg {
+  display: block;
+  flex: none;
+}
+
+/* ── Ghost interactive pattern ─────────────────── */
+
+.post-page-theme-toggle,
+.post-back-link,
+.post-actions__button,
+.post-actions__progress {
+  color: var(--color-primary);
+  opacity: var(--opacity-subtle);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    opacity var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.post-page-theme-toggle:hover,
+.post-back-link:hover,
+.post-actions__button:hover,
+.post-actions__progress:hover {
+  color: var(--color-primary);
+  opacity: 1;
+}
+
+.post-actions__separator {
+  background: var(--color-border);
+}

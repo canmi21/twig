@@ -1,0 +1,23 @@
+/* src/styles/post-toc.css */
+
+/* ── TOC ───────────────────────────────────────── */
+
+.post-toc__link {
+  color: var(--color-primary);
+  opacity: var(--opacity-subtle);
+}
+
+.post-toc__link:hover,
+.post-toc__link.text-primary {
+  color: var(--color-primary);
+  opacity: 1;
+}
+
+.post-toc__indicator {
+  background: var(--color-primary);
+}
+
+.post-back-link {
+  color: var(--color-primary);
+  opacity: var(--opacity-subtle);
+}
