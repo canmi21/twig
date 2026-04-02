@@ -173,7 +173,7 @@ function getAiProviderIcon(provider: AiProvider) {
   return <Grok2Fill className={MINGCUTE_ICON_CLASS} />
 }
 
-export function PostShareActions() {
+export function PostShareActions({ cid }: { cid?: string }) {
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle')
   const [isXHovered, setIsXHovered] = useState(false)
   const [isAiSelectorOpen, setIsAiSelectorOpen] = useState(false)
@@ -195,9 +195,16 @@ export function PostShareActions() {
     }
   }, [copyStatus])
 
+  function getShareUrl() {
+    const url = new URL(window.location.href)
+    url.search = ''
+    if (cid) url.searchParams.set('cid', cid)
+    return url.toString()
+  }
+
   async function handleCopyClick() {
     try {
-      await copyText(window.location.href)
+      await copyText(getShareUrl())
       setCopyStatus('copied')
     } catch {
       setCopyStatus('failed')

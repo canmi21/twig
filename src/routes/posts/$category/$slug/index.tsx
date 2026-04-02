@@ -2,10 +2,11 @@
 
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getCache } from '~/server/platform'
+import { getCache, getDb } from '~/server/platform'
 import { readPostKv } from '~/lib/storage/kv'
+import { resolvePostSlugByCid } from '~/lib/database/posts'
 import { PostRenderer } from '~/components/post/renderer'
 import { PostBackLink } from '~/components/post/back-link'
 import { PostShareActions } from '~/components/post/share-actions'
@@ -17,6 +18,12 @@ import { ThemeToggle } from '~/components/theme-toggle'
 import { Signature } from '~/components/post/signature'
 import postPageCss from '~/styles/post-page.css?url'
 
+const resolveSlug = createServerFn()
+  .inputValidator((input: { cid: string }) => input)
+  .handler(async ({ data }) => {
+    return resolvePostSlugByCid(getDb(), data.cid) ?? null
+  })
+
 const getPost = createServerFn()
   .inputValidator((input: { slug: string }) => input)
   .handler(async ({ data }) => {
@@ -24,6 +31,22 @@ const getPost = createServerFn()
   })
 
 export const Route = createFileRoute('/posts/$category/$slug/')({
+  validateSearch: (search: Record<string, unknown>): { cid?: string } => ({
+    cid: typeof search.cid === 'string' ? search.cid : undefined,
+  }),
+  beforeLoad: async ({ params, search }) => {
+    if (!search.cid) return
+
+    const post = await resolveSlug({ data: { cid: search.cid } })
+    const target =
+      post && post.category
+        ? `/posts/${post.category}/${post.slug}`
+        : post
+          ? `/posts/_/${post.slug}`
+          : `/posts/${params.category}/${params.slug}`
+
+    throw redirect({ to: target, statusCode: 302 })
+  },
   loader: ({ params }) => getPost({ data: { slug: params.slug } }),
   head: ({ loaderData, match }) => {
     if (!loaderData)
@@ -89,7 +112,7 @@ function PostPage() {
           createdAt={frontmatter.created_at}
           html={post.html}
         >
-          <PostShareActions />
+          <PostShareActions cid={frontmatter.cid} />
         </ArticleHeader>
         <div className="article post-page__body">
           <PostRenderer html={post.html} components={post.components} />

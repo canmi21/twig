@@ -235,6 +235,18 @@ export async function getRecentPosts(db: Db, limit = 5): Promise<RecentPost[]> {
     .all()
 }
 
+/** Resolve a cid to its current slug and category (for redirect). */
+export async function resolvePostSlugByCid(
+  db: Db,
+  cid: string,
+): Promise<{ slug: string; category: string | null } | undefined> {
+  return db
+    .select({ slug: posts.slug, category: posts.category })
+    .from(posts)
+    .where(eq(posts.cid, cid))
+    .get()
+}
+
 export interface OgPostMeta {
   title: string
   description: string | null
