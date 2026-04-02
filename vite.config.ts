@@ -31,6 +31,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  ssr: {
+    optimizeDeps: {
+      exclude: ['@cf-wasm/resvg'],
+      include: ['satori'],
+    },
+  },
   server: {
     port: 26315,
   },

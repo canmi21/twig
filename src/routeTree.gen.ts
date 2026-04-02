@@ -25,6 +25,7 @@ import { Route as FeedIndexRouteImport } from './routes/feed/index'
 import { Route as AtDashboardRouteRouteImport } from './routes/@/_dashboard/route'
 import { Route as LoginVerifyIndexRouteImport } from './routes/login/verify/index'
 import { Route as AtDashboardIndexRouteImport } from './routes/@/_dashboard/index'
+import { Route as ApiOgSplatRouteImport } from './routes/api/og/$'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -113,6 +114,11 @@ const AtDashboardIndexRoute = AtDashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AtDashboardRouteRoute,
 } as any)
+const ApiOgSplatRoute = ApiOgSplatRouteImport.update({
+  id: '/api/og/$',
+  path: '/api/og/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
   id: '/api/object/$',
   path: '/api/object/$',
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/api/og/$': typeof ApiOgSplatRoute
   '/@/': typeof AtDashboardIndexRoute
   '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/comments/': typeof AtDashboardCommentsIndexRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/api/og/$': typeof ApiOgSplatRoute
   '/login/verify': typeof LoginVerifyIndexRoute
   '/@/comments': typeof AtDashboardCommentsIndexRoute
   '/@/contents': typeof AtDashboardContentsIndexRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/object/$': typeof ApiObjectSplatRoute
+  '/api/og/$': typeof ApiOgSplatRoute
   '/@/_dashboard/': typeof AtDashboardIndexRoute
   '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/_dashboard/comments/': typeof AtDashboardCommentsIndexRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/api/og/$'
     | '/@/'
     | '/login/verify/'
     | '/@/comments/'
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/api/og/$'
     | '/login/verify'
     | '/@/comments'
     | '/@/contents'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/auth/me'
     | '/api/object/$'
+    | '/api/og/$'
     | '/@/_dashboard/'
     | '/login/verify/'
     | '/@/_dashboard/comments/'
@@ -327,6 +339,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiObjectSplatRoute: typeof ApiObjectSplatRoute
+  ApiOgSplatRoute: typeof ApiOgSplatRoute
   LoginVerifyIndexRoute: typeof LoginVerifyIndexRoute
   PostsCategorySlugIndexRoute: typeof PostsCategorySlugIndexRoute
 }
@@ -445,6 +458,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtDashboardIndexRouteImport
       parentRoute: typeof AtDashboardRouteRoute
     }
+    '/api/og/$': {
+      id: '/api/og/$'
+      path: '/api/og/$'
+      fullPath: '/api/og/$'
+      preLoaderRoute: typeof ApiOgSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/object/$': {
       id: '/api/object/$'
       path: '/api/object/$'
@@ -551,6 +571,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiObjectSplatRoute: ApiObjectSplatRoute,
+  ApiOgSplatRoute: ApiOgSplatRoute,
   LoginVerifyIndexRoute: LoginVerifyIndexRoute,
   PostsCategorySlugIndexRoute: PostsCategorySlugIndexRoute,
 }
