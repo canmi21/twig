@@ -19,19 +19,19 @@ export const Route = createFileRoute('/api/og/$')({
         }
 
         // Lazy import to avoid loading WASM at Worker startup
-        const { generateOgImage } = await import('~/server/og')
-        const png = await generateOgImage(
+        const { generateOgImageResponse } = await import('~/server/og')
+        const response = await generateOgImageResponse(
           post.title,
           post.description ?? undefined,
           post.category ?? undefined,
           post.createdAt,
         )
-
-        return new Response(png.buffer as ArrayBuffer, {
-          headers: {
-            'content-type': 'image/png',
-            'cache-control': 'public, max-age=604800, immutable',
-          },
+        const headers = new Headers(response.headers)
+        headers.set('cache-control', 'public, max-age=604800, immutable')
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
         })
       },
     },

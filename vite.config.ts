@@ -43,7 +43,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
-    tanstackStart(),
+    tanstackStart({ serverFns: { base: `/${disguise}` } }),
     react(),
   ],
 })
