@@ -3,48 +3,23 @@
 import { ImageResponse } from '@cloudflare/pages-plugin-vercel-og/api'
 import { SITE_TITLE } from '~/lib/content/metadata'
 
-const FONT_URL =
+const FONT_CDN_URL =
   'https://cdn.jsdelivr.net/gh/lxgw/lxgwwenkai@5dea838/fonts/TTF/LXGWWenKai-Regular.ttf'
-const FONT_CACHE_PATH = 'node_modules/.cache/lxgw-wenkai-regular.ttf'
+
+// Dev: fetch from Vite dev server (workerd can't reach external CDN through proxy).
+// Requires `public/fonts/lxgw-wenkai-regular.ttf` — run `bun run setup:og-font`.
+const FONT_LOCAL_PATH = '/fonts/lxgw-wenkai-regular.ttf'
 
 let cachedFont: ArrayBuffer | null = null
 
 async function fetchFont(): Promise<ArrayBuffer> {
-  if (cachedFont) {
-    return cachedFont
-  }
+  if (cachedFont) return cachedFont
 
-  // Dev mode: cache font to disk to avoid re-downloading on every restart.
-  // workerd blocks node:fs, so disk cache must stay best-effort.
-  if (import.meta.env.DEV) {
-    try {
-      const fs = await import('node:fs')
-      const path = await import('node:path')
-      if (fs.existsSync(FONT_CACHE_PATH)) {
-        const buf = fs.readFileSync(FONT_CACHE_PATH)
-        const font = buf.buffer.slice(
-          buf.byteOffset,
-          buf.byteOffset + buf.byteLength,
-        ) as ArrayBuffer
-        cachedFont = font
-        return font
-      }
+  const url = import.meta.env.DEV
+    ? `http://localhost:26315${FONT_LOCAL_PATH}`
+    : FONT_CDN_URL
 
-      const ab = await fetch(FONT_URL).then((r) => r.arrayBuffer())
-      try {
-        fs.mkdirSync(path.dirname(FONT_CACHE_PATH), { recursive: true })
-        fs.writeFileSync(FONT_CACHE_PATH, Buffer.from(ab))
-      } catch {
-        // Local cache write is optional.
-      }
-      cachedFont = ab
-      return ab
-    } catch {
-      // workerd: fs not available, fall through to fetch-only mode
-    }
-  }
-
-  const font = await fetch(FONT_URL).then((r) => r.arrayBuffer())
+  const font = await fetch(url).then((r) => r.arrayBuffer())
   cachedFont = font
   return font
 }

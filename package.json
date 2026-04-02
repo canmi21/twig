@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "setup:og-font": "mkdir -p public/fonts && curl -fsSL -o public/fonts/lxgw-wenkai-regular.ttf 'https://cdn.jsdelivr.net/gh/lxgw/lxgwwenkai@5dea838/fonts/TTF/LXGWWenKai-Regular.ttf'",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "bun run lint:oxlint && bun run lint:eslint && knip",
