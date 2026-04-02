@@ -34,6 +34,7 @@
     "@cloudflare/pages-plugin-vercel-og": "^0.1.2",
     "@mingcute/react": "^1.4.1",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@sentry/react": "^10.47.0",
     "@shikijs/langs": "^4.0.2",
     "@shikijs/rehype": "^4.0.2",
     "@shikijs/themes": "^4.0.2",

@@ -16,6 +16,7 @@ import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
 import { fontFallbackScript } from '~/lib/theme/font-fallback-script'
+import { Sentry } from '~/lib/sentry'
 import appCss from '~/styles/app.css?url'
 
 export const Route = createRootRouteWithContext<RootContext>()({
@@ -94,8 +95,18 @@ function RootComponent() {
 
   return (
     <RootDocument initialTheme={initialTheme} canonicalUrl={canonicalUrl}>
-      <Outlet />
+      <Sentry.ErrorBoundary fallback={<SentryFallback />}>
+        <Outlet />
+      </Sentry.ErrorBoundary>
     </RootDocument>
+  )
+}
+
+function SentryFallback() {
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <span className="text-sm text-secondary">Something went wrong.</span>
+    </div>
   )
 }
 
