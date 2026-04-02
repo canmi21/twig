@@ -31,10 +31,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  optimizeDeps: {
+    exclude: ['@cloudflare/pages-plugin-vercel-og/api'],
+  },
   ssr: {
     optimizeDeps: {
-      exclude: ['@cf-wasm/resvg'],
-      include: ['satori'],
+      exclude: ['@cloudflare/pages-plugin-vercel-og/api'],
     },
   },
   server: {

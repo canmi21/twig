@@ -1,6 +1,6 @@
 /* src/server/og.tsx */
 
-import { ImageResponse } from 'workers-og'
+import { ImageResponse } from '@cloudflare/pages-plugin-vercel-og/api'
 import { SITE_TITLE } from '~/lib/content/metadata'
 
 const FONT_URL =
