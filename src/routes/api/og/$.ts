@@ -3,7 +3,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { getCache } from '~/server/platform'
 import { readPostKv } from '~/lib/storage/kv'
-import { generateOgImage } from '~/server/og'
 
 export const Route = createFileRoute('/api/og/$')({
   server: {
@@ -19,6 +18,8 @@ export const Route = createFileRoute('/api/og/$')({
           return new Response('Not found', { status: 404 })
         }
 
+        // Lazy import to avoid loading WASM at Worker startup
+        const { generateOgImage } = await import('~/server/og')
         const png = await generateOgImage(
           post.frontmatter.title,
           post.frontmatter.description,

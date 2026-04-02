@@ -23,14 +23,18 @@ interface OwnerData {
 
 const getOwner = createServerFn().handler(
   async (): Promise<OwnerData | null> => {
-    const ownerEmail = getEmailOwner()
-    const row = await getDb()
-      .select({ id: userTable.id })
-      .from(userTable)
-      .where(eq(userTable.email, ownerEmail))
-      .get()
-    if (!row) return null
-    return { avatarKey: `avatar/${row.id}.webp`, email: ownerEmail }
+    try {
+      const ownerEmail = getEmailOwner()
+      const row = await getDb()
+        .select({ id: userTable.id })
+        .from(userTable)
+        .where(eq(userTable.email, ownerEmail))
+        .get()
+      if (!row) return null
+      return { avatarKey: `avatar/${row.id}.webp`, email: ownerEmail }
+    } catch {
+      return null
+    }
   },
 )
 
