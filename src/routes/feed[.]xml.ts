@@ -19,7 +19,7 @@ export const Route = createFileRoute('/feed.xml')({
 
         const posts = await readPostIndex(kv)
         const recent = posts
-          .filter((p) => p.published)
+          .filter((post) => post.published)
           .toSorted(
             (a, b) =>
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -27,14 +27,14 @@ export const Route = createFileRoute('/feed.xml')({
           .slice(0, FEED_LIMIT)
 
         const kvEntries = await Promise.all(
-          recent.map((p) => readPostKv(kv, p.slug)),
+          recent.map((post) => readPostKv(kv, post.slug)),
         )
 
         const updated =
           recent.length > 0
             ? new Date(
-                recent.reduce((latest, p) =>
-                  p.updatedAt > latest.updatedAt ? p : latest,
+                recent.reduce((latest, post) =>
+                  post.updatedAt > latest.updatedAt ? post : latest,
                 ).updatedAt,
               )
             : new Date()
@@ -61,7 +61,7 @@ export const Route = createFileRoute('/feed.xml')({
               links: [{ href: articleUrl, rel: 'alternate' as const }],
             }
           })
-          .filter((e) => e !== null)
+          .filter((entry) => entry !== null)
 
         const xml = generateAtomFeed({
           id: publicUrl,

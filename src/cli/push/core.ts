@@ -23,7 +23,12 @@ import { compile } from '../../lib/compiler/index'
 import type { Frontmatter } from '../../lib/compiler/index'
 import { parse as parseYaml } from 'yaml'
 import { postSchema } from '../../lib/content/post-schema'
-import { writePostKv, writePostIndex, deletePostKv } from '../../lib/storage/kv'
+import {
+  writePostKv,
+  writePostIndex,
+  deletePostKv,
+  toPostIndexEntry,
+} from '../../lib/storage/kv'
 import type { PostIndexEntry } from '../../lib/storage/kv'
 
 // --- Types ---
@@ -169,8 +174,8 @@ export async function diffPosts(
   scanned: ScannedPost[],
 ): Promise<DiffResult> {
   const dbPosts = await getAllPosts(db)
-  const dbByCid = new Map(dbPosts.map((p) => [p.cid, p]))
-  const dbBySlug = new Map(dbPosts.map((p) => [p.slug, p]))
+  const dbByCid = new Map(dbPosts.map((post) => [post.cid, post]))
+  const dbBySlug = new Map(dbPosts.map((post) => [post.slug, post]))
   const matchedCids = new Set<string>()
 
   const added: ScannedPost[] = []
@@ -225,7 +230,7 @@ export async function diffPosts(
     } else {
       // Expensive path: check media files (only when everything else matches)
       const dbMedia = await getMediaForPost(db, existing.cid)
-      const dbHashes = new Set(dbMedia.map((m) => m.hash))
+      const dbHashes = new Set(dbMedia.map((media) => media.hash))
       let mediaChanged = false
       for (const mf of post.mediaFiles) {
         const data = await readFile(mf.absolutePath)
@@ -366,16 +371,7 @@ export async function executeDelete(
 
 export async function buildPostIndex(db: Db): Promise<PostIndexEntry[]> {
   const allPosts = await getAllPosts(db)
-  return allPosts.map((p) => ({
-    slug: p.slug,
-    title: p.title,
-    description: p.description ?? undefined,
-    category: p.category ?? undefined,
-    tags: p.tags ? (JSON.parse(p.tags) as string[]) : undefined,
-    createdAt: p.createdAt,
-    updatedAt: p.updatedAt,
-    published: p.published === 1,
-  }))
+  return allPosts.map(toPostIndexEntry)
 }
 
 // --- Orchestrator ---

@@ -10,13 +10,17 @@ export const Route = createFileRoute('/sitemap.xml')({
       GET: async () => {
         const publicUrl = getPublicUrl()
         const posts = await readPostIndex(getCache())
-        const published = posts.filter((p) => p.published)
+        const published = posts.filter((post) => post.published)
 
         const urls: string[] = [
           pageEntry(publicUrl, '/'),
           pageEntry(publicUrl, '/posts'),
-          ...published.map((p) =>
-            postEntry(publicUrl, `/posts/${p.category}/${p.slug}`, p.updatedAt),
+          ...published.map((post) =>
+            postEntry(
+              publicUrl,
+              `/posts/${post.category}/${post.slug}`,
+              post.updatedAt,
+            ),
           ),
         ]
 

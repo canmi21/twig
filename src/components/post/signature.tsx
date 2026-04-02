@@ -47,10 +47,10 @@ export function Signature({ className }: { className?: string }) {
     activeRef.current = true
 
     const pathEls = Array.from(svg.querySelectorAll('path'))
-    const lengths = pathEls.map((p) => {
-      const len = p.getTotalLength()
-      p.style.strokeDasharray = `${len}`
-      p.style.strokeDashoffset = `${len}`
+    const lengths = pathEls.map((pathEl) => {
+      const len = pathEl.getTotalLength()
+      pathEl.style.strokeDasharray = `${len}`
+      pathEl.style.strokeDashoffset = `${len}`
       return len
     })
 

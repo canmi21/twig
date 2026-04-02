@@ -124,27 +124,27 @@ function OverviewPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentComments.map((c) => (
+                  {recentComments.map((comment) => (
                     <tr
-                      key={c.id}
+                      key={comment.id}
                       className="border-b border-border last:border-0"
                     >
                       <td className="max-w-48 truncate px-3 py-2 text-[13px] text-primary">
-                        {c.content}
+                        {comment.content}
                       </td>
                       <td className="px-3 py-2 text-[12px] text-primary opacity-(--opacity-muted)">
-                        {c.userName}
+                        {comment.userName}
                       </td>
                       <td
                         className={`px-3 py-2 text-right text-[12px] text-primary ${
-                          c.status === 'pending'
+                          comment.status === 'pending'
                             ? ''
-                            : c.status === 'approved'
+                            : comment.status === 'approved'
                               ? 'opacity-(--opacity-muted)'
                               : 'line-through opacity-(--opacity-faint)'
                         }`}
                       >
-                        {c.status}
+                        {comment.status}
                       </td>
                     </tr>
                   ))}

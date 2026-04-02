@@ -149,7 +149,7 @@ export async function deleteComment(db: Db, id: string): Promise<void> {
       SELECT c.id FROM comments c JOIN descendants d ON c.parent_id = d.id
     ) SELECT id FROM descendants`,
   )
-  const ids = rows.map((r) => r.id)
+  const ids = rows.map((row) => row.id)
   if (ids.length > 0) {
     await db.delete(comments).where(inArray(comments.id, ids))
   }

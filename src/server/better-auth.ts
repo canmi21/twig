@@ -22,7 +22,7 @@ const DEV_PORT = 26315
 
 function devTrustedOrigins(): string[] {
   const hosts = ['localhost', '127.0.0.1', '[::1]']
-  return hosts.map((h) => `http://${h}:${DEV_PORT}`)
+  return hosts.map((host) => `http://${host}:${DEV_PORT}`)
 }
 
 /** Create a Better Auth instance per request (D1 binding is request-scoped). */

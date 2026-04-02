@@ -53,7 +53,7 @@ export async function deleteMediaRefsForPost(
     await db.delete(mediaRefs).where(eq(mediaRefs.cid, cid))
   }
 
-  return refs.map((r) => r.hash)
+  return refs.map((ref) => ref.hash)
 }
 
 export async function getMediaRefCount(db: Db, hash: string): Promise<number> {

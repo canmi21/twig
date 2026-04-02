@@ -10,8 +10,7 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { RootContext } from '~/router'
-import { getCdnPublicUrl } from '~/server/get-cdn-url'
-import { getPublicUrlFn } from '~/server/get-public-url'
+import { getCdnPublicUrl, getPublicUrlFn } from '~/server/server-fns'
 import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'

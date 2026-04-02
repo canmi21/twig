@@ -21,12 +21,17 @@ import {
   getMediaByHash,
   deleteMedia,
 } from '~/lib/database/media'
-import { writePostKv, deletePostKv, writePostIndex } from '~/lib/storage/kv'
+import {
+  writePostKv,
+  deletePostKv,
+  writePostIndex,
+  toPostIndexEntry,
+} from '~/lib/storage/kv'
+import { formatDateShort } from '~/lib/utils/date'
 import { compile } from '~/lib/compiler/index'
 import { storageKey } from '~/lib/storage/storage-key'
 import { newCid } from '~/lib/utils/uuid'
 import { computeContentHash } from '~/lib/utils/hash'
-import type { PostIndexEntry } from '~/lib/storage/kv'
 
 const listPosts = createServerFn().handler(async () => {
   const db = getDb()
@@ -96,10 +101,12 @@ const removePost = createServerFn({ method: 'POST' })
     const hashes = await deleteMediaRefsForPost(db, data.cid)
     const refCounts = await Promise.all(
       hashes.map((hash) =>
-        getMediaRefCount(db, hash).then((c) => ({ hash, c })),
+        getMediaRefCount(db, hash).then((count) => ({ hash, count })),
       ),
     )
-    const orphaned = refCounts.filter((r) => r.c === 0).map((r) => r.hash)
+    const orphaned = refCounts
+      .filter((ref) => ref.count === 0)
+      .map((ref) => ref.hash)
     const mediaRows = await Promise.all(
       orphaned.map((hash) => getMediaByHash(db, hash)),
     )
@@ -119,31 +126,13 @@ const removePost = createServerFn({ method: 'POST' })
 
 async function rebuildPostIndex(db: ReturnType<typeof getDb>, kv: KVNamespace) {
   const allPosts = await getAllPosts(db)
-  const index: PostIndexEntry[] = allPosts.map((p) => ({
-    slug: p.slug,
-    title: p.title,
-    description: p.description ?? undefined,
-    category: p.category ?? undefined,
-    tags: p.tags ? JSON.parse(p.tags) : undefined,
-    createdAt: p.createdAt,
-    updatedAt: p.updatedAt,
-    published: p.published === 1,
-  }))
-  await writePostIndex(kv, index)
+  await writePostIndex(kv, allPosts.map(toPostIndexEntry))
 }
 
 export const Route = createFileRoute('/@/_dashboard/contents/')({
   loader: () => listPosts(),
   component: PostsList,
 })
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
 function PostsList() {
   const posts = Route.useLoaderData()
@@ -247,7 +236,7 @@ function PostsList() {
                     </button>
                   </td>
                   <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                    {formatDate(post.createdAt)}
+                    {formatDateShort(post.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">

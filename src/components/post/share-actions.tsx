@@ -21,7 +21,7 @@ type AiProvider = 'claude' | 'chatgpt' | 'gemini' | 'grok'
 const AI_PROVIDER_STORAGE_KEY = 'ai-provider'
 const AI_PROVIDER_CHANGE_EVENT = 'ai-provider-change'
 const AI_PROVIDERS: AiProvider[] = ['claude', 'chatgpt', 'gemini', 'grok']
-const MINGCUTE_ICON_CLASS = 'size-[1.15rem]'
+const ICON_SIZE_CLASS = 'size-[1.15rem]'
 const ICON_SLOT_CLASS =
   'post-share-actions__icon-slot relative inline-flex size-[1.15rem] items-center justify-center'
 
@@ -163,14 +163,12 @@ function getAiProviderName(provider: AiProvider) {
 }
 
 function getAiProviderIcon(provider: AiProvider) {
-  if (provider === 'claude')
-    return <ClaudeLine className={MINGCUTE_ICON_CLASS} />
-  if (provider === 'chatgpt')
-    return <OpenaiLine className={MINGCUTE_ICON_CLASS} />
+  if (provider === 'claude') return <ClaudeLine className={ICON_SIZE_CLASS} />
+  if (provider === 'chatgpt') return <OpenaiLine className={ICON_SIZE_CLASS} />
   if (provider === 'gemini') {
-    return <GoogleGeminiFill className={MINGCUTE_ICON_CLASS} />
+    return <GoogleGeminiFill className={ICON_SIZE_CLASS} />
   }
-  return <Grok2Fill className={MINGCUTE_ICON_CLASS} />
+  return <Grok2Fill className={ICON_SIZE_CLASS} />
 }
 
 export function PostShareActions({ cid }: { cid?: string }) {
@@ -336,9 +334,9 @@ export function PostShareActions({ cid }: { cid?: string }) {
               className="absolute inset-0 inline-flex items-center justify-center"
             >
               {isXHovered ? (
-                <TwitterLine className={MINGCUTE_ICON_CLASS} />
+                <TwitterLine className={ICON_SIZE_CLASS} />
               ) : (
-                <SocialXLine className={MINGCUTE_ICON_CLASS} />
+                <SocialXLine className={ICON_SIZE_CLASS} />
               )}
             </motion.span>
           </AnimatePresence>
@@ -378,7 +376,7 @@ export function PostShareActions({ cid }: { cid?: string }) {
         >
           <span className={ICON_SLOT_CLASS}>
             <Link2Line
-              className={`${MINGCUTE_ICON_CLASS} translate-y-[1.5px] -rotate-45`}
+              className={`${ICON_SIZE_CLASS} translate-y-[1.5px] -rotate-45`}
             />
           </span>
         </button>

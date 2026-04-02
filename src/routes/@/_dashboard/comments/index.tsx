@@ -9,6 +9,7 @@ import {
   rejectComment,
   removeComment,
 } from '~/server/comments'
+import { formatDateShort } from '~/lib/utils/date'
 
 type Tab = 'pending' | 'all'
 
@@ -39,14 +40,6 @@ export const Route = createFileRoute('/@/_dashboard/comments/')({
   loader: () => loadComments(),
   component: CommentsPage,
 })
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
 function CommentsPage() {
   const data = Route.useLoaderData()
@@ -143,38 +136,41 @@ function CommentsPage() {
               </tr>
             </thead>
             <tbody>
-              {comments.map((c) => (
-                <tr key={c.id} className="border-b border-border last:border-0">
+              {comments.map((comment) => (
+                <tr
+                  key={comment.id}
+                  className="border-b border-border last:border-0"
+                >
                   <td className="max-w-64 px-4 py-3">
                     <div className="truncate text-[14px] text-primary">
-                      {c.content}
+                      {comment.content}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                    {c.userName}
+                    {comment.userName}
                   </td>
                   <td className="px-4 py-3">
                     <div className="max-w-32 truncate text-[13px] text-primary opacity-(--opacity-muted)">
-                      {c.postTitle}
+                      {comment.postTitle}
                     </div>
                   </td>
                   {tab === 'all' && (
                     <td className="px-4 py-3">
                       <span
                         className={`text-[12px] text-primary ${
-                          c.status === 'pending'
+                          comment.status === 'pending'
                             ? ''
-                            : c.status === 'approved'
+                            : comment.status === 'approved'
                               ? 'opacity-(--opacity-muted)'
                               : 'line-through opacity-(--opacity-faint)'
                         }`}
                       >
-                        {c.status}
+                        {comment.status}
                       </span>
                     </td>
                   )}
                   <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                    {formatDate(c.createdAt)}
+                    {formatDateShort(comment.createdAt)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
@@ -182,16 +178,16 @@ function CommentsPage() {
                         <>
                           <button
                             type="button"
-                            disabled={loading === c.id}
-                            onClick={() => handleApprove(c.id)}
+                            disabled={loading === comment.id}
+                            onClick={() => handleApprove(comment.id)}
                             className="text-[13px] text-primary transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
                           >
                             Approve
                           </button>
                           <button
                             type="button"
-                            disabled={loading === c.id}
-                            onClick={() => handleReject(c.id)}
+                            disabled={loading === comment.id}
+                            onClick={() => handleReject(comment.id)}
                             className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
                           >
                             Reject
@@ -200,8 +196,8 @@ function CommentsPage() {
                       )}
                       <button
                         type="button"
-                        disabled={loading === c.id}
-                        onClick={() => handleDelete(c.id)}
+                        disabled={loading === comment.id}
+                        onClick={() => handleDelete(comment.id)}
                         className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:opacity-(--opacity-disabled)"
                       >
                         Delete

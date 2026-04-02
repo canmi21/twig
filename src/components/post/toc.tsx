@@ -99,14 +99,14 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
   const [activeId, setActiveId] = useState<string>('')
   const [phase, setPhase] = useState<Phase>('collapsed')
   const [barWidths, setBarWidths] = useState<Map<string, number>>(() =>
-    estimateTextWidths(entries.map((e) => e.text)),
+    estimateTextWidths(entries.map((entry) => entry.text)),
   )
   const observerRef = useRef<IntersectionObserver | null>(null)
   const navRef = useRef<HTMLElement | null>(null)
   const isClickScrollingRef = useRef(false)
   const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const fallbackBarWidths = useMemo(
-    () => estimateTextWidths(entries.map((e) => e.text)),
+    () => estimateTextWidths(entries.map((entry) => entry.text)),
     [entries],
   )
 
@@ -177,7 +177,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
   useEffect(() => {
     const headings = entries
-      .map((e) => document.getElementById(e.id))
+      .map((entry) => document.getElementById(entry.id))
       .filter(Boolean) as HTMLElement[]
 
     if (headings.length === 0) return

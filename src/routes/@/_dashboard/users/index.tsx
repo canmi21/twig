@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm'
 import { getAuth } from '~/server/better-auth'
 import { getDb, getBucket } from '~/server/platform'
 import { user as userTable } from '~/lib/database/auth-schema'
+import { formatDateShort } from '~/lib/utils/date'
 
 interface UserRow {
   id: string
@@ -27,14 +28,14 @@ const listUsers = createServerFn().handler(async (): Promise<UserRow[]> => {
     query: { limit: 100, sortBy: 'createdAt', sortDirection: 'desc' },
   })
   return (result as unknown as { users: Record<string, unknown>[] }).users.map(
-    (u) => ({
-      id: u.id as string,
-      name: u.name as string,
-      email: u.email as string,
-      role: (u.role as string | null) ?? null,
-      banned: (u.banned as boolean | null) ?? false,
-      banReason: (u.banReason as string | null) ?? null,
-      createdAt: String(u.createdAt),
+    (user) => ({
+      id: user.id as string,
+      name: user.name as string,
+      email: user.email as string,
+      role: (user.role as string | null) ?? null,
+      banned: (user.banned as boolean | null) ?? false,
+      banReason: (user.banReason as string | null) ?? null,
+      createdAt: String(user.createdAt),
     }),
   )
 })
@@ -111,14 +112,10 @@ export const Route = createFileRoute('/@/_dashboard/users/')({
   component: UsersList,
 })
 
-function formatDate(value: string): string {
+function formatUserDate(value: string): string {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return value
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  return formatDateShort(value)
 }
 
 interface EditState {
@@ -346,7 +343,7 @@ function UsersList() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                      {formatDate(user.createdAt)}
+                      {formatUserDate(user.createdAt)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-3">

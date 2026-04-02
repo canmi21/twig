@@ -1,6 +1,7 @@
 /* src/lib/storage/kv.ts */
 
 import type { CompileResult } from '../compiler/index'
+import type { PostRow } from '../database/posts'
 
 export interface PostKvEntry {
   frontmatter: CompileResult['frontmatter']
@@ -18,6 +19,20 @@ export interface PostIndexEntry {
   createdAt: string
   updatedAt: string
   published: boolean
+}
+
+/** Convert a database PostRow to a KV PostIndexEntry. */
+export function toPostIndexEntry(post: PostRow): PostIndexEntry {
+  return {
+    slug: post.slug,
+    title: post.title,
+    description: post.description ?? undefined,
+    category: post.category ?? undefined,
+    tags: post.tags ? (JSON.parse(post.tags) as string[]) : undefined,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    published: post.published === 1,
+  }
 }
 
 export async function writePostKv(

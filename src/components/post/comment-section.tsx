@@ -14,6 +14,7 @@ import { Link, useLocation, useRouteContext } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
+import { timeAgo } from '~/lib/utils/date'
 
 const AVATAR_COLORS = [
   '#DCE7F8',
@@ -42,34 +43,14 @@ function useAvatarUrl(userId: string) {
   return `${prefix}/avatar/${userId}.webp`
 }
 
-function CommentAvatar({ seed, userId }: { seed: string; userId: string }) {
-  const [imgError, setImgError] = useState(false)
-  const src = useAvatarUrl(userId)
-
-  return (
-    <span
-      aria-hidden="true"
-      className="post-comments__avatar shrink-0 overflow-hidden rounded-full"
-      style={{ backgroundColor: getAvatarColor(seed) }}
-    >
-      {!imgError && (
-        <img
-          src={src}
-          alt=""
-          className="size-full object-cover"
-          onError={() => setImgError(true)}
-        />
-      )}
-    </span>
-  )
-}
-
-function NestedCommentAvatar({
+function CommentAvatar({
   seed,
   userId,
+  nested,
 }: {
   seed: string
   userId: string
+  nested?: boolean
 }) {
   const [imgError, setImgError] = useState(false)
   const src = useAvatarUrl(userId)
@@ -77,7 +58,7 @@ function NestedCommentAvatar({
   return (
     <span
       aria-hidden="true"
-      className="post-comments__avatar post-comments__avatar--nested shrink-0 overflow-hidden rounded-full"
+      className={`${nested ? 'post-comments__avatar post-comments__avatar--nested' : 'post-comments__avatar'} shrink-0 overflow-hidden rounded-full`}
       style={{ backgroundColor: getAvatarColor(seed) }}
     >
       {!imgError && (
@@ -90,22 +71,6 @@ function NestedCommentAvatar({
       )}
     </span>
   )
-}
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 interface Comment {
@@ -463,9 +428,10 @@ export function CommentSection({ postCid }: { postCid: string }) {
               className="post-comments__reply flex gap-3"
               data-depth={visualDepth}
             >
-              <NestedCommentAvatar
+              <CommentAvatar
                 seed={`${reply.userEmail}:${reply.userName}`}
                 userId={reply.userId}
+                nested
               />
               <div className="post-comments__content min-w-0 flex-1">
                 <div className="post-comments__body">
@@ -553,34 +519,37 @@ export function CommentSection({ postCid }: { postCid: string }) {
     <div className="post-comments mt-14">
       {rootComments.length > 0 && (
         <div className="post-comments__list">
-          {rootComments.map((c) => (
-            <article key={c.id} className="post-comments__item flex gap-3">
+          {rootComments.map((comment) => (
+            <article
+              key={comment.id}
+              className="post-comments__item flex gap-3"
+            >
               <CommentAvatar
-                seed={`${c.userEmail}:${c.userName}`}
-                userId={c.userId}
+                seed={`${comment.userEmail}:${comment.userName}`}
+                userId={comment.userId}
               />
               <div className="post-comments__content min-w-0 flex-1">
                 <div className="post-comments__body">
                   <div className="post-comments__meta flex items-baseline gap-2">
                     <span className="post-comments__author text-[13px] font-medium text-primary">
-                      {c.userName}
+                      {comment.userName}
                     </span>
                     <span className="post-comments__time text-[12px] text-tertiary">
-                      {timeAgo(c.createdAt)}
+                      {timeAgo(comment.createdAt)}
                     </span>
                   </div>
                   <p className="post-comments__text mt-1 text-[14px] leading-relaxed text-primary">
-                    {c.content}
+                    {comment.content}
                   </p>
                   <div
                     className="post-comments__actions"
-                    data-active={activeReplyId === c.id}
+                    data-active={activeReplyId === comment.id}
                   >
-                    {renderReplyTrigger(c)}
+                    {renderReplyTrigger(comment)}
                   </div>
-                  {renderReplyComposer(c)}
+                  {renderReplyComposer(comment)}
                 </div>
-                {renderReplies(c.id)}
+                {renderReplies(comment.id)}
               </div>
             </article>
           ))}

@@ -35,7 +35,7 @@ export async function applyMigrations(d1: D1Database) {
 
     const statements = sql
       .split('--> statement-breakpoint')
-      .map((s) => s.trim())
+      .map((segment) => segment.trim())
       .filter(Boolean)
 
     for (const stmt of statements) {

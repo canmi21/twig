@@ -3,7 +3,11 @@
 import type { Db } from '../../lib/database/index'
 import { getAllPosts } from '../../lib/database/posts'
 import { compile } from '../../lib/compiler/index'
-import { writePostKv, writePostIndex } from '../../lib/storage/kv'
+import {
+  writePostKv,
+  writePostIndex,
+  toPostIndexEntry,
+} from '../../lib/storage/kv'
 import type { PostIndexEntry } from '../../lib/storage/kv'
 
 export interface RebuildResult {
@@ -40,16 +44,7 @@ export async function rebuildCore(opts: {
       components: compiled.components,
     })
 
-    index.push({
-      slug: row.slug,
-      title: row.title,
-      description: row.description ?? undefined,
-      category: row.category ?? undefined,
-      tags,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      published: row.published === 1,
-    })
+    index.push(toPostIndexEntry(row))
   }
 
   await writePostIndex(kv, index)

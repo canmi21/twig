@@ -13,11 +13,15 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { getDb, getCache } from '~/server/platform'
 import { getPostByCid, upsertPost, getAllPosts } from '~/lib/database/posts'
-import { writePostKv, deletePostKv, writePostIndex } from '~/lib/storage/kv'
+import {
+  writePostKv,
+  deletePostKv,
+  writePostIndex,
+  toPostIndexEntry,
+} from '~/lib/storage/kv'
 import { computeContentHash } from '~/lib/utils/hash'
 import { postSchema } from '~/lib/content/post-schema'
 import { verifyCfAccess } from '~/server/auth'
-import type { PostIndexEntry } from '~/lib/storage/kv'
 import { ArrowLeft, Eye, CodeXml, Save, Sun, Moon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { ArticleHeader } from '~/components/post/article-header'
@@ -196,17 +200,7 @@ const savePost = createServerFn({ method: 'POST' })
     }
 
     const allPosts = await getAllPosts(db)
-    const index: PostIndexEntry[] = allPosts.map((p) => ({
-      slug: p.slug,
-      title: p.title,
-      description: p.description ?? undefined,
-      category: p.category ?? undefined,
-      tags: p.tags ? JSON.parse(p.tags) : undefined,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-      published: p.published === 1,
-    }))
-    await writePostIndex(kv, index)
+    await writePostIndex(kv, allPosts.map(toPostIndexEntry))
 
     return { ok: true as const }
   })

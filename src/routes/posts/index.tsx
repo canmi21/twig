@@ -5,6 +5,7 @@ import { Navbar } from '~/components/navbar'
 import { createServerFn } from '@tanstack/react-start'
 import { getCache } from '~/server/platform'
 import { readPostIndex } from '~/lib/storage/kv'
+import { formatDateShort } from '~/lib/utils/date'
 
 const getPosts = createServerFn().handler(async () => {
   return readPostIndex(getCache())
@@ -14,15 +15,6 @@ export const Route = createFileRoute('/posts/')({
   loader: () => getPosts(),
   component: PostsPage,
 })
-
-function formatDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
 
 function PostsPage() {
   const posts = Route.useLoaderData()
@@ -74,7 +66,7 @@ function PostsPage() {
                       dateTime={post.createdAt}
                       className="shrink-0 text-[13px] text-secondary"
                     >
-                      {formatDate(post.createdAt)}
+                      {formatDateShort(post.createdAt)}
                     </time>
                   )}
                 </div>

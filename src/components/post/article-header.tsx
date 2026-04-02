@@ -3,15 +3,7 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
 import { Type } from 'lucide-react'
-
-export function formatDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
+import { formatDate } from '~/lib/utils/date'
 
 function stripHtml(html: string): string {
   return html
