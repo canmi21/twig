@@ -16,7 +16,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --exclude '**/integration.test.ts'",
     "test:integration": "vitest run integration.test",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler d1 migrations apply taki-sql --remote && wrangler deploy"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.3",
