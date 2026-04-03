@@ -101,16 +101,17 @@ function HomePage() {
               ENTP / (INFJ?)
             </div>
 
-            {/* Social links */}
+            {/* Social links — icons and borders are fixed white; brand bg does not follow theme */}
             <div className="mt-4 flex items-center gap-2.5">
               <a
                 href="https://twitter.com/intent/follow?screen_name=canmi21"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex size-8 items-center justify-center rounded-full border border-border bg-black transition-opacity duration-140 hover:opacity-80"
+                className="group relative flex size-8 items-center justify-center rounded-full border border-transparent bg-black transition-opacity duration-140 hover:opacity-80"
+                style={{ color: 'white' }}
               >
-                <SocialXLine className="absolute size-[18px] text-white transition-opacity duration-140 group-hover:opacity-0" />
-                <TwitterLine className="absolute size-[18px] text-white opacity-0 transition-opacity duration-140 group-hover:opacity-100" />
+                <SocialXLine className="absolute size-[18px] transition-opacity duration-140 group-hover:opacity-0" />
+                <TwitterLine className="absolute size-[18px] opacity-0 transition-opacity duration-140 group-hover:opacity-100" />
               </a>
               {[
                 {
@@ -139,10 +140,10 @@ function HomePage() {
                   href={href}
                   target={href.startsWith('/') ? undefined : '_blank'}
                   rel={href.startsWith('/') ? undefined : 'noopener noreferrer'}
-                  className="flex size-8 items-center justify-center rounded-full border border-border transition-opacity duration-140 hover:opacity-80"
-                  style={{ backgroundColor: bg }}
+                  className="flex size-8 items-center justify-center rounded-full border border-transparent transition-opacity duration-140 hover:opacity-80"
+                  style={{ backgroundColor: bg, color: 'white' }}
                 >
-                  <Icon className="size-[18px] text-white" />
+                  <Icon className="size-[18px]" />
                 </a>
               ))}
             </div>
