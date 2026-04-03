@@ -33,7 +33,7 @@ function ImageComponent({ url, alt }: { url: string; alt: string }) {
       }
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="
-        post-page-media post-page-media--image
+        post-media post-media--image
         aspect-video w-full rounded-xl
         border-2 border-border object-cover
         shadow-sm
@@ -44,11 +44,7 @@ function ImageComponent({ url, alt }: { url: string; alt: string }) {
 
 function VideoComponent({ url }: { url: string }) {
   return (
-    <video
-      className="post-page-media post-page-media--video"
-      controls
-      preload="metadata"
-    >
+    <video className="post-media post-media--video" controls preload="metadata">
       <source src={url} />
     </video>
   )
@@ -57,7 +53,7 @@ function VideoComponent({ url }: { url: string }) {
 function AudioComponent({ url }: { url: string }) {
   return (
     <audio
-      className="post-page-media post-page-media--audio"
+      className="post-media post-media--audio"
       controls
       preload="metadata"
       src={url}

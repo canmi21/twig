@@ -129,7 +129,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
   useEffect(() => {
     const nav = navRef.current
-    const sample = nav?.querySelector('.post-toc__text')
+    const sample = nav?.querySelector('.toc__text')
     if (!(sample instanceof HTMLElement) || entries.length === 0) return
 
     let cancelled = false
@@ -269,7 +269,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
               <a
                 href={`#${entry.id}`}
                 onClick={(e) => handleClick(e, entry.id)}
-                className={`post-toc__link relative block pl-2 opacity-(--opacity-subtle) ${isActive ? 'text-primary' : 'text-secondary'}`}
+                className={`toc__link relative block pl-2 opacity-(--opacity-subtle) ${isActive ? 'text-primary' : 'text-secondary'}`}
               >
                 {/* Bar — collapses to zero when text is shown */}
                 <motion.span
@@ -286,7 +286,7 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
                 />
                 {/* Text — fades in during revealed phase */}
                 <motion.span
-                  className="post-toc__text block h-0 truncate overflow-hidden text-[13px] leading-snug opacity-0"
+                  className="toc__text block h-0 truncate overflow-hidden text-[13px] leading-snug opacity-0"
                   initial={false}
                   animate={{
                     height: showText ? 'auto' : 0,

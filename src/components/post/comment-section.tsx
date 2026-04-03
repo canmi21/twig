@@ -58,7 +58,7 @@ function CommentAvatar({
   return (
     <span
       aria-hidden="true"
-      className={`${nested ? 'post-comments__avatar post-comments__avatar--nested' : 'post-comments__avatar'} shrink-0 overflow-hidden rounded-full`}
+      className={`${nested ? 'comments__avatar comments__avatar--nested' : 'comments__avatar'} shrink-0 overflow-hidden rounded-full`}
       style={{ backgroundColor: getAvatarColor(seed) }}
     >
       {!imgError && (
@@ -253,7 +253,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
         {session && (
           <button
             type="button"
-            className="post-comments__reply-trigger inline-flex items-center gap-[0.22rem]"
+            className="comments__reply-trigger inline-flex items-center gap-[0.22rem]"
             data-active={isReplying}
             aria-label={
               isReplying
@@ -319,14 +319,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
                   className="flex flex-col gap-[0.48rem]"
                   onSubmit={(e) => handleReplySubmit(e, comment.id)}
                 >
-                  <div className="post-comments__field post-comments__field--reply">
+                  <div className="comments__field comments__field--reply">
                     <textarea
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
                       placeholder={`Reply to ${comment.userName}...`}
                       maxLength={2000}
                       rows={2}
-                      className="post-comments__textarea post-comments__textarea--reply"
+                      className="comments__textarea comments__textarea--reply"
                     />
                     <div className="mt-[0.34rem] flex min-h-[1.23rem] items-center justify-between gap-[0.9rem]">
                       <span className="text-[11.5px] leading-none text-primary opacity-(--opacity-faint)">
@@ -343,7 +343,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                                 : 'Submit reply'
                             }
                             disabled={isSubmittingReply}
-                            className="post-comments__submit"
+                            className="comments__submit"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -420,17 +420,17 @@ export function CommentSection({ postCid }: { postCid: string }) {
 
     const repliesContent = (
       <div
-        className="post-comments__replies mt-[0.82rem] pl-[0.85rem]"
+        className="comments__replies mt-[0.82rem] pl-[0.85rem]"
         data-depth={depth}
       >
         {replies.map((reply) => (
           <div
             key={reply.id}
-            className="post-comments__reply-node"
+            className="comments__reply-node"
             data-depth={visualDepth}
           >
             <article
-              className="post-comments__reply flex gap-3"
+              className="comments__reply flex gap-3"
               data-depth={visualDepth}
             >
               <CommentAvatar
@@ -439,7 +439,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                 nested
               />
               <div className="min-w-0 flex-1">
-                <div className="post-comments__body">
+                <div className="comments__body">
                   <div className="flex items-baseline gap-[0.38rem] leading-none">
                     <span className="text-[13px] font-[560] text-primary">
                       {reply.userName}
@@ -452,16 +452,16 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     {reply.content}
                   </p>
                   <div
-                    className="post-comments__actions"
+                    className="comments__actions"
                     data-active={activeReplyId === reply.id}
                   >
                     {renderReplyTrigger(reply)}
                   </div>
                   {renderReplyComposer(reply)}
                 </div>
+                {renderReplies(reply.id, depth + 1)}
               </div>
             </article>
-            {renderReplies(reply.id, depth + 1)}
           </div>
         ))}
       </div>
@@ -472,10 +472,10 @@ export function CommentSection({ postCid }: { postCid: string }) {
     }
 
     return (
-      <div className="mt-[0.82rem]">
+      <div className="mt-[0.48rem]">
         <button
           type="button"
-          className="post-comments__thread-toggle"
+          className="comments__thread-toggle"
           onClick={() => toggleThread(parentId)}
         >
           <span className="inline-block">
@@ -525,16 +525,13 @@ export function CommentSection({ postCid }: { postCid: string }) {
       {rootComments.length > 0 && (
         <div className="mt-0">
           {rootComments.map((comment) => (
-            <article
-              key={comment.id}
-              className="post-comments__item flex gap-3"
-            >
+            <article key={comment.id} className="comments__item flex gap-3">
               <CommentAvatar
                 seed={`${comment.userEmail}:${comment.userName}`}
                 userId={comment.userId}
               />
               <div className="min-w-0 flex-1">
-                <div className="post-comments__body">
+                <div className="comments__body">
                   <div className="flex items-baseline gap-[0.38rem] leading-none">
                     <span className="text-[13px] font-[560] text-primary">
                       {comment.userName}
@@ -547,7 +544,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                     {comment.content}
                   </p>
                   <div
-                    className="post-comments__actions"
+                    className="comments__actions"
                     data-active={activeReplyId === comment.id}
                   >
                     {renderReplyTrigger(comment)}
@@ -567,7 +564,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
             <Link
               to="/login"
               search={{ callback: location.pathname }}
-              className="post-comments__signin-link text-primary hover:underline"
+              className="comments__signin-link text-primary hover:underline"
             >
               Sign in
             </Link>{' '}
@@ -579,14 +576,14 @@ export function CommentSection({ postCid }: { postCid: string }) {
           </p>
         ) : (
           <form className="flex flex-col gap-[0.58rem]" onSubmit={handleSubmit}>
-            <div className="post-comments__field">
+            <div className="comments__field">
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write a comment..."
                 maxLength={2000}
                 rows={3}
-                className="post-comments__textarea"
+                className="comments__textarea"
               />
               <div className="mt-[0.44rem] flex min-h-[1.23rem] items-center justify-between gap-[0.9rem]">
                 <span className="text-[11.5px] leading-none text-primary opacity-(--opacity-faint)">
@@ -601,7 +598,7 @@ export function CommentSection({ postCid }: { postCid: string }) {
                         submitting ? 'Submitting comment' : 'Submit comment'
                       }
                       disabled={submitting}
-                      className="post-comments__submit"
+                      className="comments__submit"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}

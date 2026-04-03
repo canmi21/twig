@@ -6,16 +6,16 @@
 
 /* ── Page shell ────────────────────────────────── */
 
-body:has(.post-page) {
+body:has(.post) {
   background: var(--color-surface);
   color: var(--color-primary);
 }
 
 /* ── Article body: headings with anchor offsets ── */
 
-.post-page__body h2,
-.post-page__body h3,
-.post-page__body h4 {
+.post__body h2,
+.post__body h3,
+.post__body h4 {
   color: var(--color-primary);
   font-weight: var(--font-weight-medium);
   letter-spacing: -0.01em;
@@ -23,25 +23,25 @@ body:has(.post-page) {
   margin-left: -1.25rem;
 }
 
-.post-page__body h2 {
+.post__body h2 {
   margin-top: 2.25em;
   margin-bottom: 0.8em;
   font-size: 1rem;
 }
 
-.post-page__body h3 {
+.post__body h3 {
   margin-top: 1.8em;
   margin-bottom: 0.72em;
   font-size: 0.95rem;
 }
 
-.post-page__body h4 {
+.post__body h4 {
   margin-top: 1.5em;
   margin-bottom: 0.6em;
   font-size: 0.92rem;
 }
 
-.post-page__body .heading-link {
+.post__body .heading-link {
   position: absolute;
   left: 0.1rem;
   color: var(--color-accent);
@@ -49,9 +49,9 @@ body:has(.post-page) {
 
 /* ── Animated pseudo-underline ─────────────────── */
 
-.post-page__body a:not(.heading-link),
-.post-page__body a:not(.heading-link):hover,
-.post-comments__signin-link {
+.post__body a:not(.heading-link),
+.post__body a:not(.heading-link):hover,
+.comments__signin-link {
   position: relative;
   z-index: 0;
   isolation: isolate;
@@ -59,8 +59,8 @@ body:has(.post-page) {
   text-decoration: none;
 }
 
-.post-page__body a:not(.heading-link)::after,
-.post-comments__signin-link::after {
+.post__body a:not(.heading-link)::after,
+.comments__signin-link::after {
   content: '';
   position: absolute;
   z-index: -1;
@@ -79,32 +79,32 @@ body:has(.post-page) {
   background-size: 0% 100%;
 }
 
-.post-page__body a:not(.heading-link):hover::after,
-.post-comments__signin-link:hover::after {
+.post__body a:not(.heading-link):hover::after,
+.comments__signin-link:hover::after {
   background-size: 100% 100%;
   transition: background-size 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Inline typography ─────────────────────────── */
 
-.post-page__body p {
+.post__body p {
   margin-bottom: 1em;
 }
 
-.post-page__body strong {
+.post__body strong {
   font-weight: var(--font-weight-bold);
 }
 
-.post-page__body ul,
-.post-page__body ol {
+.post__body ul,
+.post__body ol {
   margin-bottom: 1.2em;
 }
 
-.post-page__body li {
+.post__body li {
   margin-bottom: 0.38em;
 }
 
-.post-page__body blockquote {
+.post__body blockquote {
   margin: 1.6em 0;
   border-left: 1px solid var(--color-border);
   padding-left: 1rem;
@@ -112,16 +112,16 @@ body:has(.post-page) {
   opacity: var(--opacity-soft);
 }
 
-.post-page__body hr {
+.post__body hr {
   margin: 2.2em 0;
   border-top-color: var(--color-border);
 }
 
 /* ── Quiet surface: code blocks ────────────────── */
 
-.post-page__body pre,
-.post-page__body pre:not(.shiki),
-.post-page__body .shiki {
+.post__body pre,
+.post__body pre:not(.shiki),
+.post__body .shiki {
   margin: 1.55em 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -129,13 +129,13 @@ body:has(.post-page) {
   box-shadow: none;
 }
 
-.post-page__body pre {
+.post__body pre {
   padding: 1em 1.15em;
 }
 
 /* ── Quiet surface: inline code ────────────────── */
 
-.post-page__body :not(pre) > code {
+.post__body :not(pre) > code {
   border: 1px solid var(--color-border);
   background: var(--color-raised);
   color: var(--color-primary);
@@ -145,8 +145,8 @@ body:has(.post-page) {
 
 /* ── Quiet surface: images ─────────────────────── */
 
-.post-page__body img,
-.post-page-media--image {
+.post__body img,
+.post-media--image {
   margin: 1.8em 0;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border) !important;
@@ -154,15 +154,15 @@ body:has(.post-page) {
   box-shadow: none;
 }
 
-.post-page-media--video,
-.post-page-media--audio {
+.post-media--video,
+.post-media--audio {
   width: 100%;
   margin: 1.8em 0;
 }
 
 /* ── Quiet surface: tables ─────────────────────── */
 
-.post-page__body table {
+.post__body table {
   margin: 1.5em 0;
   border-collapse: separate;
   border-spacing: 0;
@@ -171,13 +171,13 @@ body:has(.post-page) {
   overflow: hidden;
 }
 
-.post-page__body th,
-.post-page__body td {
+.post__body th,
+.post__body td {
   border-bottom-color: var(--color-border);
   padding: 0.72em 0.9em;
 }
 
-.post-page__body th {
+.post__body th {
   background: var(--color-raised);
   color: var(--color-primary);
   font-weight: var(--font-weight-medium);
@@ -185,7 +185,7 @@ body:has(.post-page) {
 
 /* ── Article footer: signature positioning ─────── */
 
-.post-page__footer {
+.post__footer {
   position: relative;
   display: flex;
   align-items: center;
@@ -195,7 +195,7 @@ body:has(.post-page) {
   padding-right: 5.75rem;
 }
 
-.post-page__signature-wrap {
+.post__signature {
   position: absolute;
   top: 50%;
   right: 0;
@@ -210,44 +210,34 @@ body:has(.post-page) {
 /* ── Mobile ────────────────────────────────────── */
 
 @media (max-width: 1279px) {
-  .post-page {
+  .post {
     padding-top: 6.25rem;
   }
 }
 
 @media (max-width: 767px) {
-  .post-page {
+  .post {
     padding-top: 5.75rem;
     padding-bottom: 5rem;
   }
 
-  .post-page .article-header {
-    margin-bottom: 2.35rem;
-    gap: 0.9rem;
-  }
-
-  .post-page .article-header__title {
-    font-size: 1.05rem;
-    line-height: 1.5;
-  }
-
-  .post-page__footer {
+  .post__footer {
     gap: 0.4rem;
     height: 0.64rem;
     margin-top: 0.06rem;
     padding-right: 5.2rem;
   }
 
-  .post-page__signature-wrap {
+  .post__signature {
     padding-left: 0.25rem;
   }
 
-  .post-page__body {
+  .post__body {
     font-size: 14.5px;
     line-height: 1.84;
   }
 
-  .post-page__body .heading-link {
+  .post__body .heading-link {
     left: -1.15rem;
   }
 }
