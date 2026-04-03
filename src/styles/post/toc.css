@@ -1,4 +1,4 @@
-/* src/styles/post-toc.css */
+/* src/styles/post/toc.css */
 
 /* hover / active state — combined selector that Tailwind can't express inline */
 .toc__link:hover,

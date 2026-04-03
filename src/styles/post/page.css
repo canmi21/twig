@@ -1,8 +1,7 @@
-/* src/styles/post-page.css */
+/* src/styles/post/page.css */
 
-@import './post-actions.css';
-@import './post-comments.css';
-@import './post-toc.css';
+@import './comments.css';
+@import './toc.css';
 
 /* ── Page shell ────────────────────────────────── */
 

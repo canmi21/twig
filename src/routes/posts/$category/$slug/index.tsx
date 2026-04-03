@@ -16,7 +16,7 @@ import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
 import { ThemeToggle } from '~/components/theme-toggle'
 import { Signature } from '~/components/post/signature'
-import postPageCss from '~/styles/post-page.css?url'
+import postPageCss from '~/styles/post/page.css?url'
 
 const resolveSlug = createServerFn()
   .inputValidator((input: { cid: string }) => input)
@@ -106,7 +106,7 @@ function PostPage() {
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="post-page mx-auto max-w-180 px-5 pt-27 pb-28 text-primary">
+      <article className="post mx-auto max-w-180 px-5 pt-27 pb-28 text-primary">
         <ArticleHeader
           title={frontmatter.title}
           createdAt={frontmatter.created_at}
@@ -114,7 +114,7 @@ function PostPage() {
         >
           <PostShareActions cid={frontmatter.cid} />
         </ArticleHeader>
-        <div className="article post-page__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
+        <div className="article post__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
           <PostRenderer html={post.html} components={post.components} />
         </div>
         {frontmatter.tags && frontmatter.tags.length > 0 && (
@@ -140,11 +140,11 @@ function PostPage() {
                 )}
               </div>
               <div
-                className="post-page__footer text-[12px] text-secondary"
+                className="post__footer text-[12px] text-secondary"
                 aria-hidden="true"
               >
                 <div className="min-w-0 flex-1 border-b border-dashed border-border" />
-                <div className="post-page__signature-wrap">
+                <div className="post__signature">
                   <Signature className="h-13.5 text-primary opacity-(--opacity-muted) select-none" />
                 </div>
               </div>
