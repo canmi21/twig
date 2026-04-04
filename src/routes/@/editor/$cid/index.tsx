@@ -11,7 +11,7 @@ import {
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { getDb, getCache } from '~/server/platform'
+import { getDb, getCache, getBucket } from '~/server/platform'
 import { getPostByCid, upsertPost, getAllPosts } from '~/lib/database/posts'
 import {
   writePostKv,
@@ -20,6 +20,12 @@ import {
   toPostIndexEntry,
 } from '~/lib/storage/kv'
 import { computeContentHash } from '~/lib/utils/hash'
+import { storageKey } from '~/lib/storage/storage-key'
+import {
+  getMediaByHash,
+  insertMedia,
+  upsertMediaRef,
+} from '~/lib/database/media'
 import { postSchema } from '~/lib/content/post-schema'
 import { verifyCfAccess } from '~/server/auth'
 import { ArrowLeft, Eye, CodeXml, Save, Sun, Moon } from 'lucide-react'
@@ -205,6 +211,59 @@ const savePost = createServerFn({ method: 'POST' })
     return { ok: true as const }
   })
 
+interface UploadMediaData {
+  cid: string
+  base64: string
+  mime: string
+}
+
+const extFromMime: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'image/avif': 'avif',
+  'image/svg+xml': 'svg',
+}
+
+const uploadMedia = createServerFn({ method: 'POST' })
+  .inputValidator((input: UploadMediaData) => input)
+  .handler(async ({ data }) => {
+    if (!import.meta.env.DEV) {
+      const identity = await verifyCfAccess(getRequest())
+      if (!identity) throw new Error('Unauthorized')
+    }
+
+    const ext = extFromMime[data.mime]
+    if (!ext)
+      return { ok: false as const, error: `Unsupported type: ${data.mime}` }
+
+    const raw = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0))
+    const hashBuf = await crypto.subtle.digest('SHA-256', raw)
+    const hash = Array.from(new Uint8Array(hashBuf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+
+    const db = getDb()
+    const bucket = getBucket()
+    const key = storageKey(hash, ext)
+
+    const existing = await getMediaByHash(db, hash)
+    if (!existing) {
+      await bucket.put(key, raw, { httpMetadata: { contentType: data.mime } })
+      await insertMedia(db, {
+        hash,
+        ext,
+        mime: data.mime,
+        size: raw.byteLength,
+        createdAt: new Date().toISOString(),
+      })
+    }
+
+    await upsertMediaRef(db, hash, data.cid)
+    return { ok: true as const, src: `${hash}.${ext}` }
+  })
+
 // --- Route ---
 
 export const Route = createFileRoute('/@/editor/$cid/')({
@@ -373,6 +432,54 @@ function EditorPage() {
     [],
   )
 
+  const handlePaste = useCallback(
+    async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const file = Array.from(e.clipboardData.items)
+        .find((item) => item.type.startsWith('image/'))
+        ?.getAsFile()
+      if (!file) return
+
+      e.preventDefault()
+      const ta = e.currentTarget
+      const start = ta.selectionStart
+      const end = ta.selectionEnd
+
+      // Insert placeholder while uploading
+      const placeholder = '::image{src="uploading..." alt=""}'
+      const before = source.substring(0, start)
+      const after = source.substring(end)
+      setSource(before + placeholder + after)
+
+      try {
+        const buf = await file.arrayBuffer()
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)))
+        const result = await uploadMedia({
+          data: { cid: post.cid, base64, mime: file.type },
+        })
+
+        if (result.ok) {
+          const directive = `::image{src="${result.src}" alt=""}`
+          setSource((prev) => prev.replace(placeholder, directive))
+        } else {
+          setSource((prev) =>
+            prev.replace(
+              placeholder,
+              `<!-- upload failed: ${result.error} -->`,
+            ),
+          )
+        }
+      } catch (err) {
+        setSource((prev) =>
+          prev.replace(
+            placeholder,
+            `<!-- upload failed: ${err instanceof Error ? err.message : 'unknown'} -->`,
+          ),
+        )
+      }
+    },
+    [source, post.cid],
+  )
+
   async function handleSave() {
     setSaving(true)
     setFeedback(null)
@@ -458,6 +565,7 @@ function EditorPage() {
             value={source}
             onChange={(e) => setSource(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             className="min-h-0 flex-1 resize-none border-none bg-surface p-4 font-mono text-[13px]/6 text-primary outline-none"
             spellCheck={false}
           />

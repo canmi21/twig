@@ -33,7 +33,7 @@ function PostsPage() {
   return (
     <>
       <Navbar />
-      <div className="mx-auto max-w-180 px-5 pt-16 pb-24">
+      <div className="mx-auto flex min-h-svh max-w-180 flex-col justify-center px-5">
         <ul className="space-y-6">
           {posts.map((post) => (
             <li key={post.slug}>
