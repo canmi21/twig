@@ -38,7 +38,8 @@ import {
   extractFrontmatterSource,
 } from '~/lib/compiler/frontmatter'
 import type { PreviewResult } from '~/lib/compiler/compile-preview'
-import type { Frontmatter } from '~/lib/compiler/index'
+import type { Frontmatter, ComponentEntry } from '~/lib/compiler/index'
+import { PostRenderer } from '~/components/post/renderer'
 import type { HtmlSourceHighlightResult } from '~/lib/shiki/html-source-highlighter'
 import type { ThemedToken } from 'shiki/core'
 
@@ -315,6 +316,9 @@ function EditorPage() {
   } | null>(null)
 
   const [previewHtml, setPreviewHtml] = useState('')
+  const [previewComponents, setPreviewComponents] = useState<ComponentEntry[]>(
+    [],
+  )
   const [compilerReady, setCompilerReady] = useState(false)
   const [compileError, setCompileError] = useState<string | null>(null)
 
@@ -405,6 +409,7 @@ function EditorPage() {
       try {
         const result = await compiler.compilePreview(parsedContent)
         setPreviewHtml(result.html)
+        setPreviewComponents(result.components)
         setCompileError(null)
       } catch (err) {
         setCompileError(err instanceof Error ? err.message : 'Compile failed')
@@ -608,12 +613,13 @@ function EditorPage() {
                     {compileError}
                   </div>
                 ) : (
-                  // Content authored by authenticated admin, compiled by our remark/rehype pipeline
-                  <div
-                    // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-                    className="article"
-                    dangerouslySetInnerHTML={{ __html: previewHtml }}
-                  />
+                  // eslint-disable-next-line better-tailwindcss/no-unknown-classes
+                  <div className="article">
+                    <PostRenderer
+                      html={previewHtml}
+                      components={previewComponents}
+                    />
+                  </div>
                 )}
               </div>
             ) : (
