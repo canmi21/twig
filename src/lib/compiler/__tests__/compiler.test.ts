@@ -109,13 +109,11 @@ Some text.
     expect(result.components).toEqual([])
   })
 
-  test('extracts mermaid code blocks as component placeholders', async () => {
-    const md = `## Architecture
+  test('extracts svg-board code blocks as component placeholders', async () => {
+    const md = `## Diagram
 
-\`\`\`mermaid
-graph TD
-  A --> B
-  B --> C
+\`\`\`svg-board
+<svg viewBox="0 0 100 50"><rect width="100" height="50"/></svg>
 \`\`\`
 
 Some text after.
@@ -125,31 +123,15 @@ Some text after.
 
     expect(result.components).toEqual([
       {
-        type: 'mermaid',
-        props: { code: 'graph TD\n  A --> B\n  B --> C' },
+        type: 'svg-board',
+        props: {
+          code: '<svg viewBox="0 0 100 50"><rect width="100" height="50"/></svg>',
+        },
         index: 0,
       },
     ])
     expect(result.html).toContain('<!--component:0-->')
-    expect(result.html).not.toContain('graph TD')
-  })
-
-  test('mermaid blocks coexist with media directives', async () => {
-    const md = `::image{src="photo.png" alt="test"}
-
-\`\`\`mermaid
-sequenceDiagram
-  A->>B: Hello
-\`\`\`
-`
-
-    const result = await compile(md)
-
-    expect(result.components).toHaveLength(2)
-    expect(result.components[0].type).toBe('image')
-    expect(result.components[1].type).toBe('mermaid')
-    expect(result.html).toContain('<!--component:0-->')
-    expect(result.html).toContain('<!--component:1-->')
+    expect(result.html).not.toContain('<rect')
   })
 
   test('handles mixed content with directives', async () => {

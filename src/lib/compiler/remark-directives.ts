@@ -40,9 +40,9 @@ export const remarkExtractDirectives: Plugin<
       continue
     }
 
-    // Extract fenced code blocks (```mermaid, ```svg-board)
+    // Extract fenced code blocks (```svg-board)
     const codeLang = node.type === 'code' ? (node as Code).lang : undefined
-    if (codeLang === 'mermaid' || codeLang === 'svg-board') {
+    if (codeLang === 'svg-board') {
       const index = options.components.length
       options.components.push({
         type: codeLang,

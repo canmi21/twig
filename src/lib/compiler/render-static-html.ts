@@ -32,11 +32,6 @@ export function renderStaticHtml(
         return `<audio src="${url}" controls></audio>`
       case 'svg-board':
         return `<div class="post-media post-media--svg-board">${entry.props.code}</div>`
-      case 'mermaid':
-        if (entry.props.svg) {
-          return `<div class="post-media post-media--mermaid">${entry.props.svg}</div>`
-        }
-        return `<pre><code>${escapeAttr(entry.props.code)}</code></pre>`
       default:
         return opts.articleUrl
           ? `<p><a href="${opts.articleUrl}">View interactive content on the website</a></p>`

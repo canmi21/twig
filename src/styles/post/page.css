@@ -518,34 +518,6 @@ body:has(.post) {
   fill: #f7c1c1;
 }
 
-/* ── Quiet surface: mermaid diagrams ──────────── */
-
-.post-media--mermaid {
-  margin: 1.8em 0;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: var(--color-raised);
-  box-shadow: none;
-  width: 100%;
-  overflow-x: auto;
-  padding: 1em;
-}
-
-.post-media--mermaid svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  margin: 0 auto;
-}
-
-.post-media--mermaid-fallback {
-  margin: 1.8em 0;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: var(--color-raised);
-  padding: 1em 1.15em;
-}
-
 .article img.post-media__cover,
 .article img.post-media__favicon,
 .post-media__cover,
