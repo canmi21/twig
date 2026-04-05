@@ -394,9 +394,7 @@ export function PostShareActions({
           "
         >
           <span className={ICON_SLOT_CLASS}>
-            <Link2Line
-              className={`${ICON_SIZE_CLASS} translate-y-[1.5px] -rotate-45`}
-            />
+            <Link2Line className={`${ICON_SIZE_CLASS} -rotate-45`} />
           </span>
         </button>
       </div>
