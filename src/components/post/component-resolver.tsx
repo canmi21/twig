@@ -10,6 +10,10 @@ import type { ComponentEntry } from '~/lib/compiler/index'
 import { mediaUrl } from '~/lib/storage/media-url'
 
 type LinkTone = 'light' | 'dark'
+type LinkFavicon =
+  | { kind: 'proxy' }
+  | { kind: 'hidden' }
+  | { kind: 'custom'; src: string }
 
 function parseLinkTone(value: string | undefined): LinkTone | undefined {
   if (value === 'light' || value === 'dark') {
@@ -19,8 +23,16 @@ function parseLinkTone(value: string | undefined): LinkTone | undefined {
   return undefined
 }
 
-function parseFaviconEnabled(value: string | undefined): boolean {
-  return value !== 'false'
+function parseLinkFavicon(value: string | undefined): LinkFavicon {
+  if (value == null || value === '' || value === 'true') {
+    return { kind: 'proxy' }
+  }
+
+  if (value === 'false') {
+    return { kind: 'hidden' }
+  }
+
+  return { kind: 'custom', src: value }
 }
 
 function ImageComponent({ url, alt }: { url: string; alt: string }) {
@@ -81,13 +93,13 @@ function LinkCardComponent({
   url,
   title,
   tone,
-  showFavicon,
+  favicon,
 }: {
   coverUrl: string
   url: string
   title: string
   tone?: LinkTone
-  showFavicon: boolean
+  favicon: LinkFavicon
 }) {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -107,6 +119,12 @@ function LinkCardComponent({
   const faviconQuery = tone ? `?tone=${tone}` : ''
   const overlayToneClass = tone === 'dark' ? 'text-zinc-950' : 'text-white'
   const overlayDepthClass = tone === 'dark' ? '' : 'drop-shadow-sm'
+  const faviconSrc =
+    favicon.kind === 'proxy'
+      ? `/api/favicon/${domain}${faviconQuery}`
+      : favicon.kind === 'custom'
+        ? favicon.src
+        : null
 
   return (
     <a
@@ -139,9 +157,9 @@ function LinkCardComponent({
         className={`pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 ${overlayToneClass}`}
       >
         <div className="flex min-w-0 items-center gap-1.5">
-          {showFavicon ? (
+          {faviconSrc ? (
             <img
-              src={`/api/favicon/${domain}${faviconQuery}`}
+              src={faviconSrc}
               alt=""
               className={`post-media__favicon size-4 shrink-0 ${overlayDepthClass}`}
             />
@@ -176,14 +194,14 @@ export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
       const src = entry.props.src ?? ''
       const coverUrl = src.startsWith('http') ? src : url
       const tone = parseLinkTone(entry.props.tone)
-      const showFavicon = parseFaviconEnabled(entry.props.favicon)
+      const favicon = parseLinkFavicon(entry.props.favicon)
       return (
         <LinkCardComponent
           coverUrl={coverUrl}
           url={entry.props.url ?? '#'}
           title={entry.props.title ?? ''}
           tone={tone}
-          showFavicon={showFavicon}
+          favicon={favicon}
         />
       )
     }
