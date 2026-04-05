@@ -72,6 +72,7 @@ const togglePublished = createServerFn({ method: 'POST' })
           description: post.description ?? undefined,
           category: post.category ?? undefined,
           tags: post.tags ? JSON.parse(post.tags) : undefined,
+          tweet: post.tweet ?? undefined,
           cid: post.cid,
           created_at: post.createdAt,
           updated_at: post.updatedAt,
