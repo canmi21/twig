@@ -28,6 +28,7 @@ export const posts = sqliteTable('posts', {
   tags: text('tags'),
   content: text('content').notNull(),
   contentHash: text('content_hash').notNull().default(''),
+  tweet: text('tweet'),
 })
 
 export const media = sqliteTable('media', {

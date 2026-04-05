@@ -33,6 +33,10 @@ export const postSchema = z.object({
     )
     .max(5, 'at most 5 tags allowed')
     .optional(),
+  tweet: z
+    .string()
+    .regex(/^\d+$/, 'tweet must be a numeric tweet ID')
+    .optional(),
   content: z.string().min(1, 'content must not be empty'),
   cid: z
     .string()

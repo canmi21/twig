@@ -150,6 +150,7 @@ export function validateAll(scanned: ScannedPost[]): boolean {
       description: post.frontmatter.description,
       category: post.category,
       tags: post.frontmatter.tags,
+      tweet: post.frontmatter.tweet,
       content: post.content,
       cid: post.frontmatter.cid,
       created_at: post.frontmatter.created_at,
@@ -208,6 +209,7 @@ export async function diffPosts(
       (existing.description ?? undefined) !== post.frontmatter.description ||
       (existing.category ?? undefined) !== post.category ||
       existing.tags !== tagsJson ||
+      (existing.tweet ?? undefined) !== post.frontmatter.tweet ||
       existing.slug !== post.slug
 
     // Check published change
@@ -316,6 +318,7 @@ export async function executeAddOrUpdate(
     description: post.frontmatter.description,
     category: post.category,
     tags: post.frontmatter.tags,
+    tweet: post.frontmatter.tweet,
     content: post.content,
     contentHash: post.rawContentHash,
     cid: post.frontmatter.cid,

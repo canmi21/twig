@@ -112,7 +112,7 @@ function PostPage() {
           createdAt={frontmatter.created_at}
           html={post.html}
         >
-          <PostShareActions cid={frontmatter.cid} />
+          <PostShareActions cid={frontmatter.cid} tweet={frontmatter.tweet} />
         </ArticleHeader>
         <div className="article post__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
           <PostRenderer html={post.html} components={post.components} />
@@ -161,7 +161,9 @@ function PostPage() {
             </div>
           </>
         )}
-        {frontmatter.cid && <CommentSection postCid={frontmatter.cid} />}
+        {frontmatter.cid && (
+          <CommentSection postCid={frontmatter.cid} tweet={frontmatter.tweet} />
+        )}
       </article>
     </>
   )

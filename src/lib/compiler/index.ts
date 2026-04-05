@@ -27,6 +27,7 @@ export interface Frontmatter {
   description?: string
   category?: string
   tags?: string[]
+  tweet?: string
   cid?: string
   created_at?: string
   updated_at?: string

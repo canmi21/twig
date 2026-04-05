@@ -15,6 +15,9 @@ export function serializeFrontmatter(fm: Frontmatter): string {
   if (fm.description) obj.description = fm.description
   if (fm.tags && fm.tags.length > 0) obj.tags = fm.tags
 
+  // optional tweet linkage
+  if (fm.tweet) obj.tweet = fm.tweet
+
   // metadata fields last
   if (fm.created_at) obj.created_at = fm.created_at
   if (fm.updated_at) obj.updated_at = fm.updated_at

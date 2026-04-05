@@ -30,6 +30,7 @@ export async function rebuildCore(opts: {
       description: row.description ?? undefined,
       category: row.category ?? undefined,
       tags,
+      tweet: row.tweet ?? undefined,
       cid: row.cid,
       created_at: row.createdAt,
       updated_at: row.updatedAt,

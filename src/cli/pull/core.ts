@@ -30,6 +30,7 @@ export async function pullCore(opts: {
       title: row.title,
       description: row.description ?? undefined,
       tags,
+      tweet: row.tweet ?? undefined,
       created_at: row.createdAt,
       updated_at: row.updatedAt,
       published: row.published === 1,

@@ -149,7 +149,13 @@ function getClientLabel(userAgent: string): {
   return { device, label: `Desktop ${browser}` }
 }
 
-export function CommentSection({ postCid }: { postCid: string }) {
+export function CommentSection({
+  postCid,
+  tweet,
+}: {
+  postCid: string
+  tweet?: string
+}) {
   const location = useLocation()
   const [comments, setComments] = useState<Comment[]>([])
   const [session, setSession] = useState<{
@@ -569,6 +575,21 @@ export function CommentSection({ postCid }: { postCid: string }) {
               Sign in
             </Link>{' '}
             to leave a comment.
+            {tweet && (
+              <>
+                {' '}
+                Or{' '}
+                <a
+                  href={`https://x.com/intent/post?in_reply_to=${tweet}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="comments__signin-link text-primary hover:underline"
+                >
+                  comment on Twitter
+                </a>
+                .
+              </>
+            )}
           </p>
         ) : submitted ? (
           <p className="text-[13px] text-primary opacity-(--opacity-muted)">

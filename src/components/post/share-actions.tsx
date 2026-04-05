@@ -12,6 +12,7 @@ import {
   SocialXLine,
   TwitterLine,
 } from '@mingcute/react'
+import { getSession } from '~/server/session'
 
 type CopyStatus = 'idle' | 'copied' | 'failed'
 type AiProvider = 'claude' | 'chatgpt' | 'gemini' | 'grok'
@@ -169,15 +170,28 @@ function getAiProviderIcon(provider: AiProvider) {
   return <Grok2Fill className={ICON_SIZE_CLASS} />
 }
 
-export function PostShareActions({ cid }: { cid?: string }) {
+export function PostShareActions({
+  cid,
+  tweet,
+}: {
+  cid?: string
+  tweet?: string
+}) {
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle')
   const [isXHovered, setIsXHovered] = useState(false)
   const [isAiSelectorOpen, setIsAiSelectorOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const aiProvider = useSyncExternalStore<AiProvider>(
     subscribeToAiProvider,
     readStoredAiProvider,
     () => 'claude',
   )
+
+  useEffect(() => {
+    if (tweet) {
+      getSession().then((sess) => setIsLoggedIn(!!sess))
+    }
+  }, [tweet])
 
   useEffect(() => {
     if (copyStatus === 'idle') return
@@ -298,7 +312,14 @@ export function PostShareActions({ cid }: { cid?: string }) {
       <button
         type="button"
         onClick={() => {
-          openTwitterShare(window.location.href)
+          if (tweet) {
+            const url = isLoggedIn
+              ? `https://x.com/intent/post?in_reply_to=${tweet}`
+              : `https://x.com/intent/like?tweet_id=${tweet}`
+            window.open(url, '_blank', 'noopener,noreferrer')
+          } else {
+            openTwitterShare(window.location.href)
+          }
         }}
         onMouseEnter={() => {
           setIsXHovered(true)
@@ -312,8 +333,10 @@ export function PostShareActions({ cid }: { cid?: string }) {
         onBlur={() => {
           setIsXHovered(false)
         }}
-        aria-label="Share on X"
-        title="Share on X"
+        aria-label={
+          tweet ? (isLoggedIn ? 'Reply on X' : 'Like on X') : 'Share on X'
+        }
+        title={tweet ? (isLoggedIn ? 'Reply on X' : 'Like on X') : 'Share on X'}
         className="
           inline-flex cursor-pointer items-center justify-center rounded-full p-1
           text-secondary transition-colors

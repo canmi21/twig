@@ -11,6 +11,7 @@ export interface UpsertPostInput {
   description?: string
   category?: string
   tags?: string[]
+  tweet?: string
   content: string
   contentHash: string
   cid?: string
@@ -32,6 +33,7 @@ export interface PostRow {
   description: string | null
   category: string | null
   tags: string | null
+  tweet: string | null
   content: string
   contentHash: string
   createdAt: string
@@ -48,6 +50,7 @@ export async function getAllPosts(db: Db): Promise<PostRow[]> {
       description: posts.description,
       category: posts.category,
       tags: posts.tags,
+      tweet: posts.tweet,
       content: posts.content,
       contentHash: posts.contentHash,
       createdAt: contents.createdAt,
@@ -71,6 +74,7 @@ export async function getPostByCid(
       description: posts.description,
       category: posts.category,
       tags: posts.tags,
+      tweet: posts.tweet,
       content: posts.content,
       contentHash: posts.contentHash,
       createdAt: contents.createdAt,
@@ -156,6 +160,7 @@ export async function upsertPost(
         description: input.description ?? null,
         category: input.category ?? null,
         tags: tagsJson,
+        tweet: input.tweet ?? null,
         content: input.content,
         contentHash: input.contentHash,
       })
@@ -184,6 +189,7 @@ export async function upsertPost(
     description: input.description ?? null,
     category: input.category ?? null,
     tags: tagsJson,
+    tweet: input.tweet ?? null,
     content: input.content,
     contentHash: input.contentHash,
   })
