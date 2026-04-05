@@ -8,7 +8,8 @@ import { readPostIndex } from '~/lib/storage/kv'
 import { formatDateShort } from '~/lib/utils/date'
 
 const getPosts = createServerFn().handler(async () => {
-  return readPostIndex(getCache())
+  const all = await readPostIndex(getCache())
+  return all.filter((p) => p.published)
 })
 
 export const Route = createFileRoute('/posts/')({
