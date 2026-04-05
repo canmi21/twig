@@ -19,6 +19,10 @@ function parseLinkTone(value: string | undefined): LinkTone | undefined {
   return undefined
 }
 
+function parseFaviconEnabled(value: string | undefined): boolean {
+  return value !== 'false'
+}
+
 function ImageComponent({ url, alt }: { url: string; alt: string }) {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -77,11 +81,13 @@ function LinkCardComponent({
   url,
   title,
   tone,
+  showFavicon,
 }: {
   coverUrl: string
   url: string
   title: string
   tone?: LinkTone
+  showFavicon: boolean
 }) {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -133,11 +139,13 @@ function LinkCardComponent({
         className={`pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 ${overlayToneClass}`}
       >
         <div className="flex min-w-0 items-center gap-1.5">
-          <img
-            src={`/api/favicon/${domain}${faviconQuery}`}
-            alt=""
-            className={`post-media__favicon size-4 shrink-0 ${overlayDepthClass}`}
-          />
+          {showFavicon ? (
+            <img
+              src={`/api/favicon/${domain}${faviconQuery}`}
+              alt=""
+              className={`post-media__favicon size-4 shrink-0 ${overlayDepthClass}`}
+            />
+          ) : null}
           <span className={`truncate text-sm font-medium ${overlayDepthClass}`}>
             {title}
           </span>
@@ -168,12 +176,14 @@ export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
       const src = entry.props.src ?? ''
       const coverUrl = src.startsWith('http') ? src : url
       const tone = parseLinkTone(entry.props.tone)
+      const showFavicon = parseFaviconEnabled(entry.props.favicon)
       return (
         <LinkCardComponent
           coverUrl={coverUrl}
           url={entry.props.url ?? '#'}
           title={entry.props.title ?? ''}
           tone={tone}
+          showFavicon={showFavicon}
         />
       )
     }
