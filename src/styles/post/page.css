@@ -153,6 +153,399 @@ body:has(.post) {
   box-shadow: none;
 }
 
+/* ── Quiet surface: svg-board ─────────────────── */
+
+.post-media--svg-board {
+  margin: 1.8em 0;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.post-media--svg-board svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* ── svg-board: text classes ─────────────────── */
+
+.post-media--svg-board .t {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  fill: var(--color-primary);
+}
+
+.post-media--svg-board .ts {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  fill: var(--color-secondary);
+}
+
+.post-media--svg-board .th {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  fill: var(--color-primary);
+}
+
+/* ── svg-board: shape classes ────────────────── */
+
+.post-media--svg-board .box rect {
+  fill: var(--color-raised);
+  stroke: var(--color-border);
+}
+
+.post-media--svg-board .arr {
+  stroke: var(--color-tertiary);
+  stroke-width: 1.5;
+}
+
+.post-media--svg-board .leader {
+  stroke: var(--color-tertiary);
+  stroke-width: 0.5;
+  stroke-dasharray: 3 3;
+}
+
+.post-media--svg-board .node {
+  cursor: pointer;
+}
+
+.post-media--svg-board .node:hover {
+  opacity: 0.75;
+}
+
+/* ── svg-board: color ramps (light) ──────────── */
+
+.post-media--svg-board .c-purple rect,
+.post-media--svg-board .c-purple circle,
+.post-media--svg-board .c-purple ellipse {
+  fill: #eeedfe;
+  stroke: #534ab7;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-purple .th {
+  fill: #3c3489;
+}
+.post-media--svg-board .c-purple .ts {
+  fill: #534ab7;
+}
+.post-media--svg-board .c-purple .t {
+  fill: #3c3489;
+}
+
+.post-media--svg-board .c-teal rect,
+.post-media--svg-board .c-teal circle,
+.post-media--svg-board .c-teal ellipse {
+  fill: #e1f5ee;
+  stroke: #0f6e56;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-teal .th {
+  fill: #085041;
+}
+.post-media--svg-board .c-teal .ts {
+  fill: #0f6e56;
+}
+.post-media--svg-board .c-teal .t {
+  fill: #085041;
+}
+
+.post-media--svg-board .c-coral rect,
+.post-media--svg-board .c-coral circle,
+.post-media--svg-board .c-coral ellipse {
+  fill: #faece7;
+  stroke: #993c1d;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-coral .th {
+  fill: #712b13;
+}
+.post-media--svg-board .c-coral .ts {
+  fill: #993c1d;
+}
+.post-media--svg-board .c-coral .t {
+  fill: #712b13;
+}
+
+.post-media--svg-board .c-pink rect,
+.post-media--svg-board .c-pink circle,
+.post-media--svg-board .c-pink ellipse {
+  fill: #fbeaf0;
+  stroke: #993556;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-pink .th {
+  fill: #72243e;
+}
+.post-media--svg-board .c-pink .ts {
+  fill: #993556;
+}
+.post-media--svg-board .c-pink .t {
+  fill: #72243e;
+}
+
+.post-media--svg-board .c-gray rect,
+.post-media--svg-board .c-gray circle,
+.post-media--svg-board .c-gray ellipse {
+  fill: #f1efe8;
+  stroke: #5f5e5a;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-gray .th {
+  fill: #444441;
+}
+.post-media--svg-board .c-gray .ts {
+  fill: #5f5e5a;
+}
+.post-media--svg-board .c-gray .t {
+  fill: #444441;
+}
+
+.post-media--svg-board .c-blue rect,
+.post-media--svg-board .c-blue circle,
+.post-media--svg-board .c-blue ellipse {
+  fill: #e6f1fb;
+  stroke: #185fa5;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-blue .th {
+  fill: #0c447c;
+}
+.post-media--svg-board .c-blue .ts {
+  fill: #185fa5;
+}
+.post-media--svg-board .c-blue .t {
+  fill: #0c447c;
+}
+
+.post-media--svg-board .c-green rect,
+.post-media--svg-board .c-green circle,
+.post-media--svg-board .c-green ellipse {
+  fill: #eaf3de;
+  stroke: #3b6d11;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-green .th {
+  fill: #27500a;
+}
+.post-media--svg-board .c-green .ts {
+  fill: #3b6d11;
+}
+.post-media--svg-board .c-green .t {
+  fill: #27500a;
+}
+
+.post-media--svg-board .c-amber rect,
+.post-media--svg-board .c-amber circle,
+.post-media--svg-board .c-amber ellipse {
+  fill: #faeeda;
+  stroke: #854f0b;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-amber .th {
+  fill: #633806;
+}
+.post-media--svg-board .c-amber .ts {
+  fill: #854f0b;
+}
+.post-media--svg-board .c-amber .t {
+  fill: #633806;
+}
+
+.post-media--svg-board .c-red rect,
+.post-media--svg-board .c-red circle,
+.post-media--svg-board .c-red ellipse {
+  fill: #fcebeb;
+  stroke: #a32d2d;
+  stroke-width: 0.5;
+}
+.post-media--svg-board .c-red .th {
+  fill: #791f1f;
+}
+.post-media--svg-board .c-red .ts {
+  fill: #a32d2d;
+}
+.post-media--svg-board .c-red .t {
+  fill: #791f1f;
+}
+
+/* ── svg-board: color ramps (dark) ───────────── */
+
+.dark .post-media--svg-board .c-purple rect,
+.dark .post-media--svg-board .c-purple circle,
+.dark .post-media--svg-board .c-purple ellipse {
+  fill: #3c3489;
+  stroke: #afa9ec;
+}
+.dark .post-media--svg-board .c-purple .th {
+  fill: #cecbf6;
+}
+.dark .post-media--svg-board .c-purple .ts {
+  fill: #afa9ec;
+}
+.dark .post-media--svg-board .c-purple .t {
+  fill: #cecbf6;
+}
+
+.dark .post-media--svg-board .c-teal rect,
+.dark .post-media--svg-board .c-teal circle,
+.dark .post-media--svg-board .c-teal ellipse {
+  fill: #085041;
+  stroke: #5dcaa5;
+}
+.dark .post-media--svg-board .c-teal .th {
+  fill: #9fe1cb;
+}
+.dark .post-media--svg-board .c-teal .ts {
+  fill: #5dcaa5;
+}
+.dark .post-media--svg-board .c-teal .t {
+  fill: #9fe1cb;
+}
+
+.dark .post-media--svg-board .c-coral rect,
+.dark .post-media--svg-board .c-coral circle,
+.dark .post-media--svg-board .c-coral ellipse {
+  fill: #712b13;
+  stroke: #f0997b;
+}
+.dark .post-media--svg-board .c-coral .th {
+  fill: #f5c4b3;
+}
+.dark .post-media--svg-board .c-coral .ts {
+  fill: #f0997b;
+}
+.dark .post-media--svg-board .c-coral .t {
+  fill: #f5c4b3;
+}
+
+.dark .post-media--svg-board .c-pink rect,
+.dark .post-media--svg-board .c-pink circle,
+.dark .post-media--svg-board .c-pink ellipse {
+  fill: #72243e;
+  stroke: #ed93b1;
+}
+.dark .post-media--svg-board .c-pink .th {
+  fill: #f4c0d1;
+}
+.dark .post-media--svg-board .c-pink .ts {
+  fill: #ed93b1;
+}
+.dark .post-media--svg-board .c-pink .t {
+  fill: #f4c0d1;
+}
+
+.dark .post-media--svg-board .c-gray rect,
+.dark .post-media--svg-board .c-gray circle,
+.dark .post-media--svg-board .c-gray ellipse {
+  fill: #444441;
+  stroke: #b4b2a9;
+}
+.dark .post-media--svg-board .c-gray .th {
+  fill: #d3d1c7;
+}
+.dark .post-media--svg-board .c-gray .ts {
+  fill: #b4b2a9;
+}
+.dark .post-media--svg-board .c-gray .t {
+  fill: #d3d1c7;
+}
+
+.dark .post-media--svg-board .c-blue rect,
+.dark .post-media--svg-board .c-blue circle,
+.dark .post-media--svg-board .c-blue ellipse {
+  fill: #0c447c;
+  stroke: #85b7eb;
+}
+.dark .post-media--svg-board .c-blue .th {
+  fill: #b5d4f4;
+}
+.dark .post-media--svg-board .c-blue .ts {
+  fill: #85b7eb;
+}
+.dark .post-media--svg-board .c-blue .t {
+  fill: #b5d4f4;
+}
+
+.dark .post-media--svg-board .c-green rect,
+.dark .post-media--svg-board .c-green circle,
+.dark .post-media--svg-board .c-green ellipse {
+  fill: #27500a;
+  stroke: #97c459;
+}
+.dark .post-media--svg-board .c-green .th {
+  fill: #c0dd97;
+}
+.dark .post-media--svg-board .c-green .ts {
+  fill: #97c459;
+}
+.dark .post-media--svg-board .c-green .t {
+  fill: #c0dd97;
+}
+
+.dark .post-media--svg-board .c-amber rect,
+.dark .post-media--svg-board .c-amber circle,
+.dark .post-media--svg-board .c-amber ellipse {
+  fill: #633806;
+  stroke: #ef9f27;
+}
+.dark .post-media--svg-board .c-amber .th {
+  fill: #fac775;
+}
+.dark .post-media--svg-board .c-amber .ts {
+  fill: #ef9f27;
+}
+.dark .post-media--svg-board .c-amber .t {
+  fill: #fac775;
+}
+
+.dark .post-media--svg-board .c-red rect,
+.dark .post-media--svg-board .c-red circle,
+.dark .post-media--svg-board .c-red ellipse {
+  fill: #791f1f;
+  stroke: #f09595;
+}
+.dark .post-media--svg-board .c-red .th {
+  fill: #f7c1c1;
+}
+.dark .post-media--svg-board .c-red .ts {
+  fill: #f09595;
+}
+.dark .post-media--svg-board .c-red .t {
+  fill: #f7c1c1;
+}
+
+/* ── Quiet surface: mermaid diagrams ──────────── */
+
+.post-media--mermaid {
+  margin: 1.8em 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-raised);
+  box-shadow: none;
+  width: 100%;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+.post-media--mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.post-media--mermaid-fallback {
+  margin: 1.8em 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-raised);
+  padding: 1em 1.15em;
+}
+
 .article img.post-media__cover,
 .article img.post-media__favicon,
 .post-media__cover,

@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -36,6 +36,7 @@
     "feedsmith": "^2.9.1",
     "jose": "^6.2.2",
     "lucide-react": "^1.7.0",
+    "mermaid": "^11.14.0",
     "motion": "^12.38.0",
     "prettier": "3.8.1",
     "react": "^19.2.4",

@@ -340,6 +340,16 @@ export async function executeAddOrUpdate(
   }
 
   const compiled = await compile(finalContent)
+
+  const mermaidCount = compiled.components.filter(
+    (c) => c.type === 'mermaid',
+  ).length
+  if (mermaidCount > 0) {
+    console.log(
+      `  warning: "${post.slug}" contains ${mermaidCount} mermaid diagram(s) — use the web editor to render SVGs`,
+    )
+  }
+
   await writePostKv(kv, post.slug, {
     frontmatter: post.frontmatter,
     html: compiled.html,

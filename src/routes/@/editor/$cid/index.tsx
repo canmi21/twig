@@ -42,6 +42,7 @@ import type { Frontmatter, ComponentEntry } from '~/lib/compiler/index'
 import { PostRenderer } from '~/components/post/renderer'
 import type { HtmlSourceHighlightResult } from '~/lib/shiki/html-source-highlighter'
 import type { ThemedToken } from 'shiki/core'
+import postPageCss from '~/styles/post/page.css?url'
 
 const DEFAULT_SPLIT = 0.5
 const MIN_SPLIT = 0.25
@@ -54,6 +55,39 @@ function parseActiveSearch(value: unknown): boolean | undefined {
 
 function buildEditorSource(frontmatter: Frontmatter, content: string) {
   return `${serializeFrontmatter(frontmatter)}\n\n${content}`
+}
+
+async function renderMermaidSvgs(
+  content: string,
+): Promise<Record<string, string>> {
+  const blocks: string[] = []
+  const re = /```mermaid\n([\s\S]*?)```/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(content)) !== null) {
+    const code = m[1].trim()
+    if (code) blocks.push(code)
+  }
+  if (blocks.length === 0) return {}
+
+  const { default: mermaid } = await import('mermaid')
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'neutral',
+  })
+
+  const svgs: Record<string, string> = {}
+  for (let i = 0; i < blocks.length; i++) {
+    const code = blocks[i]
+    if (svgs[code]) continue
+    try {
+      // oxlint-disable-next-line no-await-in-loop -- mermaid.render shares internal state, must run sequentially
+      const { svg } = await mermaid.render(`mermaid-${i}`, code)
+      svgs[code] = svg
+    } catch {
+      // Skip failed blocks; component falls back to raw code
+    }
+  }
+  return svgs
 }
 
 function ToolbarThemeButton() {
@@ -106,6 +140,7 @@ interface SavePostData {
   slug: string
   category: string
   source: string
+  mermaidSvgs?: Record<string, string>
 }
 
 const savePost = createServerFn({ method: 'POST' })
@@ -188,6 +223,16 @@ const savePost = createServerFn({ method: 'POST' })
       const { compile } = await import('~/lib/compiler/index')
       const compiled = await compile(extracted.content)
       const savedPost = await getPostByCid(db, result.cid)
+
+      // Inject pre-rendered mermaid SVGs from the editor browser
+      if (data.mermaidSvgs) {
+        for (const comp of compiled.components) {
+          if (comp.type === 'mermaid' && comp.props.code) {
+            const svg = data.mermaidSvgs[comp.props.code]
+            if (svg) comp.props.svg = svg
+          }
+        }
+      }
 
       await writePostKv(kv, result.slug, {
         frontmatter: {
@@ -283,6 +328,7 @@ export const Route = createFileRoute('/@/editor/$cid/')({
   loader: ({ params }) => getPost({ data: { cid: params.cid } }),
   head: ({ loaderData }) => ({
     meta: loaderData ? [{ title: `Editor - ${loaderData.title}` }] : [],
+    links: [{ rel: 'stylesheet', href: postPageCss }],
   }),
   component: EditorPage,
 })
@@ -412,6 +458,19 @@ function EditorPage() {
 
       try {
         const result = await compiler.compilePreview(parsedContent)
+
+        // Render mermaid blocks for live preview
+        const mermaidComps = result.components.filter(
+          (c) => c.type === 'mermaid',
+        )
+        if (mermaidComps.length > 0) {
+          const svgs = await renderMermaidSvgs(parsedContent)
+          for (const comp of mermaidComps) {
+            const svg = svgs[comp.props.code]
+            if (svg) comp.props.svg = svg
+          }
+        }
+
         setPreviewHtml(result.html)
         setPreviewComponents(result.components)
         setCompileError(null)
@@ -498,12 +557,15 @@ function EditorPage() {
     setFeedback(null)
 
     try {
+      const mermaidSvgs = await renderMermaidSvgs(parsedContent)
+
       const result = await savePost({
         data: {
           cid: post.cid,
           slug,
           category,
           source,
+          ...(Object.keys(mermaidSvgs).length > 0 ? { mermaidSvgs } : {}),
         },
       })
 

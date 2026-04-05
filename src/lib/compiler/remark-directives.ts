@@ -1,6 +1,6 @@
 /* src/lib/compiler/remark-directives.ts */
 
-import type { Root as MdastRoot } from 'mdast'
+import type { Root as MdastRoot, Code } from 'mdast'
 import type { Plugin } from 'unified'
 
 export interface ComponentEntry {
@@ -22,20 +22,38 @@ export const remarkExtractDirectives: Plugin<
       attributes?: Record<string, string>
     }
 
-    if (node.type !== 'leafDirective') continue
-    if (!node.name || !mediaDirectives.has(node.name)) continue
+    // Extract media directives (::image, ::video, ::audio, ::linkcard)
+    if (node.type === 'leafDirective') {
+      if (!node.name || !mediaDirectives.has(node.name)) continue
 
-    const index = options.components.length
-    options.components.push({
-      type: node.name,
-      props: { ...node.attributes },
-      index,
-    })
+      const index = options.components.length
+      options.components.push({
+        type: node.name,
+        props: { ...node.attributes },
+        index,
+      })
 
-    // Replace directive node with an HTML node containing a comment placeholder
-    children[i] = {
-      type: 'html',
-      value: `<!--component:${index}-->`,
-    } as (typeof children)[number]
+      children[i] = {
+        type: 'html',
+        value: `<!--component:${index}-->`,
+      } as (typeof children)[number]
+      continue
+    }
+
+    // Extract fenced code blocks (```mermaid, ```svg-board)
+    const codeLang = node.type === 'code' ? (node as Code).lang : undefined
+    if (codeLang === 'mermaid' || codeLang === 'svg-board') {
+      const index = options.components.length
+      options.components.push({
+        type: codeLang,
+        props: { code: (node as Code).value },
+        index,
+      })
+
+      children[i] = {
+        type: 'html',
+        value: `<!--component:${index}-->`,
+      } as (typeof children)[number]
+    }
   }
 }
