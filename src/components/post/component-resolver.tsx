@@ -9,6 +9,16 @@ import { ArrowUpRight } from 'lucide-react'
 import type { ComponentEntry } from '~/lib/compiler/index'
 import { mediaUrl } from '~/lib/storage/media-url'
 
+type LinkTone = 'light' | 'dark'
+
+function parseLinkTone(value: string | undefined): LinkTone | undefined {
+  if (value === 'light' || value === 'dark') {
+    return value
+  }
+
+  return undefined
+}
+
 function ImageComponent({ url, alt }: { url: string; alt: string }) {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -66,10 +76,12 @@ function LinkCardComponent({
   coverUrl,
   url,
   title,
+  tone,
 }: {
   coverUrl: string
   url: string
   title: string
+  tone?: LinkTone
 }) {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -85,6 +97,10 @@ function LinkCardComponent({
   } catch {
     domain = url
   }
+
+  const faviconQuery = tone ? `?tone=${tone}` : ''
+  const overlayToneClass = tone === 'dark' ? 'text-zinc-950' : 'text-white'
+  const overlayDepthClass = tone === 'dark' ? '' : 'drop-shadow-sm'
 
   return (
     <a
@@ -109,24 +125,25 @@ function LinkCardComponent({
             ? { opacity: 1, filter: 'blur(0px)' }
             : { opacity: 0.01, filter: 'blur(8px)' }
         }
-        whileHover={{ scale: 1.02 }}
         transition={{ duration: 0.15, ease: 'easeOut' }}
         className="post-media__cover absolute inset-0 size-full object-cover"
       />
       <div className="post-media__shadow pointer-events-none absolute inset-x-0 bottom-0 h-20 opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100" />
-      <div className="pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 text-white">
+      <div
+        className={`pointer-events-none absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 ${overlayToneClass}`}
+      >
         <div className="flex min-w-0 items-center gap-1.5">
           <img
-            src={`/api/favicon/${domain}`}
+            src={`/api/favicon/${domain}${faviconQuery}`}
             alt=""
-            className="post-media__favicon size-4 shrink-0 drop-shadow-sm"
+            className={`post-media__favicon size-4 shrink-0 ${overlayDepthClass}`}
           />
-          <span className="truncate text-sm font-medium drop-shadow-sm">
+          <span className={`truncate text-sm font-medium ${overlayDepthClass}`}>
             {title}
           </span>
         </div>
         <ArrowUpRight
-          className="size-4 shrink-0 drop-shadow-sm"
+          className={`size-4 shrink-0 ${overlayDepthClass}`}
           strokeWidth={2}
         />
       </div>
@@ -150,11 +167,13 @@ export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
     case 'linkcard': {
       const src = entry.props.src ?? ''
       const coverUrl = src.startsWith('http') ? src : url
+      const tone = parseLinkTone(entry.props.tone)
       return (
         <LinkCardComponent
           coverUrl={coverUrl}
           url={entry.props.url ?? '#'}
           title={entry.props.title ?? ''}
+          tone={tone}
         />
       )
     }
