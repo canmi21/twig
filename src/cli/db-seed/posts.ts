@@ -13,6 +13,7 @@ export interface SeededPosts {
 
 const PUBLISHED_CID = 'seed-post-tools-we-deserve'
 const CHINESE_CID = 'seed-post-chinese-typography'
+const COMPONENTS_CID = 'seed-post-component-showcase'
 const DRAFT_CID = 'seed-post-draft-scratch'
 
 const PUBLISHED_CONTENT = `\
@@ -89,6 +90,20 @@ const CHINESE_CONTENT = `\
 说到底，我们不是为了用工具而写代码。我们是为了造东西而写代码。工具只是手段，不是目的。当手段变成了目的，那就是该停下来想想的时候了。
 `
 
+const COMPONENTS_CONTENT = `\
+A showcase of custom directive components available in the content pipeline.
+
+## Link card
+
+A rich preview card for external links. The cover image is stored in R2, and the favicon is resolved automatically from the target domain via the proxy API.
+
+::linkcard{src="https://picsum.photos/seed/github/640/360" url="https://github.com" title="GitHub"}
+
+::linkcard{src="https://picsum.photos/seed/bun/640/360" url="https://bun.sh" title="Bun — A fast all-in-one JavaScript runtime"}
+
+::linkcard{src="https://picsum.photos/seed/vite/640/360" url="https://vite.dev" title="Vite — Next Generation Frontend Tooling"}
+`
+
 const DRAFT_CONTENT = `\
 A placeholder for something I have not figured out yet.
 
@@ -125,6 +140,21 @@ export async function seedPosts(ctx: SeedContext): Promise<SeededPosts> {
     tags: ['tooling', 'writing'],
     content: CHINESE_CONTENT,
     contentHash: 'seed-hash-3',
+    createdAt: now,
+    updatedAt: now,
+    published: true,
+  })
+
+  // Component showcase post
+  await upsertPost(ctx.db, {
+    cid: COMPONENTS_CID,
+    slug: 'component-showcase',
+    title: 'Component showcase',
+    description: 'Custom directive components demo',
+    category: 'engineering',
+    tags: ['components'],
+    content: COMPONENTS_CONTENT,
+    contentHash: 'seed-hash-4',
     createdAt: now,
     updatedAt: now,
     published: true,
@@ -170,6 +200,16 @@ export async function seedPosts(ctx: SeedContext): Promise<SeededPosts> {
       published: true,
     },
     {
+      cid: COMPONENTS_CID,
+      slug: 'component-showcase',
+      title: 'Component showcase',
+      description: 'Custom directive components demo',
+      category: 'engineering',
+      tags: ['components'],
+      content: COMPONENTS_CONTENT,
+      published: true,
+    },
+    {
       cid: DRAFT_CID,
       slug: 'scratch-notes',
       title: 'Scratch notes',
@@ -212,6 +252,6 @@ export async function seedPosts(ctx: SeedContext): Promise<SeededPosts> {
 
   await writePostIndex(ctx.kv, index)
 
-  console.log(`  3 posts (2 published, 1 draft)`)
+  console.log(`  4 posts (3 published, 1 draft)`)
   return { published: PUBLISHED_CID, draft: DRAFT_CID }
 }

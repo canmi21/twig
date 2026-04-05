@@ -27,6 +27,7 @@ import { Route as LoginVerifyIndexRouteImport } from './routes/login/verify/inde
 import { Route as AtDashboardIndexRouteImport } from './routes/@/_dashboard/index'
 import { Route as ApiOgSplatRouteImport } from './routes/api/og/$'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
+import { Route as ApiFaviconSplatRouteImport } from './routes/api/favicon/$'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
@@ -124,6 +125,11 @@ const ApiObjectSplatRoute = ApiObjectSplatRouteImport.update({
   path: '/api/object/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiFaviconSplatRoute = ApiFaviconSplatRouteImport.update({
+  id: '/api/favicon/$',
+  path: '/api/favicon/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
   id: '/api/auth/me',
   path: '/api/auth/me',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/sitemap/': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/favicon/$': typeof ApiFaviconSplatRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/api/og/$': typeof ApiOgSplatRoute
   '/@/': typeof AtDashboardIndexRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/sitemap': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/favicon/$': typeof ApiFaviconSplatRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/api/og/$': typeof ApiOgSplatRoute
   '/login/verify': typeof LoginVerifyIndexRoute
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/sitemap/': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/favicon/$': typeof ApiFaviconSplatRoute
   '/api/object/$': typeof ApiObjectSplatRoute
   '/api/og/$': typeof ApiOgSplatRoute
   '/@/_dashboard/': typeof AtDashboardIndexRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/sitemap/'
     | '/api/auth/$'
     | '/api/auth/me'
+    | '/api/favicon/$'
     | '/api/object/$'
     | '/api/og/$'
     | '/@/'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/sitemap'
     | '/api/auth/$'
     | '/api/auth/me'
+    | '/api/favicon/$'
     | '/api/object/$'
     | '/api/og/$'
     | '/login/verify'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/sitemap/'
     | '/api/auth/$'
     | '/api/auth/me'
+    | '/api/favicon/$'
     | '/api/object/$'
     | '/api/og/$'
     | '/@/_dashboard/'
@@ -338,6 +350,7 @@ export interface RootRouteChildren {
   SitemapIndexRoute: typeof SitemapIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiFaviconSplatRoute: typeof ApiFaviconSplatRoute
   ApiObjectSplatRoute: typeof ApiObjectSplatRoute
   ApiOgSplatRoute: typeof ApiOgSplatRoute
   LoginVerifyIndexRoute: typeof LoginVerifyIndexRoute
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiObjectSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/favicon/$': {
+      id: '/api/favicon/$'
+      path: '/api/favicon/$'
+      fullPath: '/api/favicon/$'
+      preLoaderRoute: typeof ApiFaviconSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/me': {
       id: '/api/auth/me'
       path: '/api/auth/me'
@@ -570,6 +590,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapIndexRoute: SitemapIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiFaviconSplatRoute: ApiFaviconSplatRoute,
   ApiObjectSplatRoute: ApiObjectSplatRoute,
   ApiOgSplatRoute: ApiOgSplatRoute,
   LoginVerifyIndexRoute: LoginVerifyIndexRoute,

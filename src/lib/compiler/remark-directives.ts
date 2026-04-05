@@ -9,7 +9,7 @@ export interface ComponentEntry {
   index: number
 }
 
-const mediaDirectives = new Set(['image', 'video', 'audio'])
+const mediaDirectives = new Set(['image', 'video', 'audio', 'linkcard'])
 
 export const remarkExtractDirectives: Plugin<
   [{ components: ComponentEntry[] }],

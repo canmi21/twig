@@ -144,13 +144,47 @@ body:has(.post) {
 
 /* ── Quiet surface: images ─────────────────────── */
 
-.post__body img,
+.post__body img:not(.post-media__cover):not(.post-media__favicon),
 .post-media--image {
   margin: 1.8em 0;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border) !important;
   background: var(--color-raised);
   box-shadow: none;
+}
+
+.article img.post-media__cover,
+.article img.post-media__favicon,
+.post-media__cover,
+.post-media__favicon {
+  margin: 0;
+  border: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.post-media__cover {
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.post-media__shadow {
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.4) 0%,
+    rgb(0 0 0 / 0.24) 35%,
+    rgb(0 0 0 / 0.08) 65%,
+    transparent 100%
+  );
+}
+
+.post-media__favicon {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0;
+  object-fit: contain;
 }
 
 .post-media--video,
