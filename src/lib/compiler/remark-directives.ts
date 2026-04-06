@@ -15,6 +15,7 @@ const mediaDirectives = new Set([
   'audio',
   'linkcard',
   'github',
+  'cargo',
 ])
 
 export const remarkExtractDirectives: Plugin<

@@ -4,6 +4,7 @@
 
 import { useMemo, useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
+import { ArrowUpRight } from 'lucide-react'
 
 // --- Types ---
 
@@ -107,6 +108,37 @@ const FUNC_COLORS = {
   blanks: '#b0ada6',
 } as const
 
+// --- Text fitting ---
+
+let _measureCtx: CanvasRenderingContext2D | null = null
+function measureCtx(): CanvasRenderingContext2D {
+  _measureCtx ??= document.createElement('canvas').getContext('2d')
+  return _measureCtx as CanvasRenderingContext2D
+}
+
+function fitText(
+  text: string,
+  maxWidth: number,
+  ctx: CanvasRenderingContext2D,
+): string | null {
+  if (ctx.measureText(text).width <= maxWidth) return text
+
+  let lo = 1
+  let hi = text.length - 1
+  let best = -1
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if (ctx.measureText(text.slice(0, mid)).width <= maxWidth) {
+      best = mid
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+
+  return best > 0 ? text.slice(0, best) : null
+}
+
 // --- Formatting ---
 
 function fmt(n: number): string {
@@ -184,10 +216,7 @@ function Tooltip({ x, y, stat }: { x: number; y: number; stat: LangStat }) {
   const bp = Math.max(0, 100 - cp - mp)
 
   return (
-    <div
-      className="cs-tooltip"
-      style={{ left: Math.min(x + 14, 460), top: y - 10 }}
-    >
+    <div className="cs-tooltip" style={{ left: x + 16, top: y + 16 }}>
       <div className="cs-tooltip__head">
         <span
           className="cs-tooltip__dot"
@@ -330,23 +359,43 @@ function TreemapView({ data }: { data: LangStat[] }) {
         .attr('opacity', 0.82)
         .style('cursor', 'pointer')
 
-      if (w > 42 && h > 22) {
-        g.append('text')
-          .attr('x', node.x0 + 6)
-          .attr('y', node.y0 + 16)
-          .text(d.lang)
-          .attr('fill', '#fff')
-          .attr('font-size', w > 80 ? '13px' : '11px')
-          .attr('font-weight', '500')
-      }
+      const padX = 6
+      const padY = 4
+      const labelSize = 12
+      const subSize = 10
+      const lineGap = 2
+      const labelY = padY + labelSize
+      const subY = labelY + lineGap + subSize
+      const availW = w - padX * 2
 
-      if (w > 55 && h > 38) {
-        g.append('text')
-          .attr('x', node.x0 + 6)
-          .attr('y', node.y0 + 32)
-          .text(`${fmt(d.lines)} lines`)
-          .attr('fill', 'rgba(255,255,255,0.8)')
-          .attr('font-size', '11px')
+      if (availW > 4 && h >= labelY + padY) {
+        const ctx = measureCtx()
+        ctx.font = `500 ${labelSize}px sans-serif`
+        const label = fitText(d.lang, availW, ctx)
+        if (label) {
+          g.append('text')
+            .attr('x', node.x0 + padX)
+            .attr('y', node.y0 + labelY)
+            .text(label)
+            .attr('fill', '#fff')
+            .attr('font-size', `${labelSize}px`)
+            .attr('font-weight', '500')
+            .style('pointer-events', 'none')
+
+          if (h >= subY + padY) {
+            ctx.font = `${subSize}px sans-serif`
+            const sl = fitText(`${fmt(d.lines)} lines`, availW, ctx)
+            if (sl) {
+              g.append('text')
+                .attr('x', node.x0 + padX)
+                .attr('y', node.y0 + subY)
+                .text(sl)
+                .attr('fill', 'rgba(255,255,255,0.75)')
+                .attr('font-size', `${subSize}px`)
+                .style('pointer-events', 'none')
+            }
+          }
+        }
       }
 
       // Mini code-ratio bar
@@ -372,16 +421,16 @@ function TreemapView({ data }: { data: LangStat[] }) {
 
       g.on('mouseenter', (ev) =>
         setTip({ x: ev.offsetX, y: ev.offsetY, stat: d }),
+      ).on('mousemove', (ev) =>
+        setTip({ x: ev.offsetX, y: ev.offsetY, stat: d }),
       )
-        .on('mousemove', (ev) =>
-          setTip({ x: ev.offsetX, y: ev.offsetY, stat: d }),
-        )
-        .on('mouseleave', () => setTip(null))
     }
+
+    svg.on('mouseleave', () => setTip(null))
   }, [data])
 
   return (
-    <div className="cs-chart-wrap">
+    <div className="cs-chart-wrap" onMouseLeave={() => setTip(null)}>
       <svg ref={ref} width="100%" />
       {tip && <Tooltip x={tip.x} y={tip.y} stat={tip.stat} />}
     </div>
@@ -623,6 +672,15 @@ export function TokeiWidget({
               <span className="cs-summary-value">{m.value}</span>
             </span>
           ))}
+          <a
+            href="https://github.com/xampprocky/tokei"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cs-summary__link"
+          >
+            tokei
+            <ArrowUpRight className="cs-summary__link-icon" strokeWidth={2} />
+          </a>
         </div>
       </div>
     </div>

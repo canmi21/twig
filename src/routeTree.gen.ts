@@ -29,6 +29,7 @@ import { Route as ApiOgSplatRouteImport } from './routes/api/og/$'
 import { Route as ApiObjectSplatRouteImport } from './routes/api/object/$'
 import { Route as ApiGithubSplatRouteImport } from './routes/api/github/$'
 import { Route as ApiFaviconSplatRouteImport } from './routes/api/favicon/$'
+import { Route as ApiCratesSplatRouteImport } from './routes/api/crates/$'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
@@ -136,6 +137,11 @@ const ApiFaviconSplatRoute = ApiFaviconSplatRouteImport.update({
   path: '/api/favicon/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCratesSplatRoute = ApiCratesSplatRouteImport.update({
+  id: '/api/crates/$',
+  path: '/api/crates/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
   id: '/api/auth/me',
   path: '/api/auth/me',
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/sitemap/': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/crates/$': typeof ApiCratesSplatRoute
   '/api/favicon/$': typeof ApiFaviconSplatRoute
   '/api/github/$': typeof ApiGithubSplatRoute
   '/api/object/$': typeof ApiObjectSplatRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/sitemap': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/crates/$': typeof ApiCratesSplatRoute
   '/api/favicon/$': typeof ApiFaviconSplatRoute
   '/api/github/$': typeof ApiGithubSplatRoute
   '/api/object/$': typeof ApiObjectSplatRoute
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/sitemap/': typeof SitemapIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/crates/$': typeof ApiCratesSplatRoute
   '/api/favicon/$': typeof ApiFaviconSplatRoute
   '/api/github/$': typeof ApiGithubSplatRoute
   '/api/object/$': typeof ApiObjectSplatRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/sitemap/'
     | '/api/auth/$'
     | '/api/auth/me'
+    | '/api/crates/$'
     | '/api/favicon/$'
     | '/api/github/$'
     | '/api/object/$'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/sitemap'
     | '/api/auth/$'
     | '/api/auth/me'
+    | '/api/crates/$'
     | '/api/favicon/$'
     | '/api/github/$'
     | '/api/object/$'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/sitemap/'
     | '/api/auth/$'
     | '/api/auth/me'
+    | '/api/crates/$'
     | '/api/favicon/$'
     | '/api/github/$'
     | '/api/object/$'
@@ -362,6 +374,7 @@ export interface RootRouteChildren {
   SitemapIndexRoute: typeof SitemapIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiCratesSplatRoute: typeof ApiCratesSplatRoute
   ApiFaviconSplatRoute: typeof ApiFaviconSplatRoute
   ApiGithubSplatRoute: typeof ApiGithubSplatRoute
   ApiObjectSplatRoute: typeof ApiObjectSplatRoute
@@ -512,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiFaviconSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/crates/$': {
+      id: '/api/crates/$'
+      path: '/api/crates/$'
+      fullPath: '/api/crates/$'
+      preLoaderRoute: typeof ApiCratesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/me': {
       id: '/api/auth/me'
       path: '/api/auth/me'
@@ -610,6 +630,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapIndexRoute: SitemapIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiCratesSplatRoute: ApiCratesSplatRoute,
   ApiFaviconSplatRoute: ApiFaviconSplatRoute,
   ApiGithubSplatRoute: ApiGithubSplatRoute,
   ApiObjectSplatRoute: ApiObjectSplatRoute,

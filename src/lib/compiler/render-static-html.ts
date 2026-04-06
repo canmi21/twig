@@ -30,6 +30,12 @@ export function renderStaticHtml(
         return `<video src="${url}" controls></video>`
       case 'audio':
         return `<audio src="${url}" controls></audio>`
+      case 'cargo': {
+        const crateVer = entry.props.version
+          ? `${entry.props.crate}@${entry.props.version}`
+          : entry.props.crate
+        return `<p><a href="https://crates.io/crates/${entry.props.crate}">${escapeAttr(crateVer)}</a></p>`
+      }
       case 'tokei':
         return `<pre><code>${escapeAttr(entry.props.code)}</code></pre>`
       case 'svg-board':

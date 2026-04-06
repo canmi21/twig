@@ -98,6 +98,7 @@ function AudioComponent({ url }: { url: string }) {
 }
 
 import { TokeiWidget } from './tokei'
+import { CargoWidget } from './cargo'
 
 const LANG_COLORS: Record<string, string> = {
   TypeScript: '#3178c6',
@@ -381,6 +382,15 @@ export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
         gitRef={entry.props.ref}
         title={entry.props.title}
         align={(entry.props.align as CardAlign) || 'center'}
+      />
+    )
+  }
+  if (entry.type === 'cargo') {
+    return (
+      <CargoWidget
+        crate={entry.props.crate}
+        version={entry.props.version}
+        view={(entry.props.view as 'treemap' | 'table') || 'treemap'}
       />
     )
   }
