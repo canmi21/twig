@@ -12,6 +12,7 @@ import {
   Scale,
   Clock,
   CircleDot,
+  GitCommitHorizontal,
 } from 'lucide-react'
 import type { GitHubRepoData } from '~/routes/api/github/$.ts'
 import type { ComponentEntry } from '~/lib/compiler/index'
@@ -204,8 +205,13 @@ function GitHubCardComponent({
           {title || repoDisplayName(repo)}
         </span>
         <span className="github-card__fullname">{data.fullName}</span>
-        {gitRef && <span className="github-card__ref">{gitRef}</span>}
       </div>
+      {gitRef && (
+        <span className="github-card__ref">
+          <GitCommitHorizontal className="size-3" strokeWidth={2} />
+          {gitRef.length > 8 ? gitRef.slice(0, 7) : gitRef}
+        </span>
+      )}
       {data.description && (
         <p className="github-card__desc">{data.description}</p>
       )}
