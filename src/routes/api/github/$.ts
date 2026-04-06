@@ -17,7 +17,6 @@ export interface GitHubRepoData {
   license: string | null
   updatedAt: string
   openIssues: number
-  topics: string[]
   htmlUrl: string
 }
 
@@ -61,7 +60,6 @@ export const Route = createFileRoute('/api/github/$')({
               ?.spdx_id as string | null,
             updatedAt: repo.updated_at as string,
             openIssues: repo.open_issues_count as number,
-            topics: (repo.topics as string[]) ?? [],
             htmlUrl: repo.html_url as string,
           }
 

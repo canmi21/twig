@@ -246,15 +246,6 @@ function GitHubCardComponent({
           })}
         </span>
       </div>
-      {data.topics.length > 0 && (
-        <div className="github-card__topics">
-          {data.topics.map((topic) => (
-            <span key={topic} className="github-card__topic">
-              {topic}
-            </span>
-          ))}
-        </div>
-      )}
       <ArrowUpRight
         className="absolute right-3 bottom-3 size-4 shrink-0 text-primary opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-(--opacity-muted)"
         strokeWidth={2}

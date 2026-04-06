@@ -163,7 +163,7 @@ body:has(.post) {
   margin: 1.8em 0;
   max-width: 28rem;
   padding: 0.6rem 0.75rem;
-  height: 7.5rem;
+  height: 6.5rem;
   overflow: hidden;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
@@ -266,21 +266,6 @@ body:has(.post) {
   height: 0.6rem;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-.github-card__topics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.github-card__topic {
-  font-size: 11px;
-  color: var(--color-secondary);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: 0.15em 0.55em;
 }
 
 /* ── Quiet surface: svg-board ─────────────────── */
