@@ -32,6 +32,13 @@ export function renderStaticHtml(
         return `<audio src="${url}" controls></audio>`
       case 'svg-board':
         return `<div class="post-media post-media--svg-board">${entry.props.code}</div>`
+      case 'github': {
+        const ghRef = entry.props.ref
+        const ghUrl = ghRef
+          ? `https://github.com/${entry.props.repo}/tree/${ghRef}`
+          : `https://github.com/${entry.props.repo}`
+        return `<p><a href="${ghUrl}">${escapeAttr(entry.props.repo)}</a></p>`
+      }
       default:
         return opts.articleUrl
           ? `<p><a href="${opts.articleUrl}">View interactive content on the website</a></p>`

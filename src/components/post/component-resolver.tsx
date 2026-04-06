@@ -2,10 +2,18 @@
 
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouteContext } from '@tanstack/react-router'
 import { motion } from 'motion/react'
-import { ArrowUpRight } from 'lucide-react'
+import {
+  ArrowUpRight,
+  Star,
+  GitFork,
+  Scale,
+  Clock,
+  CircleDot,
+} from 'lucide-react'
+import type { GitHubRepoData } from '~/routes/api/github/$.ts'
 import type { ComponentEntry } from '~/lib/compiler/index'
 import { mediaUrl } from '~/lib/storage/media-url'
 
@@ -85,6 +93,173 @@ function AudioComponent({ url }: { url: string }) {
       preload="metadata"
       src={url}
     />
+  )
+}
+
+const LANG_COLORS: Record<string, string> = {
+  TypeScript: '#3178c6',
+  JavaScript: '#f1e05a',
+  Python: '#3572a5',
+  Rust: '#dea584',
+  Go: '#00add8',
+  Java: '#b07219',
+  'C++': '#f34b7d',
+  C: '#555555',
+  'C#': '#178600',
+  Ruby: '#701516',
+  Swift: '#f05138',
+  Kotlin: '#a97bff',
+  Dart: '#00b4ab',
+  PHP: '#4f5d95',
+  Shell: '#89e051',
+  Lua: '#000080',
+  Zig: '#ec915c',
+  HTML: '#e34c26',
+  CSS: '#563d7c',
+  Vue: '#41b883',
+  Svelte: '#ff3e00',
+  Elixir: '#6e4a7e',
+  Haskell: '#5e5086',
+  Scala: '#c22d40',
+  OCaml: '#3be133',
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`
+  return String(n)
+}
+
+function repoDisplayName(repo: string): string {
+  const name = repo.split('/')[1] ?? repo
+  return name
+    .toLowerCase()
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+type CardAlign = 'left' | 'center' | 'right'
+
+function GitHubCardComponent({
+  repo,
+  gitRef,
+  title,
+  align = 'center',
+}: {
+  repo: string
+  gitRef?: string
+  title?: string
+  align?: CardAlign
+}) {
+  const [data, setData] = useState<GitHubRepoData | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/github/${repo}`)
+      .then((res) => {
+        if (!res.ok) throw new Error()
+        return res.json() as Promise<GitHubRepoData>
+      })
+      .then(setData)
+      .catch(() => setError(true))
+  }, [repo])
+
+  const href = gitRef
+    ? `https://github.com/${repo}/tree/${gitRef}`
+    : `https://github.com/${repo}`
+
+  if (error) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`github-card github-card--error github-card--${align}`}
+      >
+        <span className="text-[13px] text-primary opacity-(--opacity-muted)">
+          {repo}
+        </span>
+      </a>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div
+        className={`github-card github-card--loading github-card--${align}`}
+      />
+    )
+  }
+
+  const langColor = data.language ? LANG_COLORS[data.language] : undefined
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`github-card github-card--${align} group`}
+    >
+      <div className="github-card__header">
+        <span className="github-card__name">
+          {title || repoDisplayName(repo)}
+        </span>
+        <span className="github-card__fullname">{data.fullName}</span>
+        {gitRef && <span className="github-card__ref">{gitRef}</span>}
+      </div>
+      {data.description && (
+        <p className="github-card__desc">{data.description}</p>
+      )}
+      <div className="github-card__meta">
+        {data.language && (
+          <span className="github-card__meta-item">
+            <span
+              className="github-card__lang-dot"
+              style={{ backgroundColor: langColor ?? 'var(--color-tertiary)' }}
+            />
+            {data.language}
+          </span>
+        )}
+        <span className="github-card__meta-item">
+          <Star className="size-3.5" strokeWidth={2} />
+          {formatCount(data.stars)}
+        </span>
+        <span className="github-card__meta-item">
+          <GitFork className="size-3.5" strokeWidth={2} />
+          {formatCount(data.forks)}
+        </span>
+        {data.license && data.license !== 'NOASSERTION' && (
+          <span className="github-card__meta-item">
+            <Scale className="size-3.5" strokeWidth={2} />
+            {data.license}
+          </span>
+        )}
+        <span className="github-card__meta-item">
+          <CircleDot className="size-3.5" strokeWidth={2} />
+          {formatCount(data.openIssues)}
+        </span>
+        <span className="github-card__meta-item">
+          <Clock className="size-3.5" strokeWidth={2} />
+          {new Date(data.updatedAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </span>
+      </div>
+      {data.topics.length > 0 && (
+        <div className="github-card__topics">
+          {data.topics.map((topic) => (
+            <span key={topic} className="github-card__topic">
+              {topic}
+            </span>
+          ))}
+        </div>
+      )}
+      <ArrowUpRight
+        className="absolute right-3 bottom-3 size-4 shrink-0 text-primary opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-(--opacity-muted)"
+        strokeWidth={2}
+      />
+    </a>
   )
 }
 
@@ -192,7 +367,17 @@ export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
   const { cdnPublicUrl } = useRouteContext({ from: '__root__' })
   const prefix = import.meta.env.DEV ? '/api/object' : cdnPublicUrl
 
-  // svg-board has no media src — handle before mediaUrl
+  // Components without media src — handle before mediaUrl
+  if (entry.type === 'github') {
+    return (
+      <GitHubCardComponent
+        repo={entry.props.repo}
+        gitRef={entry.props.ref}
+        title={entry.props.title}
+        align={(entry.props.align as CardAlign) || 'center'}
+      />
+    )
+  }
   if (entry.type === 'svg-board') {
     return <SvgBoardComponent code={entry.props.code} />
   }
