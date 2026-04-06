@@ -97,6 +97,8 @@ function AudioComponent({ url }: { url: string }) {
   )
 }
 
+import { TokeiWidget } from './tokei'
+
 const LANG_COLORS: Record<string, string> = {
   TypeScript: '#3178c6',
   JavaScript: '#f1e05a',
@@ -123,6 +125,13 @@ const LANG_COLORS: Record<string, string> = {
   Haskell: '#5e5086',
   Scala: '#c22d40',
   OCaml: '#3be133',
+  TOML: '#9c4221',
+  JSON: '#292929',
+  Makefile: '#427819',
+  Just: '#384d54',
+  Markdown: '#083fa1',
+  BASH: '#89e051',
+  TSX: '#3178c6',
 }
 
 function formatCount(n: number): string {
@@ -372,6 +381,14 @@ export function ComponentResolver({ entry }: { entry: ComponentEntry }) {
         gitRef={entry.props.ref}
         title={entry.props.title}
         align={(entry.props.align as CardAlign) || 'center'}
+      />
+    )
+  }
+  if (entry.type === 'tokei') {
+    return (
+      <TokeiWidget
+        raw={entry.props.code}
+        view={(entry.props.view as 'treemap' | 'bar' | 'table') || 'treemap'}
       />
     )
   }

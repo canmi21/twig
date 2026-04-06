@@ -30,6 +30,8 @@ export function renderStaticHtml(
         return `<video src="${url}" controls></video>`
       case 'audio':
         return `<audio src="${url}" controls></audio>`
+      case 'tokei':
+        return `<pre><code>${escapeAttr(entry.props.code)}</code></pre>`
       case 'svg-board':
         return `<div class="post-media post-media--svg-board">${entry.props.code}</div>`
       case 'github': {

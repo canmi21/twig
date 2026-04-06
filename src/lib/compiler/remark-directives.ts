@@ -46,13 +46,19 @@ export const remarkExtractDirectives: Plugin<
       continue
     }
 
-    // Extract fenced code blocks (```svg-board)
+    // Extract fenced code blocks (```svg-board, ```tokei)
     const codeLang = node.type === 'code' ? (node as Code).lang : undefined
-    if (codeLang === 'svg-board') {
+    if (codeLang === 'svg-board' || codeLang === 'tokei') {
+      const meta = (node as Code).meta ?? ''
+      const metaProps: Record<string, string> = {}
+      for (const m of meta.matchAll(/(\w+)(?:="([^"]*)")?/g)) {
+        metaProps[m[1]] = m[2] ?? 'true'
+      }
+
       const index = options.components.length
       options.components.push({
         type: codeLang,
-        props: { code: (node as Code).value },
+        props: { code: (node as Code).value, ...metaProps },
         index,
       })
 
