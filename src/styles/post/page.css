@@ -713,6 +713,9 @@ body:has(.post) {
 /* ── Quiet surface: svg-board ─────────────────── */
 
 .post-media--svg-board {
+  --color-text-primary: var(--color-primary);
+  --color-text-secondary: var(--color-secondary);
+  --color-text-tertiary: var(--color-tertiary);
   margin: 1.8em 0;
   width: 100%;
   overflow-x: auto;
