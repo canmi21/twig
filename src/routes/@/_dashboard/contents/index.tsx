@@ -145,12 +145,7 @@ function PostsList() {
     navigate({
       to: '/@/editor/$cid',
       params: { cid },
-      search: {
-        preview: 'rendered',
-        pretty: undefined,
-        format: true,
-        highlight: true,
-      },
+      search: { view: 'wysiwyg' },
     })
   }
 
@@ -244,12 +239,7 @@ function PostsList() {
                       <Link
                         to="/@/editor/$cid"
                         params={{ cid: post.cid }}
-                        search={{
-                          preview: 'rendered',
-                          pretty: undefined,
-                          format: true,
-                          highlight: true,
-                        }}
+                        search={{ view: 'wysiwyg' }}
                         className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
                       >
                         Edit
