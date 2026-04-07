@@ -49,6 +49,10 @@ rebuild:
 watch:
     bun run src/cli/watch/index.ts
 
+# Sync remote D1/R2/KV to local (clears local first)
+sync-remote:
+    bun run src/cli/sync-remote/index.ts
+
 # --- Database ---
 
 # Reset database schema
