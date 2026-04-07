@@ -21,15 +21,15 @@ export function renderStaticHtml(
     const entry = components[Number(indexStr)]
     if (!entry) return ''
 
-    const url = mediaUrl(opts.cdnPrefix, entry.props.src)
-
     switch (entry.type) {
-      case 'image':
+      case 'image': {
+        const url = mediaUrl(opts.cdnPrefix, entry.props.src)
         return `<img src="${url}" alt="${escapeAttr(entry.props.alt ?? '')}" />`
+      }
       case 'video':
-        return `<video src="${url}" controls></video>`
+        return `<video src="${mediaUrl(opts.cdnPrefix, entry.props.src)}" controls></video>`
       case 'audio':
-        return `<audio src="${url}" controls></audio>`
+        return `<audio src="${mediaUrl(opts.cdnPrefix, entry.props.src)}" controls></audio>`
       case 'cargo': {
         const crateVer = entry.props.version
           ? `${entry.props.crate}@${entry.props.version}`
@@ -39,12 +39,15 @@ export function renderStaticHtml(
       case 'tokei':
         return `<pre><code>${escapeAttr(entry.props.code)}</code></pre>`
       case 'svg-board':
-        return `<div class="post-media post-media--svg-board">${entry.props.code}</div>`
+        // Raw SVG breaks Atom XML; fall back to article link
+        return opts.articleUrl
+          ? `<p><a href="${opts.articleUrl}">View diagram on the website</a></p>`
+          : ''
       case 'github': {
         const ghRef = entry.props.ref
         const ghUrl = ghRef
-          ? `https://github.com/${entry.props.repo}/tree/${ghRef}`
-          : `https://github.com/${entry.props.repo}`
+          ? `https://github.com/${escapeAttr(entry.props.repo)}/tree/${escapeAttr(ghRef)}`
+          : `https://github.com/${escapeAttr(entry.props.repo)}`
         return `<p><a href="${ghUrl}">${escapeAttr(entry.props.repo)}</a></p>`
       }
       default:
