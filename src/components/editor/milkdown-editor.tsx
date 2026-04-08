@@ -6,14 +6,20 @@
  * Loaded via React.lazy() — must not be imported at SSR time.
  */
 
-import { useEffect, useRef } from 'react'
-import { Editor, rootCtx, defaultValueCtx } from '@milkdown/kit/core'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  Editor,
+  rootCtx,
+  defaultValueCtx,
+  editorViewCtx,
+} from '@milkdown/kit/core'
 import { commonmark, codeBlockSchema } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
 import { history } from '@milkdown/kit/plugin/history'
 import { clipboard } from '@milkdown/kit/plugin/clipboard'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { getMarkdown, $view } from '@milkdown/kit/utils'
+import type { EditorView } from '@milkdown/kit/prose/view'
 import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react'
 import {
   ProsemirrorAdapterProvider,
@@ -42,6 +48,8 @@ import {
   DirectiveCargoView,
   CodeBlockView,
 } from './directive-views'
+
+import { createSlashPlugin, SlashMenu, type SlashState } from './slash-menu'
 
 // oxlint-disable-next-line import/no-unassigned-import
 import '~/styles/editor.css'
@@ -75,6 +83,23 @@ function MilkdownInner({
   useEffect(() => {
     onChangeRef.current = onMarkdownChange
   }, [onMarkdownChange])
+
+  // Slash menu state — updated by ProseMirror plugin
+  const [slashState, setSlashState] = useState<SlashState>({
+    open: false,
+    query: '',
+    x: 0,
+    y: 0,
+  })
+  // Slash plugin calls setSlashState directly — stable because useState setter is stable
+  const [slashPlugin] = useState(() => createSlashPlugin(setSlashState))
+
+  const editorRef = useRef<Editor | null>(null)
+  const viewRef = useRef<EditorView | null>(null)
+
+  const handleSlashClose = useCallback(() => {
+    setSlashState({ open: false, query: '', x: 0, y: 0 })
+  }, [])
 
   const pasteImagePlugin = onPasteImage
     ? createPasteImagePlugin(onPasteImage)
@@ -155,6 +180,8 @@ function MilkdownInner({
           }),
         ),
       )
+      // Slash command detection
+      .use(slashPlugin)
 
     if (pasteImagePlugin) {
       editor.use(pasteImagePlugin)
@@ -162,6 +189,18 @@ function MilkdownInner({
 
     return editor
   }, [])
+
+  // Keep refs in sync with editor instance
+  useEffect(() => {
+    const editor = get()
+    if (!editor) return
+    editorRef.current = editor
+    try {
+      viewRef.current = editor.action((ctx) => ctx.get(editorViewCtx))
+    } catch {
+      // Editor might not be fully initialized yet
+    }
+  }, [get])
 
   // Expose getMarkdown to parent
   useEffect(() => {
@@ -177,10 +216,18 @@ function MilkdownInner({
   }, [get, getMarkdownRef, defaultValue])
 
   return (
-    // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-    <div className="post__body article milkdown-editor">
-      <Milkdown />
-    </div>
+    <>
+      {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+      <div className="post__body article milkdown-editor">
+        <Milkdown />
+      </div>
+      <SlashMenu
+        slashState={slashState}
+        editorRef={editorRef}
+        viewRef={viewRef}
+        onClose={handleSlashClose}
+      />
+    </>
   )
 }
 
