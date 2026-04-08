@@ -63,8 +63,9 @@ function getSlashQuery(view: EditorView): string | null {
   const text = $from.parent.textContent.slice(0, $from.parentOffset)
   const idx = text.lastIndexOf('/')
   if (idx < 0) return null
-  // Only trigger if "/" is preceded by whitespace, start of line, or is the only char
-  if (idx > 0 && text[idx - 1] !== ' ' && text[idx - 1] !== '\t') return null
+  // Deny "/" after URL-forming characters to avoid triggering on https:// etc.
+  // Allow after: start of line, whitespace, CJK characters, punctuation
+  if (idx > 0 && /[a-zA-Z0-9:.\-\\]/.test(text[idx - 1])) return null
   return text.slice(idx + 1)
 }
 
