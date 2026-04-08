@@ -24,7 +24,7 @@ type LinkFavicon =
   | { kind: 'hidden' }
   | { kind: 'custom'; src: string }
 
-function parseLinkTone(value: string | undefined): LinkTone | undefined {
+export function parseLinkTone(value: string | undefined): LinkTone | undefined {
   if (value === 'light' || value === 'dark') {
     return value
   }
@@ -32,7 +32,7 @@ function parseLinkTone(value: string | undefined): LinkTone | undefined {
   return undefined
 }
 
-function parseLinkFavicon(value: string | undefined): LinkFavicon {
+export function parseLinkFavicon(value: string | undefined): LinkFavicon {
   if (value == null || value === '' || value === 'true') {
     return { kind: 'proxy' }
   }
@@ -44,7 +44,7 @@ function parseLinkFavicon(value: string | undefined): LinkFavicon {
   return { kind: 'custom', src: value }
 }
 
-function ImageComponent({ url, alt }: { url: string; alt: string }) {
+export function ImageComponent({ url, alt }: { url: string; alt: string }) {
   const [loaded, setLoaded] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -78,7 +78,7 @@ function ImageComponent({ url, alt }: { url: string; alt: string }) {
   )
 }
 
-function VideoComponent({ url }: { url: string }) {
+export function VideoComponent({ url }: { url: string }) {
   return (
     <video className="post-media post-media--video" controls preload="metadata">
       <source src={url} />
@@ -86,7 +86,7 @@ function VideoComponent({ url }: { url: string }) {
   )
 }
 
-function AudioComponent({ url }: { url: string }) {
+export function AudioComponent({ url }: { url: string }) {
   return (
     <audio
       className="post-media post-media--audio"
@@ -150,7 +150,7 @@ function repoDisplayName(repo: string): string {
 
 type CardAlign = 'left' | 'center' | 'right'
 
-function GitHubCardComponent({
+export function GitHubCardComponent({
   repo,
   gitRef,
   title,
@@ -281,7 +281,7 @@ function SvgBoardComponent({ code }: { code: string }) {
   )
 }
 
-function LinkCardComponent({
+export function LinkCardComponent({
   coverUrl,
   url,
   title,

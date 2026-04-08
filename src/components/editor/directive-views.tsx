@@ -4,21 +4,27 @@
  *
  * React NodeView components for rendering custom directives
  * inside the Milkdown WYSIWYG editor.
+ *
+ * Reuses the same rendering components as the published post page
+ * (from component-resolver.tsx) so editor and post look identical.
  */
 
 import { useNodeViewContext } from '@prosemirror-adapter/react'
-import {
-  Image,
-  Video,
-  AudioLines,
-  ExternalLink,
-  GitFork,
-  Package,
-} from 'lucide-react'
+import { Image, Video, AudioLines, Package } from 'lucide-react'
 import { mediaUrl } from '~/lib/storage/media-url'
+import {
+  ImageComponent,
+  VideoComponent,
+  AudioComponent,
+  LinkCardComponent,
+  GitHubCardComponent,
+  parseLinkTone,
+  parseLinkFavicon,
+} from '~/components/post/component-resolver'
+import { CargoWidget } from '~/components/post/cargo'
 
 // ---------------------------------------------------------------------------
-// Shared
+// Shared placeholder (used when attrs are missing)
 // ---------------------------------------------------------------------------
 
 const blockClass =
@@ -26,34 +32,36 @@ const blockClass =
 
 const selectedRing = 'ring-2 ring-accent/40'
 
-function DirectiveBlock({
+function Placeholder({
   icon,
   label,
-  detail,
   selected,
 }: {
   icon: React.ReactNode
   label: string
-  detail?: string
   selected: boolean
 }) {
   return (
     <div className={`${blockClass} ${selected ? selectedRing : ''}`}>
       {icon}
-      <div className="min-w-0 flex-1">
-        <div className="font-medium text-primary">{label}</div>
-        {detail && (
-          <div className="truncate text-xs opacity-(--opacity-muted)">
-            {detail}
-          </div>
-        )}
-      </div>
+      <span className="font-medium text-primary">{label}</span>
     </div>
   )
 }
 
+function SelectedWrap({
+  selected,
+  children,
+}: {
+  selected: boolean
+  children: React.ReactNode
+}) {
+  if (!selected) return <>{children}</>
+  return <div className="rounded-xl ring-2 ring-accent/40">{children}</div>
+}
+
 // ---------------------------------------------------------------------------
-// Image
+// Image — reuses ImageComponent from post renderer
 // ---------------------------------------------------------------------------
 
 export function DirectiveImageView({ cdnPrefix }: { cdnPrefix: string }) {
@@ -62,10 +70,9 @@ export function DirectiveImageView({ cdnPrefix }: { cdnPrefix: string }) {
 
   if (!src || src === 'uploading...') {
     return (
-      <DirectiveBlock
+      <Placeholder
         icon={<Image className="size-5 shrink-0" strokeWidth={1.5} />}
         label={src === 'uploading...' ? 'Uploading...' : 'Image'}
-        detail={alt || undefined}
         selected={selected}
       />
     )
@@ -73,21 +80,14 @@ export function DirectiveImageView({ cdnPrefix }: { cdnPrefix: string }) {
 
   const url = mediaUrl(cdnPrefix, src)
   return (
-    <figure
-      className={`my-4 overflow-hidden rounded-xl border border-border ${selected ? selectedRing : ''}`}
-    >
-      <img src={url} alt={alt} loading="lazy" className="w-full object-cover" />
-      {alt && (
-        <figcaption className="bg-raised px-3 py-1.5 text-xs text-secondary">
-          {alt}
-        </figcaption>
-      )}
-    </figure>
+    <SelectedWrap selected={selected}>
+      <ImageComponent url={url} alt={alt} />
+    </SelectedWrap>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Video
+// Video — reuses VideoComponent
 // ---------------------------------------------------------------------------
 
 export function DirectiveVideoView({ cdnPrefix }: { cdnPrefix: string }) {
@@ -96,7 +96,7 @@ export function DirectiveVideoView({ cdnPrefix }: { cdnPrefix: string }) {
 
   if (!src) {
     return (
-      <DirectiveBlock
+      <Placeholder
         icon={<Video className="size-5 shrink-0" strokeWidth={1.5} />}
         label="Video"
         selected={selected}
@@ -106,16 +106,14 @@ export function DirectiveVideoView({ cdnPrefix }: { cdnPrefix: string }) {
 
   const url = mediaUrl(cdnPrefix, src)
   return (
-    <div
-      className={`my-4 overflow-hidden rounded-xl border border-border ${selected ? selectedRing : ''}`}
-    >
-      <video src={url} controls className="w-full" />
-    </div>
+    <SelectedWrap selected={selected}>
+      <VideoComponent url={url} />
+    </SelectedWrap>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Audio
+// Audio — reuses AudioComponent
 // ---------------------------------------------------------------------------
 
 export function DirectiveAudioView({ cdnPrefix }: { cdnPrefix: string }) {
@@ -124,7 +122,7 @@ export function DirectiveAudioView({ cdnPrefix }: { cdnPrefix: string }) {
 
   if (!src) {
     return (
-      <DirectiveBlock
+      <Placeholder
         icon={<AudioLines className="size-5 shrink-0" strokeWidth={1.5} />}
         label="Audio"
         selected={selected}
@@ -134,64 +132,114 @@ export function DirectiveAudioView({ cdnPrefix }: { cdnPrefix: string }) {
 
   const url = mediaUrl(cdnPrefix, src)
   return (
-    <div
-      className={`my-4 rounded-xl border border-border bg-raised p-3 ${selected ? selectedRing : ''}`}
-    >
-      <audio src={url} controls className="w-full" />
-    </div>
+    <SelectedWrap selected={selected}>
+      <AudioComponent url={url} />
+    </SelectedWrap>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Link Card
+// Link Card — reuses LinkCardComponent
 // ---------------------------------------------------------------------------
 
-export function DirectiveLinkCardView() {
+export function DirectiveLinkCardView({ cdnPrefix }: { cdnPrefix: string }) {
   const { node, selected } = useNodeViewContext()
-  const { url, title } = node.attrs as { url: string; title: string }
+  const { src, url, title, tone, favicon } = node.attrs as {
+    src: string
+    url: string
+    title: string
+    tone: string
+    favicon: string
+  }
+
+  if (!url && !title) {
+    return (
+      <Placeholder
+        icon={<Image className="size-5 shrink-0" strokeWidth={1.5} />}
+        label="Link Card"
+        selected={selected}
+      />
+    )
+  }
+
+  const coverUrl = src?.startsWith('http')
+    ? src
+    : mediaUrl(cdnPrefix, src || '')
 
   return (
-    <DirectiveBlock
-      icon={<ExternalLink className="size-5 shrink-0" strokeWidth={1.5} />}
-      label={title || 'Link Card'}
-      detail={url || undefined}
-      selected={selected}
-    />
+    <SelectedWrap selected={selected}>
+      <LinkCardComponent
+        coverUrl={coverUrl}
+        url={url || '#'}
+        title={title || ''}
+        tone={parseLinkTone(tone)}
+        favicon={parseLinkFavicon(favicon)}
+      />
+    </SelectedWrap>
   )
 }
 
 // ---------------------------------------------------------------------------
-// GitHub Card
+// GitHub Card — reuses GitHubCardComponent (fetches live data)
 // ---------------------------------------------------------------------------
 
 export function DirectiveGithubView() {
   const { node, selected } = useNodeViewContext()
-  const { repo } = node.attrs as { repo: string }
+  const {
+    repo,
+    ref: gitRef,
+    title,
+    align,
+  } = node.attrs as {
+    repo: string
+    ref: string
+    title: string
+    align: string
+  }
+
+  if (!repo) {
+    return (
+      <Placeholder
+        icon={<Package className="size-5 shrink-0" strokeWidth={1.5} />}
+        label="GitHub"
+        selected={selected}
+      />
+    )
+  }
 
   return (
-    <DirectiveBlock
-      icon={<GitFork className="size-5 shrink-0" strokeWidth={1.5} />}
-      label={repo || 'GitHub'}
-      detail={repo ? `github.com/${repo}` : undefined}
-      selected={selected}
-    />
+    <SelectedWrap selected={selected}>
+      <GitHubCardComponent
+        repo={repo}
+        gitRef={gitRef || undefined}
+        title={title || undefined}
+        align={(align as 'left' | 'center' | 'right') || 'center'}
+      />
+    </SelectedWrap>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Cargo Card
+// Cargo — reuses CargoWidget
 // ---------------------------------------------------------------------------
 
 export function DirectiveCargoView() {
   const { node, selected } = useNodeViewContext()
   const { crate, version } = node.attrs as { crate: string; version: string }
 
+  if (!crate) {
+    return (
+      <Placeholder
+        icon={<Package className="size-5 shrink-0" strokeWidth={1.5} />}
+        label="Cargo Crate"
+        selected={selected}
+      />
+    )
+  }
+
   return (
-    <DirectiveBlock
-      icon={<Package className="size-5 shrink-0" strokeWidth={1.5} />}
-      label={crate || 'Cargo Crate'}
-      detail={version ? `v${version}` : undefined}
-      selected={selected}
-    />
+    <SelectedWrap selected={selected}>
+      <CargoWidget crate={crate} version={version || undefined} />
+    </SelectedWrap>
   )
 }

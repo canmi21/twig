@@ -124,7 +124,7 @@ function MilkdownInner({
       .use(
         $view(directiveLinkCardNode, () =>
           nodeViewFactory({
-            component: DirectiveLinkCardView,
+            component: () => <DirectiveLinkCardView cdnPrefix={cdnPrefix} />,
             as: 'div',
           }),
         ),
