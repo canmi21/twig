@@ -168,7 +168,7 @@ function MilkdownInner({
 
   return (
     // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-    <div className="article milkdown-editor">
+    <div className="post__body article milkdown-editor">
       <Milkdown />
     </div>
   )
