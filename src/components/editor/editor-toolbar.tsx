@@ -76,6 +76,7 @@ function Btn({
   return (
     <button
       type="button"
+      onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       title={title}
       disabled={disabled}

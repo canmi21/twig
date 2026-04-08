@@ -423,6 +423,9 @@ export function SlashMenu({
   // Keyboard navigation
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Ignore IME composition events (e.g. Enter to confirm Chinese pinyin)
+      if (e.isComposing || e.keyCode === 229) return
+
       if (formItem) {
         if (e.key === 'Escape') {
           e.preventDefault()
