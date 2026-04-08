@@ -421,6 +421,7 @@ function EditorPage() {
               <ArticleHeader
                 title={metadata.title ?? 'Untitled'}
                 createdAt={metadata.created_at}
+                text={markdown}
               >
                 <PostShareActions cid={post.cid} tweet={metadata.tweet} />
               </ArticleHeader>

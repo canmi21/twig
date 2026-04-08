@@ -48,14 +48,21 @@ export function ArticleHeader({
   title,
   createdAt,
   html,
+  text,
   children,
 }: {
   title: string
   createdAt?: string
+  /** Compiled HTML — used to compute content count on post page */
   html?: string
+  /** Raw text (e.g. markdown) — used to compute content count in editor */
+  text?: string
   children?: React.ReactNode
 }) {
-  const contentCount = html ? formatCount(countContentUnits(html)) : undefined
+  const source = html ?? text
+  const contentCount = source
+    ? formatCount(countContentUnits(source))
+    : undefined
   return (
     <header className="mb-11 flex items-start justify-between gap-4">
       <div className="min-w-0 flex-1">
