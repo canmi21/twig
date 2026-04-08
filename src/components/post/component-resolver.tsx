@@ -270,7 +270,7 @@ export function GitHubCardComponent({
   )
 }
 
-function SvgBoardComponent({ code }: { code: string }) {
+export function SvgBoardComponent({ code }: { code: string }) {
   // SVG source from trusted author-written content,
   // same trust model as the compiled HTML pipeline.
   return (

@@ -18,10 +18,12 @@ import {
   AudioComponent,
   LinkCardComponent,
   GitHubCardComponent,
+  SvgBoardComponent,
   parseLinkTone,
   parseLinkFavicon,
 } from '~/components/post/component-resolver'
 import { CargoWidget } from '~/components/post/cargo'
+import { TokeiWidget } from '~/components/post/tokei'
 
 // ---------------------------------------------------------------------------
 // Shared placeholder (used when attrs are missing)
@@ -241,5 +243,41 @@ export function DirectiveCargoView() {
     <SelectedWrap selected={selected}>
       <CargoWidget crate={crate} version={version || undefined} />
     </SelectedWrap>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Code block — renders svg-board / tokei with shared components,
+// falls back to default <pre><code> for normal code blocks.
+// ---------------------------------------------------------------------------
+
+export function CodeBlockView() {
+  const { node, selected, contentRef } = useNodeViewContext()
+  const lang = (node.attrs.language as string) || ''
+
+  // Get the text content from the code block node
+  const code = node.textContent
+
+  if (lang === 'svg-board' && code) {
+    return (
+      <SelectedWrap selected={selected}>
+        <SvgBoardComponent code={code} />
+      </SelectedWrap>
+    )
+  }
+
+  if (lang === 'tokei' && code) {
+    return (
+      <SelectedWrap selected={selected}>
+        <TokeiWidget raw={code} />
+      </SelectedWrap>
+    )
+  }
+
+  // Default: editable code block
+  return (
+    <pre className={selected ? 'ring-2 ring-accent/40' : ''}>
+      <code ref={contentRef} />
+    </pre>
   )
 }

@@ -18,6 +18,11 @@
   caret-color: var(--color-primary);
 }
 
+/* Remove browser default focus ring on contenteditable */
+.milkdown-editor .ProseMirror {
+  outline: none;
+}
+
 /* Placeholder for empty editor */
 .milkdown-editor .ProseMirror-focused:empty::before,
 .milkdown-editor .ProseMirror > p:first-child:empty::before {

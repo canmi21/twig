@@ -8,7 +8,7 @@
 
 import { useEffect, useRef } from 'react'
 import { Editor, rootCtx, defaultValueCtx } from '@milkdown/kit/core'
-import { commonmark } from '@milkdown/kit/preset/commonmark'
+import { commonmark, codeBlockSchema } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
 import { history } from '@milkdown/kit/plugin/history'
 import { clipboard } from '@milkdown/kit/plugin/clipboard'
@@ -40,6 +40,7 @@ import {
   DirectiveLinkCardView,
   DirectiveGithubView,
   DirectiveCargoView,
+  CodeBlockView,
 } from './directive-views'
 
 // oxlint-disable-next-line import/no-unassigned-import
@@ -141,6 +142,15 @@ function MilkdownInner({
         $view(directiveCargoNode, () =>
           nodeViewFactory({
             component: DirectiveCargoView,
+            as: 'div',
+          }),
+        ),
+      )
+      // Code block: render svg-board / tokei with shared components
+      .use(
+        $view(codeBlockSchema.node, () =>
+          nodeViewFactory({
+            component: CodeBlockView,
             as: 'div',
           }),
         ),
