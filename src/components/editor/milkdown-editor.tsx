@@ -19,7 +19,6 @@ import {
   toggleStrongCommand,
   toggleEmphasisCommand,
   toggleInlineCodeCommand,
-  toggleLinkCommand,
   wrapInHeadingCommand,
   wrapInBulletListCommand,
   wrapInOrderedListCommand,
@@ -70,6 +69,7 @@ import {
   SlashMenu,
   type SlashState,
 } from './slash-menu'
+import { LinkPopover, type LinkPopoverState } from './link-popover'
 
 // ---------------------------------------------------------------------------
 // IME mark protection plugin
@@ -125,6 +125,14 @@ const imeMarkProtectionPlugin = $prose(
 // oxlint-disable-next-line import/no-unassigned-import
 import '~/styles/editor.css'
 
+const CLOSED_LINK: LinkPopoverState = {
+  open: false,
+  x: 0,
+  y: 0,
+  selectedText: '',
+  existingHref: '',
+}
+
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
@@ -170,6 +178,76 @@ function MilkdownInner({
 
   const handleSlashClose = useCallback(() => {
     setSlashState({ open: false, query: '', x: 0, y: 0 })
+  }, [])
+
+  // Link popover state
+  const [linkState, setLinkState] = useState<LinkPopoverState>(CLOSED_LINK)
+
+  const openLinkPopover = useCallback(() => {
+    const view = viewRef.current
+    if (!view) return
+    const { state } = view
+    const { from, to, empty } = state.selection
+    const linkMark = state.schema.marks.link
+
+    // Check if cursor is inside an existing link
+    if (!empty) {
+      const marks = state.doc.resolve(from).marks()
+      const existing = marks.find((m) => m.type === linkMark)
+      if (existing) {
+        // Remove the link directly
+        view.dispatch(state.tr.removeMark(from, to, linkMark))
+        return
+      }
+    }
+
+    const coords = view.coordsAtPos(from)
+    const selectedText = empty ? '' : state.doc.textBetween(from, to, ' ')
+    const existingHref = ''
+
+    setLinkState({
+      open: true,
+      x: coords.left,
+      y: coords.bottom + 4,
+      selectedText,
+      existingHref,
+    })
+  }, [])
+
+  const handleLinkSubmit = useCallback((href: string, text?: string) => {
+    const view = viewRef.current
+    if (!view) return
+    const { state } = view
+    const linkMark = state.schema.marks.link.create({ href })
+
+    if (state.selection.empty) {
+      // No selection: insert text node with link mark
+      const displayText = text || href
+      const node = state.schema.text(displayText, [linkMark])
+      view.dispatch(state.tr.replaceSelectionWith(node, false))
+    } else {
+      // Has selection: wrap in link mark
+      const { from, to } = state.selection
+      view.dispatch(state.tr.addMark(from, to, linkMark))
+    }
+
+    setLinkState(CLOSED_LINK)
+    view.focus()
+  }, [])
+
+  const handleLinkRemove = useCallback(() => {
+    const view = viewRef.current
+    if (!view) return
+    const { state } = view
+    const { from, to } = state.selection
+    view.dispatch(state.tr.removeMark(from, to, state.schema.marks.link))
+    setLinkState(CLOSED_LINK)
+    view.focus()
+  }, [])
+
+  const handleLinkClose = useCallback(() => {
+    setLinkState(CLOSED_LINK)
+    viewRef.current?.focus()
   }, [])
 
   const pasteImagePlugin = onPasteImage
@@ -319,7 +397,7 @@ function MilkdownInner({
           editor.action(callCommand(toggleInlineCodeCommand.key))
           break
         case 'toggleLink':
-          editor.action(callCommand(toggleLinkCommand.key, { href: '' }))
+          openLinkPopover()
           break
         case 'heading':
           editor.action(
@@ -355,7 +433,7 @@ function MilkdownInner({
 
     window.addEventListener('milkdown-action', handler)
     return () => window.removeEventListener('milkdown-action', handler)
-  }, [])
+  }, [openLinkPopover])
 
   return (
     <>
@@ -368,6 +446,12 @@ function MilkdownInner({
         editorRef={editorRef}
         viewRef={viewRef}
         onClose={handleSlashClose}
+      />
+      <LinkPopover
+        state={linkState}
+        onSubmit={handleLinkSubmit}
+        onRemove={handleLinkRemove}
+        onClose={handleLinkClose}
       />
     </>
   )
