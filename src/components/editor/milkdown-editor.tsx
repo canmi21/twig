@@ -13,12 +13,25 @@ import {
   defaultValueCtx,
   editorViewCtx,
 } from '@milkdown/kit/core'
-import { commonmark, codeBlockSchema } from '@milkdown/kit/preset/commonmark'
+import {
+  commonmark,
+  codeBlockSchema,
+  toggleStrongCommand,
+  toggleEmphasisCommand,
+  toggleInlineCodeCommand,
+  toggleLinkCommand,
+  wrapInHeadingCommand,
+  wrapInBulletListCommand,
+  wrapInOrderedListCommand,
+  wrapInBlockquoteCommand,
+  insertHrCommand,
+  createCodeBlockCommand,
+} from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
 import { history } from '@milkdown/kit/plugin/history'
 import { clipboard } from '@milkdown/kit/plugin/clipboard'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
-import { getMarkdown, $view } from '@milkdown/kit/utils'
+import { callCommand, getMarkdown, $view } from '@milkdown/kit/utils'
 import type { EditorView } from '@milkdown/kit/prose/view'
 import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react'
 import {
@@ -49,7 +62,12 @@ import {
   CodeBlockView,
 } from './directive-views'
 
-import { createSlashPlugin, SlashMenu, type SlashState } from './slash-menu'
+import {
+  createSlashPlugin,
+  insertDirectiveNode,
+  SlashMenu,
+  type SlashState,
+} from './slash-menu'
 
 // oxlint-disable-next-line import/no-unassigned-import
 import '~/styles/editor.css'
@@ -214,6 +232,70 @@ function MilkdownInner({
       getMarkdownRef.current = null
     }
   }, [get, getMarkdownRef, defaultValue])
+
+  // Handle toolbar actions dispatched via CustomEvent
+  useEffect(() => {
+    const directiveNodeNames: Record<string, string> = {
+      image: 'directiveImage',
+      video: 'directiveVideo',
+      audio: 'directiveAudio',
+      linkcard: 'directiveLinkcard',
+      github: 'directiveGithub',
+      cargo: 'directiveCargo',
+    }
+
+    const handler = (e: Event) => {
+      const { type, payload } = (e as CustomEvent).detail
+      const editor = editorRef.current
+      const view = viewRef.current
+      if (!editor || !view) return
+
+      switch (type) {
+        case 'toggleStrong':
+          editor.action(callCommand(toggleStrongCommand.key))
+          break
+        case 'toggleEmphasis':
+          editor.action(callCommand(toggleEmphasisCommand.key))
+          break
+        case 'toggleInlineCode':
+          editor.action(callCommand(toggleInlineCodeCommand.key))
+          break
+        case 'toggleLink':
+          editor.action(callCommand(toggleLinkCommand.key, { href: '' }))
+          break
+        case 'heading':
+          editor.action(
+            callCommand(wrapInHeadingCommand.key, Number(payload?.level ?? 2)),
+          )
+          break
+        case 'bulletList':
+          editor.action(callCommand(wrapInBulletListCommand.key))
+          break
+        case 'orderedList':
+          editor.action(callCommand(wrapInOrderedListCommand.key))
+          break
+        case 'blockquote':
+          editor.action(callCommand(wrapInBlockquoteCommand.key))
+          break
+        case 'hr':
+          editor.action(callCommand(insertHrCommand.key))
+          break
+        case 'codeBlock':
+          editor.action(callCommand(createCodeBlockCommand.key))
+          break
+        case 'insertDirective': {
+          const nodeType = directiveNodeNames[payload?.type]
+          if (nodeType) insertDirectiveNode(view, nodeType, {})
+          break
+        }
+      }
+
+      view.focus()
+    }
+
+    window.addEventListener('milkdown-action', handler)
+    return () => window.removeEventListener('milkdown-action', handler)
+  }, [])
 
   return (
     <>

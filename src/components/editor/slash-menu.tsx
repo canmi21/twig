@@ -108,7 +108,7 @@ function clearSlashText(view: EditorView) {
   }
 }
 
-function insertDirectiveNode(
+export function insertDirectiveNode(
   view: EditorView,
   nodeId: string,
   attrs: Record<string, string>,
