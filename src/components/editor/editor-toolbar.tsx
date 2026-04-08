@@ -133,17 +133,15 @@ export function EditorToolbar({
   feedback,
 }: EditorToolbarProps) {
   return (
-    <header className="flex shrink-0 items-center border-b border-border px-2 py-1">
-      {/* Left: back only */}
-      <div className="flex min-w-0 flex-1 items-center">
-        <Link to="/@/contents" className={btnClass} title="Back to contents">
-          <ArrowLeft className={iconSize} strokeWidth={1.8} />
-        </Link>
-      </div>
+    <header className="flex shrink-0 items-center gap-0.5 border-b border-border px-2 py-1">
+      {/* Left: back + formatting */}
+      <Link to="/@/contents" className={btnClass} title="Back to contents">
+        <ArrowLeft className={iconSize} strokeWidth={1.8} />
+      </Link>
 
-      {/* Center: formatting (only in WYSIWYG view) */}
       {view === 'wysiwyg' && (
-        <div className="flex items-center gap-0.5">
+        <>
+          <div className={dividerClass} />
           <Btn
             icon={<Bold className={iconSize} strokeWidth={1.8} />}
             title="Bold"
@@ -236,11 +234,14 @@ export function EditorToolbar({
             title="Insert Cargo card"
             onClick={() => onAction('insertDirective', { type: 'cargo' })}
           />
-        </div>
+        </>
       )}
 
+      {/* Spacer */}
+      <div className="flex-1" />
+
       {/* Right: mode, metadata, save, theme */}
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-0.5">
+      <div className="flex items-center gap-0.5">
         {/* Feedback */}
         {feedback && (
           <span
