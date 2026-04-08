@@ -38,16 +38,6 @@ export const Route = createRootRouteWithContext<RootContext>()({
         'data-website-id': '2b0a1e79-405a-47c0-a263-05732e0a130c',
         defer: true,
       },
-      {
-        children: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "w1qyo3ct84");`,
-      },
-      {
-        src: 'https://www.googletagmanager.com/gtag/js?id=G-JSSDP56B0P',
-        async: true,
-      },
-      {
-        children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JSSDP56B0P');`,
-      },
     ],
     links: [
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
