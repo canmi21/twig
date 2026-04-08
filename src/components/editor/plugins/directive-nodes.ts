@@ -1,14 +1,12 @@
-/* src/components/editor/milkdown-plugins.ts */
+/* src/components/editor/plugins/directive-nodes.ts */
 
-/* src/components/editor/milkdown-plugins.ts
+/* src/components/editor/plugins/directive-nodes.ts
  *
- * Custom Milkdown plugins for remark-directive based content.
- * Defines ProseMirror nodes for each directive type and wires
- * remark-directive into the Milkdown transformer pipeline.
+ * Remark-directive integration and ProseMirror node definitions
+ * for each directive type (image, video, audio, linkcard, github, cargo).
  */
 
-import { $node, $remark, $prose } from '@milkdown/kit/utils'
-import { Plugin, PluginKey } from '@milkdown/kit/prose/state'
+import { $node, $remark } from '@milkdown/kit/utils'
 import remarkDirective from 'remark-directive'
 
 // ---------------------------------------------------------------------------
@@ -156,68 +154,3 @@ export const directiveNodes = [
   directiveGithubNode,
   directiveCargoNode,
 ]
-
-// ---------------------------------------------------------------------------
-// Paste-image ProseMirror plugin
-// ---------------------------------------------------------------------------
-
-export interface PasteImageHandler {
-  (file: File): Promise<string | null>
-}
-
-const pasteImagePluginKey = new PluginKey('pasteImage')
-
-export function createPasteImagePlugin(onPaste: PasteImageHandler) {
-  return $prose(
-    () =>
-      new Plugin({
-        key: pasteImagePluginKey,
-        props: {
-          handlePaste(view, event) {
-            const file = Array.from(event.clipboardData?.items ?? [])
-              .find((item) => item.type.startsWith('image/'))
-              ?.getAsFile()
-            if (!file) return false
-
-            event.preventDefault()
-
-            // Insert placeholder node
-            const { schema, tr } = view.state
-            const nodeType = schema.nodes.directiveImage
-            if (!nodeType) return false
-
-            const placeholderNode = nodeType.create({
-              src: 'uploading...',
-              alt: '',
-            })
-            const pos = view.state.selection.from
-            view.dispatch(tr.insert(pos, placeholderNode))
-
-            // Upload in background, then replace placeholder
-            onPaste(file).then((src) => {
-              if (!src) return
-              const { state } = view
-              const newTr = state.tr
-              // Find the placeholder node
-              state.doc.descendants((node, nodePos) => {
-                if (
-                  node.type.name === 'directiveImage' &&
-                  node.attrs.src === 'uploading...'
-                ) {
-                  newTr.setNodeMarkup(nodePos, undefined, {
-                    ...node.attrs,
-                    src,
-                  })
-                  return false
-                }
-                return true
-              })
-              view.dispatch(newTr)
-            })
-
-            return true
-          },
-        },
-      }),
-  )
-}

@@ -7,7 +7,7 @@
  */
 
 import { useCallback } from 'react'
-import type { PasteImageHandler } from './milkdown-plugins'
+import type { PasteImageHandler } from './plugins'
 
 export interface RawEditorProps {
   value: string
