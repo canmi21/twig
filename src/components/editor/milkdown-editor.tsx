@@ -166,18 +166,16 @@ function MilkdownInner({
   // Slash menu state — updated by ProseMirror plugin
   const [slashState, setSlashState] = useState<SlashState>({
     open: false,
-    query: '',
     x: 0,
     y: 0,
   })
-  // Slash plugin calls setSlashState directly — stable because useState setter is stable
   const [slashPlugin] = useState(() => createSlashPlugin(setSlashState))
 
   const editorRef = useRef<Editor | null>(null)
   const viewRef = useRef<EditorView | null>(null)
 
   const handleSlashClose = useCallback(() => {
-    setSlashState({ open: false, query: '', x: 0, y: 0 })
+    setSlashState({ open: false, x: 0, y: 0 })
   }, [])
 
   // Link popover state

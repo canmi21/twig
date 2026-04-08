@@ -3,12 +3,9 @@
 /* src/components/editor/slash-menu.tsx
  *
  * Notion-style slash command menu for the Milkdown editor.
- * Triggered by typing "/", filters items by fuzzy search,
- * inserts directives or formatting on selection.
- *
- * Uses a simple ProseMirror plugin + React portal approach
- * instead of SlashProvider to avoid complexity with scroll
- * containers and plugin view lifecycle.
+ * Typing "/" opens the menu without inserting the character.
+ * Typing "//" inserts a literal "/". Other keys become the
+ * search query while the menu is open.
  */
 
 import { useState, useEffect, useCallback, useRef, type RefObject } from 'react'
@@ -49,7 +46,6 @@ import type { Editor } from '@milkdown/kit/core'
 
 export interface SlashState {
   open: boolean
-  query: string
   /** Caret position in viewport coordinates */
   x: number
   y: number
@@ -57,55 +53,48 @@ export interface SlashState {
 
 const slashKey = new PluginKey<SlashState>('slash')
 
-function getSlashQuery(view: EditorView): string | null {
-  const { $from } = view.state.selection
-  if ($from.parent.type.name !== 'paragraph') return null
-  const text = $from.parent.textContent.slice(0, $from.parentOffset)
-  const idx = text.lastIndexOf('/')
-  if (idx < 0) return null
-  // Deny "/" after URL-forming characters to avoid triggering on https:// etc.
-  // Allow after: start of line, whitespace, CJK characters, punctuation
-  if (idx > 0 && /[a-zA-Z0-9:.\-\\]/.test(text[idx - 1])) return null
-  return text.slice(idx + 1)
-}
-
-export function createSlashPlugin(onUpdate: (state: SlashState) => void) {
+/**
+ * ProseMirror plugin that intercepts "/" keypress to open the menu
+ * without inserting the character into the document.
+ */
+export function createSlashPlugin(onOpen: (state: SlashState) => void) {
   return $prose(
     () =>
       new Plugin({
         key: slashKey,
-        view() {
-          return {
-            update(view) {
-              const query = getSlashQuery(view)
-              if (query !== null) {
-                const coords = view.coordsAtPos(view.state.selection.from)
-                onUpdate({
-                  open: true,
-                  query,
-                  x: coords.left,
-                  y: coords.bottom + 4,
-                })
-              } else {
-                onUpdate({ open: false, query: '', x: 0, y: 0 })
-              }
-            },
-          }
+        props: {
+          handleKeyDown(view, event) {
+            if (
+              event.key !== '/' ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.altKey ||
+              event.isComposing
+            )
+              return false
+
+            const { $from } = view.state.selection
+            if ($from.parent.type.name !== 'paragraph') return false
+
+            // Deny after URL-forming characters or existing "/"
+            const text = $from.parent.textContent.slice(0, $from.parentOffset)
+            if (
+              text.length > 0 &&
+              /[a-zA-Z0-9:.\-\\/]/.test(text[text.length - 1])
+            )
+              return false
+
+            const coords = view.coordsAtPos(view.state.selection.from)
+            onOpen({
+              open: true,
+              x: coords.left,
+              y: coords.bottom + 4,
+            })
+            return true // prevent "/" from entering the document
+          },
         },
       }),
   )
-}
-
-function clearSlashText(view: EditorView) {
-  const { state } = view
-  const { $from } = state.selection
-  const text = $from.parent.textContent.slice(0, $from.parentOffset)
-  const slashIdx = text.lastIndexOf('/')
-  if (slashIdx >= 0) {
-    const from = $from.start() + slashIdx
-    const to = $from.pos
-    view.dispatch(state.tr.delete(from, to))
-  }
 }
 
 export function insertDirectiveNode(
@@ -274,7 +263,6 @@ const ITEMS: SlashItem[] = [
     keywords: ['svg', 'diagram'],
     icon: <FileCode2 className={iconClass} strokeWidth={1.8} />,
     action: (ctx, view) => {
-      clearSlashText(view)
       callCommand(createCodeBlockCommand.key)(ctx)
       requestAnimationFrame(() => {
         view.state.doc.descendants((node, pos) => {
@@ -302,7 +290,6 @@ const ITEMS: SlashItem[] = [
     keywords: ['tokei', 'stats'],
     icon: <BarChart3 className={iconClass} strokeWidth={1.8} />,
     action: (ctx, view) => {
-      clearSlashText(view)
       callCommand(createCodeBlockCommand.key)(ctx)
       requestAnimationFrame(() => {
         view.state.doc.descendants((node, pos) => {
@@ -352,21 +339,33 @@ interface SlashMenuProps {
   onClose: () => void
 }
 
-export function SlashMenu({
-  slashState,
-  editorRef,
-  viewRef,
-  onClose,
-}: SlashMenuProps) {
+export function SlashMenu(props: SlashMenuProps) {
+  if (!props.slashState.open) return null
+  return (
+    <div
+      className="fixed z-50"
+      style={{ left: props.slashState.x, top: props.slashState.y }}
+    >
+      <div className="w-64 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+        <SlashMenuInner {...props} />
+      </div>
+    </div>
+  )
+}
+
+/** Inner component — mounts fresh each time the menu opens */
+function SlashMenuInner({ editorRef, viewRef, onClose }: SlashMenuProps) {
+  const [query, setQuery] = useState('')
   const [selected, setSelected] = useState(0)
   const [formItem, setFormItem] = useState<SlashItem | null>(null)
   const [formValues, setFormValues] = useState<Record<string, string>>({})
   const firstInputRef = useRef<HTMLInputElement>(null)
 
-  const items = filterItems(slashState.query)
+  const items = filterItems(query)
 
+  // Reset selection when query changes
   // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset on query change
-  useEffect(() => setSelected(0), [slashState.query])
+  useEffect(() => setSelected(0), [query])
 
   // Focus first input when form opens
   useEffect(() => {
@@ -389,7 +388,6 @@ export function SlashMenu({
         return
       }
 
-      clearSlashText(view)
       editor.action((ctx) => item.action(ctx, view))
       onClose()
     },
@@ -400,8 +398,6 @@ export function SlashMenu({
     const editor = editorRef.current
     const view = viewRef.current
     if (!formItem || !editor || !view) return
-
-    clearSlashText(view)
 
     const nodeNames: Record<string, string> = {
       image: 'directiveImage',
@@ -420,12 +416,12 @@ export function SlashMenu({
     setFormItem(null)
   }, [formItem, formValues, editorRef, viewRef, onClose])
 
-  // Keyboard navigation
+  // Keyboard handler: captures all input while menu is open
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Ignore IME composition events (e.g. Enter to confirm Chinese pinyin)
       if (e.isComposing || e.keyCode === 229) return
 
+      // When a form is active, only handle Escape and Enter
       if (formItem) {
         if (e.key === 'Escape') {
           e.preventDefault()
@@ -436,6 +432,19 @@ export function SlashMenu({
           e.stopPropagation()
           submitForm()
         }
+        return
+      }
+
+      // "//" → insert literal "/" and close
+      if (e.key === '/') {
+        e.preventDefault()
+        e.stopPropagation()
+        const view = viewRef.current
+        if (view) {
+          const { state } = view
+          view.dispatch(state.tr.insertText('/'))
+        }
+        onClose()
         return
       }
 
@@ -455,90 +464,108 @@ export function SlashMenu({
         e.preventDefault()
         e.stopPropagation()
         onClose()
-        // Refocus editor
         viewRef.current?.focus()
+      } else if (e.key === 'Backspace') {
+        e.preventDefault()
+        e.stopPropagation()
+        if (query.length === 0) {
+          onClose()
+          viewRef.current?.focus()
+        } else {
+          setQuery((q) => q.slice(0, -1))
+        }
+      } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        // Printable character → append to query
+        e.preventDefault()
+        e.stopPropagation()
+        setQuery((q) => q + e.key)
       }
     }
 
     document.addEventListener('keydown', handler, { capture: true })
     return () =>
       document.removeEventListener('keydown', handler, { capture: true })
-  }, [items, selected, formItem, executeItem, submitForm, onClose, viewRef])
+  }, [
+    query,
+    items,
+    selected,
+    formItem,
+    executeItem,
+    submitForm,
+    onClose,
+    viewRef,
+  ])
 
-  if (!slashState.open) return null
-
-  return (
-    <div
-      className="fixed z-50"
-      style={{ left: slashState.x, top: slashState.y }}
-    >
-      <div className="w-64 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
-        {formItem ? (
-          <div className="p-3">
-            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-primary">
-              {formItem.icon}
-              {formItem.label}
-            </div>
-            {formItem.form?.fields.map((field, i) => (
-              <label key={field.name} className="mb-2 block">
-                <span className="mb-0.5 block text-xs text-secondary">
-                  {field.label}
-                </span>
-                <input
-                  ref={i === 0 ? firstInputRef : undefined}
-                  type="text"
-                  placeholder={field.placeholder}
-                  value={formValues[field.name] ?? ''}
-                  onChange={(e) =>
-                    setFormValues((v) => ({
-                      ...v,
-                      [field.name]: e.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                />
-              </label>
-            ))}
-            <div className="mt-2 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setFormItem(null)}
-                className="rounded-sm px-2.5 py-1 text-xs text-secondary hover:text-primary"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={submitForm}
-                className="rounded-sm bg-primary px-2.5 py-1 text-xs text-surface"
-              >
-                Insert
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="max-h-72 overflow-y-auto p-1">
-            {items.length === 0 ? (
-              <div className="px-2.5 py-3 text-center text-xs text-secondary">
-                No results
-              </div>
-            ) : (
-              items.map((item, i) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => executeItem(item)}
-                  onMouseEnter={() => setSelected(i)}
-                  className={`${itemClass} ${i === selected ? 'bg-raised' : ''}`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              ))
-            )}
-          </div>
-        )}
+  return formItem ? (
+    <div className="p-3">
+      <div className="mb-2 flex items-center gap-2 text-sm font-medium text-primary">
+        {formItem.icon}
+        {formItem.label}
+      </div>
+      {formItem.form?.fields.map((field, i) => (
+        <label key={field.name} className="mb-2 block">
+          <span className="mb-0.5 block text-xs text-secondary">
+            {field.label}
+          </span>
+          <input
+            ref={i === 0 ? firstInputRef : undefined}
+            type="text"
+            placeholder={field.placeholder}
+            value={formValues[field.name] ?? ''}
+            onChange={(e) =>
+              setFormValues((v) => ({
+                ...v,
+                [field.name]: e.target.value,
+              }))
+            }
+            className={inputClass}
+          />
+        </label>
+      ))}
+      <div className="mt-2 flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => setFormItem(null)}
+          className="rounded-sm px-2.5 py-1 text-xs text-secondary hover:text-primary"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={submitForm}
+          className="rounded-sm bg-primary px-2.5 py-1 text-xs text-surface"
+        >
+          Insert
+        </button>
       </div>
     </div>
+  ) : (
+    <>
+      {query && (
+        <div className="border-b border-border px-3 py-1.5 text-xs text-secondary">
+          /{query}
+        </div>
+      )}
+      <div className="max-h-72 overflow-y-auto p-1">
+        {items.length === 0 ? (
+          <div className="px-2.5 py-3 text-center text-xs text-secondary">
+            No results
+          </div>
+        ) : (
+          items.map((item, i) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => executeItem(item)}
+              onMouseEnter={() => setSelected(i)}
+              className={`${itemClass} ${i === selected ? 'bg-raised' : ''}`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          ))
+        )}
+      </div>
+    </>
   )
 }
