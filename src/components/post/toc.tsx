@@ -11,22 +11,6 @@ const TOP_DEAD_ZONE_PX = 64
 const COLLAPSED_GAP_PX = 6
 const EXPANDED_GAP_PX = 8
 
-function getNativeReplaceState() {
-  return window.History?.prototype.replaceState ?? window.history.replaceState
-}
-
-function replaceHash(id: string) {
-  const { pathname, search, hash } = window.location
-  const nextHash = id ? `#${id}` : ''
-  if (hash === nextHash) return
-  getNativeReplaceState().call(
-    window.history,
-    window.history.state,
-    '',
-    `${pathname}${search}${nextHash}`,
-  )
-}
-
 function estimateTextWidth(text: string): number {
   let width = 0
   for (const char of text) {
@@ -168,7 +152,6 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       if (isClickScrollingRef.current) return
       if (window.scrollY <= TOP_DEAD_ZONE_PX) {
         setActiveId('')
-        replaceHash('')
       }
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -189,7 +172,6 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
         for (const entry of intersections) {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id)
-            replaceHash(entry.target.id)
             break
           }
         }
@@ -213,7 +195,6 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
 
       const onEnd = () => {
         isClickScrollingRef.current = false
-        replaceHash(id)
       }
 
       if ('onscrollend' in window) {
