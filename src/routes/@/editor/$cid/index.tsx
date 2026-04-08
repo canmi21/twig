@@ -34,6 +34,8 @@ import {
 import { MetadataPanel } from '~/components/editor/metadata-panel'
 import { RawEditor } from '~/components/editor/raw-editor'
 import type { PasteImageHandler } from '~/components/editor/milkdown-plugins'
+import { ArticleHeader } from '~/components/post/article-header'
+import { PostShareActions } from '~/components/post/share-actions'
 import postPageCss from '~/styles/post/page.css?url'
 
 // Milkdown is client-only
@@ -403,7 +405,6 @@ function EditorPage() {
         onSave={handleSave}
         saving={saving}
         feedback={feedback}
-        title={metadata.title}
       />
 
       <div className="min-h-0 flex-1 overflow-y-auto">
@@ -415,7 +416,14 @@ function EditorPage() {
               </div>
             }
           >
-            <div className="mx-auto max-w-180">
+            {/* eslint-disable-next-line better-tailwindcss/no-unknown-classes */}
+            <div className="post mx-auto max-w-190 px-5 pt-8 pb-16 text-primary">
+              <ArticleHeader
+                title={metadata.title ?? 'Untitled'}
+                createdAt={metadata.created_at}
+              >
+                <PostShareActions cid={post.cid} tweet={metadata.tweet} />
+              </ArticleHeader>
               <MilkdownEditor
                 key={milkdownKey}
                 defaultValue={markdownRef.current}
@@ -428,7 +436,7 @@ function EditorPage() {
           </Suspense>
         ) : (
           <div
-            className="mx-auto flex max-w-180 flex-col"
+            className="mx-auto flex max-w-190 flex-col"
             style={{ minHeight: '100%' }}
           >
             <RawEditor

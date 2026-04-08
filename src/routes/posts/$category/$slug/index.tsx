@@ -106,7 +106,7 @@ function PostPage() {
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="post mx-auto max-w-180 px-5 pt-27 pb-28 text-primary">
+      <article className="post mx-auto max-w-190 px-5 pt-27 pb-28 text-primary">
         <ArticleHeader
           title={frontmatter.title}
           createdAt={frontmatter.created_at}

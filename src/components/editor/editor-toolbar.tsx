@@ -49,7 +49,6 @@ export interface EditorToolbarProps {
   onSave: () => void
   saving: boolean
   feedback: { type: 'success' | 'error'; message: string } | null
-  title?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -130,26 +129,19 @@ export function EditorToolbar({
   onSave,
   saving,
   feedback,
-  title,
 }: EditorToolbarProps) {
   return (
-    <header className="flex shrink-0 items-center gap-0.5 border-b border-border px-2 py-1">
-      {/* Back */}
-      <Link to="/@/contents" className={btnClass} title="Back to contents">
-        <ArrowLeft className={iconSize} strokeWidth={1.8} />
-      </Link>
+    <header className="flex shrink-0 items-center border-b border-border px-2 py-1">
+      {/* Left: back only */}
+      <div className="flex min-w-0 flex-1 items-center">
+        <Link to="/@/contents" className={btnClass} title="Back to contents">
+          <ArrowLeft className={iconSize} strokeWidth={1.8} />
+        </Link>
+      </div>
 
-      {title && (
-        <span className="ml-1 max-w-48 truncate text-xs text-secondary">
-          {title}
-        </span>
-      )}
-
-      <div className={dividerClass} />
-
-      {/* Formatting (only in WYSIWYG view) */}
+      {/* Center: formatting (only in WYSIWYG view) */}
       {view === 'wysiwyg' && (
-        <>
+        <div className="flex items-center gap-0.5">
           <Btn
             icon={<Bold className={iconSize} strokeWidth={1.8} />}
             title="Bold"
@@ -237,59 +229,59 @@ export function EditorToolbar({
             title="Insert Cargo card"
             onClick={() => onAction('insertDirective', { type: 'cargo' })}
           />
-        </>
+        </div>
       )}
 
-      {/* Spacer */}
-      <div className="flex-1" />
+      {/* Right: mode, metadata, save, theme */}
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-0.5">
+        {/* Feedback */}
+        {feedback && (
+          <span
+            className={`mr-2 shrink-0 text-xs ${
+              feedback.type === 'success'
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-500'
+            }`}
+          >
+            {feedback.message}
+          </span>
+        )}
 
-      {/* Feedback */}
-      {feedback && (
-        <span
-          className={`mr-2 shrink-0 text-xs ${
-            feedback.type === 'success'
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-red-500'
-          }`}
-        >
-          {feedback.message}
-        </span>
-      )}
+        {/* Mode toggle */}
+        <Btn
+          icon={
+            view === 'wysiwyg' ? (
+              <PilcrowLeft className={iconSize} strokeWidth={1.8} />
+            ) : (
+              <FileCode2 className={iconSize} strokeWidth={1.8} />
+            )
+          }
+          title={
+            view === 'wysiwyg' ? 'Switch to raw markdown' : 'Switch to WYSIWYG'
+          }
+          onClick={() => onViewChange(view === 'wysiwyg' ? 'raw' : 'wysiwyg')}
+        />
 
-      {/* Mode toggle */}
-      <Btn
-        icon={
-          view === 'wysiwyg' ? (
-            <PilcrowLeft className={iconSize} strokeWidth={1.8} />
-          ) : (
-            <FileCode2 className={iconSize} strokeWidth={1.8} />
-          )
-        }
-        title={
-          view === 'wysiwyg' ? 'Switch to raw markdown' : 'Switch to WYSIWYG'
-        }
-        onClick={() => onViewChange(view === 'wysiwyg' ? 'raw' : 'wysiwyg')}
-      />
+        <div className={dividerClass} />
 
-      <div className={dividerClass} />
+        {/* Metadata */}
+        <Btn
+          icon={<Settings2 className={iconSize} strokeWidth={1.8} />}
+          title="Metadata"
+          onClick={onMetadataToggle}
+        />
 
-      {/* Metadata */}
-      <Btn
-        icon={<Settings2 className={iconSize} strokeWidth={1.8} />}
-        title="Metadata"
-        onClick={onMetadataToggle}
-      />
+        {/* Save */}
+        <Btn
+          icon={<Save className={iconSize} strokeWidth={1.8} />}
+          title={saving ? 'Saving...' : 'Save'}
+          onClick={onSave}
+          disabled={saving}
+        />
 
-      {/* Save */}
-      <Btn
-        icon={<Save className={iconSize} strokeWidth={1.8} />}
-        title={saving ? 'Saving...' : 'Save'}
-        onClick={onSave}
-        disabled={saving}
-      />
-
-      {/* Theme */}
-      <ThemeButton />
+        {/* Theme */}
+        <ThemeButton />
+      </div>
     </header>
   )
 }

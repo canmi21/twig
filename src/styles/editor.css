@@ -14,7 +14,7 @@
 .milkdown-editor {
   outline: none;
   min-height: 100%;
-  padding: 1.5rem 1.25rem 6rem;
+  padding-bottom: 6rem;
   caret-color: var(--color-primary);
 }
 
