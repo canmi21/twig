@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Bold,
   Italic,
+  Strikethrough,
   Heading2,
   Heading3,
   List,
@@ -152,6 +153,11 @@ export function EditorToolbar({
             icon={<Italic className={iconSize} strokeWidth={1.8} />}
             title="Italic"
             onClick={() => onAction('toggleEmphasis')}
+          />
+          <Btn
+            icon={<Strikethrough className={iconSize} strokeWidth={1.8} />}
+            title="Strikethrough"
+            onClick={() => onAction('toggleStrikethrough')}
           />
           <Btn
             icon={<Code className={iconSize} strokeWidth={1.8} />}

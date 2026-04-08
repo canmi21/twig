@@ -27,7 +27,7 @@ import {
   insertHrCommand,
   createCodeBlockCommand,
 } from '@milkdown/kit/preset/commonmark'
-import { gfm } from '@milkdown/kit/preset/gfm'
+import { gfm, toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm'
 import { history } from '@milkdown/kit/plugin/history'
 import { clipboard } from '@milkdown/kit/plugin/clipboard'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
@@ -311,6 +311,9 @@ function MilkdownInner({
           break
         case 'toggleEmphasis':
           editor.action(callCommand(toggleEmphasisCommand.key))
+          break
+        case 'toggleStrikethrough':
+          editor.action(callCommand(toggleStrikethroughCommand.key))
           break
         case 'toggleInlineCode':
           editor.action(callCommand(toggleInlineCodeCommand.key))
