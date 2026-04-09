@@ -3,10 +3,13 @@
 import { Link } from '@tanstack/react-router'
 import { ThemeToggle } from './theme-toggle'
 
-const navFont = { fontFamily: "'Fira Code', monospace" } as const
+const navFont = {
+  fontFamily:
+    "'Miranda Sans', 'Roboto', 'Source Sans 3', 'CJK Sans', system-ui, -apple-system, sans-serif",
+} as const
 const linkClass =
-  'text-[17px] font-light text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100'
-const activeLinkClass = 'text-[17px] font-light text-primary opacity-100'
+  'text-[17px] font-[500] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100'
+const activeLinkClass = 'text-[17px] font-[500] text-primary opacity-100'
 
 export function Navbar() {
   return (
