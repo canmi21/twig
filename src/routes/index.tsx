@@ -75,8 +75,70 @@ function HomePage() {
   return (
     <>
       <Navbar />
-      <div className="flex min-h-screen flex-col items-center justify-center px-5">
-        <div className="w-full max-w-180 rounded-md border border-border bg-raised px-7 py-6">
+      <div className="relative flex min-h-screen flex-col items-center justify-center px-5">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <svg
+            className="absolute inset-0 size-full text-tertiary"
+            aria-hidden="true"
+          >
+            <defs>
+              <pattern
+                id="grid-pattern"
+                width="72"
+                height="72"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M 72 0 L 0 0 0 72"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 5"
+                />
+              </pattern>
+              <filter
+                id="rrect-blur"
+                x="-30%"
+                y="-30%"
+                width="160%"
+                height="160%"
+              >
+                <feGaussianBlur stdDeviation="28" />
+              </filter>
+              {/* Mask: white = grid visible, black = grid hidden.
+                  The inner rect is blurred so its edges fade smoothly. */}
+              <mask
+                id="rrect-mask"
+                maskUnits="userSpaceOnUse"
+                maskContentUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+              >
+                <rect width="100%" height="100%" fill="white" />
+                <rect
+                  x="50%"
+                  y="120"
+                  width="1200"
+                  height="460"
+                  rx="80"
+                  ry="80"
+                  transform="translate(-600 0)"
+                  fill="black"
+                  filter="url(#rrect-blur)"
+                />
+              </mask>
+            </defs>
+            <rect
+              width="100%"
+              height="100%"
+              fill="url(#grid-pattern)"
+              mask="url(#rrect-mask)"
+            />
+          </svg>
+        </div>
+        <div className="w-full max-w-180 px-7 py-6">
           {/* Header: avatar + name/handle */}
           <div className="flex items-center gap-4">
             {owner && <OwnerAvatar avatarKey={owner.avatarKey} />}
