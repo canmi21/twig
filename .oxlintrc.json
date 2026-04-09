@@ -34,7 +34,6 @@
     "unicorn/filename-case": "off",
     "unicorn/prefer-ternary": "off",
     "unicorn/no-array-for-each": "off",
-    "unicorn/prevent-abbreviations": "off",
     "unicorn/no-useless-undefined": "off",
     "unicorn/prefer-node-protocol": "error",
     "import/no-cycle": "error",
