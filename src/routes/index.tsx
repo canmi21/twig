@@ -68,12 +68,12 @@ function OwnerAvatar({ avatarKey }: { avatarKey: string }) {
   )
 }
 
-// Grid tile size in px. Keep in sync with the <pattern> width/height below.
-const GRID_TILE = 72
+const GRID_TILE = 80
 // Grid line crossing sits at the tile center so a single tile can draw one
 // full "+" crosshair without relying on neighbors (which previously caused
 // overlapping strokes and doubled-thickness artifacts).
 const GRID_CENTER = GRID_TILE / 2
+const GRID_CROSSHAIR_ARM = 3
 
 function HomePage() {
   const owner = Route.useLoaderData()
@@ -109,14 +109,14 @@ function HomePage() {
             <defs>
               <pattern
                 id="grid-pattern"
-                width="72"
-                height="72"
+                width={GRID_TILE}
+                height={GRID_TILE}
                 patternUnits="userSpaceOnUse"
                 patternTransform={gridTransform}
               >
-                {/* Grid lines cross at the tile center (36, 36). */}
+                {/* Grid lines cross at the tile center. */}
                 <path
-                  d="M 0 36 L 72 36 M 36 0 L 36 72"
+                  d={`M 0 ${GRID_CENTER} L ${GRID_TILE} ${GRID_CENTER} M ${GRID_CENTER} 0 L ${GRID_CENTER} ${GRID_TILE}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
@@ -125,7 +125,7 @@ function HomePage() {
                 {/* Solid crosshair at the crossing, fills any gap the dashed
                     pattern may leave at the intersection. */}
                 <path
-                  d="M 33 36 L 39 36 M 36 33 L 36 39"
+                  d={`M ${GRID_CENTER - GRID_CROSSHAIR_ARM} ${GRID_CENTER} L ${GRID_CENTER + GRID_CROSSHAIR_ARM} ${GRID_CENTER} M ${GRID_CENTER} ${GRID_CENTER - GRID_CROSSHAIR_ARM} L ${GRID_CENTER} ${GRID_CENTER + GRID_CROSSHAIR_ARM}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
