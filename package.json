@@ -21,7 +21,7 @@
     "deploy:prod": "wrangler d1 migrations apply taki-sql --remote && wrangler deploy"
   },
   "dependencies": {
-    "@chenglou/pretext": "^0.0.3",
+    "@chenglou/pretext": "^0.0.5",
     "@cloudflare/pages-plugin-vercel-og": "^0.1.2",
     "@milkdown/kit": "^7.20.0",
     "@milkdown/react": "^7.20.0",
