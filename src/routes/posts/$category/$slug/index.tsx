@@ -16,6 +16,8 @@ import { ArticleHeader } from '~/components/post/article-header'
 import { CommentSection } from '~/components/post/comment-section'
 import { ThemeToggle } from '~/components/theme-toggle'
 import { Signature } from '~/components/post/signature'
+import { getPresenceCount } from '~/server/presence-count'
+import { usePresence } from '~/lib/presence'
 import postPageCss from '~/styles/post/page.css?url'
 
 const resolveSlug = createServerFn()
@@ -47,13 +49,20 @@ export const Route = createFileRoute('/posts/$category/$slug/')({
 
     throw redirect({ to: target, statusCode: 302 })
   },
-  loader: ({ params }) => getPost({ data: { slug: params.slug } }),
+  loader: async ({ params }) => {
+    const post = await getPost({ data: { slug: params.slug } })
+    const cid = post?.frontmatter.cid
+    const presence = cid
+      ? await getPresenceCount({ data: { cid } })
+      : { global: 0, article: 0 }
+    return { post, presence }
+  },
   head: ({ loaderData, match }) => {
-    if (!loaderData)
+    if (!loaderData?.post)
       return { meta: [], links: [{ rel: 'stylesheet', href: postPageCss }] }
-    const { title, description } = loaderData.frontmatter
+    const { title, description } = loaderData.post.frontmatter
     const { publicUrl, canonicalUrl } = match.context
-    const ogImage = `${publicUrl}/api/og/${loaderData.frontmatter.cid}`
+    const ogImage = `${publicUrl}/api/og/${loaderData.post.frontmatter.cid}`
     return {
       meta: [
         { title },
@@ -84,7 +93,7 @@ function formatShortDate(iso: string, includeYear: boolean): string {
 }
 
 function PostPage() {
-  const post = Route.useLoaderData()
+  const { post, presence } = Route.useLoaderData()
 
   if (!post) {
     return (
@@ -95,6 +104,11 @@ function PostPage() {
   }
 
   const { frontmatter } = post
+  const live = usePresence({
+    cid: frontmatter.cid,
+    initialGlobal: presence.global,
+    initialArticle: presence.article,
+  })
   const shouldShowUpdatedYear =
     !frontmatter.created_at ||
     new Date(frontmatter.updated_at ?? '').getFullYear() !==
@@ -111,6 +125,7 @@ function PostPage() {
           title={frontmatter.title}
           createdAt={frontmatter.created_at}
           html={post.html}
+          readers={live.article}
         >
           <PostShareActions cid={frontmatter.cid} tweet={frontmatter.tweet} />
         </ArticleHeader>

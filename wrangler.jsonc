@@ -3,7 +3,7 @@
   "name": "taki",
   "compatibility_date": "2026-03-12",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "src/worker-entry.ts",
   "observability": {
     "logs": {
       "enabled": true,
@@ -42,6 +42,20 @@
       "database_name": "taki-sql",
       "database_id": "488012b4-4ab2-4a4c-99ac-33dc0e197615",
       "migrations_dir": "drizzle/migrations",
+    },
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PRESENCE",
+        "class_name": "PresenceDO",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_classes": ["PresenceDO"],
     },
   ],
 }

@@ -15,6 +15,7 @@ interface Bindings {
   CONTENT: D1Database
   CACHE: KVNamespace
   BUCKET: R2Bucket
+  PRESENCE: DurableObjectNamespace
   CDN_PUBLIC_URL: string
   PUBLIC_URL: string
   CF_ACCESS_TEAM_DOMAIN: string
@@ -94,4 +95,9 @@ export function getResendApiKey() {
 /** Whether to skip OTP verification (dev convenience). */
 export function getSkipOtpVerify() {
   return !!getBindings().SKIP_OTP_VERIFY
+}
+
+/** Durable Object namespace for real-time presence tracking. */
+export function getPresence() {
+  return getBindings().PRESENCE
 }

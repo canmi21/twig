@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WsRouteImport } from './routes/ws'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
@@ -38,6 +39,11 @@ import { Route as AtDashboardUsersIndexRouteImport } from './routes/@/_dashboard
 import { Route as AtDashboardContentsIndexRouteImport } from './routes/@/_dashboard/contents/index'
 import { Route as AtDashboardCommentsIndexRouteImport } from './routes/@/_dashboard/comments/index'
 
+const WsRoute = WsRouteImport.update({
+  id: '/ws',
+  path: '/ws',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/ws': typeof WsRoute
   '/feed/': typeof FeedIndexRoute
   '/login/': typeof LoginIndexRoute
   '/logout/': typeof LogoutIndexRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/ws': typeof WsRoute
   '/feed': typeof FeedIndexRoute
   '/login': typeof LoginIndexRoute
   '/logout': typeof LogoutIndexRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/ws': typeof WsRoute
   '/@/_dashboard': typeof AtDashboardRouteRouteWithChildren
   '/feed/': typeof FeedIndexRoute
   '/login/': typeof LoginIndexRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/ws'
     | '/feed/'
     | '/login/'
     | '/logout/'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/ws'
     | '/feed'
     | '/login'
     | '/logout'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/rss.xml'
     | '/sitemap.xml'
+    | '/ws'
     | '/@/_dashboard'
     | '/feed/'
     | '/login/'
@@ -365,6 +377,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WsRoute: typeof WsRoute
   FeedIndexRoute: typeof FeedIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   LogoutIndexRoute: typeof LogoutIndexRoute
@@ -385,6 +398,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ws': {
+      id: '/ws'
+      path: '/ws'
+      fullPath: '/ws'
+      preLoaderRoute: typeof WsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -621,6 +641,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WsRoute: WsRoute,
   FeedIndexRoute: FeedIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   LogoutIndexRoute: LogoutIndexRoute,

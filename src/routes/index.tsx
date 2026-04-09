@@ -13,6 +13,7 @@ import {
   RssLine,
 } from '@mingcute/react'
 import { Navbar } from '~/components/navbar'
+import { usePresence } from '~/lib/presence'
 import { getDb, getEmailOwner } from '~/server/platform'
 import { user as userTable } from '~/lib/database/auth-schema'
 
@@ -69,6 +70,7 @@ function OwnerAvatar({ avatarKey }: { avatarKey: string }) {
 
 function HomePage() {
   const owner = Route.useLoaderData()
+  const { global } = usePresence()
 
   return (
     <>
@@ -161,6 +163,7 @@ function HomePage() {
           </a>
           {'  '}
           2023-{new Date().getFullYear()} © Canmi
+          {global > 0 && <span className="ml-2">{global} online</span>}
         </p>
       </div>
     </>

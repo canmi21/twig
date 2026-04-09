@@ -1,6 +1,6 @@
 /* src/components/post/article-header.tsx */
 
-import { Type } from 'lucide-react'
+import { Eye, Type } from 'lucide-react'
 import { formatDate } from '~/lib/utils/date'
 
 function stripHtml(html: string): string {
@@ -49,6 +49,7 @@ export function ArticleHeader({
   createdAt,
   html,
   text,
+  readers,
   children,
 }: {
   title: string
@@ -57,6 +58,8 @@ export function ArticleHeader({
   html?: string
   /** Raw text (e.g. markdown) — used to compute content count in editor */
   text?: string
+  /** Live reader count from presence tracking */
+  readers?: number
   children?: React.ReactNode
 }) {
   const source = html ?? text
@@ -82,6 +85,12 @@ export function ArticleHeader({
             <span className="inline-flex min-h-[0.8rem] items-center gap-[0.18rem] text-primary [&>svg]:block [&>svg]:flex-none">
               <Type className="size-[0.8rem]" strokeWidth={1.8} />
               <span>{contentCount}</span>
+            </span>
+          )}
+          {readers != null && readers > 0 && (
+            <span className="inline-flex min-h-[0.8rem] items-center gap-[0.18rem] text-primary [&>svg]:block [&>svg]:flex-none">
+              <Eye className="size-[0.8rem]" strokeWidth={1.8} />
+              <span>{readers}</span>
             </span>
           )}
         </div>
