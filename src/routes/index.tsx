@@ -1,6 +1,6 @@
 /* src/routes/index.tsx */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
@@ -68,9 +68,34 @@ function OwnerAvatar({ avatarKey }: { avatarKey: string }) {
   )
 }
 
+// Grid tile size in px. Keep in sync with the <pattern> width/height below.
+const GRID_TILE = 72
+// Grid line crossing sits at the tile center so a single tile can draw one
+// full "+" crosshair without relying on neighbors (which previously caused
+// overlapping strokes and doubled-thickness artifacts).
+const GRID_CENTER = GRID_TILE / 2
+
 function HomePage() {
   const owner = Route.useLoaderData()
   const { global } = usePresence()
+
+  // Align a grid crossing to the first viewport's center (document coords),
+  // then let the tiled pattern extend naturally as the page grows downward.
+  const [gridTransform, setGridTransform] = useState('translate(0 0)')
+  useEffect(() => {
+    const update = () => {
+      const cx = window.innerWidth / 2
+      const cy = window.innerHeight / 2
+      // The pattern's crossing is at (GRID_CENTER, GRID_CENTER), so shift by
+      // (cx - GRID_CENTER, cy - GRID_CENTER) mod tile to land on (cx, cy).
+      const tx = (((cx - GRID_CENTER) % GRID_TILE) + GRID_TILE) % GRID_TILE
+      const ty = (((cy - GRID_CENTER) % GRID_TILE) + GRID_TILE) % GRID_TILE
+      setGridTransform(`translate(${tx} ${ty})`)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   return (
     <>
@@ -78,7 +103,7 @@ function HomePage() {
       <div className="relative flex min-h-screen flex-col items-center justify-center px-5">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <svg
-            className="absolute inset-0 size-full text-tertiary"
+            className="absolute inset-0 size-full text-border"
             aria-hidden="true"
           >
             <defs>
@@ -87,13 +112,23 @@ function HomePage() {
                 width="72"
                 height="72"
                 patternUnits="userSpaceOnUse"
+                patternTransform={gridTransform}
               >
+                {/* Grid lines cross at the tile center (36, 36). */}
                 <path
-                  d="M 72 0 L 0 0 0 72"
+                  d="M 0 36 L 72 36 M 36 0 L 36 72"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.5"
-                  strokeDasharray="3 5"
+                  strokeDasharray="3 4"
+                />
+                {/* Solid crosshair at the crossing, fills any gap the dashed
+                    pattern may leave at the intersection. */}
+                <path
+                  d="M 33 36 L 39 36 M 36 33 L 36 39"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
                 />
               </pattern>
               <filter
