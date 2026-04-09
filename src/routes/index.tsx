@@ -1,6 +1,6 @@
 /* src/routes/index.tsx */
 
-import { useEffect, useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
@@ -74,104 +74,43 @@ const GRID_TILE = 80
 // overlapping strokes and doubled-thickness artifacts).
 const GRID_CENTER = GRID_TILE / 2
 const GRID_CROSSHAIR_ARM = 3
+const GRID_MASK_IMAGE = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${GRID_TILE}" height="${GRID_TILE}" viewBox="0 0 ${GRID_TILE} ${GRID_TILE}" fill="none"><path d="M 0 ${GRID_CENTER} L ${GRID_TILE} ${GRID_CENTER} M ${GRID_CENTER} 0 L ${GRID_CENTER} ${GRID_TILE}" stroke="black" stroke-width="1.5" stroke-dasharray="3 4"/><path d="M ${GRID_CENTER - GRID_CROSSHAIR_ARM} ${GRID_CENTER} L ${GRID_CENTER + GRID_CROSSHAIR_ARM} ${GRID_CENTER} M ${GRID_CENTER} ${GRID_CENTER - GRID_CROSSHAIR_ARM} L ${GRID_CENTER} ${GRID_CENTER + GRID_CROSSHAIR_ARM}" stroke="black" stroke-width="1.5"/></svg>`,
+)}")`
+const GRID_MASK_POSITION = `calc(50vw - ${GRID_CENTER}px) calc(50vh - ${GRID_CENTER}px)`
+const gridMaskStyle: CSSProperties = {
+  backgroundColor: 'var(--color-border)',
+  WebkitMaskImage: GRID_MASK_IMAGE,
+  maskImage: GRID_MASK_IMAGE,
+  WebkitMaskPosition: GRID_MASK_POSITION,
+  maskPosition: GRID_MASK_POSITION,
+  WebkitMaskSize: `${GRID_TILE}px ${GRID_TILE}px`,
+  maskSize: `${GRID_TILE}px ${GRID_TILE}px`,
+  WebkitMaskRepeat: 'repeat',
+  maskRepeat: 'repeat',
+}
+const gridVeilStyle: CSSProperties = {
+  left: '50%',
+  top: '120px',
+  width: '1200px',
+  height: '460px',
+  borderRadius: '80px',
+  backgroundColor: 'var(--color-surface)',
+  filter: 'blur(28px)',
+  transform: 'translateX(-50%)',
+}
 
 function HomePage() {
   const owner = Route.useLoaderData()
   const { global } = usePresence()
-
-  // Align a grid crossing to the first viewport's center (document coords),
-  // then let the tiled pattern extend naturally as the page grows downward.
-  const [gridTransform, setGridTransform] = useState('translate(0 0)')
-  useEffect(() => {
-    const update = () => {
-      const cx = window.innerWidth / 2
-      const cy = window.innerHeight / 2
-      // The pattern's crossing is at (GRID_CENTER, GRID_CENTER), so shift by
-      // (cx - GRID_CENTER, cy - GRID_CENTER) mod tile to land on (cx, cy).
-      const tx = (((cx - GRID_CENTER) % GRID_TILE) + GRID_TILE) % GRID_TILE
-      const ty = (((cy - GRID_CENTER) % GRID_TILE) + GRID_TILE) % GRID_TILE
-      setGridTransform(`translate(${tx} ${ty})`)
-    }
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
 
   return (
     <>
       <Navbar />
       <div className="relative flex min-h-screen flex-col items-center justify-center px-5">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <svg
-            className="absolute inset-0 size-full text-border"
-            aria-hidden="true"
-          >
-            <defs>
-              <pattern
-                id="grid-pattern"
-                width={GRID_TILE}
-                height={GRID_TILE}
-                patternUnits="userSpaceOnUse"
-                patternTransform={gridTransform}
-              >
-                {/* Grid lines cross at the tile center. */}
-                <path
-                  d={`M 0 ${GRID_CENTER} L ${GRID_TILE} ${GRID_CENTER} M ${GRID_CENTER} 0 L ${GRID_CENTER} ${GRID_TILE}`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeDasharray="3 4"
-                />
-                {/* Solid crosshair at the crossing, fills any gap the dashed
-                    pattern may leave at the intersection. */}
-                <path
-                  d={`M ${GRID_CENTER - GRID_CROSSHAIR_ARM} ${GRID_CENTER} L ${GRID_CENTER + GRID_CROSSHAIR_ARM} ${GRID_CENTER} M ${GRID_CENTER} ${GRID_CENTER - GRID_CROSSHAIR_ARM} L ${GRID_CENTER} ${GRID_CENTER + GRID_CROSSHAIR_ARM}`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-              </pattern>
-              <filter
-                id="rrect-blur"
-                x="-30%"
-                y="-30%"
-                width="160%"
-                height="160%"
-              >
-                <feGaussianBlur stdDeviation="28" />
-              </filter>
-              {/* Mask: white = grid visible, black = grid hidden.
-                  The inner rect is blurred so its edges fade smoothly. */}
-              <mask
-                id="rrect-mask"
-                maskUnits="userSpaceOnUse"
-                maskContentUnits="userSpaceOnUse"
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-              >
-                <rect width="100%" height="100%" fill="white" />
-                <rect
-                  x="50%"
-                  y="120"
-                  width="1200"
-                  height="460"
-                  rx="80"
-                  ry="80"
-                  transform="translate(-600 0)"
-                  fill="black"
-                  filter="url(#rrect-blur)"
-                />
-              </mask>
-            </defs>
-            <rect
-              width="100%"
-              height="100%"
-              fill="url(#grid-pattern)"
-              mask="url(#rrect-mask)"
-            />
-          </svg>
+          <div className="absolute inset-0" style={gridMaskStyle} />
+          <div className="absolute" style={gridVeilStyle} />
         </div>
         <div className="w-full max-w-180 px-7 py-6">
           {/* Header: avatar + name/handle */}
