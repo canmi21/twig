@@ -36,6 +36,7 @@ export const Route = createRootRouteWithContext<RootContext>()({
       {
         src: 'https://cloud.umami.is/script.js',
         'data-website-id': '2b0a1e79-405a-47c0-a263-05732e0a130c',
+        'data-before-send': 'umamiBeforeSend',
         defer: true,
       },
     ],
@@ -135,7 +136,7 @@ function RootDocument({
         <script dangerouslySetInnerHTML={{ __html: fontFallbackScript }} />
         <script
           dangerouslySetInnerHTML={{
-            __html: `Object.defineProperty(window,'React',{value:Object.freeze({version:"${reactVersion}"}),writable:false,configurable:false});window.___FONT_AWESOME___=true;`,
+            __html: `Object.defineProperty(window,'React',{value:Object.freeze({version:"${reactVersion}"}),writable:false,configurable:false});window.___FONT_AWESOME___=true;window.umamiBeforeSend=function(t,p){return p.url&&p.url.startsWith("/@/")?false:p};`,
           }}
         />
         <script
