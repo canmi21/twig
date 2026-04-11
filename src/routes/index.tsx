@@ -1,10 +1,19 @@
 /* src/routes/index.tsx */
 
 import { type CSSProperties } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMap } from '@fortawesome/free-solid-svg-icons'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import { MailLine, RssLine, SocialXLine } from '@mingcute/react'
+import {
+  MailLine,
+  PlanetLine,
+  Rss2Fill,
+  RssLine,
+  SocialXLine,
+  Train2Fill,
+} from '@mingcute/react'
 import { usePresence } from '~/lib/presence'
 import { Navbar } from '~/components/navbar'
 import { getAuth } from '~/server/better-auth'
@@ -91,22 +100,18 @@ const heroTitleStyle: CSSProperties = {
 const HERO_IMAGE_URL =
   'https://cdn.canmi.net/image/2a00abe2c3479309c6da278323d00a1eceb4a5ec0a52e98b2a90ff9019697bbe.png'
 
-function TelegramIcon({ className }: { className?: string }) {
+function TelegramGlyphIcon({ className }: { className?: string }) {
   return (
     <svg
       role="img"
-      viewBox="0 0 1000 1000"
+      viewBox="180 290 560 470"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden="true"
-      fill="none"
+      fill="currentColor"
     >
       <title>Telegram</title>
-      <circle cx="500" cy="500" r="500" fill="#26A5E4" />
-      <path
-        d="M226.328419,494.722069 C372.088573,431.216685 469.284839,389.350049 517.917216,369.122161 C656.772535,311.36743 685.625481,301.334815 704.431427,301.003532 C708.567621,300.93067 717.815839,301.955743 723.806446,306.816707 C728.864797,310.92121 730.256552,316.46581 730.922551,320.357329 C731.588551,324.248848 732.417879,333.113828 731.758626,340.040666 C724.234007,419.102486 691.675104,610.964674 675.110982,699.515267 C668.10208,736.984342 654.301336,749.547532 640.940618,750.777006 C611.904684,753.448938 589.856115,731.588035 561.733393,713.153237 C517.726886,684.306416 492.866009,666.349181 450.150074,638.200013 C400.78442,605.66878 432.786119,587.789048 460.919462,558.568563 C468.282091,550.921423 596.21508,434.556479 598.691227,424.000355 C599.00091,422.680135 599.288312,417.758981 596.36474,415.160431 C593.441168,412.561881 589.126229,413.450484 586.012448,414.157198 C581.598758,415.158943 511.297793,461.625274 375.109553,553.556189 C355.154858,567.258623 337.080515,573.934908 320.886524,573.585046 C303.033948,573.199351 268.692754,563.490928 243.163606,555.192408 C211.851067,545.013936 186.964484,539.632504 189.131547,522.346309 C190.260287,513.342589 202.659244,504.134509 226.328419,494.722069 Z"
-        fill="white"
-      />
+      <path d="M226.328419,494.722069 C372.088573,431.216685 469.284839,389.350049 517.917216,369.122161 C656.772535,311.36743 685.625481,301.334815 704.431427,301.003532 C708.567621,300.93067 717.815839,301.955743 723.806446,306.816707 C728.864797,310.92121 730.256552,316.46581 730.922551,320.357329 C731.588551,324.248848 732.417879,333.113828 731.758626,340.040666 C724.234007,419.102486 691.675104,610.964674 675.110982,699.515267 C668.10208,736.984342 654.301336,749.547532 640.940618,750.777006 C611.904684,753.448938 589.856115,731.588035 561.733393,713.153237 C517.726886,684.306416 492.866009,666.349181 450.150074,638.200013 C400.78442,605.66878 432.786119,587.789048 460.919462,558.568563 C468.282091,550.921423 596.21508,434.556479 598.691227,424.000355 C599.00091,422.680135 599.288312,417.758981 596.36474,415.160431 C593.441168,412.561881 589.126229,413.450484 586.012448,414.157198 C581.598758,415.158943 511.297793,461.625274 375.109553,553.556189 C355.154858,567.258623 337.080515,573.934908 320.886524,573.585046 C303.033948,573.199351 268.692754,563.490928 243.163606,555.192408 C211.851067,545.013936 186.964484,539.632504 189.131547,522.346309 C190.260287,513.342589 202.659244,504.134509 226.328419,494.722069 Z" />
     </svg>
   )
 }
@@ -125,6 +130,10 @@ function GitHubIcon({ className }: { className?: string }) {
       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
     </svg>
   )
+}
+
+function SitemapIcon({ className }: { className?: string }) {
+  return <FontAwesomeIcon icon={faMap} className={className} />
 }
 
 function BlueskyIcon({ className }: { className?: string }) {
@@ -147,7 +156,7 @@ function NyaoneIcon({ className }: { className?: string }) {
   return (
     <svg
       role="img"
-      viewBox="0 0 1024 1024"
+      viewBox="280 240 470 550"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       aria-hidden="true"
@@ -182,15 +191,15 @@ const baseSocialLinks = [
     bg: '#62B6E7',
     darkBg: '#62B6E7',
     Icon: NyaoneIcon,
-    iconClassName: 'size-[23px]',
+    iconClassName: 'size-[13px]',
   },
   {
     name: 'Telegram',
     href: 'https://t.me/canmi21',
     bg: '#26A5E4',
     darkBg: '#26A5E4',
-    Icon: TelegramIcon,
-    iconClassName: 'size-[23px]',
+    Icon: TelegramGlyphIcon,
+    iconClassName: 'size-[15px]',
   },
   {
     name: 'Bluesky',
@@ -222,6 +231,68 @@ function HomePage() {
       darkBg: '#C45140',
       Icon: RssLine,
       iconClassName: 'size-[16.5px]',
+    },
+  ] as const
+  // Footer icons share a 1rem optical base (= 16px). Each `scale` is the
+  // per-icon multiplier applied on top; source icons come from FA, mingcute
+  // and inline SVG with different viewBox padding and aspect ratios, so
+  // per-icon compensation lives here rather than in the icons themselves.
+  const footerLinks = [
+    {
+      name: 'GitHub',
+      href: 'https://github.com/canmi21/taki',
+      Icon: GitHubIcon,
+      scale: 1,
+    },
+    {
+      name: 'X',
+      href: 'https://twitter.com/intent/follow?screen_name=canmi21',
+      Icon: SocialXLine,
+      scale: 1.25,
+    },
+    {
+      name: 'Nyaone',
+      href: 'https://nya.one/@canmi',
+      Icon: NyaoneIcon,
+      scale: 1,
+    },
+    {
+      name: 'Bluesky',
+      href: 'https://bsky.app/profile/canmi.net',
+      Icon: BlueskyIcon,
+      scale: 1,
+    },
+    {
+      name: 'Telegram',
+      href: 'https://t.me/canmi21',
+      Icon: TelegramGlyphIcon,
+      scale: 0.9375,
+    },
+    {
+      name: 'Sitemap',
+      href: '/sitemap.xml',
+      Icon: SitemapIcon,
+      scale: 1,
+      newTab: true,
+    },
+    {
+      name: 'Travellings',
+      href: 'https://www.travellings.cn/go.html',
+      Icon: Train2Fill,
+      scale: 1.1875,
+    },
+    {
+      name: 'TravelMoe',
+      href: 'https://travel.moe/go?travel=on',
+      Icon: PlanetLine,
+      scale: 1.1875,
+      bold: true,
+    },
+    {
+      name: 'RSS',
+      href: '/feed.xml',
+      Icon: Rss2Fill,
+      scale: 1.125,
     },
   ] as const
 
@@ -293,46 +364,97 @@ function HomePage() {
             </div>
           </div>
         </div>
-        <footer className="border-t border-border bg-surface px-5 py-7">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[14px] text-primary opacity-(--opacity-soft)">
-            <span
-              className="text-[16px] font-[620] text-primary"
-              style={heroTitleStyle}
+        <footer className="border-t border-border bg-surface">
+          <div className="px-5 py-7">
+            <div className="mx-auto flex w-full items-start justify-between gap-6 px-3 sm:px-6">
+              <div className="min-w-0 text-left text-primary opacity-(--opacity-soft)">
+                <div
+                  className="text-[20px] font-[620] text-primary"
+                  style={heroTitleStyle}
+                >
+                  Hi, {home.accountName}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px]">
+                  <span>小站已经活了 {home.runtimeDays} 天</span>
+                  <span>{live.global} 位小伙伴正在浏览呢</span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-4 text-primary opacity-(--opacity-muted)">
+                  {footerLinks.map((link) => {
+                    const { name, href, Icon, scale } = link
+                    const bold = 'bold' in link && link.bold
+                    const newTab =
+                      !href.startsWith('/') || ('newTab' in link && link.newTab)
+                    return (
+                      <a
+                        key={name}
+                        href={href}
+                        target={newTab ? '_blank' : undefined}
+                        rel={newTab ? 'noopener noreferrer' : undefined}
+                        aria-label={name}
+                        className={`inline-flex size-4 shrink-0 items-center justify-center transition-opacity duration-140 hover:opacity-100 [&>svg]:h-(--icon-h)! [&>svg]:w-auto! [&>svg]:flex-none${bold ? 'footer-icon-bold' : ''}`}
+                        style={
+                          {
+                            '--icon-h': `calc(1rem * ${scale})`,
+                          } as CSSProperties
+                        }
+                      >
+                        <Icon />
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+              <div className="pt-0.5 text-right text-[14px] text-primary opacity-(--opacity-soft)">
+                <a
+                  href="https://icp.gov.moe/?keyword=20260000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-block transition-opacity duration-140 hover:opacity-100"
+                >
+                  萌ICP备 20260000 号
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-surface px-5 py-3">
+            <div className="mx-3 border-t border-dashed border-border sm:mx-6" />
+            <div
+              className="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[13px] text-primary opacity-(--opacity-muted) sm:flex-row sm:items-end sm:justify-between sm:px-6"
+              style={{ ...heroTitleStyle, fontWeight: 400 }}
             >
-              Hi, {home.accountName}
-            </span>
-            <span
-              aria-hidden="true"
-              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
-            />
-            <span>All systems normal.</span>
-            <span
-              aria-hidden="true"
-              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
-            />
-            <span>原来已经活了 {home.runtimeDays} 天嘛</span>
-            <span
-              aria-hidden="true"
-              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
-            />
-            <span>CC BY-NC-SA 4.0 © {home.copyrightYear} Canmi</span>
-            <span
-              aria-hidden="true"
-              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
-            />
-            <span>{live.global} 位小伙伴正在浏览</span>
-            <span
-              aria-hidden="true"
-              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
-            />
-            <a
-              href="https://icp.gov.moe/?keyword=20260000"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition-opacity duration-140 hover:opacity-100"
-            >
-              萌ICP备 20260000 号
-            </a>
+              <span className="text-left">
+                Copyright © {home.copyrightYear}{' '}
+                <a
+                  href="https://ill.li"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-opacity duration-140 hover:opacity-100"
+                >
+                  Canmi
+                </a>
+                . Released under the{' '}
+                <a
+                  href="https://spdx.org/licenses/AGPL-3.0-or-later"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-opacity duration-140 hover:opacity-100"
+                >
+                  AGPLv3 License
+                </a>
+                .
+              </span>
+              <span className="text-left sm:text-right">
+                <span className="relative inline-block">
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-1/2 -left-3 size-1.5 -translate-y-1/2 rounded-full"
+                    style={{ backgroundColor: '#7AC8A7' }}
+                  />
+                  <span>All systems normal.</span>
+                </span>
+              </span>
+            </div>
           </div>
         </footer>
       </div>

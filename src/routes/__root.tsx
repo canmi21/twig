@@ -136,7 +136,7 @@ function RootDocument({
         <script dangerouslySetInnerHTML={{ __html: fontFallbackScript }} />
         <script
           dangerouslySetInnerHTML={{
-            __html: `Object.defineProperty(window,'React',{value:Object.freeze({version:"${reactVersion}"}),writable:false,configurable:false});window.___FONT_AWESOME___=true;window.umamiBeforeSend=function(t,p){return p.url&&p.url.startsWith("/@/")?false:p};`,
+            __html: `Object.defineProperty(window,'React',{value:Object.freeze({version:"${reactVersion}"}),writable:false,configurable:false});window.umamiBeforeSend=function(t,p){return p.url&&p.url.startsWith("/@/")?false:p};`,
           }}
         />
         <script

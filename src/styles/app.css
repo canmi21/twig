@@ -4,6 +4,17 @@
 @import './tokens.css';
 @import './typography.css';
 
+/* Fattens a fill-based icon by adding a same-color stroke outline on the
+   visible filled path. mingcute Line icons (and similar fill-only sources)
+   draw glyphs as filled paths, so CSS stroke-width alone produces no
+   visible effect — painting a stroke under the fill is the only way to
+   add optical weight without swapping the icon. */
+.footer-icon-bold > svg path[fill='currentColor'] {
+  stroke: currentColor;
+  stroke-width: 0.75;
+  paint-order: stroke fill;
+}
+
 /* ── TOC bar intro animation ───────────────────── */
 
 @keyframes toc-bar-intro {

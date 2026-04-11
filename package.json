@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -23,6 +23,9 @@
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
     "@cloudflare/pages-plugin-vercel-og": "^0.1.2",
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^3.3.0",
     "@milkdown/kit": "^7.20.0",
     "@milkdown/react": "^7.20.0",
     "@mingcute/react": "^1.4.1",
