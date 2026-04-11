@@ -51,7 +51,7 @@ export default [
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
       'better-tailwindcss/no-unknown-classes': [
         'error',
-        { ignore: ['^geist', '^geist-mono$', '^footer-icon'] },
+        { ignore: ['^geist', '^geist-mono$', '^footer-icon', '^status-dot'] },
       ],
     },
     settings: {

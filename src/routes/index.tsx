@@ -3,7 +3,7 @@
 import { type CSSProperties } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMap } from '@fortawesome/free-solid-svg-icons'
-import { Lollipop } from 'lucide-react'
+import { GitMerge, Lollipop } from 'lucide-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
@@ -480,7 +480,7 @@ function HomePage() {
                 <span className="relative inline-block">
                   <span
                     aria-hidden="true"
-                    className="absolute top-1/2 -left-3 size-1.5 -translate-y-1/2 rounded-full"
+                    className="status-dot-breathe absolute top-1/2 -left-3 size-1.5 -translate-y-1/2 rounded-full"
                     style={{ backgroundColor: '#7AC8A7' }}
                   />
                   <span>All systems normal.</span>
@@ -493,6 +493,20 @@ function HomePage() {
                 >
                   <Lollipop className="size-[13px]" strokeWidth={2} />
                   <span>ICP 20260000</span>
+                </a>
+                <a
+                  href={
+                    __APP_GIT_COMMIT__ === 'dev'
+                      ? 'https://github.com/canmi21/taki'
+                      : `https://github.com/canmi21/taki/commit/${__APP_GIT_COMMIT__}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={__APP_GIT_COMMIT__}
+                  className="inline-flex items-center gap-1 transition-opacity duration-140 hover:opacity-100"
+                >
+                  <GitMerge className="size-[13px]" strokeWidth={2} />
+                  <span>{__APP_GIT_COMMIT__.slice(0, 7)}</span>
                 </a>
               </span>
             </div>

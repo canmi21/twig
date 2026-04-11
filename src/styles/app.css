@@ -15,6 +15,31 @@
   paint-order: stroke fill;
 }
 
+/* ── Status dot slow breathing ─────────────────── */
+
+/* A slow, gentle breathe for the footer status indicator. Only opacity and
+   box-shadow animate so the browser stays on the compositor — no layout or
+   paint churn. Intentionally avoids Tailwind's animate-pulse, which reads
+   like a system alert light rather than ambient liveness. */
+@keyframes status-dot-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    box-shadow: 0 0 0 1px rgba(122, 200, 167, 0.14);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 3px rgba(122, 200, 167, 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .status-dot-breathe {
+    animation: status-dot-breathe 3.6s ease-in-out infinite;
+  }
+}
+
 /* ── TOC bar intro animation ───────────────────── */
 
 @keyframes toc-bar-intro {
