@@ -5,15 +5,18 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { MailLine, RssLine, SocialXLine } from '@mingcute/react'
+import { usePresence } from '~/lib/presence'
 import { Navbar } from '~/components/navbar'
 import { getAuth } from '~/server/better-auth'
 import { getEmailOwner } from '~/server/platform'
+import { getPresenceCount } from '~/server/presence-count'
 
 interface HomeData {
   accountName: string
   email: string
   runtimeDays: number
   copyrightYear: number
+  presenceCount: number
 }
 
 const SITE_STARTED_AT = '2024-10-11T06:24:59+08:00'
@@ -32,12 +35,15 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
     (session?.user.name as string | undefined) ||
     (session?.user.email as string | undefined) ||
     'Guest'
+  const presence = await getPresenceCount({ data: {} })
+  const initialPresenceCount = Math.max(1, presence.global + 1)
 
   return {
     accountName,
     email: ownerEmail,
     runtimeDays,
     copyrightYear: new Date(now).getFullYear(),
+    presenceCount: initialPresenceCount,
   }
 })
 
@@ -198,6 +204,7 @@ const baseSocialLinks = [
 
 function HomePage() {
   const home = Route.useLoaderData()
+  const live = usePresence({ initialGlobal: home.presenceCount })
   const socialLinks = [
     ...baseSocialLinks,
     {
@@ -298,23 +305,33 @@ function HomePage() {
               aria-hidden="true"
               className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
             />
-            <span>原来已经活了 {home.runtimeDays} 天</span>
+            <span>All systems normal.</span>
             <span
               aria-hidden="true"
               className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
             />
-            <span>
-              © {home.copyrightYear} Canmi 版权所有禁止商用，转发需注明出处
-            </span>
+            <span>原来已经活了 {home.runtimeDays} 天嘛</span>
+            <span
+              aria-hidden="true"
+              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
+            />
+            <span>CC BY-NC-SA 4.0 © {home.copyrightYear} Canmi</span>
+            <span
+              aria-hidden="true"
+              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
+            />
+            <span>{live.global} 位小伙伴正在浏览</span>
             <span
               aria-hidden="true"
               className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
             />
             <a
-              href="/sitemap.xml"
+              href="https://icp.gov.moe/?keyword=20260000"
+              target="_blank"
+              rel="noopener noreferrer"
               className="transition-opacity duration-140 hover:opacity-100"
             >
-              Sitemap
+              萌ICP备 20260000 号
             </a>
           </div>
         </footer>
