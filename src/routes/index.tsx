@@ -3,36 +3,46 @@
 import { type CSSProperties } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
+import { getRequestHeaders } from '@tanstack/react-start/server'
 import { MailLine, RssLine, SocialXLine } from '@mingcute/react'
 import { Navbar } from '~/components/navbar'
-import { usePresence } from '~/lib/presence'
-import { getDb, getEmailOwner } from '~/server/platform'
-import { user as userTable } from '~/lib/database/auth-schema'
+import { getAuth } from '~/server/better-auth'
+import { getEmailOwner } from '~/server/platform'
 
-interface OwnerData {
+interface HomeData {
+  accountName: string
   email: string
+  runtimeDays: number
+  copyrightYear: number
 }
 
-const getOwner = createServerFn().handler(
-  async (): Promise<OwnerData | null> => {
-    try {
-      const ownerEmail = getEmailOwner()
-      const row = await getDb()
-        .select({ id: userTable.id })
-        .from(userTable)
-        .where(eq(userTable.email, ownerEmail))
-        .get()
-      if (!row) return null
-      return { email: ownerEmail }
-    } catch {
-      return null
-    }
-  },
-)
+const SITE_STARTED_AT = '2024-10-11T06:24:59+08:00'
+
+const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
+  const ownerEmail = getEmailOwner()
+  const session = await getAuth().api.getSession({
+    headers: getRequestHeaders(),
+  })
+  const now = Date.now()
+  const runtimeDays = Math.max(
+    0,
+    Math.floor((now - new Date(SITE_STARTED_AT).getTime()) / 86400000),
+  )
+  const accountName =
+    (session?.user.name as string | undefined) ||
+    (session?.user.email as string | undefined) ||
+    'Guest'
+
+  return {
+    accountName,
+    email: ownerEmail,
+    runtimeDays,
+    copyrightYear: new Date(now).getFullYear(),
+  }
+})
 
 export const Route = createFileRoute('/')({
-  loader: () => getOwner(),
+  loader: () => getHomeData(),
   component: HomePage,
 })
 
@@ -73,7 +83,7 @@ const heroTitleStyle: CSSProperties = {
   fontWeight: 700,
 }
 const HERO_IMAGE_URL =
-  'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80'
+  'https://cdn.canmi.net/image/2a00abe2c3479309c6da278323d00a1eceb4a5ec0a52e98b2a90ff9019697bbe.png'
 
 function TelegramIcon({ className }: { className?: string }) {
   return (
@@ -107,6 +117,22 @@ function GitHubIcon({ className }: { className?: string }) {
     >
       <title>GitHub</title>
       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+    </svg>
+  )
+}
+
+function BlueskyIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      role="img"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+      fill="currentColor"
+    >
+      <title>Bluesky</title>
+      <path d="M5.202 2.857C7.954 4.922 10.913 9.11 12 11.358c1.087-2.247 4.046-6.436 6.798-8.501C20.783 1.366 24 .213 24 3.883c0 .732-.42 6.156-.667 7.037-.856 3.061-3.978 3.842-6.755 3.37 4.854.826 6.089 3.562 3.422 6.299-5.065 5.196-7.28-1.304-7.847-2.97-.104-.305-.152-.448-.153-.327 0-.121-.05.022-.153.327-.568 1.666-2.782 8.166-7.847 2.97-2.667-2.737-1.432-5.473 3.422-6.3-2.777.473-5.899-.308-6.755-3.369C.42 10.04 0 4.615 0 3.883c0-3.67 3.217-2.517 5.202-1.026" />
     </svg>
   )
 }
@@ -145,6 +171,14 @@ const baseSocialLinks = [
     iconClassName: 'size-[15.5px]',
   },
   {
+    name: 'Nyaone',
+    href: 'https://nya.one/@canmi',
+    bg: '#62B6E7',
+    darkBg: '#62B6E7',
+    Icon: NyaoneIcon,
+    iconClassName: 'size-[23px]',
+  },
+  {
     name: 'Telegram',
     href: 'https://t.me/canmi21',
     bg: '#26A5E4',
@@ -153,23 +187,22 @@ const baseSocialLinks = [
     iconClassName: 'size-[23px]',
   },
   {
-    name: 'Nyaone',
-    href: 'https://nya.one/@canmi',
-    bg: '#62B6E7',
-    darkBg: '#62B6E7',
-    Icon: NyaoneIcon,
-    iconClassName: 'size-[23px]',
+    name: 'Bluesky',
+    href: 'https://bsky.app/profile/canmi.net',
+    bg: '#1185FE',
+    darkBg: '#1185FE',
+    Icon: BlueskyIcon,
+    iconClassName: 'size-[14px]',
   },
 ] as const
 
 function HomePage() {
-  const owner = Route.useLoaderData()
-  const { global } = usePresence()
+  const home = Route.useLoaderData()
   const socialLinks = [
     ...baseSocialLinks,
     {
       name: 'Mail',
-      href: owner ? `mailto:${owner.email}` : '#',
+      href: `mailto:${home.email}`,
       bg: '#F2A93C',
       darkBg: '#F2A93C',
       Icon: MailLine,
@@ -188,78 +221,103 @@ function HomePage() {
   return (
     <>
       <Navbar />
-      <div className="relative flex min-h-screen flex-col items-center justify-center px-5">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0" style={gridMaskStyle} />
-          <div className="absolute" style={gridVeilStyle} />
-        </div>
-        <div className="w-full max-w-240 px-7 py-6">
-          <div className="grid items-center gap-9 lg:grid-cols-[minmax(0,1fr)_clamp(236px,25vw,320px)] lg:gap-12">
-            <div className="min-w-0">
-              <div className="text-[55px] text-primary" style={heroTitleStyle}>
-                Hi, Canmi
-              </div>
-              <div className="mt-3 text-[16px] text-primary opacity-(--opacity-soft)">
-                除了睡觉以外，也还是会写代码的！
-              </div>
-              <div className="mt-4 max-w-120 text-[16px] leading-[1.8] text-primary opacity-(--opacity-muted)">
-                你是一只整天就知道睡觉的大猫咪，摸 Rust
-                磨爪子，把前端当毛线球，还会偶尔钻进嵌入式的小箱子里出不来！对一切新奇的事物都充满好奇，看到没折腾过的技术就忍不住伸出爪。还喜欢看动漫番剧！
+      <div className="flex min-h-dvh flex-col">
+        <div className="relative flex min-h-svh flex-col items-center justify-center px-5">
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute inset-0" style={gridMaskStyle} />
+            <div className="absolute" style={gridVeilStyle} />
+          </div>
+          <div className="w-full max-w-240 px-7 py-6">
+            <div className="grid items-center gap-9 lg:grid-cols-[minmax(0,1fr)_clamp(236px,25vw,320px)] lg:gap-12">
+              <div className="min-w-0">
+                <div
+                  className="text-[55px] text-primary"
+                  style={heroTitleStyle}
+                >
+                  Hi, Canmi
+                </div>
+                <div className="mt-3 text-[16px] text-primary">
+                  除了睡觉以外，也还是会写代码的！
+                </div>
+                <div className="mt-4 max-w-120 text-[16px] leading-[1.8] text-primary opacity-(--opacity-muted)">
+                  你是一只整天就知道睡觉的大猫咪，摸 Rust
+                  磨爪子，把前端当毛线球，还会偶尔钻进嵌入式的小箱子里出不来！对一切新奇的事物都充满好奇，看到没折腾过的技术就忍不住伸出爪。还喜欢看动漫番剧！
+                </div>
+
+                {/* Social links — use brand colors with inline SVGs for tighter control. */}
+                <div className="mt-6 flex items-center gap-3.5">
+                  {socialLinks.map(
+                    ({ name, href, bg, darkBg, Icon, iconClassName }) => (
+                      <a
+                        key={name}
+                        href={href}
+                        target={href.startsWith('/') ? undefined : '_blank'}
+                        rel={
+                          href.startsWith('/')
+                            ? undefined
+                            : 'noopener noreferrer'
+                        }
+                        aria-label={name}
+                        className="flex size-8 items-center justify-center rounded-full border border-transparent bg-(--social-bg) text-white ring-1 ring-white/10 transition-opacity duration-140 hover:opacity-80 dark:bg-(--social-bg-dark)"
+                        style={
+                          {
+                            '--social-bg': bg,
+                            '--social-bg-dark': darkBg,
+                            color: 'white',
+                          } as CSSProperties
+                        }
+                      >
+                        <Icon className={iconClassName} />
+                      </a>
+                    ),
+                  )}
+                </div>
               </div>
 
-              {/* Social links — use brand colors with inline SVGs for tighter control. */}
-              <div className="mt-6 flex items-center gap-3.5">
-                {socialLinks.map(
-                  ({ name, href, bg, darkBg, Icon, iconClassName }) => (
-                    <a
-                      key={name}
-                      href={href}
-                      target={href.startsWith('/') ? undefined : '_blank'}
-                      rel={
-                        href.startsWith('/') ? undefined : 'noopener noreferrer'
-                      }
-                      aria-label={name}
-                      className="flex size-8 items-center justify-center rounded-full border border-transparent bg-(--social-bg) text-white ring-1 ring-white/10 transition-opacity duration-140 hover:opacity-80 dark:bg-(--social-bg-dark)"
-                      style={
-                        {
-                          '--social-bg': bg,
-                          '--social-bg-dark': darkBg,
-                          color: 'white',
-                        } as CSSProperties
-                      }
-                    >
-                      <Icon className={iconClassName} />
-                    </a>
-                  ),
-                )}
-              </div>
-            </div>
-
-            <div className="mx-auto w-full max-w-[300px]">
-              <div className="overflow-hidden rounded-[28px] border border-border bg-raised">
-                <img
-                  src={HERO_IMAGE_URL}
-                  alt="Abstract gradient placeholder artwork"
-                  className="aspect-square w-full object-cover"
-                />
+              <div className="mx-auto w-full max-w-[300px]">
+                <div className="overflow-hidden rounded-[28px] border border-border bg-raised">
+                  <img
+                    src={HERO_IMAGE_URL}
+                    alt="Abstract gradient placeholder artwork"
+                    className="aspect-square w-full object-cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
-
-        <p className="mt-8 text-center text-[12px] text-primary opacity-(--opacity-faint)">
-          <a
-            href="https://icp.gov.moe/?keyword=20260000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-opacity duration-140 hover:opacity-100"
-          >
-            萌ICP备20260000号
-          </a>
-          {'  '}
-          2023-{new Date().getFullYear()} © Canmi
-          {global > 0 && <span className="ml-2">{global} online</span>}
-        </p>
+        <footer className="border-t border-border bg-surface px-5 py-7">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[14px] text-primary opacity-(--opacity-soft)">
+            <span
+              className="text-[16px] font-[620] text-primary"
+              style={heroTitleStyle}
+            >
+              Hi, {home.accountName}
+            </span>
+            <span
+              aria-hidden="true"
+              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
+            />
+            <span>原来已经活了 {home.runtimeDays} 天</span>
+            <span
+              aria-hidden="true"
+              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
+            />
+            <span>
+              © {home.copyrightYear} Canmi 版权所有禁止商用，转发需注明出处
+            </span>
+            <span
+              aria-hidden="true"
+              className="h-[18px] w-px bg-border opacity-(--opacity-soft)"
+            />
+            <a
+              href="/sitemap.xml"
+              className="transition-opacity duration-140 hover:opacity-100"
+            >
+              Sitemap
+            </a>
+          </div>
+        </footer>
       </div>
     </>
   )
