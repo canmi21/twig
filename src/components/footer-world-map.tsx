@@ -3,20 +3,17 @@
 import { useEffect, useRef } from 'react'
 import { sampleLand } from './footer-world-map-data'
 
-// Grid dimensions tuned together: COLS/ROWS = 3 gives a 3:1 aspect, and
-// LON_SPAN/LAT_SPAN = 3 keeps each tile square in geographic terms.
+// Grid dimensions copied from the last committed version.
 const COLS = 48
-const ROWS = 16
-const LON_SPAN = 90
-const LAT_SPAN = 30
-// Center latitude of the visible strip. 20°N covers a populated equatorial
-// band (Sahel, Arabia, India, southeast Asia, Mexico) with mixed land/sea.
-const LAT_CENTER = 20
-const SPEED_DEG_PER_SEC = 0.5
-// Tile visual: how much of its cell the tile fills, and corner radius as a
-// fraction of the tile side.
+const ROWS = 14
+const LON_SPAN = 360
+const LAT_SPAN = (ROWS / COLS) * LON_SPAN
+// Exported so the route loader can precompute a wall-clock-aligned starting
+// offset to send down with SSR. Both sides must use the same constant.
+export const FOOTER_MAP_SPEED_DEG_PER_SEC = 1
 const TILE_FILL_FRAC = 0.82
 const TILE_RADIUS_FRAC = 0.28
+const COLOR_SMOOTHING_SEC = 0.45
 
 type RGB = [number, number, number]
 
@@ -36,7 +33,20 @@ function parseCssColor(cssColor: string): RGB {
   ]
 }
 
-export function FooterWorldMap({ className }: { className?: string }) {
+interface FooterWorldMapProps {
+  className?: string
+  // Starting longitude offset in degrees, decided by the server at request
+  // time so all clients loading at the same wall-clock moment see the same
+  // slice. Client advances from here using local performance.now() delta.
+  initialOffset: number
+  latCenter: number
+}
+
+export function FooterWorldMap({
+  className,
+  initialOffset,
+  latCenter,
+}: FooterWorldMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -79,14 +89,22 @@ export function FooterWorldMap({ className }: { className?: string }) {
     const ro = new ResizeObserver(setupSize)
     ro.observe(canvas)
 
-    let offset = 0
-    let lastT = performance.now()
+    const mountedAt = performance.now()
+    let lastDrawAt = mountedAt
+    const smoothed = new Float32Array(COLS * ROWS * 3)
+    const initialized = new Uint8Array(COLS * ROWS)
     let rafId = 0
 
     const tick = (now: number) => {
-      const dt = (now - lastT) / 1000
-      lastT = now
-      offset = (offset + SPEED_DEG_PER_SEC * dt) % 360
+      const elapsed = (now - mountedAt) / 1000
+      const dt = Math.max(0, (now - lastDrawAt) / 1000)
+      lastDrawAt = now
+      const offset =
+        (((initialOffset + elapsed * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) +
+          360) %
+        360
+      const alpha =
+        COLOR_SMOOTHING_SEC > 0 ? 1 - Math.exp(-dt / COLOR_SMOOTHING_SEC) : 1
 
       const rect = canvas.getBoundingClientRect()
       const W = rect.width
@@ -100,23 +118,45 @@ export function FooterWorldMap({ className }: { className?: string }) {
       const radius = Math.min(tileW, tileH) * TILE_RADIUS_FRAC
       const xPad = (cellW - tileW) / 2
       const yPad = (cellH - tileH) / 2
-
+      const lonStep = LON_SPAN / COLS
       const [dr, dg, db] = colors.dim
       const [lr, lg, lb] = colors.lit
 
       for (let row = 0; row < ROWS; row++) {
-        const lat = LAT_CENTER + LAT_SPAN / 2 - (row + 0.5) * (LAT_SPAN / ROWS)
+        const lat = latCenter + LAT_SPAN / 2 - (row + 0.5) * (LAT_SPAN / ROWS)
         for (let col = 0; col < COLS; col++) {
-          const lon = offset + (col + 0.5) * (LON_SPAN / COLS) - 180
+          const lon = offset + (col + 0.5) * lonStep - 180
           const v = sampleLand(lon, lat)
           const r = Math.round(dr + (lr - dr) * v)
           const g = Math.round(dg + (lg - dg) * v)
           const b = Math.round(db + (lb - db) * v)
-          ctx.fillStyle = `rgb(${r},${g},${b})`
-          const x = col * cellW + xPad
-          const y = row * cellH + yPad
+          const i = row * COLS + col
+          const si = i * 3
+          if (initialized[i] === 0) {
+            smoothed[si] = r
+            smoothed[si + 1] = g
+            smoothed[si + 2] = b
+            initialized[i] = 1
+          } else {
+            const sr = smoothed[si] ?? r
+            const sg = smoothed[si + 1] ?? g
+            const sb = smoothed[si + 2] ?? b
+            smoothed[si] = sr + (r - sr) * alpha
+            smoothed[si + 1] = sg + (g - sg) * alpha
+            smoothed[si + 2] = sb + (b - sb) * alpha
+          }
+          const rr = Math.round(smoothed[si] ?? r)
+          const gg = Math.round(smoothed[si + 1] ?? g)
+          const bb = Math.round(smoothed[si + 2] ?? b)
+          ctx.fillStyle = `rgb(${rr},${gg},${bb})`
           ctx.beginPath()
-          ctx.roundRect(x, y, tileW, tileH, radius)
+          ctx.roundRect(
+            col * cellW + xPad,
+            row * cellH + yPad,
+            tileW,
+            tileH,
+            radius,
+          )
           ctx.fill()
         }
       }
@@ -130,7 +170,7 @@ export function FooterWorldMap({ className }: { className?: string }) {
       themeObserver.disconnect()
       ro.disconnect()
     }
-  }, [])
+  }, [initialOffset, latCenter])
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />
 }

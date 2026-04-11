@@ -6,7 +6,7 @@ import { faMap } from '@fortawesome/free-solid-svg-icons'
 import { Lollipop } from 'lucide-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
+import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
 import {
   MailLine,
   PlanetLine,
@@ -16,7 +16,10 @@ import {
   Train2Fill,
 } from '@mingcute/react'
 import { usePresence } from '~/lib/presence'
-import { FooterWorldMap } from '~/components/footer-world-map'
+import {
+  FOOTER_MAP_SPEED_DEG_PER_SEC,
+  FooterWorldMap,
+} from '~/components/footer-world-map'
 import { Navbar } from '~/components/navbar'
 import { getAuth } from '~/server/better-auth'
 import { getEmailOwner } from '~/server/platform'
@@ -28,9 +31,35 @@ interface HomeData {
   runtimeDays: number
   copyrightYear: number
   presenceCount: number
+  // Initial longitude offset for the footer world map, computed server-side
+  // from wall-clock UTC so every client loading at the same moment sees the
+  // same slice. The client advances from here using its own rAF delta.
+  worldMapOffset: number
+  // Center latitude for the footer map strip. Cloudflare provides request.cf
+  // geolocation in production; local development falls back to Japan.
+  worldMapLatCenter: number
 }
 
 const SITE_STARTED_AT = '2024-10-11T06:24:59+08:00'
+const FALLBACK_WORLD_MAP_LAT_CENTER = 36
+const WORLD_MAP_LAT_SPAN = 105
+
+function clampWorldMapLatCenter(lat: number): number {
+  const margin = WORLD_MAP_LAT_SPAN / 2
+  return Math.max(-90 + margin, Math.min(90 - margin, lat))
+}
+
+function getVisitorLatCenter(): number {
+  const cf = (getRequest() as { cf?: { latitude?: string | number } }).cf
+  const latitude =
+    typeof cf?.latitude === 'number'
+      ? cf.latitude
+      : Number.parseFloat(cf?.latitude ?? '')
+
+  return clampWorldMapLatCenter(
+    Number.isFinite(latitude) ? latitude : FALLBACK_WORLD_MAP_LAT_CENTER,
+  )
+}
 
 const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
   const ownerEmail = getEmailOwner()
@@ -48,6 +77,8 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
     'Guest'
   const presence = await getPresenceCount({ data: {} })
   const initialPresenceCount = Math.max(1, presence.global + 1)
+  const worldMapOffset =
+    ((((now / 1000) * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) + 360) % 360
 
   return {
     accountName,
@@ -55,6 +86,8 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
     runtimeDays,
     copyrightYear: new Date(now).getFullYear(),
     presenceCount: initialPresenceCount,
+    worldMapOffset,
+    worldMapLatCenter: getVisitorLatCenter(),
   }
 })
 
@@ -367,9 +400,9 @@ function HomePage() {
           </div>
         </div>
         <footer className="border-t border-border bg-surface">
-          <div className="px-5 pt-7 pb-3">
+          <div className="px-5 py-3">
             <div className="mx-auto flex w-full items-start justify-between gap-6 px-3 sm:px-6">
-              <div className="min-w-0 text-left text-primary opacity-(--opacity-soft)">
+              <div className="min-w-0 pt-4 text-left text-primary opacity-(--opacity-soft)">
                 <div
                   className="text-[20px] font-[620] text-primary"
                   style={heroTitleStyle}
@@ -407,7 +440,11 @@ function HomePage() {
                 </div>
               </div>
               <div className="hidden flex-col items-end gap-3 text-right text-[14px] text-primary opacity-(--opacity-soft) md:flex">
-                <FooterWorldMap className="h-[112px] w-[336px]" />
+                <FooterWorldMap
+                  className="h-[110.25px] w-[378px]"
+                  initialOffset={home.worldMapOffset}
+                  latCenter={home.worldMapLatCenter}
+                />
               </div>
             </div>
           </div>
@@ -455,7 +492,7 @@ function HomePage() {
                   className="inline-flex items-center gap-1 transition-opacity duration-140 hover:opacity-100"
                 >
                   <Lollipop className="size-[13px]" strokeWidth={2} />
-                  <span>20260000</span>
+                  <span>ICP 20260000</span>
                 </a>
               </span>
             </div>
