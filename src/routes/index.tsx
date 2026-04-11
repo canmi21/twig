@@ -3,6 +3,7 @@
 import { type CSSProperties } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMap } from '@fortawesome/free-solid-svg-icons'
+import { Lollipop } from 'lucide-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
@@ -15,6 +16,7 @@ import {
   Train2Fill,
 } from '@mingcute/react'
 import { usePresence } from '~/lib/presence'
+import { FooterWorldMap } from '~/components/footer-world-map'
 import { Navbar } from '~/components/navbar'
 import { getAuth } from '~/server/better-auth'
 import { getEmailOwner } from '~/server/platform'
@@ -365,7 +367,7 @@ function HomePage() {
           </div>
         </div>
         <footer className="border-t border-border bg-surface">
-          <div className="px-5 py-7">
+          <div className="px-5 pt-7 pb-3">
             <div className="mx-auto flex w-full items-start justify-between gap-6 px-3 sm:px-6">
               <div className="min-w-0 text-left text-primary opacity-(--opacity-soft)">
                 <div
@@ -404,20 +406,13 @@ function HomePage() {
                   })}
                 </div>
               </div>
-              <div className="pt-0.5 text-right text-[14px] text-primary opacity-(--opacity-soft)">
-                <a
-                  href="https://icp.gov.moe/?keyword=20260000"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 inline-block transition-opacity duration-140 hover:opacity-100"
-                >
-                  萌ICP备 20260000 号
-                </a>
+              <div className="hidden flex-col items-end gap-3 text-right text-[14px] text-primary opacity-(--opacity-soft) md:flex">
+                <FooterWorldMap className="h-[112px] w-[336px]" />
               </div>
             </div>
           </div>
 
-          <div className="bg-surface px-5 py-3">
+          <div className="bg-surface px-5 pb-3">
             <div className="mx-3 border-t border-dashed border-border sm:mx-6" />
             <div
               className="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[13px] text-primary opacity-(--opacity-muted) sm:flex-row sm:items-end sm:justify-between sm:px-6"
@@ -444,7 +439,7 @@ function HomePage() {
                 </a>
                 .
               </span>
-              <span className="text-left sm:text-right">
+              <span className="flex flex-wrap items-center gap-x-2 text-left sm:justify-end sm:text-right">
                 <span className="relative inline-block">
                   <span
                     aria-hidden="true"
@@ -453,6 +448,15 @@ function HomePage() {
                   />
                   <span>All systems normal.</span>
                 </span>
+                <a
+                  href="https://icp.gov.moe/?keyword=20260000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 transition-opacity duration-140 hover:opacity-100"
+                >
+                  <Lollipop className="size-[13px]" strokeWidth={2} />
+                  <span>20260000</span>
+                </a>
               </span>
             </div>
           </div>

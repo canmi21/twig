@@ -120,6 +120,12 @@ h6 {
   --color-error: #b24b4b;
 }
 
+:root {
+  /* Footer world map tile palette — neutral grays per theme */
+  --map-tile-dim: #ededed;
+  --map-tile-lit: #a4a4a4;
+}
+
 .dark {
   color-scheme: dark;
   --color-surface: #161616;
@@ -131,4 +137,6 @@ h6 {
   --color-accent: #686868;
   --color-focus: #3e3e3e;
   --color-error: #c96b6b;
+  --map-tile-dim: #242424;
+  --map-tile-lit: #6a6a6a;
 }
