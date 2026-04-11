@@ -391,7 +391,7 @@ function HomePage() {
                         target={newTab ? '_blank' : undefined}
                         rel={newTab ? 'noopener noreferrer' : undefined}
                         aria-label={name}
-                        className={`inline-flex size-4 shrink-0 items-center justify-center transition-opacity duration-140 hover:opacity-100 [&>svg]:h-(--icon-h)! [&>svg]:w-auto! [&>svg]:flex-none${bold ? 'footer-icon-bold' : ''}`}
+                        className={`inline-flex size-4 shrink-0 items-center justify-center transition-opacity duration-140 hover:opacity-100 [&>svg]:h-(--icon-h)! [&>svg]:w-auto! [&>svg]:flex-none ${bold ? 'footer-icon-bold' : ''}`}
                         style={
                           {
                             '--icon-h': `calc(1rem * ${scale})`,
