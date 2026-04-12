@@ -1,100 +1,36 @@
 /* src/routes/index.tsx */
 
 import { type CSSProperties, useEffect, useMemo, useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faMap } from '@fortawesome/free-solid-svg-icons'
-import { GitMerge, Lollipop } from 'lucide-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
-import {
-  MailLine,
-  PlanetLine,
-  Rss2Fill,
-  RssLine,
-  SocialXLine,
-  Train2Fill,
-} from '@mingcute/react'
-import { usePresence } from '~/lib/presence'
+import { MailLine, RssLine, SocialXLine } from '@mingcute/react'
 import {
   getRandomSentence,
   type RandomSentence,
 } from '~/lib/sentences/hitokoto'
-import {
-  FOOTER_MAP_SPEED_DEG_PER_SEC,
-  FooterWorldMap,
-} from '~/components/footer-world-map'
 import { Navbar } from '~/components/navbar'
-import { getAuth } from '~/server/better-auth'
+import { SiteFooter } from '~/components/site-footer'
 import { getEmailOwner } from '~/server/platform'
-import { getPresenceCount } from '~/server/presence-count'
+import {
+  getSiteFooterData,
+  type SiteFooterData,
+} from '~/server/site-footer-data'
 
 interface HomeData {
-  accountName: string
   email: string
-  runtimeDays: number
-  copyrightYear: number
-  presenceCount: number
   sentence: RandomSentence | null
-  // Initial longitude offset for the footer world map, computed server-side
-  // from wall-clock UTC so every client loading at the same moment sees the
-  // same slice. The client advances from here using its own rAF delta.
-  worldMapOffset: number
-  // Center latitude for the footer map strip. Cloudflare provides request.cf
-  // geolocation in production; local development falls back to Japan.
-  worldMapLatCenter: number
-}
-
-const SITE_STARTED_AT = '2024-10-11T06:24:59+08:00'
-const FALLBACK_WORLD_MAP_LAT_CENTER = 36
-const WORLD_MAP_LAT_SPAN = 105
-
-function clampWorldMapLatCenter(lat: number): number {
-  const margin = WORLD_MAP_LAT_SPAN / 2
-  return Math.max(-90 + margin, Math.min(90 - margin, lat))
-}
-
-function getVisitorLatCenter(): number {
-  const cf = (getRequest() as { cf?: { latitude?: string | number } }).cf
-  const latitude =
-    typeof cf?.latitude === 'number'
-      ? cf.latitude
-      : Number.parseFloat(cf?.latitude ?? '')
-
-  return clampWorldMapLatCenter(
-    Number.isFinite(latitude) ? latitude : FALLBACK_WORLD_MAP_LAT_CENTER,
-  )
+  footer: SiteFooterData
 }
 
 const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
   const ownerEmail = getEmailOwner()
-  const session = await getAuth().api.getSession({
-    headers: getRequestHeaders(),
-  })
-  const now = Date.now()
-  const runtimeDays = Math.max(
-    0,
-    Math.floor((now - new Date(SITE_STARTED_AT).getTime()) / 86400000),
-  )
-  const accountName =
-    (session?.user.name as string | undefined) ||
-    (session?.user.email as string | undefined) ||
-    'Guest'
-  const presence = await getPresenceCount({ data: {} })
   const sentence = await getRandomSentence().catch(() => null)
-  const initialPresenceCount = Math.max(1, presence.global + 1)
-  const worldMapOffset =
-    ((((now / 1000) * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) + 360) % 360
+  const footer = await getSiteFooterData()
 
   return {
-    accountName,
     email: ownerEmail,
-    runtimeDays,
-    copyrightYear: new Date(now).getFullYear(),
-    presenceCount: initialPresenceCount,
     sentence,
-    worldMapOffset,
-    worldMapLatCenter: getVisitorLatCenter(),
+    footer,
   }
 })
 
@@ -168,10 +104,6 @@ function GitHubIcon({ className }: { className?: string }) {
       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
     </svg>
   )
-}
-
-function SitemapIcon({ className }: { className?: string }) {
-  return <FontAwesomeIcon icon={faMap} className={className} />
 }
 
 function BlueskyIcon({ className }: { className?: string }) {
@@ -251,7 +183,6 @@ const baseSocialLinks = [
 
 function HomePage() {
   const home = Route.useLoaderData()
-  const live = usePresence({ initialGlobal: home.presenceCount })
   const socialLinks = [
     ...baseSocialLinks,
     {
@@ -271,69 +202,6 @@ function HomePage() {
       iconClassName: 'size-[16.5px]',
     },
   ] as const
-  // Footer icons share a 1rem optical base (= 16px). Each `scale` is the
-  // per-icon multiplier applied on top; source icons come from FA, mingcute
-  // and inline SVG with different viewBox padding and aspect ratios, so
-  // per-icon compensation lives here rather than in the icons themselves.
-  const footerLinks = [
-    {
-      name: 'GitHub',
-      href: 'https://github.com/canmi21/taki',
-      Icon: GitHubIcon,
-      scale: 1,
-    },
-    {
-      name: 'X',
-      href: 'https://twitter.com/intent/follow?screen_name=canmi21',
-      Icon: SocialXLine,
-      scale: 1.25,
-    },
-    {
-      name: 'Nyaone',
-      href: 'https://nya.one/@canmi',
-      Icon: NyaoneIcon,
-      scale: 1,
-    },
-    {
-      name: 'Bluesky',
-      href: 'https://bsky.app/profile/canmi.net',
-      Icon: BlueskyIcon,
-      scale: 1,
-    },
-    {
-      name: 'Telegram',
-      href: 'https://t.me/canmi21',
-      Icon: TelegramGlyphIcon,
-      scale: 0.9375,
-    },
-    {
-      name: 'Sitemap',
-      href: '/sitemap.xml',
-      Icon: SitemapIcon,
-      scale: 1,
-      newTab: true,
-    },
-    {
-      name: 'Travellings',
-      href: 'https://www.travellings.cn/go.html',
-      Icon: Train2Fill,
-      scale: 1.1875,
-    },
-    {
-      name: 'TravelMoe',
-      href: 'https://travel.moe/go?travel=on',
-      Icon: PlanetLine,
-      scale: 1.1875,
-      bold: true,
-    },
-    {
-      name: 'RSS',
-      href: '/feed.xml',
-      Icon: Rss2Fill,
-      scale: 1.125,
-    },
-  ] as const
-
   return (
     <>
       <Navbar />
@@ -407,119 +275,7 @@ function HomePage() {
             />
           ) : null}
         </div>
-        <footer className="border-t border-border bg-surface">
-          <div className="px-5 py-3">
-            <div className="mx-auto flex w-full items-start justify-between gap-6 px-3 sm:px-6">
-              <div className="min-w-0 pt-4 text-left text-primary opacity-(--opacity-soft)">
-                <div
-                  className="text-[20px] font-[620] text-primary"
-                  style={heroTitleStyle}
-                >
-                  Hi, {home.accountName}
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[14px]">
-                  <span>小站已经活了 {home.runtimeDays} 天</span>
-                  <span>{live.global} 位小伙伴正在浏览呢</span>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-primary opacity-(--opacity-muted)">
-                  {footerLinks.map((link) => {
-                    const { name, href, Icon, scale } = link
-                    const bold = 'bold' in link && link.bold
-                    const newTab =
-                      !href.startsWith('/') || ('newTab' in link && link.newTab)
-                    return (
-                      <a
-                        key={name}
-                        href={href}
-                        target={newTab ? '_blank' : undefined}
-                        rel={newTab ? 'noopener noreferrer' : undefined}
-                        aria-label={name}
-                        className={`inline-flex size-4 shrink-0 items-center justify-center transition-opacity duration-140 hover:opacity-100 [&>svg]:h-(--icon-h)! [&>svg]:w-auto! [&>svg]:flex-none ${bold ? 'footer-icon-bold' : ''}`}
-                        style={
-                          {
-                            '--icon-h': `calc(1rem * ${scale})`,
-                          } as CSSProperties
-                        }
-                      >
-                        <Icon />
-                      </a>
-                    )
-                  })}
-                </div>
-              </div>
-              <div className="hidden flex-col items-end gap-3 text-right text-[14px] text-primary opacity-(--opacity-soft) md:flex">
-                <FooterWorldMap
-                  className="h-[110.25px] w-[378px]"
-                  initialOffset={home.worldMapOffset}
-                  latCenter={home.worldMapLatCenter}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-surface px-5 pb-3">
-            <div className="mx-3 border-t border-dashed border-border sm:mx-6" />
-            <div
-              className="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[13px] text-primary opacity-(--opacity-muted) sm:flex-row sm:items-end sm:justify-between sm:px-6"
-              style={{ ...heroTitleStyle, fontWeight: 400 }}
-            >
-              <span className="text-left">
-                Copyright © {home.copyrightYear}{' '}
-                <a
-                  href="https://ill.li"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-opacity duration-140 hover:opacity-100"
-                >
-                  Canmi
-                </a>
-                . Released under the{' '}
-                <a
-                  href="https://spdx.org/licenses/AGPL-3.0-or-later"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-opacity duration-140 hover:opacity-100"
-                >
-                  AGPLv3 License
-                </a>
-                .
-              </span>
-              <span className="flex flex-wrap items-center gap-x-2 text-left sm:justify-end sm:text-right">
-                <span className="relative inline-block">
-                  <span
-                    aria-hidden="true"
-                    className="status-dot-breathe absolute top-1/2 -left-3 size-1.5 -translate-y-1/2 rounded-full"
-                    style={{ backgroundColor: '#7AC8A7' }}
-                  />
-                  <span>All systems normal.</span>
-                </span>
-                <a
-                  href="https://icp.gov.moe/?keyword=20260000"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 transition-opacity duration-140 hover:opacity-100"
-                >
-                  <Lollipop className="size-[13px]" strokeWidth={2} />
-                  <span>ICP 20260000</span>
-                </a>
-                <a
-                  href={
-                    __APP_GIT_COMMIT__ === 'dev'
-                      ? 'https://github.com/canmi21/taki'
-                      : `https://github.com/canmi21/taki/commit/${__APP_GIT_COMMIT__}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={__APP_GIT_COMMIT__}
-                  className="inline-flex items-center gap-1 transition-opacity duration-140 hover:opacity-100"
-                >
-                  <GitMerge className="size-[13px]" strokeWidth={2} />
-                  <span>{__APP_GIT_COMMIT__.slice(0, 7)}</span>
-                </a>
-              </span>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter data={home.footer} />
       </div>
     </>
   )

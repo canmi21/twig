@@ -18,6 +18,8 @@ import { ThemeToggle } from '~/components/theme-toggle'
 import { Signature } from '~/components/post/signature'
 import { getPresenceCount } from '~/server/presence-count'
 import { usePresence } from '~/lib/presence'
+import { SiteFooter } from '~/components/site-footer'
+import { getSiteFooterData } from '~/server/site-footer-data'
 import postPageCss from '~/styles/post/page.css?url'
 
 const resolveSlug = createServerFn()
@@ -31,6 +33,8 @@ const getPost = createServerFn()
   .handler(async ({ data }) => {
     return readPostKv(getCache(), data.slug)
   })
+
+const getFooterData = createServerFn().handler(() => getSiteFooterData())
 
 export const Route = createFileRoute('/posts/$category/$slug/')({
   validateSearch: (search: Record<string, unknown>): { cid?: string } => ({
@@ -50,12 +54,15 @@ export const Route = createFileRoute('/posts/$category/$slug/')({
     throw redirect({ to: target, statusCode: 302 })
   },
   loader: async ({ params }) => {
-    const post = await getPost({ data: { slug: params.slug } })
+    const [post, footer] = await Promise.all([
+      getPost({ data: { slug: params.slug } }),
+      getFooterData(),
+    ])
     const cid = post?.frontmatter.cid
     const presence = cid
       ? await getPresenceCount({ data: { cid } })
       : { global: 0, article: 0 }
-    return { post, presence }
+    return { post, presence, footer }
   },
   head: ({ loaderData, match }) => {
     if (!loaderData?.post)
@@ -93,12 +100,15 @@ function formatShortDate(iso: string, includeYear: boolean): string {
 }
 
 function PostPage() {
-  const { post, presence } = Route.useLoaderData()
+  const { post, presence, footer } = Route.useLoaderData()
 
   if (!post) {
     return (
-      <div className="mx-auto max-w-180 px-5 pt-24">
-        <p className="text-secondary">Post not found.</p>
+      <div className="flex min-h-dvh flex-col">
+        <main className="mx-auto min-h-svh w-full max-w-180 px-5 pt-24">
+          <p className="text-secondary">Post not found.</p>
+        </main>
+        <SiteFooter data={footer} />
       </div>
     )
   }
@@ -120,66 +130,77 @@ function PostPage() {
       <PostBackLink />
       <Toc entries={post.toc} />
       <PostActions />
-      <article className="post mx-auto max-w-190 px-5 pt-27 pb-28 text-primary">
-        <ArticleHeader
-          title={frontmatter.title}
-          createdAt={frontmatter.created_at}
-          html={post.html}
-          readers={live.article}
-        >
-          <PostShareActions cid={frontmatter.cid} tweet={frontmatter.tweet} />
-        </ArticleHeader>
-        <div className="article post__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
-          <PostRenderer html={post.html} components={post.components} />
-        </div>
-        {frontmatter.tags && frontmatter.tags.length > 0 && (
-          <>
-            <div className="mt-14">
-              <div className="flex flex-wrap items-center gap-x-[0.52rem] gap-y-1 text-[12px] leading-none text-primary opacity-(--opacity-muted)">
-                <a
-                  href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
-                >
-                  CC BY-NC-SA 4.0
-                </a>
-                {frontmatter.updated_at && (
-                  <span className="text-primary opacity-(--opacity-muted)">
-                    Updated on{' '}
-                    {formatShortDate(
-                      frontmatter.updated_at,
-                      shouldShowUpdatedYear,
-                    )}
-                  </span>
-                )}
-              </div>
-              <div
-                className="post__footer text-[12px] text-secondary"
-                aria-hidden="true"
-              >
-                <div className="min-w-0 flex-1 border-b border-dashed border-border" />
-                <div className="post__signature">
-                  <Signature className="h-13.5 text-primary opacity-(--opacity-muted) select-none" />
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-x-[0.8rem] gap-y-[0.45rem] pt-3 text-[12px] text-secondary">
-                {frontmatter.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-primary capitalize opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
+      <div className="flex min-h-dvh flex-col">
+        <main className="min-h-svh">
+          <article className="post mx-auto max-w-190 px-5 pt-27 pb-28 text-primary">
+            <ArticleHeader
+              title={frontmatter.title}
+              createdAt={frontmatter.created_at}
+              html={post.html}
+              readers={live.article}
+            >
+              <PostShareActions
+                cid={frontmatter.cid}
+                tweet={frontmatter.tweet}
+              />
+            </ArticleHeader>
+            <div className="article post__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
+              <PostRenderer html={post.html} components={post.components} />
             </div>
-          </>
-        )}
-        {frontmatter.cid && (
-          <CommentSection postCid={frontmatter.cid} tweet={frontmatter.tweet} />
-        )}
-      </article>
+            {frontmatter.tags && frontmatter.tags.length > 0 && (
+              <>
+                <div className="mt-14">
+                  <div className="flex flex-wrap items-center gap-x-[0.52rem] gap-y-1 text-[12px] leading-none text-primary opacity-(--opacity-muted)">
+                    <a
+                      href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
+                    >
+                      CC BY-NC-SA 4.0
+                    </a>
+                    {frontmatter.updated_at && (
+                      <span className="text-primary opacity-(--opacity-muted)">
+                        Updated on{' '}
+                        {formatShortDate(
+                          frontmatter.updated_at,
+                          shouldShowUpdatedYear,
+                        )}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className="post__footer text-[12px] text-secondary"
+                    aria-hidden="true"
+                  >
+                    <div className="min-w-0 flex-1 border-b border-dashed border-border" />
+                    <div className="post__signature">
+                      <Signature className="h-13.5 text-primary opacity-(--opacity-muted) select-none" />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-x-[0.8rem] gap-y-[0.45rem] pt-3 text-[12px] text-secondary">
+                    {frontmatter.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-primary capitalize opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+            {frontmatter.cid && (
+              <CommentSection
+                postCid={frontmatter.cid}
+                tweet={frontmatter.tweet}
+              />
+            )}
+          </article>
+        </main>
+        <SiteFooter data={footer} globalPresenceCount={live.global} />
+      </div>
     </>
   )
 }
