@@ -2,7 +2,7 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { getAudience } from '~/server/platform'
+import { getPresence } from '~/server/platform'
 import type { VisitorGeo } from '~/server/presence'
 
 const DEV_FALLBACK_GEO: VisitorGeo = { country: 'Japan', city: 'Tokyo' }
@@ -32,7 +32,7 @@ export const swapVisitorGeo = createServerFn({ method: 'GET' }).handler(
     const current = getCurrentGeo()
 
     try {
-      const binding = getAudience()
+      const binding = getPresence()
       const id = binding.idFromName('global')
       const stub = binding.get(id)
 

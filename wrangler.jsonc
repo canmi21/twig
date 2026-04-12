@@ -47,7 +47,7 @@
   "durable_objects": {
     "bindings": [
       {
-        "name": "AUDIENCE",
+        "name": "PRESENCE",
         "class_name": "actor",
       },
     ],
@@ -55,7 +55,16 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_classes": ["actor"],
+      "new_classes": ["PresenceDO"],
+    },
+    {
+      "tag": "v2",
+      "renamed_classes": [
+        {
+          "from": "PresenceDO",
+          "to": "actor",
+        },
+      ],
     },
   ],
 }
