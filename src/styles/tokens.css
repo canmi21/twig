@@ -126,6 +126,8 @@ h6 {
   /* Footer world map tile palette — neutral grays per theme */
   --map-tile-dim: #ededed;
   --map-tile-lit: #a4a4a4;
+  --map-tile-marker: #f97316;
+  --map-tile-heat: #22c55e;
 }
 
 .dark {
@@ -141,4 +143,6 @@ h6 {
   --color-error: #c96b6b;
   --map-tile-dim: #242424;
   --map-tile-lit: #6a6a6a;
+  --map-tile-marker: #fb923c;
+  --map-tile-heat: #4ade80;
 }

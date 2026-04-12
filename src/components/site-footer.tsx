@@ -145,32 +145,52 @@ const footerLinks = [
 interface SiteFooterProps {
   data: SiteFooterData
   globalPresenceCount?: number
+  tileHeat?: Record<string, number>
 }
 
-export function SiteFooter({ data, globalPresenceCount }: SiteFooterProps) {
+export function SiteFooter({
+  data,
+  globalPresenceCount,
+  tileHeat,
+}: SiteFooterProps) {
   if (globalPresenceCount != null) {
     return (
       <SiteFooterContent
         data={data}
         globalPresenceCount={globalPresenceCount}
+        tileHeat={tileHeat}
       />
     )
   }
 
-  return <LiveSiteFooter data={data} />
+  return <LiveSiteFooter data={data} tileHeat={tileHeat} />
 }
 
-function LiveSiteFooter({ data }: { data: SiteFooterData }) {
+function LiveSiteFooter({
+  data,
+  tileHeat,
+}: {
+  data: SiteFooterData
+  tileHeat?: Record<string, number>
+}) {
   const live = usePresence({ initialGlobal: data.presenceCount })
-  return <SiteFooterContent data={data} globalPresenceCount={live.global} />
+  return (
+    <SiteFooterContent
+      data={data}
+      globalPresenceCount={live.global}
+      tileHeat={tileHeat}
+    />
+  )
 }
 
 function SiteFooterContent({
   data,
   globalPresenceCount,
+  tileHeat,
 }: {
   data: SiteFooterData
   globalPresenceCount: number
+  tileHeat?: Record<string, number>
 }) {
   return (
     <footer className="border-t border-border bg-surface">
@@ -218,6 +238,9 @@ function SiteFooterContent({
               className="h-[110.25px] w-[378px]"
               initialOffset={data.worldMapOffset}
               latCenter={data.worldMapLatCenter}
+              visitorLat={data.visitorLat}
+              visitorLon={data.visitorLon}
+              tileHeat={tileHeat}
             />
           </div>
         </div>

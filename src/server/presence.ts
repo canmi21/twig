@@ -9,6 +9,7 @@
  */
 
 import { DurableObject } from 'cloudflare:workers'
+import { geoToTileIndex } from '~/lib/geo-tile'
 
 interface ConnectionMeta {
   path: string
@@ -32,7 +33,18 @@ export interface VisitorGeo {
   city: string
 }
 
+interface VisitorGeoRequest extends VisitorGeo {
+  lat?: number
+  lon?: number
+}
+
+export interface GeoSwapResponse {
+  previousGeo: VisitorGeo | null
+  tiles: Record<string, number>
+}
+
 const LAST_GEO_KEY = 'last-geo'
+const TILE_PREFIX = 'tile:'
 
 // Exported as `actor` to match wrangler.jsonc class_name.
 // Cloudflare dashboard shows "taki-actor".
@@ -55,14 +67,42 @@ export class actor extends DurableObject<Record<string, unknown>> {
       return Response.json(counts)
     }
 
-    // Swap last visitor geo: return the stored geo, then overwrite
-    // with the incoming one. Atomic read-then-write within a single
-    // DO instance — no race conditions.
+    // Swap last visitor geo + increment heat tile.
+    // Atomic within a single DO instance — no race conditions.
     if (url.pathname === '/last-geo' && request.method === 'POST') {
-      const incoming = (await request.json()) as VisitorGeo
+      const incoming = (await request.json()) as VisitorGeoRequest
       const stored = await this.ctx.storage.get<VisitorGeo>(LAST_GEO_KEY)
-      await this.ctx.storage.put(LAST_GEO_KEY, incoming)
-      return Response.json(stored ?? null)
+      await this.ctx.storage.put(LAST_GEO_KEY, {
+        country: incoming.country,
+        city: incoming.city,
+      } satisfies VisitorGeo)
+
+      // Increment the visitor's heat tile if coordinates are available
+      if (
+        typeof incoming.lat === 'number' &&
+        typeof incoming.lon === 'number' &&
+        Number.isFinite(incoming.lat) &&
+        Number.isFinite(incoming.lon)
+      ) {
+        const idx = geoToTileIndex(incoming.lon, incoming.lat)
+        const key = `${TILE_PREFIX}${idx}`
+        const prev = (await this.ctx.storage.get<number>(key)) ?? 0
+        await this.ctx.storage.put(key, prev + 1)
+      }
+
+      // Return all heat tiles (only non-zero entries stored)
+      const tileEntries = await this.ctx.storage.list<number>({
+        prefix: TILE_PREFIX,
+      })
+      const tiles: Record<string, number> = {}
+      for (const [key, count] of tileEntries) {
+        tiles[key.slice(TILE_PREFIX.length)] = count
+      }
+
+      return Response.json({
+        previousGeo: stored ?? null,
+        tiles,
+      } satisfies GeoSwapResponse)
     }
 
     // WebSocket upgrade

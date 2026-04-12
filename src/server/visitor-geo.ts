@@ -2,16 +2,35 @@
 
 import { getRequest } from '@tanstack/react-start/server'
 import { getPresence } from '~/server/platform'
-import type { VisitorGeo } from '~/server/presence'
+import type { VisitorGeo, GeoSwapResponse } from '~/server/presence'
 
 const DEV_FALLBACK_GEO: VisitorGeo = { country: 'Japan', city: 'Tokyo' }
 
 // Country codes where country name === city name (city-states).
 const CITY_STATE_CODES = new Set(['SG', 'MC', 'VA', 'GI'])
 
-function getCurrentGeo(): VisitorGeo {
-  const cf = (getRequest() as { cf?: { country?: string; city?: string } }).cf
-  if (!cf?.country) return DEV_FALLBACK_GEO
+interface CfGeo {
+  country?: string
+  city?: string
+  latitude?: string | number
+  longitude?: string | number
+}
+
+function getCfGeo(): CfGeo {
+  return (getRequest() as { cf?: CfGeo }).cf ?? {}
+}
+
+function parseCoord(v: string | number | undefined): number | undefined {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : undefined
+  if (typeof v === 'string') {
+    const n = Number.parseFloat(v)
+    return Number.isFinite(n) ? n : undefined
+  }
+  return undefined
+}
+
+function getCurrentGeo(cf: CfGeo): VisitorGeo {
+  if (!cf.country) return DEV_FALLBACK_GEO
 
   const regionNames = new Intl.DisplayNames(['en'], { type: 'region' })
   const country = regionNames.of(cf.country) ?? cf.country
@@ -24,10 +43,18 @@ function getCurrentGeo(): VisitorGeo {
   return { country, city }
 }
 
-/** Swap last visitor geo: returns the previously stored geo and
- *  overwrites it with the current request's geo. */
-export async function swapVisitorGeo(): Promise<VisitorGeo> {
-  const current = getCurrentGeo()
+interface VisitorGeoResult {
+  geo: VisitorGeo
+  tiles: Record<string, number>
+}
+
+/** Swap last visitor geo and increment heat tile.
+ *  Returns the previous visitor's geo and all tile counts. */
+export async function swapVisitorGeo(): Promise<VisitorGeoResult> {
+  const cf = getCfGeo()
+  const current = getCurrentGeo(cf)
+  const lat = parseCoord(cf.latitude)
+  const lon = parseCoord(cf.longitude)
 
   try {
     const binding = getPresence()
@@ -37,12 +64,15 @@ export async function swapVisitorGeo(): Promise<VisitorGeo> {
     const res = await stub.fetch('https://do-internal/last-geo', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(current),
+      body: JSON.stringify({ ...current, lat, lon }),
     })
-    const previous = (await res.json()) as VisitorGeo | null
-    return previous ?? current
+    const data = (await res.json()) as GeoSwapResponse
+    return {
+      geo: data.previousGeo ?? current,
+      tiles: data.tiles,
+    }
   } catch {
     // DO not available in local dev
-    return current
+    return { geo: current, tiles: {} }
   }
 }

@@ -16,6 +16,8 @@ export interface SiteFooterData {
   presenceCount: number
   worldMapOffset: number
   worldMapLatCenter: number
+  visitorLat: number | null
+  visitorLon: number | null
 }
 
 function clampWorldMapLatCenter(lat: number): number {
@@ -23,16 +25,33 @@ function clampWorldMapLatCenter(lat: number): number {
   return Math.max(-90 + margin, Math.min(90 - margin, lat))
 }
 
-function getVisitorLatCenter(): number {
-  const cf = (getRequest() as { cf?: { latitude?: string | number } }).cf
-  const latitude =
-    typeof cf?.latitude === 'number'
-      ? cf.latitude
-      : Number.parseFloat(cf?.latitude ?? '')
+function parseCfCoord(v: string | number | undefined): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v === 'string') {
+    const n = Number.parseFloat(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
 
-  return clampWorldMapLatCenter(
-    Number.isFinite(latitude) ? latitude : FALLBACK_WORLD_MAP_LAT_CENTER,
-  )
+function getVisitorCoords(): {
+  latCenter: number
+  lat: number | null
+  lon: number | null
+} {
+  const cf = (
+    getRequest() as {
+      cf?: { latitude?: string | number; longitude?: string | number }
+    }
+  ).cf
+  const lat = parseCfCoord(cf?.latitude)
+  const lon = parseCfCoord(cf?.longitude)
+
+  return {
+    latCenter: clampWorldMapLatCenter(lat ?? FALLBACK_WORLD_MAP_LAT_CENTER),
+    lat,
+    lon,
+  }
 }
 
 export async function getSiteFooterData(): Promise<SiteFooterData> {
@@ -51,6 +70,7 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
   const presence = await getPresenceCount({ data: {} })
   const worldMapOffset =
     ((((now / 1000) * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) + 360) % 360
+  const visitor = getVisitorCoords()
 
   return {
     accountName,
@@ -58,6 +78,8 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     copyrightYear: new Date(now).getFullYear(),
     presenceCount: Math.max(1, presence.global + 1),
     worldMapOffset,
-    worldMapLatCenter: getVisitorLatCenter(),
+    worldMapLatCenter: visitor.latCenter,
+    visitorLat: visitor.lat,
+    visitorLon: visitor.lon,
   }
 }

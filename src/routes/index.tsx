@@ -23,17 +23,24 @@ interface HomeData {
   sentence: RandomSentence | null
   footer: SiteFooterData
   geo: VisitorGeo
+  tileHeat: Record<string, number>
 }
 
 const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
-  const [ownerEmail, sentence, footer, geo] = await Promise.all([
+  const [ownerEmail, sentence, footer, visitorResult] = await Promise.all([
     Promise.resolve(getEmailOwner()),
     getRandomSentence().catch(() => null),
     getSiteFooterData(),
     swapVisitorGeo(),
   ])
 
-  return { email: ownerEmail, sentence, footer, geo }
+  return {
+    email: ownerEmail,
+    sentence,
+    footer,
+    geo: visitorResult.geo,
+    tileHeat: visitorResult.tiles,
+  }
 })
 
 export const Route = createFileRoute('/')({
@@ -351,7 +358,7 @@ function HomePage() {
             />
           ) : null}
         </div>
-        <SiteFooter data={home.footer} />
+        <SiteFooter data={home.footer} tileHeat={home.tileHeat} />
       </div>
     </>
   )

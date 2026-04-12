@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { sampleLand } from './footer-world-map-data'
+import { geoToTileIndex } from '~/lib/geo-tile'
 
 // Grid dimensions copied from the last committed version.
 const COLS = 48
@@ -35,17 +36,20 @@ function parseCssColor(cssColor: string): RGB {
 
 interface FooterWorldMapProps {
   className?: string
-  // Starting longitude offset in degrees, decided by the server at request
-  // time so all clients loading at the same wall-clock moment see the same
-  // slice. Client advances from here using local performance.now() delta.
   initialOffset: number
   latCenter: number
+  visitorLat?: number | null
+  visitorLon?: number | null
+  tileHeat?: Record<string, number>
 }
 
 export function FooterWorldMap({
   className,
   initialOffset,
   latCenter,
+  visitorLat,
+  visitorLon,
+  tileHeat,
 }: FooterWorldMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -59,18 +63,25 @@ export function FooterWorldMap({
     const colors = {
       dim: [0, 0, 0] as RGB,
       lit: [0, 0, 0] as RGB,
+      marker: [0, 0, 0] as RGB,
+      heat: [0, 0, 0] as RGB,
     }
 
     const refreshColors = () => {
       const styles = getComputedStyle(root)
       const dim = styles.getPropertyValue('--map-tile-dim').trim() || '#888'
       const lit = styles.getPropertyValue('--map-tile-lit').trim() || '#ccc'
+      const marker =
+        styles.getPropertyValue('--map-tile-marker').trim() || '#f97316'
+      const heat =
+        styles.getPropertyValue('--map-tile-heat').trim() || '#22c55e'
       colors.dim = parseCssColor(dim)
       colors.lit = parseCssColor(lit)
+      colors.marker = parseCssColor(marker)
+      colors.heat = parseCssColor(heat)
     }
     refreshColors()
 
-    // Theme toggle flips a class on <html>; re-read the palette when it does.
     const themeObserver = new MutationObserver(refreshColors)
     themeObserver.observe(root, {
       attributes: true,
@@ -88,6 +99,25 @@ export function FooterWorldMap({
     setupSize()
     const ro = new ResizeObserver(setupSize)
     ro.observe(canvas)
+
+    // Visitor rendered row (constant — lat band doesn't scroll).
+    // Computed in the rendered grid's coordinate system so exactly one
+    // tile matches, unlike geoToTileIndex which uses a coarser static grid.
+    const visitorRow = (() => {
+      if (visitorLat == null) return -1
+      const latStep = LAT_SPAN / ROWS
+      const r = Math.floor((latCenter + LAT_SPAN / 2 - visitorLat) / latStep)
+      return r >= 0 && r < ROWS ? r : -1
+    })()
+
+    // Precompute heat normalization
+    let maxLogCount = 0
+    if (tileHeat) {
+      const values = Object.values(tileHeat)
+      if (values.length > 0) {
+        maxLogCount = Math.log(1 + Math.max(...values))
+      }
+    }
 
     const mountedAt = performance.now()
     let lastDrawAt = mountedAt
@@ -121,15 +151,50 @@ export function FooterWorldMap({
       const lonStep = LON_SPAN / COLS
       const [dr, dg, db] = colors.dim
       const [lr, lg, lb] = colors.lit
+      const [mr, mg, mb] = colors.marker
+      const [hr, hg, hb] = colors.heat
+
+      // Visitor rendered col (recomputed each frame — offset scrolls)
+      let visitorCol = -1
+      if (visitorLon != null && visitorRow >= 0) {
+        const normLon = (((visitorLon + 180 - offset) % 360) + 360) % 360
+        visitorCol = Math.floor(normLon / lonStep)
+        if (visitorCol < 0 || visitorCol >= COLS) visitorCol = -1
+      }
 
       for (let row = 0; row < ROWS; row++) {
         const lat = latCenter + LAT_SPAN / 2 - (row + 0.5) * (LAT_SPAN / ROWS)
         for (let col = 0; col < COLS; col++) {
           const lon = offset + (col + 0.5) * lonStep - 180
           const v = sampleLand(lon, lat)
-          const r = Math.round(dr + (lr - dr) * v)
-          const g = Math.round(dg + (lg - dg) * v)
-          const b = Math.round(db + (lb - db) * v)
+
+          // Base color: dim → lit interpolation
+          let r = dr + (lr - dr) * v
+          let g = dg + (lg - dg) * v
+          let b = db + (lb - db) * v
+
+          // Static tile index for heat lookup
+          const staticIdx = geoToTileIndex(lon, lat)
+
+          // Heat map: blend toward green on land tiles with visits
+          if (tileHeat && maxLogCount > 0 && v > 0) {
+            const count = tileHeat[String(staticIdx)]
+            if (count && count > 0) {
+              const hf = (Math.log(1 + count) / maxLogCount) * v
+              r += (hr - r) * hf
+              g += (hg - g) * hf
+              b += (hb - b) * hf
+            }
+          }
+
+          // Visitor marker: override to orange (exactly one tile)
+          if (row === visitorRow && col === visitorCol) {
+            r = mr
+            g = mg
+            b = mb
+          }
+
+          // Exponential color smoothing
           const i = row * COLS + col
           const si = i * 3
           if (initialized[i] === 0) {
@@ -170,7 +235,7 @@ export function FooterWorldMap({
       themeObserver.disconnect()
       ro.disconnect()
     }
-  }, [initialOffset, latCenter])
+  }, [initialOffset, latCenter, visitorLat, visitorLon, tileHeat])
 
   return <canvas ref={canvasRef} className={className} aria-hidden="true" />
 }
