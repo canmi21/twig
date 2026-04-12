@@ -2,7 +2,7 @@
 
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
-import { useEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCache, getDb } from '~/server/platform'
@@ -104,23 +104,36 @@ function formatShortDate(iso: string, includeYear: boolean): string {
   })
 }
 
-function usePostNavigationRailTop() {
-  const tocRef = useRef<HTMLDivElement>(null)
-  const [railTop, setRailTop] = useState(
-    ARTICLE_TITLE_TOP_PX + BACK_TO_TOC_MIN_GAP_PX,
-  )
-  const collapsedHeightRef = useRef(0)
+// Collapsed TOC height: each entry = 4px bar + 6px gap (except last).
+function estimateCollapsedTocHeight(entryCount: number) {
+  return Math.max(0, entryCount * 10 - 6)
+}
 
-  useEffect(() => {
+const RAIL_MIN_TOP = ARTICLE_TITLE_TOP_PX + BACK_TO_TOC_MIN_GAP_PX
+
+// CSS expression that approximates the centered rail position.
+// Used for SSR so the first paint is already near-correct; JS refines
+// to the exact pixel value in useLayoutEffect (typically <5px diff).
+function railTopFallbackCss(tocEntryCount: number) {
+  const halfH = Math.round(estimateCollapsedTocHeight(tocEntryCount) / 2)
+  return `max(${RAIL_MIN_TOP}px, calc(50vh - ${halfH}px))`
+}
+
+function usePostNavigationRailTop(tocEntryCount: number) {
+  const tocRef = useRef<HTMLDivElement>(null)
+  const [railTop, setRailTop] = useState<number | null>(null)
+  const collapsedHeightRef = useRef(0)
+  const fallbackCss = railTopFallbackCss(tocEntryCount)
+
+  useLayoutEffect(() => {
     const el = tocRef.current
     if (!el) return
 
     const media = window.matchMedia(DESKTOP_MEDIA_QUERY)
-    const minTop = ARTICLE_TITLE_TOP_PX + BACK_TO_TOC_MIN_GAP_PX
 
     function centeredRailTop(h: number) {
-      const centered = h > 0 ? (window.innerHeight - h) / 2 : minTop
-      return Math.max(minTop, centered)
+      const centered = h > 0 ? (window.innerHeight - h) / 2 : RAIL_MIN_TOP
+      return Math.max(RAIL_MIN_TOP, centered)
     }
 
     // Capture collapsed height once on mount — the collapsed TOC height
@@ -162,7 +175,7 @@ function usePostNavigationRailTop() {
     }
   }, [])
 
-  return { tocRef, railTop }
+  return { tocRef, railTop, fallbackCss }
 }
 
 function PostPage() {
@@ -189,7 +202,17 @@ function PostPage() {
     !frontmatter.created_at ||
     new Date(frontmatter.updated_at ?? '').getFullYear() !==
       new Date(frontmatter.created_at).getFullYear()
-  const { tocRef, railTop } = usePostNavigationRailTop()
+  const { tocRef, railTop, fallbackCss } = usePostNavigationRailTop(
+    post.toc.length,
+  )
+
+  // SSR: use CSS expression (viewport-relative, no JS needed).
+  // Client: use exact pixel value from useLayoutEffect.
+  const asideTop = railTop != null ? railTop : fallbackCss
+  const backLinkTop =
+    railTop != null
+      ? ARTICLE_TITLE_TOP_PX - railTop
+      : `calc(${ARTICLE_TITLE_TOP_PX}px - ${fallbackCss})`
 
   return (
     <>
@@ -201,12 +224,12 @@ function PostPage() {
             <aside
               aria-label="Post navigation"
               className="hidden max-h-[calc(100svh-12rem)] pl-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))] xl:sticky xl:col-start-1 xl:row-start-1 xl:block xl:self-start xl:justify-self-start"
-              style={{ top: railTop }}
+              style={{ top: asideTop }}
             >
               <div className="relative min-w-24">
                 <PostBackLink
                   className="absolute left-0 inline-flex items-center justify-start gap-1.5 rounded-none p-0 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-140 hover:opacity-100"
-                  style={{ top: ARTICLE_TITLE_TOP_PX - railTop }}
+                  style={{ top: backLinkTop }}
                 />
                 <div ref={tocRef}>
                   <Toc
