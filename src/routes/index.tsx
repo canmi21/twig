@@ -15,23 +15,25 @@ import {
   getSiteFooterData,
   type SiteFooterData,
 } from '~/server/site-footer-data'
+import { swapVisitorGeo } from '~/server/visitor-geo'
+import type { VisitorGeo } from '~/server/presence'
 
 interface HomeData {
   email: string
   sentence: RandomSentence | null
   footer: SiteFooterData
+  geo: VisitorGeo
 }
 
 const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
-  const ownerEmail = getEmailOwner()
-  const sentence = await getRandomSentence().catch(() => null)
-  const footer = await getSiteFooterData()
+  const [ownerEmail, sentence, footer, geo] = await Promise.all([
+    Promise.resolve(getEmailOwner()),
+    getRandomSentence().catch(() => null),
+    getSiteFooterData(),
+    swapVisitorGeo(),
+  ])
 
-  return {
-    email: ownerEmail,
-    sentence,
-    footer,
-  }
+  return { email: ownerEmail, sentence, footer, geo }
 })
 
 export const Route = createFileRoute('/')({
@@ -181,6 +183,74 @@ const baseSocialLinks = [
   },
 ] as const
 
+function getUtc8Date() {
+  // Reliable UTC+8: take UTC ms and shift by 8 hours, then wrap in Date.
+  const now = new Date()
+  return new Date(
+    now.getTime() + 8 * 3600_000 + now.getTimezoneOffset() * 60_000,
+  )
+}
+
+function formatUtc8Time(d: Date) {
+  const h = d.getHours()
+  const m = d.getMinutes()
+  const s = d.getSeconds()
+  const suffix = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${h12}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} ${suffix}`
+}
+
+function HomeClock() {
+  const [now, setNow] = useState(getUtc8Date)
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(getUtc8Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <span
+      className="text-[13px] text-primary opacity-(--opacity-muted)"
+      suppressHydrationWarning
+    >
+      {formatUtc8Time(now)}
+    </span>
+  )
+}
+
+function useViewportSize() {
+  const [size, setSize] = useState('')
+
+  useEffect(() => {
+    function update() {
+      setSize(`${window.innerWidth} x ${window.innerHeight}`)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  return size
+}
+
+function HomeResolution() {
+  const size = useViewportSize()
+
+  if (!size) return null
+
+  return (
+    <span className="animate-fade-in text-[13px] text-primary">{size}</span>
+  )
+}
+
+function HomeVisitorGeo({ geo }: { geo: VisitorGeo }) {
+  const label = geo.city
+    ? `Last visit from ${geo.country}, ${geo.city}`
+    : `Last visit from ${geo.country}`
+
+  return <span className="text-[13px] text-primary">{label}</span>
+}
+
 function HomePage() {
   const home = Route.useLoaderData()
   const socialLinks = [
@@ -204,7 +274,7 @@ function HomePage() {
   ] as const
   return (
     <>
-      <Navbar />
+      <Navbar left={<HomeClock />} />
       <div className="flex min-h-dvh flex-col">
         <div className="relative grid min-h-svh grid-rows-[1fr_auto_1fr] items-center px-5">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -267,6 +337,12 @@ function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="absolute bottom-5 left-6 opacity-(--opacity-muted)">
+            <HomeResolution />
+          </div>
+          <div className="absolute right-6 bottom-5 opacity-(--opacity-muted)">
+            <HomeVisitorGeo geo={home.geo} />
           </div>
           {home.sentence ? (
             <HomeSentence

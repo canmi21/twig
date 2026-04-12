@@ -68,6 +68,16 @@
 
 /* ── TOC bar intro animation ───────────────────── */
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes toc-bar-intro {
   from {
     transform: scaleX(0.42);

@@ -7,13 +7,13 @@
  */
 
 import { createFileRoute } from '@tanstack/react-router'
-import { getPresence } from '~/server/platform'
+import { getAudience } from '~/server/platform'
 
 export const Route = createFileRoute('/ws')({
   server: {
     handlers: {
       GET: async ({ request }: { request: Request }) => {
-        const binding = getPresence()
+        const binding = getAudience()
         const id = binding.idFromName('global')
         const stub = binding.get(id)
         return stub.fetch(request)

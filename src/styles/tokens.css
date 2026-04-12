@@ -109,6 +109,8 @@ h6 {
  * error     — error messages
  * ─────────────────────────────────────────────── */
 @theme {
+  --animate-fade-in: fade-in 0.4s ease-out both;
+
   --color-surface: #ffffff;
   --color-primary: #333333;
   --color-secondary: #828282;

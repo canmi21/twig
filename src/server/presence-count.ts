@@ -8,13 +8,13 @@
  */
 
 import { createServerFn } from '@tanstack/react-start'
-import { getPresence } from '~/server/platform'
+import { getAudience } from '~/server/platform'
 
 export const getPresenceCount = createServerFn({ method: 'GET' })
   .inputValidator((input: { cid?: string }) => input)
   .handler(async ({ data }) => {
     try {
-      const binding = getPresence()
+      const binding = getAudience()
       const id = binding.idFromName('global')
       const stub = binding.get(id)
 

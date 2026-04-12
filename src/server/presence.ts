@@ -1,13 +1,11 @@
 /* src/server/presence.ts */
 
-/* src/server/presence.ts
- *
- * Durable Object for real-time presence tracking.
+/* Durable Object for audience tracking.
  * Uses WebSocket Hibernation API — the DO sleeps between messages,
  * waking only on connect/disconnect/navigate events.
  *
- * Single global instance tracks all visitors. Per-connection metadata
- * (path, cid) is persisted in DO storage to survive hibernation.
+ * Single global instance tracks all visitors (presence) and stores
+ * the last visitor's geolocation for display on the homepage.
  */
 
 import { DurableObject } from 'cloudflare:workers'
@@ -29,10 +27,19 @@ interface PresenceMessage {
   article: number
 }
 
-export class PresenceDO extends DurableObject<Record<string, unknown>> {
+export interface VisitorGeo {
+  country: string
+  city: string
+}
+
+const LAST_GEO_KEY = 'last-geo'
+
+// Exported as `actor` to match wrangler.jsonc class_name.
+// Cloudflare dashboard shows "taki-actor".
+// oxlint-disable-next-line typescript/class-name -- wrangler class_name binding
+export class actor extends DurableObject<Record<string, unknown>> {
   constructor(ctx: DurableObjectState, env: Record<string, unknown>) {
     super(ctx, env)
-    // Auto-respond to pings without waking the DO
     this.ctx.setWebSocketAutoResponse(
       new WebSocketRequestResponsePair('ping', 'pong'),
     )
@@ -46,6 +53,16 @@ export class PresenceDO extends DurableObject<Record<string, unknown>> {
       const cid = url.searchParams.get('cid')
       const counts = await this.computeCounts(cid)
       return Response.json(counts)
+    }
+
+    // Swap last visitor geo: return the stored geo, then overwrite
+    // with the incoming one. Atomic read-then-write within a single
+    // DO instance — no race conditions.
+    if (url.pathname === '/last-geo' && request.method === 'POST') {
+      const incoming = (await request.json()) as VisitorGeo
+      const stored = await this.ctx.storage.get<VisitorGeo>(LAST_GEO_KEY)
+      await this.ctx.storage.put(LAST_GEO_KEY, incoming)
+      return Response.json(stored ?? null)
     }
 
     // WebSocket upgrade
@@ -122,7 +139,6 @@ export class PresenceDO extends DurableObject<Record<string, unknown>> {
     const sockets = this.ctx.getWebSockets()
     const global = sockets.length
 
-    // Build cid → count map
     const entries = await this.ctx.storage.list<ConnectionMeta>({
       prefix: 'ws:',
     })
@@ -133,14 +149,12 @@ export class PresenceDO extends DurableObject<Record<string, unknown>> {
       }
     }
 
-    // Build connectionId → cid lookup for sending targeted counts
     const idToCid = new Map<string, string | null>()
     for (const [key, meta] of entries.entries()) {
-      const connectionId = key.slice(3) // strip "ws:" prefix
+      const connectionId = key.slice(3)
       idToCid.set(connectionId, meta.cid)
     }
 
-    // Send each connection its relevant article count
     for (const ws of sockets) {
       const tags = this.ctx.getTags(ws)
       const connectionId = tags[0]
