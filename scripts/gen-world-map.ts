@@ -9,13 +9,15 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { geoContains } from 'd3-geo'
 import { feature } from 'topojson-client'
 
+const require = createRequire(import.meta.url)
 const WIDTH = 360
 const HEIGHT = 180
-const INPUT = resolve('node_modules/world-atlas/land-110m.json')
+const INPUT = require.resolve('world-atlas/land-110m.json')
 const OUTPUT = resolve('src/components/footer-world-map-data.ts')
 
 interface TopoLike {
@@ -55,8 +57,8 @@ function main() {
  * Source: Natural Earth 110m land via world-atlas.
  */
 
-export const WORLD_MAP_WIDTH = ${WIDTH}
-export const WORLD_MAP_HEIGHT = ${HEIGHT}
+const WORLD_MAP_WIDTH = ${WIDTH}
+const WORLD_MAP_HEIGHT = ${HEIGHT}
 
 const BASE64 =
   '${base64}'

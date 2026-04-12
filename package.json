@@ -1,6 +1,6 @@
 {
   "name": "taki",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -32,9 +32,7 @@
     "@prosemirror-adapter/react": "^0.5.3",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@sentry/react": "^10.47.0",
-    "@shikijs/langs": "^4.0.2",
     "@shikijs/rehype": "^4.0.2",
-    "@shikijs/themes": "^4.0.2",
     "@tanstack/react-router": "^1.168.10",
     "@tanstack/react-start": "^1.167.16",
     "better-auth": "^1.6.1",

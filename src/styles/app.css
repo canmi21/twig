@@ -40,6 +40,32 @@
   }
 }
 
+/* ── Home sentence typewriter ─────────────────── */
+
+.home-sentence-typewriter-pending [data-home-sentence-text='true'] {
+  visibility: hidden;
+}
+
+@keyframes home-sentence-caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-home-sentence-caret='true'] {
+    display: inline-block;
+    margin-left: 0.12em;
+    animation: home-sentence-caret-blink 900ms steps(1, end) infinite;
+  }
+}
+
 /* ── TOC bar intro animation ───────────────────── */
 
 @keyframes toc-bar-intro {

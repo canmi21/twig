@@ -13,14 +13,3 @@ export const getSession = createServerFn({ method: 'GET' }).handler(
     return session
   },
 )
-
-/** Get the current session, or throw if not authenticated. */
-export const ensureSession = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const session = await getAuth().api.getSession({
-      headers: getRequestHeaders(),
-    })
-    if (!session) throw new Error('Unauthorized')
-    return session
-  },
-)

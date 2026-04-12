@@ -9,7 +9,7 @@
 import { useCallback } from 'react'
 import type { PasteImageHandler } from './plugins'
 
-export interface RawEditorProps {
+interface RawEditorProps {
   value: string
   onChange: (value: string) => void
   onPasteImage?: PasteImageHandler

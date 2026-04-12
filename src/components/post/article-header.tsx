@@ -15,7 +15,7 @@ function stripHtml(html: string): string {
     .trim()
 }
 
-export function countContentUnits(html: string): number {
+function countContentUnits(html: string): number {
   const text = stripHtml(html)
   if (!text) return 0
 
@@ -35,7 +35,7 @@ export function countContentUnits(html: string): number {
   return cjkCount + latinWordCount
 }
 
-export function formatCount(count: number): string {
+function formatCount(count: number): string {
   if (count < 1000) return String(count)
 
   const compact = count / 1000

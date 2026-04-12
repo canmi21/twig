@@ -8,7 +8,7 @@ import { getMediaForPost } from '../../lib/database/media'
 import { storageKey } from '../../lib/storage/storage-key'
 import { serializeFrontmatter } from '../../lib/compiler/frontmatter'
 
-export interface PullResult {
+interface PullResult {
   exported: number
 }
 

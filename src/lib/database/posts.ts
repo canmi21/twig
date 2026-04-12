@@ -5,7 +5,7 @@ import type { Db } from './index'
 import { contents, posts } from './schema'
 import { newCid } from '../utils/uuid'
 
-export interface UpsertPostInput {
+interface UpsertPostInput {
   slug: string
   title: string
   description?: string
@@ -20,7 +20,7 @@ export interface UpsertPostInput {
   published?: boolean
 }
 
-export interface UpsertPostResult {
+interface UpsertPostResult {
   cid: string
   slug: string
   action: 'created' | 'updated'
@@ -253,7 +253,7 @@ export async function resolvePostSlugByCid(
     .get()
 }
 
-export interface OgPostMeta {
+interface OgPostMeta {
   title: string
   description: string | null
   category: string | null

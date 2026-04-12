@@ -10,7 +10,7 @@ import {
 } from '../../lib/storage/kv'
 import type { PostIndexEntry } from '../../lib/storage/kv'
 
-export interface RebuildResult {
+interface RebuildResult {
   compiled: number
 }
 

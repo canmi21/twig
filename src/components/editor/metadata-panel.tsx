@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { X } from 'lucide-react'
 import type { Frontmatter } from '~/lib/compiler/index'
 
-export interface MetadataPanelProps {
+interface MetadataPanelProps {
   open: boolean
   onClose: () => void
   metadata: Frontmatter

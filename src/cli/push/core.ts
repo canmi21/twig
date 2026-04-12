@@ -33,7 +33,7 @@ import type { PostIndexEntry } from '../../lib/storage/kv'
 
 // --- Types ---
 
-export interface ScannedPost {
+interface ScannedPost {
   slug: string
   category: string
   frontmatter: Frontmatter
@@ -42,14 +42,14 @@ export interface ScannedPost {
   mediaFiles: Array<{ relativePath: string; absolutePath: string }>
 }
 
-export interface DiffResult {
+interface DiffResult {
   added: ScannedPost[]
   updated: ScannedPost[]
   deleted: Array<{ slug: string; cid: string }>
   unchanged: string[]
 }
 
-export interface PushResult {
+interface PushResult {
   added: number
   updated: number
   deleted: number
@@ -65,9 +65,7 @@ export class PushValidationError extends Error {
 
 // --- Scanning ---
 
-export { computeContentHash } from '../../lib/utils/hash'
-
-export function extractFrontmatter(source: string): {
+function extractFrontmatter(source: string): {
   frontmatter: Frontmatter
   content: string
 } {
@@ -79,7 +77,7 @@ export function extractFrontmatter(source: string): {
   }
 }
 
-export async function collectFiles(
+async function collectFiles(
   dir: string,
   base: string,
 ): Promise<Array<{ relativePath: string; absolutePath: string }>> {
@@ -99,7 +97,7 @@ export async function collectFiles(
   return results
 }
 
-export async function scanPosts(postsDir: string): Promise<ScannedPost[]> {
+async function scanPosts(postsDir: string): Promise<ScannedPost[]> {
   // Structure: postsDir/{category}/{slug}/index.md
   let categories: string[]
   try {
@@ -141,7 +139,7 @@ export async function scanPosts(postsDir: string): Promise<ScannedPost[]> {
 
 // --- Phase 1: Validate ---
 
-export function validateAll(scanned: ScannedPost[]): boolean {
+function validateAll(scanned: ScannedPost[]): boolean {
   let valid = true
   for (const post of scanned) {
     const result = postSchema.safeParse({
@@ -170,10 +168,7 @@ export function validateAll(scanned: ScannedPost[]): boolean {
 
 // --- Phase 2: Diff ---
 
-export async function diffPosts(
-  db: Db,
-  scanned: ScannedPost[],
-): Promise<DiffResult> {
+async function diffPosts(db: Db, scanned: ScannedPost[]): Promise<DiffResult> {
   const dbPosts = await getAllPosts(db)
   const dbByCid = new Map(dbPosts.map((post) => [post.cid, post]))
   const dbBySlug = new Map(dbPosts.map((post) => [post.slug, post]))
@@ -263,7 +258,7 @@ export async function diffPosts(
 
 // --- Phase 3: Execute ---
 
-export async function processMedia(
+async function processMedia(
   db: Db,
   r2: R2Bucket,
   cid: string,
@@ -295,7 +290,7 @@ export async function processMedia(
   return replacements
 }
 
-export function replaceMediaRefs(
+function replaceMediaRefs(
   content: string,
   replacements: Map<string, string>,
 ): string {
@@ -306,7 +301,7 @@ export function replaceMediaRefs(
   return result
 }
 
-export async function executeAddOrUpdate(
+async function executeAddOrUpdate(
   db: Db,
   r2: R2Bucket,
   kv: KVNamespace,
@@ -348,7 +343,7 @@ export async function executeAddOrUpdate(
   })
 }
 
-export async function executeDelete(
+async function executeDelete(
   db: Db,
   r2: R2Bucket,
   kv: KVNamespace,
@@ -372,7 +367,7 @@ export async function executeDelete(
   await deletePostKv(kv, slug)
 }
 
-export async function buildPostIndex(db: Db): Promise<PostIndexEntry[]> {
+async function buildPostIndex(db: Db): Promise<PostIndexEntry[]> {
   const allPosts = await getAllPosts(db)
   return allPosts.map(toPostIndexEntry)
 }

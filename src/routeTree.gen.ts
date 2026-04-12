@@ -23,6 +23,7 @@ import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as LogoutIndexRouteImport } from './routes/logout/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as FeedIndexRouteImport } from './routes/feed/index'
+import { Route as ApiSentencesRouteImport } from './routes/api/sentences'
 import { Route as AtDashboardRouteRouteImport } from './routes/@/_dashboard/route'
 import { Route as LoginVerifyIndexRouteImport } from './routes/login/verify/index'
 import { Route as AtDashboardIndexRouteImport } from './routes/@/_dashboard/index'
@@ -107,6 +108,11 @@ const LoginIndexRoute = LoginIndexRouteImport.update({
 const FeedIndexRoute = FeedIndexRouteImport.update({
   id: '/feed/',
   path: '/feed/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSentencesRoute = ApiSentencesRouteImport.update({
+  id: '/api/sentences',
+  path: '/api/sentences',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtDashboardRouteRoute = AtDashboardRouteRouteImport.update({
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ws': typeof WsRoute
+  '/api/sentences': typeof ApiSentencesRoute
   '/feed/': typeof FeedIndexRoute
   '/login/': typeof LoginIndexRoute
   '/logout/': typeof LogoutIndexRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/rss.xml': typeof RssDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ws': typeof WsRoute
+  '/api/sentences': typeof ApiSentencesRoute
   '/feed': typeof FeedIndexRoute
   '/login': typeof LoginIndexRoute
   '/logout': typeof LogoutIndexRoute
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/ws': typeof WsRoute
   '/@/_dashboard': typeof AtDashboardRouteRouteWithChildren
+  '/api/sentences': typeof ApiSentencesRoute
   '/feed/': typeof FeedIndexRoute
   '/login/': typeof LoginIndexRoute
   '/logout/': typeof LogoutIndexRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/sitemap.xml'
     | '/ws'
+    | '/api/sentences'
     | '/feed/'
     | '/login/'
     | '/logout/'
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/rss.xml'
     | '/sitemap.xml'
     | '/ws'
+    | '/api/sentences'
     | '/feed'
     | '/login'
     | '/logout'
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/ws'
     | '/@/_dashboard'
+    | '/api/sentences'
     | '/feed/'
     | '/login/'
     | '/logout/'
@@ -378,6 +390,7 @@ export interface RootRouteChildren {
   RssDotxmlRoute: typeof RssDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WsRoute: typeof WsRoute
+  ApiSentencesRoute: typeof ApiSentencesRoute
   FeedIndexRoute: typeof FeedIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   LogoutIndexRoute: typeof LogoutIndexRoute
@@ -494,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/feed'
       fullPath: '/feed/'
       preLoaderRoute: typeof FeedIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sentences': {
+      id: '/api/sentences'
+      path: '/api/sentences'
+      fullPath: '/api/sentences'
+      preLoaderRoute: typeof ApiSentencesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/@/_dashboard': {
@@ -642,6 +662,7 @@ const rootRouteChildren: RootRouteChildren = {
   RssDotxmlRoute: RssDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WsRoute: WsRoute,
+  ApiSentencesRoute: ApiSentencesRoute,
   FeedIndexRoute: FeedIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   LogoutIndexRoute: LogoutIndexRoute,

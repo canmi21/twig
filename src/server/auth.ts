@@ -3,7 +3,7 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose'
 import { getCfAccessTeamDomain, getCfAccessAud } from './platform'
 
-export interface CfAccessIdentity {
+interface CfAccessIdentity {
   email: string
   sub: string
   iss: string

@@ -21,7 +21,6 @@ interface Bindings {
   CF_ACCESS_TEAM_DOMAIN: string
   CF_ACCESS_AUD: string
   EMAIL_FROM_NOREPLY: string
-  EMAIL_FROM_NOTIFY: string
   EMAIL_OWNER: string
   BETTER_AUTH_SECRET: string
   RESEND_API_KEY: string
@@ -70,11 +69,6 @@ export function getCfAccessAud() {
 /** Noreply sender address for auth and system emails. */
 export function getEmailFromNoreply() {
   return getBindings().EMAIL_FROM_NOREPLY
-}
-
-/** Notification sender address for user-facing alerts (reserved for future use). */
-export function getEmailFromNotify() {
-  return getBindings().EMAIL_FROM_NOTIFY
 }
 
 /** Admin email for notifications. */

@@ -1,6 +1,6 @@
 /* src/routes/index.tsx */
 
-import { type CSSProperties } from 'react'
+import { type CSSProperties, useEffect, useMemo, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMap } from '@fortawesome/free-solid-svg-icons'
 import { GitMerge, Lollipop } from 'lucide-react'
@@ -17,6 +17,10 @@ import {
 } from '@mingcute/react'
 import { usePresence } from '~/lib/presence'
 import {
+  getRandomSentence,
+  type RandomSentence,
+} from '~/lib/sentences/hitokoto'
+import {
   FOOTER_MAP_SPEED_DEG_PER_SEC,
   FooterWorldMap,
 } from '~/components/footer-world-map'
@@ -31,6 +35,7 @@ interface HomeData {
   runtimeDays: number
   copyrightYear: number
   presenceCount: number
+  sentence: RandomSentence | null
   // Initial longitude offset for the footer world map, computed server-side
   // from wall-clock UTC so every client loading at the same moment sees the
   // same slice. The client advances from here using its own rAF delta.
@@ -76,6 +81,7 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
     (session?.user.email as string | undefined) ||
     'Guest'
   const presence = await getPresenceCount({ data: {} })
+  const sentence = await getRandomSentence().catch(() => null)
   const initialPresenceCount = Math.max(1, presence.global + 1)
   const worldMapOffset =
     ((((now / 1000) * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) + 360) % 360
@@ -86,6 +92,7 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
     runtimeDays,
     copyrightYear: new Date(now).getFullYear(),
     presenceCount: initialPresenceCount,
+    sentence,
     worldMapOffset,
     worldMapLatCenter: getVisitorLatCenter(),
   }
@@ -118,14 +125,10 @@ const gridMaskStyle: CSSProperties = {
   maskRepeat: 'repeat',
 }
 const gridVeilStyle: CSSProperties = {
-  left: '50%',
-  top: '120px',
-  width: '1200px',
-  height: '460px',
+  inset: 'clamp(88px, 14svh, 150px) clamp(24px, 8vw, 120px)',
   borderRadius: '80px',
   backgroundColor: 'var(--color-surface)',
   filter: 'blur(28px)',
-  transform: 'translateX(-50%)',
 }
 const heroTitleStyle: CSSProperties = {
   fontFamily:
@@ -335,12 +338,12 @@ function HomePage() {
     <>
       <Navbar />
       <div className="flex min-h-dvh flex-col">
-        <div className="relative flex min-h-svh flex-col items-center justify-center px-5">
+        <div className="relative grid min-h-svh grid-rows-[1fr_auto_1fr] items-center px-5">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute inset-0" style={gridMaskStyle} />
             <div className="absolute" style={gridVeilStyle} />
           </div>
-          <div className="w-full max-w-240 px-7 py-6">
+          <div className="row-start-2 w-full max-w-240 justify-self-center px-7 py-6">
             <div className="grid items-center gap-9 lg:grid-cols-[minmax(0,1fr)_clamp(236px,25vw,320px)] lg:gap-12">
               <div className="min-w-0">
                 <div
@@ -356,7 +359,6 @@ function HomePage() {
                   你是一只整天就知道睡觉的大猫咪，摸 Rust
                   磨爪子，把前端当毛线球，还会偶尔钻进嵌入式的小箱子里出不来！对一切新奇的事物都充满好奇，看到没折腾过的技术就忍不住伸出爪。还喜欢看动漫番剧！
                 </div>
-
                 {/* Social links — use brand colors with inline SVGs for tighter control. */}
                 <div className="mt-6 flex items-center gap-3.5">
                   {socialLinks.map(
@@ -398,6 +400,12 @@ function HomePage() {
               </div>
             </div>
           </div>
+          {home.sentence ? (
+            <HomeSentence
+              key={`${home.sentence.hitokoto}:${home.sentence.fromWho}`}
+              sentence={home.sentence}
+            />
+          ) : null}
         </div>
         <footer className="border-t border-border bg-surface">
           <div className="px-5 py-3">
@@ -514,5 +522,218 @@ function HomePage() {
         </footer>
       </div>
     </>
+  )
+}
+
+const HOME_SENTENCE_CARET_PRELUDE_MS = 1800
+const HOME_SENTENCE_TYPE_INTERVAL_MS = 72
+const HOME_SENTENCE_ERASE_INTERVAL_MS = 34
+const HOME_SENTENCE_INITIAL_HOLD_MS = 3800
+const HOME_SENTENCE_MAX_HOLD_MS = 60_000
+const HOME_SENTENCE_HOLD_GROWTH = 1.55
+
+interface SentenceApiResponse {
+  hitokoto: string
+  from_who: string
+}
+
+function formatSentence(sentence: RandomSentence): string {
+  return `「${sentence.hitokoto} — ${sentence.fromWho}」`
+}
+
+function isSentenceApiResponse(value: unknown): value is SentenceApiResponse {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const sentence = value as Record<string, unknown>
+  return (
+    typeof sentence.hitokoto === 'string' &&
+    typeof sentence.from_who === 'string'
+  )
+}
+
+async function fetchRandomSentenceText(): Promise<string | null> {
+  const response = await fetch('/api/sentences', {
+    headers: {
+      accept: 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    return null
+  }
+
+  const payload = (await response.json()) as unknown
+  if (!isSentenceApiResponse(payload)) {
+    return null
+  }
+
+  return formatSentence({
+    hitokoto: payload.hitokoto,
+    fromWho: payload.from_who,
+  })
+}
+
+function sentenceHoldDuration(cycle: number): number {
+  return Math.min(
+    HOME_SENTENCE_MAX_HOLD_MS,
+    Math.round(
+      HOME_SENTENCE_INITIAL_HOLD_MS * HOME_SENTENCE_HOLD_GROWTH ** cycle,
+    ),
+  )
+}
+
+function HomeSentence({ sentence }: { sentence: RandomSentence }) {
+  const fullText = useMemo(() => formatSentence(sentence), [sentence])
+  const [text, setText] = useState(fullText)
+  const [isTyping, setIsTyping] = useState(false)
+
+  useEffect(() => {
+    const root = document.documentElement
+    const typewriterWindow = window as typeof window & {
+      __TAKI_HOME_SENTENCE_TYPEWRITER_PENDING?: boolean
+    }
+    if (!typewriterWindow.__TAKI_HOME_SENTENCE_TYPEWRITER_PENDING) {
+      root.classList.remove('home-sentence-typewriter-pending')
+      return
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      typewriterWindow.__TAKI_HOME_SENTENCE_TYPEWRITER_PENDING = false
+      root.classList.remove('home-sentence-typewriter-pending')
+      return
+    }
+
+    let cancelled = false
+    const timers: number[] = []
+
+    const delay = (duration: number) =>
+      new Promise<void>((resolve) => {
+        const timer = window.setTimeout(resolve, duration)
+        timers.push(timer)
+      })
+
+    const typeText = async (nextText: string) => {
+      setIsTyping(true)
+
+      for (let nextIndex = 1; nextIndex <= nextText.length; nextIndex += 1) {
+        // oxlint-disable-next-line no-await-in-loop -- sequential timer controls the typewriter cadence
+        await delay(HOME_SENTENCE_TYPE_INTERVAL_MS)
+        if (cancelled) {
+          return
+        }
+
+        setText(nextText.slice(0, nextIndex))
+      }
+
+      setIsTyping(false)
+    }
+
+    const eraseText = async (currentText: string) => {
+      setIsTyping(true)
+
+      for (
+        let nextIndex = currentText.length - 1;
+        nextIndex >= 0;
+        nextIndex -= 1
+      ) {
+        // oxlint-disable-next-line no-await-in-loop -- sequential timer controls the erase cadence
+        await delay(HOME_SENTENCE_ERASE_INTERVAL_MS)
+        if (cancelled) {
+          return
+        }
+
+        setText(currentText.slice(0, nextIndex))
+      }
+    }
+
+    const run = async () => {
+      await delay(0)
+      if (!typewriterWindow.__TAKI_HOME_SENTENCE_TYPEWRITER_PENDING) {
+        root.classList.remove('home-sentence-typewriter-pending')
+        return
+      }
+
+      setText('')
+      setIsTyping(true)
+
+      await delay(0)
+      if (cancelled) {
+        return
+      }
+
+      root.classList.remove('home-sentence-typewriter-pending')
+      typewriterWindow.__TAKI_HOME_SENTENCE_TYPEWRITER_PENDING = false
+
+      await delay(HOME_SENTENCE_CARET_PRELUDE_MS)
+      if (cancelled) {
+        return
+      }
+
+      await typeText(fullText)
+      let currentText = fullText
+      let cycle = 0
+
+      // oxlint-disable-next-line no-unmodified-loop-condition -- cleanup mutates cancelled while this async loop is suspended
+      while (!cancelled) {
+        // oxlint-disable-next-line no-await-in-loop -- each sentence must finish its hold before the next transition starts
+        await delay(sentenceHoldDuration(cycle))
+        if (cancelled) {
+          return
+        }
+
+        // oxlint-disable-next-line no-await-in-loop -- fetch belongs to the sequential sentence cycle
+        const nextText = await fetchRandomSentenceText().catch(() => null)
+        if (cancelled) {
+          return
+        }
+
+        if (!nextText) {
+          cycle += 1
+          continue
+        }
+
+        // oxlint-disable-next-line no-await-in-loop -- erase must complete before typing the next sentence
+        await eraseText(currentText)
+        if (cancelled) {
+          return
+        }
+
+        // oxlint-disable-next-line no-await-in-loop -- empty caret prelude mirrors the first typewriter reveal
+        await delay(HOME_SENTENCE_CARET_PRELUDE_MS)
+        if (cancelled) {
+          return
+        }
+
+        currentText = nextText
+        // oxlint-disable-next-line no-await-in-loop -- typewriter transitions are intentionally sequential
+        await typeText(currentText)
+        cycle += 1
+      }
+    }
+
+    void run()
+
+    return () => {
+      cancelled = true
+      timers.forEach((timer) => window.clearTimeout(timer))
+    }
+  }, [fullText])
+
+  return (
+    <div className="row-start-3 w-full translate-y-8 self-center justify-self-center px-7 text-center">
+      <div
+        data-home-sentence-text="true"
+        className="mx-auto max-w-full text-[15px] leading-[1.8] text-primary opacity-(--opacity-muted)"
+      >
+        {text}
+        {isTyping ? (
+          <span aria-hidden="true" data-home-sentence-caret="true">
+            |
+          </span>
+        ) : null}
+      </div>
+    </div>
   )
 }

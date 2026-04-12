@@ -47,5 +47,3 @@ export const postSchema = z.object({
   updated_at: z.iso.datetime().optional(),
   published: z.boolean().optional(),
 })
-
-export type PostInput = z.infer<typeof postSchema>

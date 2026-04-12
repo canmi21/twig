@@ -20,7 +20,7 @@ import {
   type CommentWithContext,
 } from '~/lib/database/comments'
 
-export interface DashboardOverview {
+interface DashboardOverview {
   postStats: PostStats
   commentStats: CommentStats
   recentPosts: RecentPost[]

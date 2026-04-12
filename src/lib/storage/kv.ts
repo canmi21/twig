@@ -3,7 +3,7 @@
 import type { CompileResult } from '../compiler/index'
 import type { PostRow } from '../database/posts'
 
-export interface PostKvEntry {
+interface PostKvEntry {
   frontmatter: CompileResult['frontmatter']
   html: string
   toc: CompileResult['toc']

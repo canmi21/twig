@@ -159,7 +159,7 @@ function pct(part: number, total: number): number {
 
 // --- Parser ---
 
-export function parseTokei(raw: string): LangStat[] {
+function parseTokei(raw: string): LangStat[] {
   const lines = raw.split('\n')
   const results: LangStat[] = []
   let current: LangStat | null = null

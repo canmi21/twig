@@ -4,7 +4,7 @@ import { eq, and } from 'drizzle-orm'
 import type { Db } from './index'
 import { media, mediaRefs } from './schema'
 
-export interface MediaRow {
+interface MediaRow {
   hash: string
   ext: string
   mime: string

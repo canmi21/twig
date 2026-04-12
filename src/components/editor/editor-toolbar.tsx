@@ -42,7 +42,7 @@ export interface ToolbarAction {
   (type: string, payload?: Record<string, string>): void
 }
 
-export interface EditorToolbarProps {
+interface EditorToolbarProps {
   view: EditorMode
   onViewChange: (view: EditorMode) => void
   onAction: ToolbarAction

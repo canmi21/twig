@@ -1,11 +1,16 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "ignoreBinaries": ["chore"],
-  "ignoreDependencies": ["cloudflare"],
-  "entry": ["src/router.tsx", "src/cli/*/index.ts"],
+  "ignoreDependencies": ["cloudflare", "prettier"],
+  "entry": [
+    "src/router.tsx",
+    "src/routes/**/*.{ts,tsx}",
+    "src/cli/*/index.ts",
+    "scripts/gen-world-map.ts"
+  ],
   "project": [
     "src/**/*.{ts,tsx}",
     "src/**/*.css",
+    "scripts/**/*.ts",
     "*.config.ts",
     "*.config.mjs"
   ]

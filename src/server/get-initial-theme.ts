@@ -3,7 +3,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getCookie } from '@tanstack/react-start/server'
 
-export type InitialTheme = 'light' | 'dark' | null
+type InitialTheme = 'light' | 'dark' | null
 
 export const getInitialTheme = createServerFn().handler((): InitialTheme => {
   const theme = getCookie('theme')
