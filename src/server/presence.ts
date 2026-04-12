@@ -45,9 +45,6 @@ export interface GeoSwapResponse {
 
 const LAST_GEO_KEY = 'last-geo'
 const VISIT_COUNT_KEY = 'visit-count'
-// Historical visit count from Cloudflare analytics before DO tracking.
-// Used as the initial value when the DO storage is empty (first deploy).
-const VISIT_COUNT_SEED = 155660
 const TILE_PREFIX = 'tile:'
 
 // Exported as `actor` to match wrangler.jsonc class_name.
@@ -73,9 +70,7 @@ export class actor extends DurableObject<Record<string, unknown>> {
 
     // Increment site-wide visit counter and return total
     if (url.pathname === '/visit' && request.method === 'POST') {
-      const prev =
-        (await this.ctx.storage.get<number>(VISIT_COUNT_KEY)) ??
-        VISIT_COUNT_SEED
+      const prev = (await this.ctx.storage.get<number>(VISIT_COUNT_KEY)) ?? 0
       const next = prev + 1
       await this.ctx.storage.put(VISIT_COUNT_KEY, next)
       return Response.json({ totalVisits: next })
