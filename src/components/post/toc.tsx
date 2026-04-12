@@ -79,7 +79,13 @@ function normalizeBarWidths(widths: Map<string, number>): Map<string, number> {
 
 type Phase = 'collapsed' | 'expanded' | 'revealed'
 
-export function Toc({ entries }: { entries: TocEntry[] }) {
+export function Toc({
+  entries,
+  className,
+}: {
+  entries: TocEntry[]
+  className?: string
+}) {
   const [activeId, setActiveId] = useState<string>('')
   const [phase, setPhase] = useState<Phase>('collapsed')
   const [barWidths, setBarWidths] = useState<Map<string, number>>(() =>
@@ -217,12 +223,15 @@ export function Toc({ entries }: { entries: TocEntry[] }) {
       aria-label="Table of contents"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
-      className="
+      className={
+        className ??
+        `
         hidden
         xl:fixed xl:top-1/2 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:block xl:max-h-[calc(100vh-16rem)]
         xl:-translate-y-1/2 xl:overflow-y-auto
-      "
+      `
+      }
     >
       <motion.ul
         initial={false}

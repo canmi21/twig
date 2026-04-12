@@ -2,6 +2,7 @@
 
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
+import { useEffect, useRef, useState } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCache, getDb } from '~/server/platform'
@@ -35,6 +36,10 @@ const getPost = createServerFn()
   })
 
 const getFooterData = createServerFn().handler(() => getSiteFooterData())
+
+const DESKTOP_MEDIA_QUERY = '(min-width: 1280px)'
+const ARTICLE_TITLE_TOP_PX = 108
+const BACK_TO_TOC_MIN_GAP_PX = 48
 
 export const Route = createFileRoute('/posts/$category/$slug/')({
   validateSearch: (search: Record<string, unknown>): { cid?: string } => ({
@@ -99,6 +104,67 @@ function formatShortDate(iso: string, includeYear: boolean): string {
   })
 }
 
+function usePostNavigationRailTop() {
+  const tocRef = useRef<HTMLDivElement>(null)
+  const [railTop, setRailTop] = useState(
+    ARTICLE_TITLE_TOP_PX + BACK_TO_TOC_MIN_GAP_PX,
+  )
+  const collapsedHeightRef = useRef(0)
+
+  useEffect(() => {
+    const el = tocRef.current
+    if (!el) return
+
+    const media = window.matchMedia(DESKTOP_MEDIA_QUERY)
+    const minTop = ARTICLE_TITLE_TOP_PX + BACK_TO_TOC_MIN_GAP_PX
+
+    function centeredRailTop(h: number) {
+      const centered = h > 0 ? (window.innerHeight - h) / 2 : minTop
+      return Math.max(minTop, centered)
+    }
+
+    // Capture collapsed height once on mount — the collapsed TOC height
+    // only depends on entry count (fixed bar heights + gaps), not hover state.
+    collapsedHeightRef.current = el.offsetHeight
+    setRailTop(centeredRailTop(collapsedHeightRef.current))
+
+    // Lock the parent's layout height to the collapsed size so TOC
+    // expansion doesn't shift the sticky unstick boundary — prevents
+    // oscillation near the article bottom.
+    if (el.parentElement) {
+      el.parentElement.style.height = `${collapsedHeightRef.current}px`
+    }
+
+    // When the TOC resizes (hover expand/collapse), shift it via translateY
+    // so it grows from its visual center. The rail position stays fixed,
+    // keeping the Back link stable.
+    const observer = new ResizeObserver((entries) => {
+      if (!media.matches) return
+      const h = entries[0]?.contentRect.height ?? 0
+      const delta = h - collapsedHeightRef.current
+      el.style.transform = delta
+        ? `translateY(${(-delta / 2).toFixed(1)}px)`
+        : ''
+    })
+    observer.observe(el)
+
+    function onResize() {
+      if (!media.matches) return
+      setRailTop(centeredRailTop(collapsedHeightRef.current))
+    }
+
+    window.addEventListener('resize', onResize)
+    media.addEventListener('change', onResize)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', onResize)
+      media.removeEventListener('change', onResize)
+    }
+  }, [])
+
+  return { tocRef, railTop }
+}
+
 function PostPage() {
   const { post, presence, footer } = Route.useLoaderData()
 
@@ -123,81 +189,104 @@ function PostPage() {
     !frontmatter.created_at ||
     new Date(frontmatter.updated_at ?? '').getFullYear() !==
       new Date(frontmatter.created_at).getFullYear()
+  const { tocRef, railTop } = usePostNavigationRailTop()
 
   return (
     <>
       <ThemeToggle className="absolute top-5 right-5 z-50 cursor-pointer rounded-full p-2 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-140 hover:opacity-100 xl:fixed" />
-      <PostBackLink />
-      <Toc entries={post.toc} />
-      <PostActions />
+      <PostBackLink className="absolute top-5 left-5 z-50 inline-flex items-center justify-center rounded-full p-2 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-140 hover:opacity-100 xl:hidden" />
       <div className="flex min-h-dvh flex-col">
         <main className="min-h-svh">
-          <article className="post mx-auto max-w-190 px-5 pt-27 pb-28 text-primary">
-            <ArticleHeader
-              title={frontmatter.title}
-              createdAt={frontmatter.created_at}
-              html={post.html}
-              readers={live.article}
+          <div className="grid w-full grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,47.5rem)_minmax(0,1fr)] xl:pt-27">
+            <aside
+              aria-label="Post navigation"
+              className="hidden max-h-[calc(100svh-12rem)] pl-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))] xl:sticky xl:col-start-1 xl:row-start-1 xl:block xl:self-start xl:justify-self-start"
+              style={{ top: railTop }}
             >
-              <PostShareActions
-                cid={frontmatter.cid}
-                tweet={frontmatter.tweet}
-              />
-            </ArticleHeader>
-            <div className="article post__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
-              <PostRenderer html={post.html} components={post.components} />
-            </div>
-            {frontmatter.tags && frontmatter.tags.length > 0 && (
-              <>
-                <div className="mt-14">
-                  <div className="flex flex-wrap items-center gap-x-[0.52rem] gap-y-1 text-[12px] leading-none text-primary opacity-(--opacity-muted)">
-                    <a
-                      href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
+              <div className="relative min-w-24">
+                <PostBackLink
+                  className="absolute left-0 inline-flex items-center justify-start gap-1.5 rounded-none p-0 text-primary opacity-(--opacity-subtle) transition-[color,opacity] duration-140 hover:opacity-100"
+                  style={{ top: ARTICLE_TITLE_TOP_PX - railTop }}
+                />
+                <div ref={tocRef}>
+                  <Toc
+                    entries={post.toc}
+                    className="block max-h-[calc(100svh-18rem)] overflow-y-auto"
+                  />
+                </div>
+              </div>
+            </aside>
+            <article className="post post--bounded-body mx-auto w-full max-w-190 px-5 pt-27 text-primary xl:col-start-2 xl:row-start-1 xl:pt-0">
+              <ArticleHeader
+                title={frontmatter.title}
+                createdAt={frontmatter.created_at}
+                html={post.html}
+                readers={live.article}
+              >
+                <PostShareActions
+                  cid={frontmatter.cid}
+                  tweet={frontmatter.tweet}
+                />
+              </ArticleHeader>
+              <div className="article post__body leading-relaxed font-[450] tracking-[0.002em] text-primary">
+                <PostRenderer html={post.html} components={post.components} />
+              </div>
+              {frontmatter.tags && frontmatter.tags.length > 0 && (
+                <>
+                  <div className="mt-14">
+                    <div className="flex flex-wrap items-center gap-x-[0.52rem] gap-y-1 text-[12px] leading-none text-primary opacity-(--opacity-muted)">
+                      <a
+                        href="https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
+                      >
+                        CC BY-NC-SA 4.0
+                      </a>
+                      {frontmatter.updated_at && (
+                        <span className="text-primary opacity-(--opacity-muted)">
+                          Updated on{' '}
+                          {formatShortDate(
+                            frontmatter.updated_at,
+                            shouldShowUpdatedYear,
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className="post__footer text-[12px] text-secondary"
+                      aria-hidden="true"
                     >
-                      CC BY-NC-SA 4.0
-                    </a>
-                    {frontmatter.updated_at && (
-                      <span className="text-primary opacity-(--opacity-muted)">
-                        Updated on{' '}
-                        {formatShortDate(
-                          frontmatter.updated_at,
-                          shouldShowUpdatedYear,
-                        )}
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className="post__footer text-[12px] text-secondary"
-                    aria-hidden="true"
-                  >
-                    <div className="min-w-0 flex-1 border-b border-dashed border-border" />
-                    <div className="post__signature">
-                      <Signature className="h-13.5 text-primary opacity-(--opacity-muted) select-none" />
+                      <div className="min-w-0 flex-1 border-b border-dashed border-border" />
+                      <div className="post__signature">
+                        <Signature className="h-13.5 text-primary opacity-(--opacity-muted) select-none" />
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-x-[0.8rem] gap-y-[0.45rem] pt-3 text-[12px] text-secondary">
+                      {frontmatter.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-primary capitalize opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-x-[0.8rem] gap-y-[0.45rem] pt-3 text-[12px] text-secondary">
-                    {frontmatter.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-primary capitalize opacity-(--opacity-muted) transition-[color,opacity] duration-140 hover:opacity-100"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-            {frontmatter.cid && (
+                </>
+              )}
+            </article>
+            <PostActions className="mr-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))] hidden max-h-[calc(100svh-12rem)] w-10 -translate-y-1/2 flex-col items-center gap-1 overflow-y-auto xl:sticky xl:top-1/2 xl:col-start-3 xl:row-start-1 xl:flex xl:self-start xl:justify-self-end" />
+          </div>
+          {frontmatter.cid && (
+            <div className="mx-auto max-w-190 px-5 pb-28 text-primary">
               <CommentSection
                 postCid={frontmatter.cid}
                 tweet={frontmatter.tweet}
               />
-            )}
-          </article>
+            </div>
+          )}
+          {!frontmatter.cid && <div className="pb-28" aria-hidden="true" />}
         </main>
         <SiteFooter data={footer} globalPresenceCount={live.global} />
       </div>

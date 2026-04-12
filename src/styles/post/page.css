@@ -1199,3 +1199,7 @@ body:has(.post) {
     left: -1.15rem;
   }
 }
+
+.post--bounded-body {
+  padding-bottom: 0;
+}

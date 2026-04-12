@@ -4,12 +4,18 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { Undo2 } from 'lucide-react'
 
-export function PostBackLink() {
+export function PostBackLink({
+  className,
+  style,
+}: { className?: string; style?: React.CSSProperties } = {}) {
   return (
     <Link
       to="/posts"
       aria-label="Back to posts"
-      className="
+      style={style}
+      className={
+        className ??
+        `
         absolute top-5 left-5 z-50
         inline-flex items-center justify-center
         rounded-full p-2
@@ -20,7 +26,8 @@ export function PostBackLink() {
         xl:top-28 xl:left-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:justify-start xl:gap-1.5
         xl:rounded-none xl:p-0
-      "
+      `
+      }
     >
       <motion.span
         className="inline-flex"

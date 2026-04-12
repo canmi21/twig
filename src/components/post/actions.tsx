@@ -106,16 +106,19 @@ const actions = [
   { icon: Paintbrush, label: 'Theme' },
 ] as const
 
-export function PostActions() {
+export function PostActions({ className }: { className?: string } = {}) {
   return (
     <aside
       aria-label="Post actions"
-      className="
+      className={
+        className ??
+        `
         hidden
         xl:fixed xl:top-1/2 xl:right-[max(1.5rem,calc((100vw-45rem)/4-5.5rem))]
         xl:flex xl:max-h-[calc(100vh-16rem)] xl:w-10
         xl:-translate-y-1/2 xl:flex-col xl:items-center xl:gap-1
-      "
+      `
+      }
     >
       <ReadingProgress />
       <div className="my-1 h-px w-4 bg-border" />
