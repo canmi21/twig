@@ -44,6 +44,7 @@ export interface GeoSwapResponse {
 }
 
 const LAST_GEO_KEY = 'last-geo'
+const VISIT_COUNT_KEY = 'visit-count'
 const TILE_PREFIX = 'tile:'
 
 // Exported as `actor` to match wrangler.jsonc class_name.
@@ -65,6 +66,21 @@ export class actor extends DurableObject<Record<string, unknown>> {
       const cid = url.searchParams.get('cid')
       const counts = await this.computeCounts(cid)
       return Response.json(counts)
+    }
+
+    // Increment site-wide visit counter and return total
+    if (url.pathname === '/visit' && request.method === 'POST') {
+      const prev = (await this.ctx.storage.get<number>(VISIT_COUNT_KEY)) ?? 0
+      const next = prev + 1
+      await this.ctx.storage.put(VISIT_COUNT_KEY, next)
+      return Response.json({ totalVisits: next })
+    }
+
+    // Seed visit counter to an absolute value (one-time admin use)
+    if (url.pathname === '/visit' && request.method === 'PUT') {
+      const { count } = (await request.json()) as { count: number }
+      await this.ctx.storage.put(VISIT_COUNT_KEY, count)
+      return Response.json({ totalVisits: count })
     }
 
     // Swap last visitor geo + increment heat tile.

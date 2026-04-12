@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMap } from '@fortawesome/free-solid-svg-icons'
 import { GitMerge, Lollipop } from 'lucide-react'
 import { PlanetLine, Rss2Fill, SocialXLine, Train2Fill } from '@mingcute/react'
+import { useMemo } from 'react'
 import { usePresence } from '~/lib/presence'
 import { FooterWorldMap } from '~/components/footer-world-map'
 import type { SiteFooterData } from '~/server/site-footer-data'
@@ -142,6 +143,33 @@ const footerLinks = [
   },
 ] as const
 
+function VisitCounter({ count }: { count: number }) {
+  const padded = useMemo(() => {
+    const s = String(count)
+    return s.padStart(Math.max(6, s.length), '0')
+  }, [count])
+
+  return (
+    <div
+      className="mt-3 flex items-center gap-[3px]"
+      aria-label={`Total visits: ${count}`}
+    >
+      {/* Static digit boxes — count never changes within a single render,
+          so position-based keys are stable. */}
+      {/* oxlint-disable no-array-index-key -- fixed-length static digit array */}
+      {[...padded].map((digit, i) => (
+        <span
+          key={i}
+          className="inline-flex h-6 w-4.5 items-center justify-center rounded-[3px] border border-border bg-raised font-['Roboto'] text-[13px] font-[500] leading-none text-primary"
+        >
+          {digit}
+        </span>
+      ))}
+      {/* oxlint-enable no-array-index-key */}
+    </div>
+  )
+}
+
 interface SiteFooterProps {
   data: SiteFooterData
   globalPresenceCount?: number
@@ -232,6 +260,7 @@ function SiteFooterContent({
                 )
               })}
             </div>
+            {data.totalVisits > 0 && <VisitCounter count={data.totalVisits} />}
           </div>
           <div className="hidden flex-col items-end gap-3 text-right text-[14px] text-primary opacity-(--opacity-soft) md:flex">
             <FooterWorldMap

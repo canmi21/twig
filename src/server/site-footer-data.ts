@@ -3,6 +3,7 @@
 import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
 import { getAuth } from './better-auth'
 import { getPresenceCount } from './presence-count'
+import { getPresence } from './platform'
 import { FOOTER_MAP_SPEED_DEG_PER_SEC } from '~/components/footer-world-map'
 
 const SITE_STARTED_AT = '2024-10-11T06:24:59+08:00'
@@ -18,6 +19,7 @@ export interface SiteFooterData {
   worldMapLatCenter: number
   visitorLat: number | null
   visitorLon: number | null
+  totalVisits: number
 }
 
 function clampWorldMapLatCenter(lat: number): number {
@@ -67,7 +69,22 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     (session?.user.name as string | undefined) ||
     (session?.user.email as string | undefined) ||
     'Guest'
-  const presence = await getPresenceCount({ data: {} })
+  const [presence, visitResult] = await Promise.all([
+    getPresenceCount({ data: {} }),
+    (async () => {
+      try {
+        const binding = getPresence()
+        const id = binding.idFromName('global')
+        const stub = binding.get(id)
+        const res = await stub.fetch('https://do-internal/visit', {
+          method: 'POST',
+        })
+        return (await res.json()) as { totalVisits: number }
+      } catch {
+        return { totalVisits: 0 }
+      }
+    })(),
+  ])
   const worldMapOffset =
     ((((now / 1000) * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) + 360) % 360
   const visitor = getVisitorCoords()
@@ -81,5 +98,6 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     worldMapLatCenter: visitor.latCenter,
     visitorLat: visitor.lat,
     visitorLon: visitor.lon,
+    totalVisits: visitResult.totalVisits,
   }
 }
