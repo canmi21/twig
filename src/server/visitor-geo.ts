@@ -1,6 +1,5 @@
 /* src/server/visitor-geo.ts */
 
-import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { getPresence } from '~/server/platform'
 import type { VisitorGeo } from '~/server/presence'
@@ -27,25 +26,23 @@ function getCurrentGeo(): VisitorGeo {
 
 /** Swap last visitor geo: returns the previously stored geo and
  *  overwrites it with the current request's geo. */
-export const swapVisitorGeo = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<VisitorGeo> => {
-    const current = getCurrentGeo()
+export async function swapVisitorGeo(): Promise<VisitorGeo> {
+  const current = getCurrentGeo()
 
-    try {
-      const binding = getPresence()
-      const id = binding.idFromName('global')
-      const stub = binding.get(id)
+  try {
+    const binding = getPresence()
+    const id = binding.idFromName('global')
+    const stub = binding.get(id)
 
-      const res = await stub.fetch('https://do-internal/last-geo', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(current),
-      })
-      const previous = (await res.json()) as VisitorGeo | null
-      return previous ?? current
-    } catch {
-      // DO not available in local dev
-      return current
-    }
-  },
-)
+    const res = await stub.fetch('https://do-internal/last-geo', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(current),
+    })
+    const previous = (await res.json()) as VisitorGeo | null
+    return previous ?? current
+  } catch {
+    // DO not available in local dev
+    return current
+  }
+}
