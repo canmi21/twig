@@ -1,22 +1,70 @@
 /* src/routes/index.tsx */
 
-import { type CSSProperties, useEffect, useMemo, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { MailLine, RssLine, SocialXLine } from '@mingcute/react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
   getRandomSentence,
   type RandomSentence,
 } from '~/lib/sentences/hitokoto'
 import { Navbar } from '~/components/navbar'
 import { SiteFooter } from '~/components/site-footer'
-import { getEmailOwner } from '~/server/platform'
+import { getCache, getEmailOwner } from '~/server/platform'
 import {
   getSiteFooterData,
   type SiteFooterData,
 } from '~/server/site-footer-data'
 import { swapVisitorGeo } from '~/server/visitor-geo'
 import type { VisitorGeo } from '~/server/presence'
+import {
+  readPostIndex,
+  readPostKv,
+  type PostIndexEntry,
+} from '~/lib/storage/kv'
+import { formatDateShort } from '~/lib/utils/date'
+
+const HOME_RECENT_POSTS_LIMIT = 5
+const HOME_PREVIEW_MAX_CHARS = 140
+const HOME_HERO_CORNER_HOVER_X_PX = 190
+const HOME_HERO_CORNER_HOVER_Y_PX = 116
+const HOME_HERO_CORNER_RIGHT_HOVER_X_PX = 260
+
+type HomeHeroCorner = 'top-left' | 'bottom-left' | 'bottom-right'
+
+const homeHeroCornerPositionClass: Record<HomeHeroCorner, string> = {
+  'top-left': 'top-5 left-6',
+  'bottom-left': 'bottom-5 left-6',
+  'bottom-right': 'right-6 bottom-5',
+}
+
+interface HomeRecentPost {
+  slug: string
+  title: string
+  category?: string
+  description?: string
+  preview: string
+  createdAt: string
+  tags?: string[]
+}
+
+function extractTextPreview(html: string, maxChars: number): string {
+  const plain = html
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (plain.length <= maxChars) return plain
+  return `${plain.slice(0, maxChars).trimEnd()}…`
+}
 
 interface HomeData {
   email: string
@@ -24,15 +72,49 @@ interface HomeData {
   footer: SiteFooterData
   geo: VisitorGeo
   tileHeat: Record<string, number>
+  recentPosts: HomeRecentPost[]
+  totalPosts: number
+}
+
+function sortPostsByDateDesc(posts: PostIndexEntry[]): PostIndexEntry[] {
+  return posts.toSorted(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )
 }
 
 const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
-  const [ownerEmail, sentence, footer, visitorResult] = await Promise.all([
-    Promise.resolve(getEmailOwner()),
-    getRandomSentence().catch(() => null),
-    getSiteFooterData(),
-    swapVisitorGeo(),
-  ])
+  const [ownerEmail, sentence, footer, visitorResult, postIndex] =
+    await Promise.all([
+      Promise.resolve(getEmailOwner()),
+      getRandomSentence().catch(() => null),
+      getSiteFooterData(),
+      swapVisitorGeo(),
+      readPostIndex(getCache()).catch(() => [] as PostIndexEntry[]),
+    ])
+
+  const published = postIndex.filter((p) => p.published)
+  const topPosts = sortPostsByDateDesc(published).slice(
+    0,
+    HOME_RECENT_POSTS_LIMIT,
+  )
+
+  const cache = getCache()
+  const recentPosts: HomeRecentPost[] = await Promise.all(
+    topPosts.map(async (p) => {
+      const full = await readPostKv(cache, p.slug).catch(() => null)
+      return {
+        slug: p.slug,
+        title: p.title,
+        category: p.category,
+        description: p.description,
+        preview: full
+          ? extractTextPreview(full.html, HOME_PREVIEW_MAX_CHARS)
+          : '',
+        createdAt: p.createdAt,
+        tags: p.tags,
+      }
+    }),
+  )
 
   return {
     email: ownerEmail,
@@ -40,6 +122,8 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
     footer,
     geo: visitorResult.geo,
     tileHeat: visitorResult.tiles,
+    recentPosts,
+    totalPosts: published.length,
   }
 })
 
@@ -216,10 +300,7 @@ function HomeClock() {
   }, [])
 
   return (
-    <span
-      className="text-[13px] text-primary opacity-(--opacity-muted)"
-      suppressHydrationWarning
-    >
+    <span className="text-[13px] text-primary" suppressHydrationWarning>
       {formatUtc8Time(now)}
     </span>
   )
@@ -258,8 +339,171 @@ function HomeVisitorGeo({ geo }: { geo: VisitorGeo }) {
   return <span className="text-[13px] text-primary">{label}</span>
 }
 
+function HomeHeroCornerLabel({
+  corner,
+  activeCorner,
+  shouldReduceMotion,
+  children,
+}: {
+  corner: HomeHeroCorner
+  activeCorner: HomeHeroCorner | null
+  shouldReduceMotion: boolean
+  children: ReactNode
+}) {
+  const isActive = activeCorner === corner
+  const hiddenOffset =
+    corner === 'top-left'
+      ? { x: -4, y: -4 }
+      : corner === 'bottom-left'
+        ? { x: -4, y: 4 }
+        : { x: 4, y: 4 }
+
+  return (
+    <motion.div
+      aria-hidden={!isActive}
+      data-home-hero-corner={corner}
+      initial={false}
+      animate={
+        shouldReduceMotion
+          ? { opacity: isActive ? 1 : 0 }
+          : {
+              opacity: isActive ? 1 : 0,
+              x: isActive ? 0 : hiddenOffset.x,
+              y: isActive ? 0 : hiddenOffset.y,
+            }
+      }
+      transition={{ duration: shouldReduceMotion ? 0 : 0.16, ease: 'easeOut' }}
+      className={`pointer-events-none absolute z-20 ${homeHeroCornerPositionClass[corner]}`}
+    >
+      <div className="opacity-(--opacity-muted)">{children}</div>
+    </motion.div>
+  )
+}
+
+function formatPostMeta(iso: string): string {
+  const d = new Date(iso)
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'short' })
+  return `${formatDateShort(iso)} · ${weekday}`
+}
+
+function HomeRecentPosts({
+  posts,
+  totalPosts,
+}: {
+  posts: HomeRecentPost[]
+  totalPosts: number
+}) {
+  const shouldReduceMotion = useReducedMotion() === true
+  const [hoveredPostSlug, setHoveredPostSlug] = useState<string | null>(null)
+
+  return (
+    <section aria-label="Recent posts" className="border-t border-border">
+      <div className="mx-auto w-full max-w-180 px-5 py-20">
+        <div className="mb-6 flex items-baseline justify-between">
+          <h2
+            className="text-[18px] font-[620] text-primary"
+            style={heroTitleStyle}
+          >
+            Recent
+            <span className="ml-2 text-[13px] font-[450] text-tertiary">
+              {totalPosts} total
+            </span>
+          </h2>
+          <Link
+            to="/posts"
+            className="text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+          >
+            View all →
+          </Link>
+        </div>
+        <ul className="space-y-1" onMouseLeave={() => setHoveredPostSlug(null)}>
+          {posts.map((post) => (
+            <li key={post.slug}>
+              <Link
+                to="/posts/$category/$slug"
+                params={{
+                  category: post.category ?? 'uncategorized',
+                  slug: post.slug,
+                }}
+                onFocus={() => setHoveredPostSlug(post.slug)}
+                onMouseEnter={() => setHoveredPostSlug(post.slug)}
+                className="relative -mx-3 block rounded-[6px] p-3 text-primary transition-colors duration-140 hover:text-primary"
+              >
+                {hoveredPostSlug === post.slug && (
+                  <motion.span
+                    layoutId={
+                      shouldReduceMotion ? undefined : 'home-recent-post-hover'
+                    }
+                    className="pointer-events-none absolute inset-0 rounded-[6px] bg-raised/60"
+                    transition={{
+                      type: 'spring',
+                      stiffness: 420,
+                      damping: 32,
+                    }}
+                  />
+                )}
+                <motion.div
+                  initial={false}
+                  animate={
+                    shouldReduceMotion || hoveredPostSlug !== post.slug
+                      ? { x: 0 }
+                      : { x: 4 }
+                  }
+                  transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+                  className="relative"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="truncate text-[15px] font-medium">
+                      {post.title}
+                    </h3>
+                    {post.createdAt && (
+                      <time
+                        dateTime={post.createdAt}
+                        className="shrink-0 text-[12px] text-tertiary"
+                      >
+                        {formatPostMeta(post.createdAt)}
+                      </time>
+                    )}
+                  </div>
+                  {post.description && (
+                    <p className="mt-1 line-clamp-1 text-[13px] text-secondary">
+                      {post.description}
+                    </p>
+                  )}
+                  {post.preview && (
+                    <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-tertiary opacity-(--opacity-muted)">
+                      {post.preview}
+                    </p>
+                  )}
+                  {(post.category || (post.tags && post.tags.length > 0)) && (
+                    <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[12px] text-tertiary">
+                      {post.category && (
+                        <span className="text-primary capitalize opacity-(--opacity-muted)">
+                          {post.category}
+                        </span>
+                      )}
+                      {post.tags?.map((tag) => (
+                        <span key={tag} className="capitalize">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
 function HomePage() {
   const home = Route.useLoaderData()
+  const shouldReduceMotion = useReducedMotion() === true
+  const [activeHeroCorner, setActiveHeroCorner] =
+    useState<HomeHeroCorner | null>(null)
   const socialLinks = [
     ...baseSocialLinks,
     {
@@ -279,11 +523,38 @@ function HomePage() {
       iconClassName: 'size-[16.5px]',
     },
   ] as const
+
+  const handleHeroMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    const nearTop = y <= HOME_HERO_CORNER_HOVER_Y_PX
+    const nearBottom = y >= rect.height - HOME_HERO_CORNER_HOVER_Y_PX
+    const nearLeft = x <= HOME_HERO_CORNER_HOVER_X_PX
+    const nearRight = x >= rect.width - HOME_HERO_CORNER_RIGHT_HOVER_X_PX
+    const nextCorner: HomeHeroCorner | null =
+      nearTop && nearLeft
+        ? 'top-left'
+        : nearBottom && nearLeft
+          ? 'bottom-left'
+          : nearBottom && nearRight
+            ? 'bottom-right'
+            : null
+
+    setActiveHeroCorner((current) =>
+      current === nextCorner ? current : nextCorner,
+    )
+  }
+
   return (
     <>
-      <Navbar left={<HomeClock />} />
+      <Navbar />
       <div className="flex min-h-dvh flex-col">
-        <div className="relative grid min-h-svh grid-rows-[1fr_auto_1fr] items-center px-5">
+        <div
+          className="relative grid min-h-svh grid-rows-[1fr_auto_1fr] items-center px-5"
+          onMouseLeave={() => setActiveHeroCorner(null)}
+          onMouseMove={handleHeroMouseMove}
+        >
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute inset-0" style={gridMaskStyle} />
             <div className="absolute" style={gridVeilStyle} />
@@ -345,12 +616,27 @@ function HomePage() {
               </div>
             </div>
           </div>
-          <div className="absolute bottom-5 left-6 opacity-(--opacity-muted)">
+          <HomeHeroCornerLabel
+            corner="top-left"
+            activeCorner={activeHeroCorner}
+            shouldReduceMotion={shouldReduceMotion}
+          >
+            <HomeClock />
+          </HomeHeroCornerLabel>
+          <HomeHeroCornerLabel
+            corner="bottom-left"
+            activeCorner={activeHeroCorner}
+            shouldReduceMotion={shouldReduceMotion}
+          >
             <HomeResolution />
-          </div>
-          <div className="absolute right-6 bottom-5 opacity-(--opacity-muted)">
+          </HomeHeroCornerLabel>
+          <HomeHeroCornerLabel
+            corner="bottom-right"
+            activeCorner={activeHeroCorner}
+            shouldReduceMotion={shouldReduceMotion}
+          >
             <HomeVisitorGeo geo={home.geo} />
-          </div>
+          </HomeHeroCornerLabel>
           {home.sentence ? (
             <HomeSentence
               key={`${home.sentence.hitokoto}:${home.sentence.fromWho}`}
@@ -358,6 +644,12 @@ function HomePage() {
             />
           ) : null}
         </div>
+        {home.recentPosts.length > 0 && (
+          <HomeRecentPosts
+            posts={home.recentPosts}
+            totalPosts={home.totalPosts}
+          />
+        )}
         <SiteFooter data={home.footer} tileHeat={home.tileHeat} />
       </div>
     </>

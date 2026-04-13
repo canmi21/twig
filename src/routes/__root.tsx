@@ -94,8 +94,11 @@ function RootComponent() {
 
 function SentryFallback() {
   return (
-    <div className="flex h-screen items-center justify-center">
-      <span className="text-sm text-secondary">Something went wrong.</span>
+    <div className="flex h-screen items-center justify-center px-5 text-center text-sm/relaxed text-secondary">
+      <div>
+        <p>Unexpected client behavior. Please refresh the page.</p>
+        <p>If it keeps happening, contact t@canmi.icu.</p>
+      </div>
     </div>
   )
 }
