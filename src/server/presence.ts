@@ -43,6 +43,10 @@ export interface GeoSwapResponse {
   tiles: Record<string, number>
 }
 
+interface GeoTilesResponse {
+  tiles: Record<string, number>
+}
+
 const LAST_GEO_KEY = 'last-geo'
 const VISIT_COUNT_KEY = 'visit-count'
 const TILE_PREFIX = 'tile:'
@@ -76,6 +80,13 @@ export class actor extends DurableObject<Record<string, unknown>> {
       return Response.json({ totalVisits: next })
     }
 
+    // Read current heat tiles without mutating visitor state
+    if (url.pathname === '/tiles') {
+      return Response.json({
+        tiles: await this.readTiles(),
+      } satisfies GeoTilesResponse)
+    }
+
     // Swap last visitor geo + increment heat tile.
     // Atomic within a single DO instance — no race conditions.
     if (url.pathname === '/last-geo' && request.method === 'POST') {
@@ -100,17 +111,9 @@ export class actor extends DurableObject<Record<string, unknown>> {
       }
 
       // Return all heat tiles (only non-zero entries stored)
-      const tileEntries = await this.ctx.storage.list<number>({
-        prefix: TILE_PREFIX,
-      })
-      const tiles: Record<string, number> = {}
-      for (const [key, count] of tileEntries) {
-        tiles[key.slice(TILE_PREFIX.length)] = count
-      }
-
       return Response.json({
         previousGeo: stored ?? null,
-        tiles,
+        tiles: await this.readTiles(),
       } satisfies GeoSwapResponse)
     }
 
@@ -217,5 +220,16 @@ export class actor extends DurableObject<Record<string, unknown>> {
         // Connection already closed
       }
     }
+  }
+
+  private async readTiles(): Promise<Record<string, number>> {
+    const tileEntries = await this.ctx.storage.list<number>({
+      prefix: TILE_PREFIX,
+    })
+    const tiles: Record<string, number> = {}
+    for (const [key, count] of tileEntries) {
+      tiles[key.slice(TILE_PREFIX.length)] = count
+    }
+    return tiles
   }
 }

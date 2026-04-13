@@ -20,6 +20,7 @@ export interface SiteFooterData {
   visitorLat: number | null
   visitorLon: number | null
   totalVisits: number
+  tileHeat: Record<string, number>
 }
 
 function clampWorldMapLatCenter(lat: number): number {
@@ -69,7 +70,7 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     (session?.user.name as string | undefined) ||
     (session?.user.email as string | undefined) ||
     'Guest'
-  const [presence, visitResult] = await Promise.all([
+  const [presence, visitResult, tileResult] = await Promise.all([
     getPresenceCount({ data: {} }),
     (async () => {
       try {
@@ -82,6 +83,17 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
         return (await res.json()) as { totalVisits: number }
       } catch {
         return { totalVisits: 0 }
+      }
+    })(),
+    (async () => {
+      try {
+        const binding = getPresence()
+        const id = binding.idFromName('global')
+        const stub = binding.get(id)
+        const res = await stub.fetch('https://do-internal/tiles')
+        return (await res.json()) as { tiles: Record<string, number> }
+      } catch {
+        return { tiles: {} }
       }
     })(),
   ])
@@ -99,5 +111,6 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     visitorLat: visitor.lat,
     visitorLon: visitor.lon,
     totalVisits: visitResult.totalVisits,
+    tileHeat: tileResult.tiles,
   }
 }

@@ -143,7 +143,13 @@ const footerLinks = [
   },
 ] as const
 
-function VisitCounter({ count }: { count: number }) {
+export function VisitCounter({
+  count,
+  className,
+}: {
+  count: number
+  className?: string
+}) {
   const padded = useMemo(() => {
     const s = String(count)
     return s.padStart(Math.max(6, s.length), '0')
@@ -151,7 +157,7 @@ function VisitCounter({ count }: { count: number }) {
 
   return (
     <div
-      className="mt-3 flex items-center gap-[3px]"
+      className={`flex items-center gap-[3px] ${className ?? ''}`}
       aria-label={`Total visits: ${count}`}
     >
       {/* Static digit boxes — count never changes within a single render,
@@ -181,17 +187,19 @@ export function SiteFooter({
   globalPresenceCount,
   tileHeat,
 }: SiteFooterProps) {
+  const resolvedTileHeat = tileHeat ?? data.tileHeat
+
   if (globalPresenceCount != null) {
     return (
       <SiteFooterContent
         data={data}
         globalPresenceCount={globalPresenceCount}
-        tileHeat={tileHeat}
+        tileHeat={resolvedTileHeat}
       />
     )
   }
 
-  return <LiveSiteFooter data={data} tileHeat={tileHeat} />
+  return <LiveSiteFooter data={data} tileHeat={resolvedTileHeat} />
 }
 
 function LiveSiteFooter({
@@ -260,7 +268,6 @@ function SiteFooterContent({
                 )
               })}
             </div>
-            {data.totalVisits > 0 && <VisitCounter count={data.totalVisits} />}
           </div>
           <div className="hidden flex-col items-end gap-3 text-right text-[14px] text-primary opacity-(--opacity-soft) md:flex">
             <FooterWorldMap

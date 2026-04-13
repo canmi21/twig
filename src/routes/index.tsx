@@ -17,7 +17,7 @@ import {
   type RandomSentence,
 } from '~/lib/sentences/hitokoto'
 import { Navbar } from '~/components/navbar'
-import { SiteFooter } from '~/components/site-footer'
+import { SiteFooter, VisitCounter } from '~/components/site-footer'
 import { getCache, getEmailOwner } from '~/server/platform'
 import {
   getSiteFooterData,
@@ -389,9 +389,11 @@ function formatPostMeta(iso: string): string {
 function HomeRecentPosts({
   posts,
   totalPosts,
+  totalVisits,
 }: {
   posts: HomeRecentPost[]
   totalPosts: number
+  totalVisits: number
 }) {
   const shouldReduceMotion = useReducedMotion() === true
   const [hoveredPostSlug, setHoveredPostSlug] = useState<string | null>(null)
@@ -494,6 +496,9 @@ function HomeRecentPosts({
             </li>
           ))}
         </ul>
+        {totalVisits > 0 && (
+          <VisitCounter count={totalVisits} className="mt-6" />
+        )}
       </div>
     </section>
   )
@@ -648,6 +653,7 @@ function HomePage() {
           <HomeRecentPosts
             posts={home.recentPosts}
             totalPosts={home.totalPosts}
+            totalVisits={home.footer.totalVisits}
           />
         )}
         <SiteFooter data={home.footer} tileHeat={home.tileHeat} />
