@@ -11,7 +11,6 @@ export const Route = createFileRoute('/robots.txt')({
           '# https://www.robotstxt.org/robotstxt.html',
           'User-agent: *',
           'Disallow: /@/',
-          'Disallow: /api/',
           'Disallow: /cgi-bin/',
           'Disallow: /cdn-cgi/',
           `Sitemap: ${getPublicUrl()}/sitemap.xml`,
