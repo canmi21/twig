@@ -184,6 +184,11 @@ const ITEMS: SlashItem[] = [
       fields: [
         { name: 'repo', label: 'Repository', placeholder: 'owner/repo' },
         { name: 'ref', label: 'Ref', placeholder: 'branch (optional)' },
+        {
+          name: 'align',
+          label: 'Align',
+          placeholder: 'left | center | right',
+        },
       ],
     },
     action: (_ctx, view) =>

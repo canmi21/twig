@@ -74,7 +74,7 @@ export async function generateOgImageResponse(
           display: 'flex',
           flexDirection: 'column',
           gap: 16,
-          maxWidth: 1000,
+          maxWidth: 1056,
         }}
       >
         <div
