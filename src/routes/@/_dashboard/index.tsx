@@ -1,6 +1,6 @@
 /* src/routes/@/_dashboard/index.tsx */
 
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouteContext } from '@tanstack/react-router'
 import { fetchDashboardOverview } from '~/server/dashboard'
 
 export const Route = createFileRoute('/@/_dashboard/')({
@@ -8,10 +8,11 @@ export const Route = createFileRoute('/@/_dashboard/')({
   component: OverviewPage,
 })
 
-function formatDate(iso: string): string {
+function formatOverviewDate(iso: string, timeZone: string): string {
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
+    timeZone,
   })
 }
 
@@ -29,6 +30,7 @@ function Stat({ value, label }: { value: number; label: string }) {
 function OverviewPage() {
   const { postStats, commentStats, recentPosts, recentComments, userCount } =
     Route.useLoaderData()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
 
   return (
     <div>
@@ -89,7 +91,7 @@ function OverviewPage() {
                         </span>
                       </td>
                       <td className="px-3 py-2 text-right text-[12px] text-primary opacity-(--opacity-muted)">
-                        {formatDate(post.updatedAt)}
+                        {formatOverviewDate(post.updatedAt, siteTimezone)}
                       </td>
                     </tr>
                   ))}

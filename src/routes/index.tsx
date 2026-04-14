@@ -7,8 +7,9 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { MailLine, RssLine, SocialXLine } from '@mingcute/react'
 import { motion, useReducedMotion } from 'motion/react'
@@ -274,34 +275,52 @@ const baseSocialLinks = [
   },
 ] as const
 
-function getUtc8Date() {
-  // Reliable UTC+8: take UTC ms and shift by 8 hours, then wrap in Date.
-  const now = new Date()
-  return new Date(
-    now.getTime() + 8 * 3600_000 + now.getTimezoneOffset() * 60_000,
+// Module-scoped snapshot keeps `useSyncExternalStore`'s `getSnapshot` cheap
+// and stable: the value only changes when the interval ticks via `subscribe`,
+// so React reads a consistent number across consecutive snapshot calls and
+// never tears or warns about returning a fresh value each render.
+let cachedClockSnapshot = 0
+
+function subscribeClock(notify: () => void) {
+  cachedClockSnapshot = Date.now()
+  notify()
+  const id = setInterval(() => {
+    cachedClockSnapshot = Date.now()
+    notify()
+  }, 1000)
+  return () => clearInterval(id)
+}
+
+function getClockSnapshot() {
+  return cachedClockSnapshot
+}
+
+// Server snapshot is `0` so SSR markup is deterministic and the first client
+// render matches before the subscription activates.
+function getClockServerSnapshot() {
+  return 0
+}
+
+function HomeClock({ timeZone }: { timeZone: string }) {
+  const ts = useSyncExternalStore(
+    subscribeClock,
+    getClockSnapshot,
+    getClockServerSnapshot,
   )
-}
 
-function formatUtc8Time(d: Date) {
-  const h = d.getHours()
-  const m = d.getMinutes()
-  const s = d.getSeconds()
-  const suffix = h >= 12 ? 'PM' : 'AM'
-  const h12 = h % 12 || 12
-  return `${h12}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} ${suffix}`
-}
-
-function HomeClock() {
-  const [now, setNow] = useState(getUtc8Date)
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(getUtc8Date()), 1000)
-    return () => clearInterval(id)
-  }, [])
+  if (ts === 0) {
+    return <span className="text-[13px] text-primary">&nbsp;</span>
+  }
 
   return (
-    <span className="text-[13px] text-primary" suppressHydrationWarning>
-      {formatUtc8Time(now)}
+    <span className="text-[13px] text-primary">
+      {new Date(ts).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+        timeZone,
+      })}
     </span>
   )
 }
@@ -380,20 +399,22 @@ function HomeHeroCornerLabel({
   )
 }
 
-function formatPostMeta(iso: string): string {
+function formatPostMeta(iso: string, timeZone: string): string {
   const d = new Date(iso)
-  const weekday = d.toLocaleDateString('en-US', { weekday: 'short' })
-  return `${formatDateShort(iso)} · ${weekday}`
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'short', timeZone })
+  return `${formatDateShort(iso, timeZone)} · ${weekday}`
 }
 
 function HomeRecentPosts({
   posts,
   totalPosts,
   totalVisits,
+  timeZone,
 }: {
   posts: HomeRecentPost[]
   totalPosts: number
   totalVisits: number
+  timeZone: string
 }) {
   const shouldReduceMotion = useReducedMotion() === true
   const [hoveredPostSlug, setHoveredPostSlug] = useState<string | null>(null)
@@ -463,7 +484,7 @@ function HomeRecentPosts({
                         dateTime={post.createdAt}
                         className="shrink-0 text-[12px] text-tertiary"
                       >
-                        {formatPostMeta(post.createdAt)}
+                        {formatPostMeta(post.createdAt, timeZone)}
                       </time>
                     )}
                   </div>
@@ -506,6 +527,7 @@ function HomeRecentPosts({
 
 function HomePage() {
   const home = Route.useLoaderData()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
   const shouldReduceMotion = useReducedMotion() === true
   const [activeHeroCorner, setActiveHeroCorner] =
     useState<HomeHeroCorner | null>(null)
@@ -626,7 +648,7 @@ function HomePage() {
             activeCorner={activeHeroCorner}
             shouldReduceMotion={shouldReduceMotion}
           >
-            <HomeClock />
+            <HomeClock timeZone={siteTimezone} />
           </HomeHeroCornerLabel>
           <HomeHeroCornerLabel
             corner="bottom-left"
@@ -654,6 +676,7 @@ function HomePage() {
             posts={home.recentPosts}
             totalPosts={home.totalPosts}
             totalVisits={home.footer.totalVisits}
+            timeZone={siteTimezone}
           />
         )}
         <SiteFooter data={home.footer} tileHeat={home.tileHeat} />

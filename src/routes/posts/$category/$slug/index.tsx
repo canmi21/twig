@@ -3,7 +3,11 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 
 import { useLayoutEffect, useRef, useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  redirect,
+  useRouteContext,
+} from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getCache, getDb } from '~/server/platform'
 import { readPostKv } from '~/lib/storage/kv'
@@ -95,12 +99,17 @@ export const Route = createFileRoute('/posts/$category/$slug/')({
   component: PostPage,
 })
 
-function formatShortDate(iso: string, includeYear: boolean): string {
+function formatShortDate(
+  iso: string,
+  includeYear: boolean,
+  timeZone: string,
+): string {
   const d = new Date(iso)
   return d.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     ...(includeYear ? { year: 'numeric' as const } : {}),
+    timeZone,
   })
 }
 
@@ -180,6 +189,7 @@ function usePostNavigationRailTop(tocEntryCount: number) {
 
 function PostPage() {
   const { post, presence, footer } = Route.useLoaderData()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
 
   if (!post) {
     return (
@@ -243,6 +253,7 @@ function PostPage() {
               <ArticleHeader
                 title={frontmatter.title}
                 createdAt={frontmatter.created_at}
+                timeZone={siteTimezone}
                 html={post.html}
                 readers={live.article}
                 reads={presence.reads}
@@ -273,6 +284,7 @@ function PostPage() {
                           {formatShortDate(
                             frontmatter.updated_at,
                             shouldShowUpdatedYear,
+                            siteTimezone,
                           )}
                         </span>
                       )}

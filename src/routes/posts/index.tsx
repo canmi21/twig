@@ -1,6 +1,6 @@
 /* src/routes/posts/index.tsx */
 
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouteContext } from '@tanstack/react-router'
 import { Navbar } from '~/components/navbar'
 import { createServerFn } from '@tanstack/react-start'
 import { getCache } from '~/server/platform'
@@ -22,6 +22,7 @@ export const Route = createFileRoute('/posts/')({
 
 function PostsPage() {
   const { posts, footer } = Route.useLoaderData()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
 
   if (posts.length === 0) {
     return (
@@ -74,7 +75,7 @@ function PostsPage() {
                         dateTime={post.createdAt}
                         className="shrink-0 text-[13px] text-secondary"
                       >
-                        {formatDateShort(post.createdAt)}
+                        {formatDateShort(post.createdAt, siteTimezone)}
                       </time>
                     )}
                   </div>

@@ -8,6 +8,7 @@ export interface RootContext {
   publicUrl: string
   canonicalUrl: string
   initialTheme: 'light' | 'dark' | null
+  siteTimezone: string
 }
 
 export function getRouter() {
@@ -19,6 +20,7 @@ export function getRouter() {
       publicUrl: '',
       canonicalUrl: '',
       initialTheme: null,
+      siteTimezone: 'UTC',
     },
   })
 

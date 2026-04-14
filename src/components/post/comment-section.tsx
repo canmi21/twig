@@ -10,7 +10,7 @@ import {
   MonitorSmartphone,
   TabletSmartphone,
 } from 'lucide-react'
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link, useLocation, useRouteContext } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { getSession } from '~/server/session'
 import { fetchComments, submitComment } from '~/server/comments'
@@ -35,6 +35,7 @@ export function CommentSection({
   tweet?: string
 }) {
   const location = useLocation()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
   const [comments, setComments] = useState<Comment[]>([])
   const [session, setSession] = useState<{
     user: { id: string; name: string }
@@ -329,7 +330,7 @@ export function CommentSection({
                       {reply.userName}
                     </span>
                     <span className="text-[12px] text-primary opacity-(--opacity-muted)">
-                      {timeAgo(reply.createdAt)}
+                      {timeAgo(reply.createdAt, siteTimezone)}
                     </span>
                   </div>
                   <p className="mt-[0.24rem] text-[14.5px] leading-[1.66] text-primary">
@@ -421,7 +422,7 @@ export function CommentSection({
                       {comment.userName}
                     </span>
                     <span className="text-[12px] text-primary opacity-(--opacity-muted)">
-                      {timeAgo(comment.createdAt)}
+                      {timeAgo(comment.createdAt, siteTimezone)}
                     </span>
                   </div>
                   <p className="mt-[0.24rem] text-[14.5px] leading-[1.66] text-primary">

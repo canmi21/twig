@@ -20,6 +20,8 @@ interface MetadataPanelProps {
   onSlugChange: (slug: string) => void
   category: string
   onCategoryChange: (category: string) => void
+  /** IANA timezone for read-only timestamp display. */
+  timeZone: string
 }
 
 const labelClass = 'block text-xs font-medium text-secondary mb-1'
@@ -36,6 +38,7 @@ export function MetadataPanel({
   onSlugChange,
   category,
   onCategoryChange,
+  timeZone,
 }: MetadataPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -190,7 +193,9 @@ export function MetadataPanel({
                 <div className={fieldClass}>
                   <span className={labelClass}>Created</span>
                   <div className="text-xs text-secondary">
-                    {new Date(metadata.created_at).toLocaleString()}
+                    {new Date(metadata.created_at).toLocaleString('en-US', {
+                      timeZone,
+                    })}
                   </div>
                 </div>
               )}
@@ -198,7 +203,9 @@ export function MetadataPanel({
                 <div className={fieldClass}>
                   <span className={labelClass}>Updated</span>
                   <div className="text-xs text-secondary">
-                    {new Date(metadata.updated_at).toLocaleString()}
+                    {new Date(metadata.updated_at).toLocaleString('en-US', {
+                      timeZone,
+                    })}
                   </div>
                 </div>
               )}

@@ -1,7 +1,11 @@
 /* src/routes/@/_dashboard/users/index.tsx */
 
 import { useState, useRef } from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  useRouteContext,
+  useRouter,
+} from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { eq } from 'drizzle-orm'
@@ -112,10 +116,10 @@ export const Route = createFileRoute('/@/_dashboard/users/')({
   component: UsersList,
 })
 
-function formatUserDate(value: string): string {
+function formatUserDate(value: string, timeZone: string): string {
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return value
-  return formatDateShort(value)
+  return formatDateShort(value, timeZone)
 }
 
 interface EditState {
@@ -158,6 +162,7 @@ function imageToWebpBase64(file: File): Promise<string> {
 function UsersList() {
   const users = Route.useLoaderData()
   const router = useRouter()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
   const [loading, setLoading] = useState<string | null>(null)
   const [editing, setEditing] = useState<EditState | null>(null)
   const avatarRef = useRef<HTMLInputElement>(null)
@@ -343,7 +348,7 @@ function UsersList() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                      {formatUserDate(user.createdAt)}
+                      {formatUserDate(user.createdAt, siteTimezone)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-3">

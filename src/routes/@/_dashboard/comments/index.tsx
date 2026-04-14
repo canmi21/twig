@@ -1,7 +1,11 @@
 /* src/routes/@/_dashboard/comments/index.tsx */
 
 import { useState } from 'react'
-import { createFileRoute, useRouter } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  useRouteContext,
+  useRouter,
+} from '@tanstack/react-router'
 import {
   fetchPendingComments,
   fetchAllComments,
@@ -43,6 +47,7 @@ export const Route = createFileRoute('/@/_dashboard/comments/')({
 
 function CommentsPage() {
   const data = Route.useLoaderData()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('pending')
   const [loading, setLoading] = useState<string | null>(null)
@@ -170,7 +175,7 @@ function CommentsPage() {
                     </td>
                   )}
                   <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                    {formatDateShort(comment.createdAt)}
+                    {formatDateShort(comment.createdAt, siteTimezone)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">

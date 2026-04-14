@@ -44,7 +44,7 @@ function EditorPage() {
   const post = Route.useLoaderData()
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
-  const { cdnPublicUrl } = useRouteContext({ from: '__root__' })
+  const { cdnPublicUrl, siteTimezone } = useRouteContext({ from: '__root__' })
   const cdnPrefix = import.meta.env.DEV ? '/api/object' : cdnPublicUrl
 
   // --- State: metadata (separated from content) ---
@@ -220,6 +220,7 @@ function EditorPage() {
               <ArticleHeader
                 title={metadata.title ?? 'Untitled'}
                 createdAt={metadata.created_at}
+                timeZone={siteTimezone}
                 text={markdown}
               >
                 <PostShareActions cid={post.cid} tweet={metadata.tweet} />
@@ -257,6 +258,7 @@ function EditorPage() {
         onSlugChange={setSlug}
         category={category}
         onCategoryChange={setCategory}
+        timeZone={siteTimezone}
       />
     </div>
   )

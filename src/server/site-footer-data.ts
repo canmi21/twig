@@ -3,7 +3,7 @@
 import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
 import { getAuth } from './better-auth'
 import { getPresenceCount } from './presence-count'
-import { getPresence } from './platform'
+import { getPresence, getSiteTimezone } from './platform'
 import { FOOTER_MAP_SPEED_DEG_PER_SEC } from '~/components/footer-world-map'
 
 const SITE_STARTED_AT = '2024-10-11T06:24:59+08:00'
@@ -101,10 +101,17 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     ((((now / 1000) * FOOTER_MAP_SPEED_DEG_PER_SEC) % 360) + 360) % 360
   const visitor = getVisitorCoords()
 
+  const copyrightYear = Number(
+    new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      timeZone: getSiteTimezone(),
+    }).format(now),
+  )
+
   return {
     accountName,
     runtimeDays,
-    copyrightYear: new Date(now).getFullYear(),
+    copyrightYear,
     presenceCount: Math.max(1, presence.global + 1),
     worldMapOffset,
     worldMapLatCenter: visitor.latCenter,

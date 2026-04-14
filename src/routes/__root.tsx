@@ -10,7 +10,11 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import type { RootContext } from '~/router'
-import { getCdnPublicUrl, getPublicUrlFn } from '~/server/server-fns'
+import {
+  getCdnPublicUrl,
+  getPublicUrlFn,
+  getSiteTimezoneFn,
+} from '~/server/server-fns'
 import { getInitialTheme } from '~/server/get-initial-theme'
 import { themeScript } from '~/lib/theme/theme-script'
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/lib/content/metadata'
@@ -68,13 +72,21 @@ export const Route = createRootRouteWithContext<RootContext>()({
     ],
   }),
   beforeLoad: async ({ location }) => {
-    const [cdnPublicUrl, initialTheme, publicUrl] = await Promise.all([
-      getCdnPublicUrl(),
-      getInitialTheme(),
-      getPublicUrlFn(),
-    ])
+    const [cdnPublicUrl, initialTheme, publicUrl, siteTimezone] =
+      await Promise.all([
+        getCdnPublicUrl(),
+        getInitialTheme(),
+        getPublicUrlFn(),
+        getSiteTimezoneFn(),
+      ])
     const canonicalUrl = `${publicUrl}${location.pathname}`
-    return { cdnPublicUrl, publicUrl, canonicalUrl, initialTheme }
+    return {
+      cdnPublicUrl,
+      publicUrl,
+      canonicalUrl,
+      initialTheme,
+      siteTimezone,
+    }
   },
   component: RootComponent,
   notFoundComponent: NotFound,

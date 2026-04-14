@@ -29,6 +29,7 @@
     "EMAIL_OWNER": "t@canmi.icu",
     "EMAIL_FROM_NOREPLY": "noreply@canmi.net",
     "EMAIL_FROM_NOTIFY": "notify@canmi.net",
+    "SITE_TIMEZONE": "Asia/Shanghai",
   },
   "r2_buckets": [
     {

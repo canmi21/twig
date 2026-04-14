@@ -47,6 +47,7 @@ function formatCount(count: number): string {
 export function ArticleHeader({
   title,
   createdAt,
+  timeZone,
   html,
   text,
   readers,
@@ -55,6 +56,8 @@ export function ArticleHeader({
 }: {
   title: string
   createdAt?: string
+  /** IANA timezone used to format `createdAt` consistently across SSR and client. */
+  timeZone: string
   /** Compiled HTML — used to compute content count on post page */
   html?: string
   /** Raw text (e.g. markdown) — used to compute content count in editor */
@@ -81,7 +84,7 @@ export function ArticleHeader({
               className="inline-flex min-h-[0.8rem] items-center"
               dateTime={createdAt}
             >
-              {formatDate(createdAt)}
+              {formatDate(createdAt, timeZone)}
             </time>
           )}
           {contentCount && (

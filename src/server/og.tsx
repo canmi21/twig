@@ -2,6 +2,7 @@
 
 import { ImageResponse } from '@cloudflare/pages-plugin-vercel-og/api'
 import { SITE_TITLE } from '~/lib/content/metadata'
+import { getSiteTimezone } from './platform'
 
 const FONT_CDN_URL =
   'https://cdn.jsdelivr.net/gh/lxgw/lxgwwenkai@5dea838/fonts/TTF/LXGWWenKai-Regular.ttf'
@@ -33,6 +34,7 @@ function formatCreatedAt(createdAt?: string) {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    timeZone: getSiteTimezone(),
   })
 }
 

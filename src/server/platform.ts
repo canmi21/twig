@@ -22,6 +22,7 @@ interface Bindings {
   CF_ACCESS_AUD: string
   EMAIL_FROM_NOREPLY: string
   EMAIL_OWNER: string
+  SITE_TIMEZONE: string
   BETTER_AUTH_SECRET: string
   RESEND_API_KEY: string
   SKIP_OTP_VERIFY?: string
@@ -74,6 +75,11 @@ export function getEmailFromNoreply() {
 /** Admin email for notifications. */
 export function getEmailOwner() {
   return getBindings().EMAIL_OWNER
+}
+
+/** Canonical site timezone (IANA). Single source of truth for SSR/client date formatting. */
+export function getSiteTimezone() {
+  return getBindings().SITE_TIMEZONE
 }
 
 /** Better Auth secret for session signing. */

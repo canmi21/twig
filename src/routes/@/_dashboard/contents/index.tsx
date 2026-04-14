@@ -5,6 +5,7 @@ import {
   Link,
   useRouter,
   useNavigate,
+  useRouteContext,
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getDb, getCache, getBucket } from '~/server/platform'
@@ -146,6 +147,7 @@ function PostsList() {
   const { posts, readCounts } = Route.useLoaderData()
   const router = useRouter()
   const navigate = useNavigate()
+  const { siteTimezone } = useRouteContext({ from: '__root__' })
 
   async function handleNewPost() {
     const { cid } = await createDraft()
@@ -256,7 +258,7 @@ function PostsList() {
                     </button>
                   </td>
                   <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
-                    {formatDateShort(post.createdAt)}
+                    {formatDateShort(post.createdAt, siteTimezone)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button
