@@ -55,6 +55,17 @@ export function getAuth() {
             if (user.email === ownerEmail) {
               return { data: { ...user, role: 'admin' } }
             }
+            // Dev seed admin: the auto-login flow in src/routes/@/route.tsx
+            // signs in as this fixed email so the dashboard is usable
+            // without manual login. On a fresh DB the "first user"
+            // bootstrap below covers it, but after `just sync-remote`
+            // pulls prod data the seed account is no longer first and
+            // would otherwise get the default `user` role, locking the
+            // dashboard behind a 403. Pin it to admin in dev so the
+            // post-sync workflow keeps working.
+            if (isDev && user.email === 'admin@dev.local') {
+              return { data: { ...user, role: 'admin' } }
+            }
             // First registered user becomes admin (bootstrap)
             const db = getDb()
             const existing = await db
