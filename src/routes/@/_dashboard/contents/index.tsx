@@ -28,20 +28,24 @@ import {
   deletePostKv,
   writePostIndex,
   toPostIndexEntry,
+  parseTagsJson,
 } from '~/lib/storage/kv'
 import { formatDateShort } from '~/lib/utils/date'
 import { compile } from '~/lib/compiler/index'
 import { storageKey } from '~/lib/storage/storage-key'
 import { newCid } from '~/lib/utils/uuid'
 import { computeContentHash } from '~/lib/utils/hash'
+import { requireAdmin } from '~/server/admin-guard'
 import { getAllReadCounts, setReadCount } from '~/server/read-count-admin'
 
 const listPosts = createServerFn().handler(async () => {
+  await requireAdmin()
   const db = getDb()
   return getAllPosts(db)
 })
 
 const createDraft = createServerFn({ method: 'POST' }).handler(async () => {
+  await requireAdmin()
   const db = getDb()
   const cid = newCid()
   const contentHash = computeContentHash('')
@@ -59,22 +63,28 @@ const createDraft = createServerFn({ method: 'POST' }).handler(async () => {
 const togglePublished = createServerFn({ method: 'POST' })
   .inputValidator((input: { cid: string; published: boolean }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const db = getDb()
     const kv = getCache()
 
-    await setPublished(db, data.cid, data.published)
-
+    // Read the current row BEFORE flipping contents.published. The D1
+    // write is the commit marker and must not happen until the KV side
+    // is already in the right state for the new published value.
     const post = await getPostByCid(db, data.cid)
     if (!post) return
 
     if (data.published) {
+      // Publish: compile and write KV first so readers see the post the
+      // moment the D1 flag flips. If compile or writePostKv throws,
+      // contents.published stays at its old value and the user can
+      // retry from the dashboard without an inconsistent state.
       const compiled = await compile(post.content)
       await writePostKv(kv, post.slug, {
         frontmatter: {
           title: post.title,
           description: post.description ?? undefined,
           category: post.category ?? undefined,
-          tags: post.tags ? JSON.parse(post.tags) : undefined,
+          tags: parseTagsJson(post.tags),
           tweet: post.tweet ?? undefined,
           cid: post.cid,
           created_at: post.createdAt,
@@ -86,8 +96,13 @@ const togglePublished = createServerFn({ method: 'POST' })
         toc: compiled.toc,
         components: compiled.components,
       })
+      await setPublished(db, data.cid, true)
     } else {
+      // Unpublish: remove KV entry first so readers stop seeing the post
+      // before the D1 flag flips. If deletePostKv throws, the post stays
+      // published in both D1 and KV — a safe, retryable state.
       await deletePostKv(kv, post.slug)
+      await setPublished(db, data.cid, false)
     }
 
     await rebuildPostIndex(db, kv)
@@ -96,6 +111,7 @@ const togglePublished = createServerFn({ method: 'POST' })
 const rebuildPostKv = createServerFn({ method: 'POST' })
   .inputValidator((input: { cid: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const db = getDb()
     const kv = getCache()
 
@@ -110,7 +126,7 @@ const rebuildPostKv = createServerFn({ method: 'POST' })
         title: post.title,
         description: post.description ?? undefined,
         category: post.category ?? undefined,
-        tags: post.tags ? JSON.parse(post.tags) : undefined,
+        tags: parseTagsJson(post.tags),
         tweet: post.tweet ?? undefined,
         cid: post.cid,
         created_at: post.createdAt,
@@ -129,6 +145,7 @@ const rebuildPostKv = createServerFn({ method: 'POST' })
 const removePost = createServerFn({ method: 'POST' })
   .inputValidator((input: { cid: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const db = getDb()
     const kv = getCache()
     const r2 = getBucket()
