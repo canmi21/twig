@@ -5,6 +5,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
 import { getDb } from './platform'
 import { getAuth } from './better-auth'
+import { requireAdmin } from './admin-guard'
 import { notifyNewComment, notifyCommentReply } from './notify'
 import {
   createComment,
@@ -134,27 +135,32 @@ export const submitComment = createServerFn({ method: 'POST' })
   })
 
 export const fetchPendingComments = createServerFn().handler(async () => {
+  await requireAdmin()
   return getPendingComments(getDb())
 })
 
 export const fetchAllComments = createServerFn().handler(async () => {
+  await requireAdmin()
   return getAllComments(getDb())
 })
 
 export const approveComment = createServerFn({ method: 'POST' })
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     await updateCommentStatus(getDb(), data.id, 'approved')
   })
 
 export const rejectComment = createServerFn({ method: 'POST' })
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     await updateCommentStatus(getDb(), data.id, 'rejected')
   })
 
 export const removeComment = createServerFn({ method: 'POST' })
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     await deleteComment(getDb(), data.id)
   })
