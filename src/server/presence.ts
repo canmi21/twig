@@ -123,6 +123,25 @@ export class actor extends DurableObject<Record<string, unknown>> {
       return Response.json({ reads: value })
     }
 
+    // Admin action: force-close every live WebSocket. Clients reconnect
+    // through the use-presence backoff and re-init their counts, which
+    // is useful when ghost sockets from a historical bug are inflating
+    // the roster and you cannot reset the whole DO (geo + tile + visit
+    // data live here too).
+    if (url.pathname === '/presence-reset' && request.method === 'POST') {
+      const sockets = this.ctx.getWebSockets()
+      const closed = sockets.length
+      for (const ws of sockets) {
+        try {
+          ws.close(1000, 'presence-reset')
+        } catch {
+          // Already closing
+        }
+      }
+      this.broadcastCounts()
+      return Response.json({ closed })
+    }
+
     // Increment site-wide visit counter and return total
     if (url.pathname === '/visit' && request.method === 'POST') {
       const prev = (await this.ctx.storage.get<number>(VISIT_COUNT_KEY)) ?? 0

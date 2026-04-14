@@ -3,7 +3,7 @@
 import { count } from 'drizzle-orm'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import { getDb } from './platform'
+import { getDb, getPresence } from './platform'
 import { getAuth } from './better-auth'
 import { user } from '~/lib/database/auth-schema'
 import {
@@ -69,3 +69,15 @@ export const fetchSidebarData = createServerFn().handler(async () => {
   const db = getDb()
   return { pendingComments: await getPendingCommentCount(db) }
 })
+
+export const resetPresenceSockets = createServerFn({ method: 'POST' }).handler(
+  async (): Promise<{ closed: number }> => {
+    const binding = getPresence()
+    const id = binding.idFromName('global')
+    const stub = binding.get(id)
+    const res = await stub.fetch('https://do-internal/presence-reset', {
+      method: 'POST',
+    })
+    return (await res.json()) as { closed: number }
+  },
+)
