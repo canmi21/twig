@@ -26,7 +26,10 @@ describe('rebuild integration', () => {
   })
 
   async function seedPost(slug: string, title: string, content: string) {
-    const dir = resolve(env.postsDir, slug)
+    // pushCore derives category from the directory path, so every fixture
+    // has to live under a category dir. Hardcode 'dev' here since this
+    // suite only exercises category-agnostic rebuild behavior.
+    const dir = resolve(env.postsDir, 'dev', slug)
     await mkdir(dir, { recursive: true })
     const fm = stringifyYaml({ title, category: 'dev' }).trimEnd()
     await writeFile(

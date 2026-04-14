@@ -28,7 +28,11 @@ async function writePost(
   content: string,
   media?: Array<{ name: string; data: Buffer }>,
 ): Promise<void> {
-  const dir = resolve(postsDir, slug)
+  // scanPosts derives category from the directory path, so the fixture
+  // has to live at {postsDir}/{category}/{slug}/index.md for push to see
+  // it at all. The category field is still serialised into frontmatter
+  // for round-trip tests against pull.
+  const dir = resolve(postsDir, fm.category, slug)
   await mkdir(dir, { recursive: true })
   const header = `---\n${stringifyYaml(fm).trimEnd()}\n---`
   await writeFile(
@@ -144,7 +148,7 @@ describe('push integration', () => {
     })
 
     // Remove post-b
-    await rm(resolve(env.postsDir, 'post-b'), { recursive: true })
+    await rm(resolve(env.postsDir, 'dev', 'post-b'), { recursive: true })
     const result = await pushCore({
       db: env.db,
       r2: env.r2,
@@ -261,7 +265,7 @@ describe('push integration', () => {
     expect(refs.results).toHaveLength(2)
 
     // Delete one post, media should survive
-    await rm(resolve(env.postsDir, 'post-x'), { recursive: true })
+    await rm(resolve(env.postsDir, 'dev', 'post-x'), { recursive: true })
     await pushCore({
       db: env.db,
       r2: env.r2,
@@ -273,7 +277,7 @@ describe('push integration', () => {
     expect(mediaAfter1.results).toHaveLength(1)
 
     // Delete the other post, media should be cleaned up
-    await rm(resolve(env.postsDir, 'post-y'), { recursive: true })
+    await rm(resolve(env.postsDir, 'dev', 'post-y'), { recursive: true })
     await pushCore({
       db: env.db,
       r2: env.r2,
@@ -309,12 +313,14 @@ describe('push integration', () => {
   })
 
   test('throws PushValidationError on invalid post', async () => {
-    // Missing category (required field)
-    const dir = resolve(env.postsDir, 'bad-post')
+    // Empty title — required field. Category comes from the directory
+    // path now, so the post must live under {postsDir}/{category}/{slug}
+    // for scanPosts to pick it up and forward it to postSchema at all.
+    const dir = resolve(env.postsDir, 'dev', 'bad-post')
     await mkdir(dir, { recursive: true })
     await writeFile(
       resolve(dir, 'index.md'),
-      '---\ntitle: Bad\n---\n\nContent.\n',
+      '---\ntitle: ""\n---\n\nContent.\n',
       'utf-8',
     )
 

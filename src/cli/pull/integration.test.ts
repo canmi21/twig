@@ -58,13 +58,17 @@ describe('pull integration', () => {
     })
     expect(pullResult.exported).toBe(1)
 
-    // Check directory structure
-    const slugDirs = await readdir(pullDir)
+    // pullCore writes posts under {postsDir}/{category}/{slug}/ to mirror
+    // the layout push scans from. Verify the nested structure explicitly.
+    const topLevel = await readdir(pullDir)
+    expect(topLevel).toContain('dev')
+
+    const slugDirs = await readdir(resolve(pullDir, 'dev'))
     expect(slugDirs).toContain('test-post')
 
     // Check frontmatter
     const md = await readFile(
-      resolve(pullDir, 'test-post', 'index.md'),
+      resolve(pullDir, 'dev', 'test-post', 'index.md'),
       'utf-8',
     )
     expect(md).toContain('cid:')
@@ -76,15 +80,17 @@ describe('pull integration', () => {
 
     // Check media file
     const mediaFile = await readFile(
-      resolve(pullDir, 'test-post', `${mediaHash}.png`),
+      resolve(pullDir, 'dev', 'test-post', `${mediaHash}.png`),
     )
     expect(mediaFile).toEqual(mediaData)
   })
 
   test('clears existing directory before writing', async () => {
-    // Create stale file
+    // Seed a stale file inside the (to-be-wiped) pull directory. The
+    // path layout does not matter for the cleanup check; what matters is
+    // that the file exists before pullCore runs.
     const pullDir = resolve(env.tmpDir, 'pull-stale')
-    const staleDir = resolve(pullDir, 'old-post')
+    const staleDir = resolve(pullDir, 'old-category', 'old-post')
     await mkdir(staleDir, { recursive: true })
     await writeFile(resolve(staleDir, 'index.md'), 'stale', 'utf-8')
 
@@ -99,8 +105,12 @@ describe('pull integration', () => {
 
     await pullCore({ db: env.db, r2: env.r2, postsDir: pullDir })
 
-    const dirs = await readdir(pullDir)
-    expect(dirs).toEqual(['fresh-post'])
-    expect(dirs).not.toContain('old-post')
+    // After cleanup the top level only contains the new category dir.
+    const topLevel = await readdir(pullDir)
+    expect(topLevel).toEqual(['dev'])
+    expect(topLevel).not.toContain('old-category')
+
+    const slugDirs = await readdir(resolve(pullDir, 'dev'))
+    expect(slugDirs).toEqual(['fresh-post'])
   })
 })
