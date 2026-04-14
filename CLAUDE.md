@@ -67,6 +67,17 @@ Follow the rule in `~/.claude/CLAUDE.md`:
 - Add `Co-Authored-By: Claude {Opus|Sonnet|Haiku}-{VERSION} <noreply@anthropic.com>` **only** when the assistant materially contributed original code or design beyond direct instructions.
 - Do not add co-authorship for mechanical changes, one-shot user instructions, or simple commits.
 
+## Styling & color tokens
+
+- Tailwind v4 is wired via `@tailwindcss/vite` — no `tailwind.config.js`, no PostCSS.
+- All stylesheets live in `src/styles/`.
+- Global stylesheet entry: `src/styles/app.css`. It imports `tailwindcss`, then `./tokens.css`, declares the `dark` custom variant, and sets base `html` background/foreground. It is imported once from `src/routes/+layout.svelte`.
+- **All colors live in `src/styles/tokens.css`** as two layers:
+  - **Physical layer:** Tailwind's built-in palette (`var(--color-white)`, `var(--color-neutral-900)`, etc.). These are OKLCH and must not be touched.
+  - **Semantic layer:** project-owned tokens (`--color-background`, `--color-foreground`, `--color-border`, `--color-muted`, …). Light values go in `@theme`, dark overrides go in `.dark`.
+- **Hard rule:** project code (`.svelte`, `.ts`, `.css`) must **only** use the semantic layer (`bg-background`, `text-foreground`, `border-border`, `hover:bg-muted`, …). Never reach through to a raw Tailwind color utility (`bg-neutral-900`, `text-white`) and never hard-code hex values. If a needed semantic does not exist yet, add it to `src/styles/tokens.css` first.
+- Because `@theme` emits CSS variables at runtime, redefining a token inside `.dark` automatically flips every utility that references it — you should **not** need `dark:` prefixes on semantic utilities.
+
 ## Project layout notes
 
 - `src/routes/` — SvelteKit routes (file-based).

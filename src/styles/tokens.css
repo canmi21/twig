@@ -1,0 +1,13 @@
+@theme {
+	--color-background: var(--color-white);
+	--color-foreground: var(--color-neutral-900);
+	--color-border: var(--color-neutral-300);
+	--color-muted: var(--color-neutral-100);
+}
+
+.dark {
+	--color-background: var(--color-neutral-900);
+	--color-foreground: var(--color-neutral-100);
+	--color-border: var(--color-neutral-700);
+	--color-muted: var(--color-neutral-800);
+}
