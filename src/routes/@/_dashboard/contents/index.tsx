@@ -32,6 +32,7 @@ import { compile } from '~/lib/compiler/index'
 import { storageKey } from '~/lib/storage/storage-key'
 import { newCid } from '~/lib/utils/uuid'
 import { computeContentHash } from '~/lib/utils/hash'
+import { getAllReadCounts, setReadCount } from '~/server/read-count-admin'
 
 const listPosts = createServerFn().handler(async () => {
   const db = getDb()
@@ -131,12 +132,18 @@ async function rebuildPostIndex(db: ReturnType<typeof getDb>, kv: KVNamespace) {
 }
 
 export const Route = createFileRoute('/@/_dashboard/contents/')({
-  loader: () => listPosts(),
+  loader: async () => {
+    const [posts, readCounts] = await Promise.all([
+      listPosts(),
+      getAllReadCounts(),
+    ])
+    return { posts, readCounts: readCounts.counts }
+  },
   component: PostsList,
 })
 
 function PostsList() {
-  const posts = Route.useLoaderData()
+  const { posts, readCounts } = Route.useLoaderData()
   const router = useRouter()
   const navigate = useNavigate()
 
@@ -157,6 +164,20 @@ function PostsList() {
   async function handleDelete(cid: string) {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
     await removePost({ data: { cid } })
+    router.invalidate()
+  }
+
+  async function handleEditReads(cid: string, current: number) {
+    const input = window.prompt('Set read count:', String(current))
+    if (input == null) return
+    const trimmed = input.trim()
+    if (!trimmed) return
+    const parsed = Number(trimmed)
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      window.alert('Must be a non-negative number.')
+      return
+    }
+    await setReadCount({ data: { cid, reads: Math.floor(parsed) } })
     router.invalidate()
   }
 
@@ -197,6 +218,9 @@ function PostsList() {
                   Created
                 </th>
                 <th className="px-4 py-2.5 text-right text-[12px] font-[560] text-primary">
+                  Reads
+                </th>
+                <th className="px-4 py-2.5 text-right text-[12px] font-[560] text-primary">
                   Actions
                 </th>
               </tr>
@@ -233,6 +257,17 @@ function PostsList() {
                   </td>
                   <td className="px-4 py-3 text-[13px] text-primary opacity-(--opacity-muted)">
                     {formatDateShort(post.createdAt)}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleEditReads(post.cid, readCounts[post.cid] ?? 0)
+                      }
+                      className="cursor-pointer text-[13px] text-primary tabular-nums opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100"
+                    >
+                      {readCounts[post.cid] ?? 0}
+                    </button>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">

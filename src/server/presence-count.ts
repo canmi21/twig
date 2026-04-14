@@ -22,9 +22,13 @@ export const getPresenceCount = createServerFn({ method: 'GET' })
       if (data.cid) url.searchParams.set('cid', data.cid)
 
       const res = await stub.fetch(url.toString())
-      return (await res.json()) as { global: number; article: number }
+      return (await res.json()) as {
+        global: number
+        article: number
+        reads: number
+      }
     } catch {
       // DO may not be available in dev without wrangler
-      return { global: 0, article: 0 }
+      return { global: 0, article: 0, reads: 0 }
     }
   })

@@ -50,6 +50,7 @@ interface GeoTilesResponse {
 const LAST_GEO_KEY = 'last-geo'
 const VISIT_COUNT_KEY = 'visit-count'
 const TILE_PREFIX = 'tile:'
+const READ_COUNT_PREFIX = 'read-count:'
 
 // Exported as `actor` to match wrangler.jsonc class_name.
 // Cloudflare dashboard shows "taki-actor".
@@ -65,11 +66,50 @@ export class actor extends DurableObject<Record<string, unknown>> {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url)
 
-    // HTTP count query (used by SSR loaders)
+    // HTTP count query (used by SSR loaders).
+    // When cid is present, atomically increments the per-article read
+    // counter and returns the post-increment value. DO is single-threaded,
+    // so read-modify-write is naturally atomic.
     if (url.pathname === '/count') {
       const cid = url.searchParams.get('cid')
       const counts = await this.computeCounts(cid)
-      return Response.json(counts)
+      let reads = 0
+      if (cid) {
+        const key = `${READ_COUNT_PREFIX}${cid}`
+        const prev = (await this.ctx.storage.get<number>(key)) ?? 0
+        reads = prev + 1
+        await this.ctx.storage.put(key, reads)
+      }
+      return Response.json({ ...counts, reads })
+    }
+
+    // Bulk read of all per-article read counts (used by admin dashboard).
+    // Returns a map of cid -> count. Does not mutate state.
+    if (url.pathname === '/read-counts' && request.method === 'GET') {
+      const entries = await this.ctx.storage.list<number>({
+        prefix: READ_COUNT_PREFIX,
+      })
+      const counts: Record<string, number> = {}
+      for (const [key, value] of entries) {
+        counts[key.slice(READ_COUNT_PREFIX.length)] = value
+      }
+      return Response.json({ counts })
+    }
+
+    // Admin override for a single article's read count.
+    // Accepts any non-negative integer; clamps and floors the input.
+    if (url.pathname === '/read-count' && request.method === 'PUT') {
+      const cid = url.searchParams.get('cid')
+      if (!cid) return new Response('cid required', { status: 400 })
+      const body = (await request.json()) as { reads: unknown }
+      const raw =
+        typeof body.reads === 'number' ? body.reads : Number(body.reads)
+      if (!Number.isFinite(raw)) {
+        return new Response('invalid reads', { status: 400 })
+      }
+      const value = Math.max(0, Math.floor(raw))
+      await this.ctx.storage.put(`${READ_COUNT_PREFIX}${cid}`, value)
+      return Response.json({ reads: value })
     }
 
     // Increment site-wide visit counter and return total

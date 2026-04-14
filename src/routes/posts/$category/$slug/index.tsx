@@ -66,7 +66,7 @@ export const Route = createFileRoute('/posts/$category/$slug/')({
     const cid = post?.frontmatter.cid
     const presence = cid
       ? await getPresenceCount({ data: { cid } })
-      : { global: 0, article: 0 }
+      : { global: 0, article: 0, reads: 0 }
     return { post, presence, footer }
   },
   head: ({ loaderData, match }) => {
@@ -245,6 +245,7 @@ function PostPage() {
                 createdAt={frontmatter.created_at}
                 html={post.html}
                 readers={live.article}
+                reads={presence.reads}
               >
                 <PostShareActions
                   cid={frontmatter.cid}

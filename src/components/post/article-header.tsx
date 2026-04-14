@@ -1,6 +1,6 @@
 /* src/components/post/article-header.tsx */
 
-import { Eye, Type } from 'lucide-react'
+import { BookOpenText, Eye, Type } from 'lucide-react'
 import { formatDate } from '~/lib/utils/date'
 
 function stripHtml(html: string): string {
@@ -50,6 +50,7 @@ export function ArticleHeader({
   html,
   text,
   readers,
+  reads,
   children,
 }: {
   title: string
@@ -60,6 +61,8 @@ export function ArticleHeader({
   text?: string
   /** Live reader count from presence tracking */
   readers?: number
+  /** Cumulative read count from DO storage (SSR initial value) */
+  reads?: number
   children?: React.ReactNode
 }) {
   const source = html ?? text
@@ -85,6 +88,12 @@ export function ArticleHeader({
             <span className="inline-flex min-h-[0.8rem] items-center gap-[0.18rem] text-primary [&>svg]:block [&>svg]:flex-none">
               <Type className="size-[0.8rem]" strokeWidth={1.8} />
               <span>{contentCount}</span>
+            </span>
+          )}
+          {reads != null && reads > 0 && (
+            <span className="inline-flex min-h-[0.8rem] items-center gap-[0.18rem] text-primary [&>svg]:block [&>svg]:flex-none">
+              <BookOpenText className="size-[0.8rem]" strokeWidth={1.8} />
+              <span>{formatCount(reads)}</span>
             </span>
           )}
           {readers != null && readers > 0 && (
