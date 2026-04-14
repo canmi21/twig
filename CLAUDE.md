@@ -10,18 +10,22 @@ Project: twig — SvelteKit app targeting Cloudflare Workers (Workers + Static A
 - **Framework:** SvelteKit + TypeScript (strict)
 - **Local Workers emulator:** `wrangler dev` (bundles miniflare/workerd)
 - **Dead-code / unused-deps:** Knip
+- **Formatter:** Prettier (+ `prettier-plugin-svelte`, `prettier-plugin-tailwindcss`)
+- **Linter:** ESLint flat config (+ `typescript-eslint`, `eslint-plugin-svelte`, `eslint-config-prettier`)
 - **Git hooks:** Husky + commitlint (`commit-msg` only)
 
 ## Commands
 
-| Command           | Purpose                                               |
-| ----------------- | ----------------------------------------------------- |
-| `bun run dev`     | Vite dev server on `http://localhost:23315` (strict)  |
-| `bun run build`   | `wrangler types --check` + `vite build`               |
-| `bun run preview` | `wrangler dev` against built worker on port 4173      |
-| `bun run gen`     | Regenerate `worker-configuration.d.ts` from wrangler  |
-| `bun run check`   | Types + svelte-check                                  |
-| `bun run knip`    | Report unused files / exports / dependencies          |
+| Command           | Purpose                                              |
+| ----------------- | ---------------------------------------------------- |
+| `bun run dev`     | Vite dev server on `http://localhost:23315` (strict) |
+| `bun run build`   | `wrangler types --check` + `vite build`              |
+| `bun run preview` | `wrangler dev` against built worker on port 4173     |
+| `bun run gen`     | Regenerate `worker-configuration.d.ts` from wrangler |
+| `bun run check`   | Types + svelte-check                                 |
+| `bun run knip`    | Report unused files / exports / dependencies         |
+| `bun run format`  | Prettier write (formats in place — no `--check`)     |
+| `bun run lint`    | Prettier check + ESLint                              |
 
 Do **not** use `npm`, `pnpm`, `yarn`, or `bun` as a script runtime. Bun is the installer; all scripts execute under Node via shebang.
 
@@ -38,11 +42,13 @@ Default to **no comments**. Only write a comment when at least one of these is t
 2. A specific decision was made for a reason that is not visible in the code (trade-off, constraint, workaround for an upstream bug).
 3. A known issue / TODO links to an external reference (issue URL, RFC, spec section).
 
-Never explain *what* the code does when the name already says it. Never reference the current task / PR / caller ("used by X", "added for Y") — that rots.
+Never explain _what_ the code does when the name already says it. Never reference the current task / PR / caller ("used by X", "added for Y") — that rots.
 
 Keep each comment to one short line when possible. No multi-paragraph docstrings.
 
 ## Commit policy
+
+**Before every commit, run `bun run format`.** Always the write variant — do not run `prettier --check` or `bun run lint` as a gate, just let Prettier rewrite files in place and include the result in the commit. This keeps diffs clean and avoids commit-hook friction.
 
 Every commit **must** follow [Conventional Commits](https://www.conventionalcommits.org/).
 

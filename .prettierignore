@@ -1,0 +1,14 @@
+# Lockfiles
+bun.lock
+bun.lockb
+
+# Build artifacts
+.svelte-kit
+build
+.wrangler
+
+# Generated
+worker-configuration.d.ts
+
+# Public assets
+/public/

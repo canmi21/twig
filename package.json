@@ -1,36 +1,49 @@
 {
-  "name": "twig",
-  "private": true,
-  "version": "0.2.1",
-  "license": "AGPL-3.0-or-later",
-  "type": "module",
-  "engines": {
-    "node": ">=25"
-  },
-  "scripts": {
-    "dev": "vite dev",
-    "build": "wrangler types --check && vite build",
-    "preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
-    "prepare": "svelte-kit sync || true; husky",
-    "check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "gen": "wrangler types",
-    "knip": "knip"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.5.0",
-    "@sveltejs/adapter-cloudflare": "^7.2.8",
-    "@sveltejs/kit": "^2.57.1",
-    "@sveltejs/vite-plugin-svelte": "^7.0.0",
-    "@tailwindcss/vite": "^4.2.2",
-    "husky": "^9.1.7",
-    "knip": "^6.4.1",
-    "svelte": "^5.55.4",
-    "svelte-check": "^4.4.6",
-    "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.8",
-    "wrangler": "^4.82.2"
-  }
+	"name": "twig",
+	"private": true,
+	"version": "0.2.1",
+	"license": "AGPL-3.0-or-later",
+	"type": "module",
+	"engines": {
+		"node": ">=25"
+	},
+	"scripts": {
+		"dev": "vite dev",
+		"build": "wrangler types --check && vite build",
+		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
+		"prepare": "svelte-kit sync || true; husky",
+		"check": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"gen": "wrangler types",
+		"knip": "knip",
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write ."
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^20.5.0",
+		"@commitlint/config-conventional": "^20.5.0",
+		"@eslint/compat": "^2.0.4",
+		"@eslint/js": "^10.0.1",
+		"@sveltejs/adapter-cloudflare": "^7.2.8",
+		"@sveltejs/kit": "^2.57.1",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@tailwindcss/vite": "^4.2.2",
+		"@types/node": "^24",
+		"eslint": "^10.2.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-svelte": "^3.17.0",
+		"globals": "^17.4.0",
+		"husky": "^9.1.7",
+		"knip": "^6.4.1",
+		"prettier": "^3.8.1",
+		"prettier-plugin-svelte": "^3.5.1",
+		"prettier-plugin-tailwindcss": "^0.7.2",
+		"svelte": "^5.55.4",
+		"svelte-check": "^4.4.6",
+		"tailwindcss": "^4.2.2",
+		"typescript": "^6.0.2",
+		"typescript-eslint": "^8.58.1",
+		"vite": "^8.0.8",
+		"wrangler": "^4.82.2"
+	}
 }
