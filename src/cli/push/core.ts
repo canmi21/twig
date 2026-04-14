@@ -4,9 +4,13 @@ import { resolve, relative, extname } from 'node:path'
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { computeContentHash } from '../../lib/utils/hash'
-import { eq } from 'drizzle-orm'
 import type { Db } from '../../lib/database/index'
-import { getAllPosts, upsertPost, deletePost } from '../../lib/database/posts'
+import {
+  getAllPosts,
+  upsertPostMetadata,
+  finalizePostContent,
+  deletePost,
+} from '../../lib/database/posts'
 import {
   getMediaByHash,
   insertMedia,
@@ -16,7 +20,6 @@ import {
   deleteMedia,
   getMediaForPost,
 } from '../../lib/database/media'
-import { posts } from '../../lib/database/schema'
 import { storageKey } from '../../lib/storage/storage-key'
 import { mimeFromExt } from '../../lib/utils/mime'
 import { compile } from '../../lib/compiler/index'
@@ -307,40 +310,54 @@ async function executeAddOrUpdate(
   kv: KVNamespace,
   post: ScannedPost,
 ): Promise<void> {
-  const result = await upsertPost(db, {
+  // Phase A: reserve the row and write metadata only. Content and hash
+  // stay at their previous values (or empty strings for a brand new
+  // post) until every fallible step below has succeeded.
+  const result = await upsertPostMetadata(db, {
     slug: post.slug,
     title: post.frontmatter.title,
     description: post.frontmatter.description,
     category: post.category,
     tags: post.frontmatter.tags,
     tweet: post.frontmatter.tweet,
-    content: post.content,
-    contentHash: post.rawContentHash,
     cid: post.frontmatter.cid,
     createdAt: post.frontmatter.created_at,
-    updatedAt: post.frontmatter.updated_at,
-    published: post.frontmatter.published,
   })
 
+  // Phase B: upload media and rewrite in-content paths. Media inserts
+  // are idempotent (keyed by sha256), so retrying after a crash is safe.
   let finalContent = post.content
   if (post.mediaFiles.length > 0) {
     const replacements = await processMedia(db, r2, result.cid, post.mediaFiles)
     finalContent = replaceMediaRefs(post.content, replacements)
-    if (finalContent !== post.content) {
-      await db
-        .update(posts)
-        .set({ content: finalContent })
-        .where(eq(posts.cid, result.cid))
-    }
   }
 
+  // Phase C: compile the post. Pure CPU work; if this throws, no D1 or
+  // KV state has been touched since Phase A's metadata write and the
+  // next push run will re-enter this function because contentHash is
+  // still stale.
   const compiled = await compile(finalContent)
+
+  // Phase D: publish to KV. Readers hit KV directly, so this is the
+  // moment the new version becomes visible. If this throws we abort
+  // before flipping contentHash and the next run retries.
   await writePostKv(kv, post.slug, {
     frontmatter: post.frontmatter,
     html: compiled.html,
     text: compiled.text,
     toc: compiled.toc,
     components: compiled.components,
+  })
+
+  // Phase E: commit marker. Writing contentHash is the last step, so a
+  // mismatched hash in D1 is the unambiguous signal "this post needs to
+  // be re-pushed". Do not add fallible work after this point.
+  await finalizePostContent(db, {
+    cid: result.cid,
+    content: finalContent,
+    contentHash: post.rawContentHash,
+    updatedAt: post.frontmatter.updated_at,
+    published: post.frontmatter.published,
   })
 }
 

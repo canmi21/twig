@@ -9,7 +9,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { getDb, getCache, getBucket } from '~/server/platform'
-import { getPostByCid, upsertPost, getAllPosts } from '~/lib/database/posts'
+import {
+  getPostByCid,
+  upsertPostMetadata,
+  finalizePostContent,
+  getAllPosts,
+} from '~/lib/database/posts'
 import {
   writePostKv,
   deletePostKv,
@@ -108,21 +113,21 @@ export const savePost = createServerFn({ method: 'POST' })
     const oldSlug = oldPost?.slug
 
     const contentHash = computeContentHash(extracted.content)
-    const result = await upsertPost(db, {
+
+    // Phase A: reserve the row and write metadata only.
+    const result = await upsertPostMetadata(db, {
       slug: parsed.data.slug,
       title: parsed.data.title,
       description: parsed.data.description,
       category: parsed.data.category,
       tags: parsed.data.tags,
       tweet: parsed.data.tweet,
-      content: extracted.content,
-      contentHash,
       cid: parsed.data.cid,
       createdAt: parsed.data.created_at,
-      updatedAt: parsed.data.updated_at,
-      published: parsed.data.published,
     })
 
+    // Phase B: refresh KV. Slug rename deletes the old key first so the
+    // post-index rebuild cannot briefly expose both entries.
     if (oldSlug && oldSlug !== result.slug) {
       await deletePostKv(kv, oldSlug)
     }
@@ -130,7 +135,6 @@ export const savePost = createServerFn({ method: 'POST' })
     if (parsed.data.published) {
       const { compile } = await import('~/lib/compiler/index')
       const compiled = await compile(extracted.content)
-      const savedPost = await getPostByCid(db, result.cid)
 
       await writePostKv(kv, result.slug, {
         frontmatter: {
@@ -140,8 +144,8 @@ export const savePost = createServerFn({ method: 'POST' })
           tags: parsed.data.tags,
           tweet: parsed.data.tweet,
           cid: result.cid,
-          created_at: savedPost?.createdAt ?? parsed.data.created_at,
-          updated_at: savedPost?.updatedAt ?? parsed.data.updated_at,
+          created_at: parsed.data.created_at,
+          updated_at: parsed.data.updated_at,
           published: parsed.data.published,
         },
         html: compiled.html,
@@ -152,6 +156,17 @@ export const savePost = createServerFn({ method: 'POST' })
     } else {
       await deletePostKv(kv, result.slug)
     }
+
+    // Phase C: commit marker. contentHash + content + updatedAt flip
+    // together so a crash anywhere above leaves the row with a stale
+    // hash, cueing the next save (or a CLI push) to retry.
+    await finalizePostContent(db, {
+      cid: result.cid,
+      content: extracted.content,
+      contentHash,
+      updatedAt: parsed.data.updated_at,
+      published: parsed.data.published,
+    })
 
     const allPosts = await getAllPosts(db)
     await writePostIndex(kv, allPosts.map(toPostIndexEntry))

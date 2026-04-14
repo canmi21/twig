@@ -20,6 +20,20 @@ interface UpsertPostInput {
   published?: boolean
 }
 
+/** Metadata-only variant: omits content/contentHash so the content commit
+ *  can be deferred to a separate step. See upsertPostMetadata below for
+ *  the rationale. */
+interface UpsertPostMetadataInput {
+  slug: string
+  title: string
+  description?: string
+  category?: string
+  tags?: string[]
+  tweet?: string
+  cid?: string
+  createdAt?: string
+}
+
 interface UpsertPostResult {
   cid: string
   slug: string
@@ -102,6 +116,137 @@ export async function setPublished(
 export async function deletePost(db: Db, cid: string): Promise<void> {
   await db.delete(posts).where(eq(posts.cid, cid))
   await db.delete(contents).where(eq(contents.cid, cid))
+}
+
+/**
+ * Two-phase publish, phase A.
+ *
+ * Ensures a posts row exists for the given input and writes every
+ * metadata field except `content` and `contentHash`. For new posts the
+ * content columns are seeded with empty strings so the schema's
+ * NOT NULL constraint is satisfied; existing posts keep their current
+ * content untouched.
+ *
+ * `contents.updatedAt` is intentionally NOT bumped here — it is bumped
+ * by `finalizePostContent` (phase B), which acts as the commit marker.
+ * If a push run crashes between phase A and phase B, the next run will
+ * see an unchanged updatedAt and a mismatched contentHash, and retry
+ * this post from the top.
+ */
+export async function upsertPostMetadata(
+  db: Db,
+  input: UpsertPostMetadataInput,
+): Promise<UpsertPostResult> {
+  const now = new Date().toISOString()
+  const tagsJson = input.tags ? JSON.stringify(input.tags) : null
+
+  let existing: { cid: string } | undefined
+  if (input.cid) {
+    existing = await db
+      .select({ cid: posts.cid })
+      .from(posts)
+      .where(eq(posts.cid, input.cid))
+      .get()
+  }
+  if (!existing) {
+    existing = await db
+      .select({ cid: posts.cid })
+      .from(posts)
+      .where(eq(posts.slug, input.slug))
+      .get()
+  }
+
+  if (existing) {
+    await db
+      .update(posts)
+      .set({
+        slug: input.slug,
+        title: input.title,
+        description: input.description ?? null,
+        category: input.category ?? null,
+        tags: tagsJson,
+        tweet: input.tweet ?? null,
+      })
+      .where(eq(posts.cid, existing.cid))
+    return { cid: existing.cid, slug: input.slug, action: 'updated' }
+  }
+
+  const cid = input.cid ?? newCid()
+  const createdAt = input.createdAt ?? now
+  // New rows start as unpublished, with empty content placeholders. The
+  // commit phase flips these to their real values once compile + KV
+  // write have succeeded.
+  await db.insert(contents).values({
+    cid,
+    type: 'post',
+    createdAt,
+    updatedAt: createdAt,
+    published: 0,
+  })
+  await db.insert(posts).values({
+    cid,
+    slug: input.slug,
+    title: input.title,
+    description: input.description ?? null,
+    category: input.category ?? null,
+    tags: tagsJson,
+    tweet: input.tweet ?? null,
+    content: '',
+    contentHash: '',
+  })
+  return { cid, slug: input.slug, action: 'created' }
+}
+
+interface FinalizePostContentInput {
+  cid: string
+  content: string
+  contentHash: string
+  /** Optional frontmatter override; falls back to the existing row's
+   *  updatedAt when no override is provided (so trivial re-pushes do
+   *  not bump the timestamp on unchanged posts). */
+  updatedAt?: string
+  published?: boolean
+}
+
+/**
+ * Two-phase publish, phase B. Writes the final content, content hash,
+ * published flag, and updatedAt in the order that makes contentHash
+ * the atomic commit marker. Callers must perform every fallible step
+ * (media upload, compile, KV write) BEFORE invoking this function —
+ * once contentHash is up to date the next diff run treats the post as
+ * stable.
+ */
+export async function finalizePostContent(
+  db: Db,
+  input: FinalizePostContentInput,
+): Promise<void> {
+  const now = new Date().toISOString()
+
+  const dbRow = await db
+    .select({ updatedAt: contents.updatedAt })
+    .from(contents)
+    .where(eq(contents.cid, input.cid))
+    .get()
+
+  let updatedAt = now
+  if (input.updatedAt && input.updatedAt !== dbRow?.updatedAt) {
+    updatedAt = input.updatedAt
+  }
+
+  await db
+    .update(posts)
+    .set({ content: input.content, contentHash: input.contentHash })
+    .where(eq(posts.cid, input.cid))
+
+  await db
+    .update(contents)
+    .set({
+      updatedAt,
+      ...(input.published !== undefined
+        ? { published: input.published ? 1 : 0 }
+        : {}),
+    })
+    .where(eq(contents.cid, input.cid))
 }
 
 export async function upsertPost(
