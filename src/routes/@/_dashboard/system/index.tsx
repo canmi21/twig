@@ -98,19 +98,17 @@ function SystemPage() {
   function handleWipe() {
     if (
       !window.confirm(
-        'Wipe ALL DO persistent state (visit count, geo, tile heat, read counts)? Do a Backup first if you want to recover.',
+        'Wipe ALL DO persistent state (visit count, geo, tile heat, read counts)? A fresh snapshot will be taken automatically before the wipe.',
       )
     ) {
       return
     }
-    if (
-      !window.confirm('Really wipe? This cannot be undone without a backup.')
-    ) {
+    if (!window.confirm('Really wipe? You can Restore afterwards if needed.')) {
       return
     }
     void run('wipe', async () => {
-      await wipeDo()
-      return 'DO wiped. Isolate restart triggered.'
+      const { backupCount } = await wipeDo()
+      return `DO wiped. Isolate restart triggered. Auto-snapshot captured ${backupCount} keys.`
     })
   }
 
