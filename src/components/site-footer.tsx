@@ -310,14 +310,19 @@ function SiteFooterContent({
             .
           </span>
           <span className="flex flex-wrap items-center gap-x-2 text-left sm:justify-end sm:text-right">
-            <span className="relative inline-block">
+            <a
+              href="https://stats.uptimerobot.com/8zxeLKSP2t"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-block transition-opacity duration-140 hover:opacity-100"
+            >
               <span
                 aria-hidden="true"
                 className="status-dot-breathe absolute top-1/2 -left-3 size-1.5 -translate-y-1/2 rounded-full"
                 style={{ backgroundColor: '#7AC8A7' }}
               />
               <span>All systems normal.</span>
-            </span>
+            </a>
             <a
               href="https://icp.gov.moe/?keyword=20260000"
               target="_blank"
