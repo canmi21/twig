@@ -7,6 +7,7 @@ import { getAllPosts } from '../../lib/database/posts'
 import { getMediaForPost } from '../../lib/database/media'
 import { storageKey } from '../../lib/storage/storage-key'
 import { serializeFrontmatter } from '../../lib/compiler/frontmatter'
+import { parseTagsJson } from '../../lib/storage/kv'
 
 interface PullResult {
   exported: number
@@ -24,7 +25,7 @@ export async function pullCore(opts: {
   await rm(postsDir, { recursive: true, force: true })
 
   for (const row of rows) {
-    const tags = row.tags ? (JSON.parse(row.tags) as string[]) : undefined
+    const tags = parseTagsJson(row.tags)
     const header = serializeFrontmatter({
       cid: row.cid,
       title: row.title,

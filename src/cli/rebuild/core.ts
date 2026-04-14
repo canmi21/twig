@@ -7,6 +7,7 @@ import {
   writePostKv,
   writePostIndex,
   toPostIndexEntry,
+  parseTagsJson,
 } from '../../lib/storage/kv'
 import type { PostIndexEntry } from '../../lib/storage/kv'
 
@@ -24,7 +25,7 @@ export async function rebuildCore(opts: {
   const index: PostIndexEntry[] = []
 
   for (const row of rows) {
-    const tags = row.tags ? (JSON.parse(row.tags) as string[]) : undefined
+    const tags = parseTagsJson(row.tags)
     const frontmatter = {
       title: row.title,
       description: row.description ?? undefined,
