@@ -1,5 +1,6 @@
 /* src/routes/@/_dashboard/contents/index.tsx */
 
+import { useState } from 'react'
 import {
   createFileRoute,
   Link,
@@ -92,6 +93,39 @@ const togglePublished = createServerFn({ method: 'POST' })
     await rebuildPostIndex(db, kv)
   })
 
+const rebuildPostKv = createServerFn({ method: 'POST' })
+  .inputValidator((input: { cid: string }) => input)
+  .handler(async ({ data }) => {
+    const db = getDb()
+    const kv = getCache()
+
+    const post = await getPostByCid(db, data.cid)
+    if (!post || post.published !== 1) {
+      return { rebuilt: false as const }
+    }
+
+    const compiled = await compile(post.content)
+    await writePostKv(kv, post.slug, {
+      frontmatter: {
+        title: post.title,
+        description: post.description ?? undefined,
+        category: post.category ?? undefined,
+        tags: post.tags ? JSON.parse(post.tags) : undefined,
+        tweet: post.tweet ?? undefined,
+        cid: post.cid,
+        created_at: post.createdAt,
+        updated_at: post.updatedAt,
+        published: true,
+      },
+      html: compiled.html,
+      text: compiled.text,
+      toc: compiled.toc,
+      components: compiled.components,
+    })
+
+    return { rebuilt: true as const }
+  })
+
 const removePost = createServerFn({ method: 'POST' })
   .inputValidator((input: { cid: string }) => input)
   .handler(async ({ data }) => {
@@ -149,6 +183,7 @@ function PostsList() {
   const router = useRouter()
   const navigate = useNavigate()
   const { siteTimezone } = useRouteContext({ from: '__root__' })
+  const [rebuildingCid, setRebuildingCid] = useState<string | null>(null)
 
   async function handleNewPost() {
     const { cid } = await createDraft()
@@ -168,6 +203,15 @@ function PostsList() {
     if (!window.confirm('Delete this post? This cannot be undone.')) return
     await removePost({ data: { cid } })
     router.invalidate()
+  }
+
+  async function handleRebuild(cid: string) {
+    setRebuildingCid(cid)
+    try {
+      await rebuildPostKv({ data: { cid } })
+    } finally {
+      setRebuildingCid(null)
+    }
   }
 
   async function handleEditReads(cid: string, current: number) {
@@ -282,6 +326,18 @@ function PostsList() {
                       >
                         Edit
                       </Link>
+                      {post.published === 1 && (
+                        <button
+                          type="button"
+                          disabled={rebuildingCid === post.cid}
+                          onClick={() => handleRebuild(post.cid)}
+                          className="cursor-pointer text-[13px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:cursor-wait disabled:opacity-(--opacity-faint)"
+                        >
+                          {rebuildingCid === post.cid
+                            ? 'Rebuilding…'
+                            : 'Rebuild'}
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleDelete(post.cid)}
