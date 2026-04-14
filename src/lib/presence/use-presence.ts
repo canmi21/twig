@@ -15,6 +15,11 @@ const INITIAL_RECONNECT_DELAY = 1000
 const MAX_RECONNECT_DELAY = 30_000
 const BACKOFF_FACTOR = 2
 
+// Heartbeat cadence. Must be sent as the literal string "ping" (not JSON)
+// so the DO's `setWebSocketAutoResponse('ping','pong')` intercepts it
+// without waking the Durable Object.
+const HEARTBEAT_INTERVAL_MS = 21_000
+
 interface PresenceOptions {
   cid?: string
   initialGlobal?: number
@@ -43,6 +48,7 @@ export function usePresence(options?: PresenceOptions): PresenceState {
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reconnectDelay = useRef(INITIAL_RECONNECT_DELAY)
+  const heartbeatTimer = useRef<ReturnType<typeof setInterval> | null>(null)
   const cidRef = useRef(cid)
   const mountedRef = useRef(true)
 
@@ -55,6 +61,13 @@ export function usePresence(options?: PresenceOptions): PresenceState {
     if (typeof window === 'undefined') return
 
     mountedRef.current = true
+
+    function stopHeartbeat() {
+      if (heartbeatTimer.current) {
+        clearInterval(heartbeatTimer.current)
+        heartbeatTimer.current = null
+      }
+    }
 
     function connect() {
       if (wsRef.current) return
@@ -72,11 +85,22 @@ export function usePresence(options?: PresenceOptions): PresenceState {
             cid: cidRef.current ?? null,
           }),
         )
+        stopHeartbeat()
+        heartbeatTimer.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            // Literal string — intercepted by DO's auto-response, never
+            // JSON-parsed on the server.
+            ws.send('ping')
+          }
+        }, HEARTBEAT_INTERVAL_MS)
       })
 
       ws.addEventListener('message', (event) => {
+        const data = event.data as string
+        // Ignore the heartbeat echo from the DO auto-response.
+        if (data === 'pong') return
         try {
-          const msg = JSON.parse(event.data as string) as ServerMessage
+          const msg = JSON.parse(data) as ServerMessage
           if (msg.type === 'presence' && mountedRef.current) {
             setState({ global: msg.global, article: msg.article })
           }
@@ -87,6 +111,7 @@ export function usePresence(options?: PresenceOptions): PresenceState {
 
       ws.addEventListener('close', () => {
         wsRef.current = null
+        stopHeartbeat()
         if (!mountedRef.current) return
 
         const delay = reconnectDelay.current
@@ -98,7 +123,7 @@ export function usePresence(options?: PresenceOptions): PresenceState {
       })
 
       ws.addEventListener('error', () => {
-        // Close event fires after error, triggering reconnect
+        // Close event fires after error, triggering reconnect + heartbeat stop
       })
     }
 
@@ -106,6 +131,7 @@ export function usePresence(options?: PresenceOptions): PresenceState {
 
     return () => {
       mountedRef.current = false
+      stopHeartbeat()
       if (reconnectTimer.current) {
         clearTimeout(reconnectTimer.current)
         reconnectTimer.current = null

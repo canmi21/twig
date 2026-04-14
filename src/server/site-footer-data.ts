@@ -112,7 +112,10 @@ export async function getSiteFooterData(): Promise<SiteFooterData> {
     accountName,
     runtimeDays,
     copyrightYear,
-    presenceCount: Math.max(1, presence.global + 1),
+    // Floor at 1 — if the visitor is reading the footer there is at least
+    // one person online (themselves), even when SSR runs before their WS
+    // connection is established.
+    presenceCount: Math.max(1, presence.global),
     worldMapOffset,
     worldMapLatCenter: visitor.latCenter,
     visitorLat: visitor.lat,

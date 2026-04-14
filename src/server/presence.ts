@@ -52,12 +52,23 @@ const VISIT_COUNT_KEY = 'visit-count'
 const TILE_PREFIX = 'tile:'
 const READ_COUNT_PREFIX = 'read-count:'
 
+// Periodic resync cadence. Defensive layer that catches any socket whose
+// close event slipped (e.g. stale hibernation state) — the broadcast reads
+// the authoritative `getWebSockets()` roster, so stuck UIs correct within
+// this window. Also acts as a soft upper bound on how long an article's
+// live reader count can drift from reality.
+const PRESENCE_ALARM_MS = 60_000
+
 // Exported as `actor` to match wrangler.jsonc class_name.
 // Cloudflare dashboard shows "taki-actor".
 // oxlint-disable-next-line typescript/class-name -- wrangler class_name binding
 export class actor extends DurableObject<Record<string, unknown>> {
   constructor(ctx: DurableObjectState, env: Record<string, unknown>) {
     super(ctx, env)
+    // Client heartbeat. `setWebSocketAutoResponse` matches on exact string
+    // "ping" and replies "pong" without waking the DO — zero billed CPU per
+    // heartbeat, while still refreshing CF's "last active" bookkeeping so
+    // dead clients get reaped sooner.
     this.ctx.setWebSocketAutoResponse(
       new WebSocketRequestResponsePair('ping', 'pong'),
     )
@@ -72,7 +83,7 @@ export class actor extends DurableObject<Record<string, unknown>> {
     // so read-modify-write is naturally atomic.
     if (url.pathname === '/count') {
       const cid = url.searchParams.get('cid')
-      const counts = await this.computeCounts(cid)
+      const counts = this.computeCounts(cid)
       let reads = 0
       if (cid) {
         const key = `${READ_COUNT_PREFIX}${cid}`
@@ -164,9 +175,8 @@ export class actor extends DurableObject<Record<string, unknown>> {
 
     const pair = new WebSocketPair()
     const [client, server] = Object.values(pair)
-    const connectionId = crypto.randomUUID().slice(0, 8)
 
-    this.ctx.acceptWebSocket(server, [connectionId])
+    this.ctx.acceptWebSocket(server)
 
     return new Response(null, { status: 101, webSocket: client })
   }
@@ -174,6 +184,8 @@ export class actor extends DurableObject<Record<string, unknown>> {
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
     if (typeof message !== 'string') return
 
+    // `ping` heartbeats are intercepted by setWebSocketAutoResponse and
+    // never reach this handler — anything here is an application message.
     let msg: ClientMessage
     try {
       msg = JSON.parse(message)
@@ -183,75 +195,80 @@ export class actor extends DurableObject<Record<string, unknown>> {
 
     if (msg.type !== 'init' && msg.type !== 'navigate') return
 
-    const tags = this.ctx.getTags(ws)
-    const connectionId = tags[0]
-    if (!connectionId) return
-
-    const meta: ConnectionMeta = {
+    ws.serializeAttachment({
       path: msg.path,
       cid: msg.cid ?? null,
-    }
+    } satisfies ConnectionMeta)
 
-    await this.ctx.storage.put(`ws:${connectionId}`, meta)
-    await this.broadcastCounts()
+    this.broadcastCounts()
+    await this.ensureAlarm()
   }
 
   async webSocketClose(ws: WebSocket) {
-    const tags = this.ctx.getTags(ws)
-    const connectionId = tags[0]
-    if (connectionId) {
-      await this.ctx.storage.delete(`ws:${connectionId}`)
-    }
-    await this.broadcastCounts()
+    // Attachment disappears with the socket — no storage cleanup needed.
+    void ws
+    this.broadcastCounts()
   }
 
   async webSocketError(ws: WebSocket) {
-    await this.webSocketClose(ws)
+    void ws
+    this.broadcastCounts()
   }
 
-  private async computeCounts(
-    targetCid?: string | null,
-  ): Promise<{ global: number; article: number }> {
-    const global = this.ctx.getWebSockets().length
+  async alarm() {
+    this.broadcastCounts()
+    if (this.ctx.getWebSockets().length > 0) {
+      await this.ctx.storage.setAlarm(Date.now() + PRESENCE_ALARM_MS)
+    }
+  }
+
+  private async ensureAlarm() {
+    const existing = await this.ctx.storage.getAlarm()
+    if (existing == null) {
+      await this.ctx.storage.setAlarm(Date.now() + PRESENCE_ALARM_MS)
+    }
+  }
+
+  private getMeta(ws: WebSocket): ConnectionMeta | null {
+    return (ws.deserializeAttachment() as ConnectionMeta | null) ?? null
+  }
+
+  private computeCounts(targetCid?: string | null): {
+    global: number
+    article: number
+  } {
+    const sockets = this.ctx.getWebSockets()
+    const global = sockets.length
     let article = 0
 
     if (targetCid) {
-      const entries = await this.ctx.storage.list<ConnectionMeta>({
-        prefix: 'ws:',
-      })
-      for (const meta of entries.values()) {
-        if (meta.cid === targetCid) article++
+      for (const ws of sockets) {
+        if (this.getMeta(ws)?.cid === targetCid) article++
       }
     }
 
     return { global, article }
   }
 
-  private async broadcastCounts() {
+  private broadcastCounts() {
     const sockets = this.ctx.getWebSockets()
     const global = sockets.length
 
-    const entries = await this.ctx.storage.list<ConnectionMeta>({
-      prefix: 'ws:',
-    })
+    // First pass: aggregate per-cid counts from attachments.
     const cidCounts = new Map<string, number>()
-    for (const meta of entries.values()) {
-      if (meta.cid) {
+    const metaCache = new Map<WebSocket, ConnectionMeta | null>()
+    for (const ws of sockets) {
+      const meta = this.getMeta(ws)
+      metaCache.set(ws, meta)
+      if (meta?.cid) {
         cidCounts.set(meta.cid, (cidCounts.get(meta.cid) ?? 0) + 1)
       }
     }
 
-    const idToCid = new Map<string, string | null>()
-    for (const [key, meta] of entries.entries()) {
-      const connectionId = key.slice(3)
-      idToCid.set(connectionId, meta.cid)
-    }
-
+    // Second pass: push personalized counts to each socket.
     for (const ws of sockets) {
-      const tags = this.ctx.getTags(ws)
-      const connectionId = tags[0]
-      const cid = connectionId ? idToCid.get(connectionId) : null
-      const article = cid ? (cidCounts.get(cid) ?? 0) : 0
+      const meta = metaCache.get(ws) ?? null
+      const article = meta?.cid ? (cidCounts.get(meta.cid) ?? 0) : 0
 
       const msg: PresenceMessage = { type: 'presence', global, article }
       try {
