@@ -32,6 +32,7 @@ import {
   type PostIndexEntry,
 } from '~/lib/storage/kv'
 import { formatDateShort } from '~/lib/utils/date'
+import { warnAndReturn } from '~/lib/utils/warn-and-return'
 
 const HOME_RECENT_POSTS_LIMIT = 5
 const HOME_PREVIEW_MAX_CHARS = 140
@@ -82,10 +83,12 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
   const [ownerEmail, sentence, footer, visitorResult, postIndex] =
     await Promise.all([
       Promise.resolve(getEmailOwner()),
-      getRandomSentence().catch(() => null),
+      getRandomSentence().catch(warnAndReturn('home:random-sentence', null)),
       getSiteFooterData(),
       swapVisitorGeo(),
-      readPostIndex(getCache()).catch(() => [] as PostIndexEntry[]),
+      readPostIndex(getCache()).catch(
+        warnAndReturn('home:post-index', [] as PostIndexEntry[]),
+      ),
     ])
 
   const published = postIndex.filter((p) => p.published)
@@ -97,7 +100,9 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
   const cache = getCache()
   const recentPosts: HomeRecentPost[] = await Promise.all(
     topPosts.map(async (p) => {
-      const full = await readPostKv(cache, p.slug).catch(() => null)
+      const full = await readPostKv(cache, p.slug).catch(
+        warnAndReturn(`home:post-kv:${p.slug}`, null),
+      )
       return {
         slug: p.slug,
         title: p.title,
@@ -837,7 +842,9 @@ function HomeSentence({ sentence }: { sentence: RandomSentence }) {
         }
 
         // oxlint-disable-next-line no-await-in-loop -- fetch belongs to the sequential sentence cycle
-        const nextText = await fetchRandomSentenceText().catch(() => null)
+        const nextText = await fetchRandomSentenceText().catch(
+          warnAndReturn('home:sentence-refresh', null),
+        )
         if (cancelled) {
           return
         }
