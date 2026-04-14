@@ -1,11 +1,7 @@
 /* src/routes/@/_dashboard/index.tsx */
 
-import { useState } from 'react'
 import { createFileRoute, useRouteContext } from '@tanstack/react-router'
-import {
-  fetchDashboardOverview,
-  resetPresenceSockets,
-} from '~/server/dashboard'
+import { fetchDashboardOverview } from '~/server/dashboard'
 
 export const Route = createFileRoute('/@/_dashboard/')({
   loader: () => fetchDashboardOverview(),
@@ -35,51 +31,12 @@ function OverviewPage() {
   const { postStats, commentStats, recentPosts, recentComments, userCount } =
     Route.useLoaderData()
   const { siteTimezone } = useRouteContext({ from: '__root__' })
-  const [resetting, setResetting] = useState(false)
-  const [resetResult, setResetResult] = useState<string | null>(null)
-
-  async function handleResetPresence() {
-    if (
-      !window.confirm(
-        'Force-close every live WebSocket? Visitors will reconnect within seconds.',
-      )
-    ) {
-      return
-    }
-    setResetting(true)
-    setResetResult(null)
-    try {
-      const { closed } = await resetPresenceSockets()
-      setResetResult(`Closed ${closed} socket${closed === 1 ? '' : 's'}.`)
-    } catch {
-      setResetResult('Failed to reset presence.')
-    } finally {
-      setResetting(false)
-    }
-  }
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
-          Overview
-        </h1>
-        <div className="flex items-center gap-3">
-          {resetResult && (
-            <span className="text-[12px] text-primary opacity-(--opacity-muted)">
-              {resetResult}
-            </span>
-          )}
-          <button
-            type="button"
-            disabled={resetting}
-            onClick={handleResetPresence}
-            className="cursor-pointer rounded-sm border border-border px-3 py-1 text-[12px] text-primary opacity-(--opacity-muted) transition-opacity duration-140 hover:opacity-100 disabled:cursor-wait disabled:opacity-(--opacity-faint)"
-          >
-            {resetting ? 'Resetting…' : 'Reset presence'}
-          </button>
-        </div>
-      </div>
+      <h1 className="text-[17px] font-[560] tracking-[-0.015em] text-primary">
+        Overview
+      </h1>
 
       <div className="mt-6 flex gap-8">
         <Stat value={postStats.total} label="Posts" />

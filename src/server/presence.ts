@@ -123,23 +123,90 @@ export class actor extends DurableObject<Record<string, unknown>> {
       return Response.json({ reads: value })
     }
 
-    // Admin action: force-close every live WebSocket. Clients reconnect
-    // through the use-presence backoff and re-init their counts, which
-    // is useful when ghost sockets from a historical bug are inflating
-    // the roster and you cannot reset the whole DO (geo + tile + visit
-    // data live here too).
-    if (url.pathname === '/presence-reset' && request.method === 'POST') {
-      const sockets = this.ctx.getWebSockets()
-      const closed = sockets.length
-      for (const ws of sockets) {
-        try {
-          ws.close(1000, 'presence-reset')
-        } catch {
-          // Already closing
-        }
+    // Admin snapshot: dump every persistent DO key worth backing up so
+    // the dashboard can mirror it into D1. Does not mutate state.
+    if (url.pathname === '/snapshot' && request.method === 'GET') {
+      const entries: Array<{ key: string; value: unknown }> = []
+      const visitCount = await this.ctx.storage.get<number>(VISIT_COUNT_KEY)
+      if (visitCount !== undefined) {
+        entries.push({ key: VISIT_COUNT_KEY, value: visitCount })
       }
-      this.broadcastCounts()
-      return Response.json({ closed })
+      const lastGeo = await this.ctx.storage.get<VisitorGeo>(LAST_GEO_KEY)
+      if (lastGeo !== undefined) {
+        entries.push({ key: LAST_GEO_KEY, value: lastGeo })
+      }
+      const tiles = await this.ctx.storage.list<number>({ prefix: TILE_PREFIX })
+      for (const [key, value] of tiles) {
+        entries.push({ key, value })
+      }
+      const reads = await this.ctx.storage.list<number>({
+        prefix: READ_COUNT_PREFIX,
+      })
+      for (const [key, value] of reads) {
+        entries.push({ key, value })
+      }
+      return Response.json({ entries })
+    }
+
+    // Admin restore: overwrite DO storage with a previously-saved D1
+    // snapshot. Keys not present in the payload are left untouched.
+    if (url.pathname === '/restore' && request.method === 'POST') {
+      const body = (await request.json()) as {
+        entries: Array<{ key: string; value: unknown }>
+      }
+      await Promise.all(
+        body.entries.map((entry) =>
+          this.ctx.storage.put(entry.key, entry.value),
+        ),
+      )
+      return Response.json({ restored: body.entries.length })
+    }
+
+    // Admin full wipe: delete every persistent key, then restart the
+    // isolate. Caller is expected to have taken a /snapshot first.
+    if (url.pathname === '/wipe' && request.method === 'POST') {
+      await this.ctx.storage.deleteAll()
+      const response = Response.json({ wiped: true })
+      setTimeout(() => {
+        try {
+          this.ctx.abort('full wipe by admin')
+        } catch {
+          // abort() throws by design.
+        }
+      }, 50)
+      return response
+    }
+
+    // Admin action: nuclear presence reset. `ctx.abort()` tears down
+    // the isolate, dropping every WebSocket (including ghost sockets
+    // whose TCP connection died but CF hasn't noticed yet, and any
+    // hibernation-restored zombies from previous deploys). Persistent
+    // storage — `last-geo`, `visit-count`, `tile:*`, `read-count:*`
+    // — is untouched, per CF's abort() contract. Live clients reconnect
+    // within ~1s via the use-presence backoff.
+    if (url.pathname === '/presence-reset' && request.method === 'POST') {
+      const closed = this.ctx.getWebSockets().length
+
+      // One-time sweep of per-connection meta written by the previous
+      // storage-based implementation. The current code path never reads
+      // these keys, but they waste DO storage and can be removed safely.
+      const stale = await this.ctx.storage.list<unknown>({ prefix: 'ws:' })
+      if (stale.size > 0) {
+        await this.ctx.storage.delete([...stale.keys()])
+      }
+
+      const response = Response.json({ closed })
+      // Defer the abort so the HTTP response can flush first. abort()
+      // throws synchronously to terminate the isolate, so it cannot be
+      // called before `return response`.
+      setTimeout(() => {
+        try {
+          this.ctx.abort('presence reset by admin')
+        } catch {
+          // abort() throws by design.
+        }
+      }, 50)
+      return response
     }
 
     // Increment site-wide visit counter and return total

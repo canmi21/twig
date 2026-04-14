@@ -37,6 +37,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PostsCategorySlugIndexRouteImport } from './routes/posts/$category/$slug/index'
 import { Route as AtEditorCidIndexRouteImport } from './routes/@/editor/$cid/index'
 import { Route as AtDashboardUsersIndexRouteImport } from './routes/@/_dashboard/users/index'
+import { Route as AtDashboardSystemIndexRouteImport } from './routes/@/_dashboard/system/index'
 import { Route as AtDashboardContentsIndexRouteImport } from './routes/@/_dashboard/contents/index'
 import { Route as AtDashboardCommentsIndexRouteImport } from './routes/@/_dashboard/comments/index'
 
@@ -179,6 +180,11 @@ const AtDashboardUsersIndexRoute = AtDashboardUsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => AtDashboardRouteRoute,
 } as any)
+const AtDashboardSystemIndexRoute = AtDashboardSystemIndexRouteImport.update({
+  id: '/system/',
+  path: '/system/',
+  getParentRoute: () => AtDashboardRouteRoute,
+} as any)
 const AtDashboardContentsIndexRoute =
   AtDashboardContentsIndexRouteImport.update({
     id: '/contents/',
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/comments/': typeof AtDashboardCommentsIndexRoute
   '/@/contents/': typeof AtDashboardContentsIndexRoute
+  '/@/system/': typeof AtDashboardSystemIndexRoute
   '/@/users/': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/login/verify': typeof LoginVerifyIndexRoute
   '/@/comments': typeof AtDashboardCommentsIndexRoute
   '/@/contents': typeof AtDashboardContentsIndexRoute
+  '/@/system': typeof AtDashboardSystemIndexRoute
   '/@/users': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug': typeof PostsCategorySlugIndexRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/login/verify/': typeof LoginVerifyIndexRoute
   '/@/_dashboard/comments/': typeof AtDashboardCommentsIndexRoute
   '/@/_dashboard/contents/': typeof AtDashboardContentsIndexRoute
+  '/@/_dashboard/system/': typeof AtDashboardSystemIndexRoute
   '/@/_dashboard/users/': typeof AtDashboardUsersIndexRoute
   '/@/editor/$cid/': typeof AtEditorCidIndexRoute
   '/posts/$category/$slug/': typeof PostsCategorySlugIndexRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/login/verify/'
     | '/@/comments/'
     | '/@/contents/'
+    | '/@/system/'
     | '/@/users/'
     | '/@/editor/$cid/'
     | '/posts/$category/$slug/'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/login/verify'
     | '/@/comments'
     | '/@/contents'
+    | '/@/system'
     | '/@/users'
     | '/@/editor/$cid'
     | '/posts/$category/$slug'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '/login/verify/'
     | '/@/_dashboard/comments/'
     | '/@/_dashboard/contents/'
+    | '/@/_dashboard/system/'
     | '/@/_dashboard/users/'
     | '/@/editor/$cid/'
     | '/posts/$category/$slug/'
@@ -607,6 +619,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtDashboardUsersIndexRouteImport
       parentRoute: typeof AtDashboardRouteRoute
     }
+    '/@/_dashboard/system/': {
+      id: '/@/_dashboard/system/'
+      path: '/system'
+      fullPath: '/@/system/'
+      preLoaderRoute: typeof AtDashboardSystemIndexRouteImport
+      parentRoute: typeof AtDashboardRouteRoute
+    }
     '/@/_dashboard/contents/': {
       id: '/@/_dashboard/contents/'
       path: '/contents'
@@ -628,6 +647,7 @@ interface AtDashboardRouteRouteChildren {
   AtDashboardIndexRoute: typeof AtDashboardIndexRoute
   AtDashboardCommentsIndexRoute: typeof AtDashboardCommentsIndexRoute
   AtDashboardContentsIndexRoute: typeof AtDashboardContentsIndexRoute
+  AtDashboardSystemIndexRoute: typeof AtDashboardSystemIndexRoute
   AtDashboardUsersIndexRoute: typeof AtDashboardUsersIndexRoute
 }
 
@@ -635,6 +655,7 @@ const AtDashboardRouteRouteChildren: AtDashboardRouteRouteChildren = {
   AtDashboardIndexRoute: AtDashboardIndexRoute,
   AtDashboardCommentsIndexRoute: AtDashboardCommentsIndexRoute,
   AtDashboardContentsIndexRoute: AtDashboardContentsIndexRoute,
+  AtDashboardSystemIndexRoute: AtDashboardSystemIndexRoute,
   AtDashboardUsersIndexRoute: AtDashboardUsersIndexRoute,
 }
 

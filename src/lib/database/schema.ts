@@ -52,6 +52,17 @@ export const mediaRefs = sqliteTable(
   (table) => [primaryKey({ columns: [table.hash, table.cid] })],
 )
 
+// Flat key/value mirror of the presence DO's persistent state. Only
+// populated by manual admin snapshots from the dashboard; the hot path
+// of /visit, /last-geo, and /count never touches this table. The keys
+// here are the exact DO storage keys (visit-count, last-geo, tile:*,
+// read-count:*) and values are their JSON-stringified payloads.
+export const doBackup = sqliteTable('do_backup', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: text('updated_at').notNull(),
+})
+
 export const comments = sqliteTable(
   'comments',
   {

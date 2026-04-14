@@ -57,6 +57,13 @@
       "when": 1775397509623,
       "tag": "0007_fantastic_peter_quill",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1776154607558,
+      "tag": "0008_curly_mongu",
+      "breakpoints": true
     }
   ]
 }

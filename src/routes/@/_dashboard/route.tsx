@@ -6,6 +6,7 @@ import {
   FileText,
   Users,
   MessageSquare,
+  Database,
   Undo2,
 } from 'lucide-react'
 import { fetchSidebarData } from '~/server/dashboard'
@@ -60,6 +61,14 @@ function DashboardLayout() {
             title="Comments"
           >
             <MessageSquare className={iconClass} strokeWidth={1.8} />
+          </Link>
+          <Link
+            to="/@/system"
+            className={linkClass}
+            activeProps={{ className: activeLinkClass }}
+            title="System"
+          >
+            <Database className={iconClass} strokeWidth={1.8} />
           </Link>
         </nav>
         <div className="border-t border-border py-3">
