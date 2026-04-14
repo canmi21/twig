@@ -18,8 +18,6 @@ interface Bindings {
   PRESENCE: DurableObjectNamespace
   CDN_PUBLIC_URL: string
   PUBLIC_URL: string
-  CF_ACCESS_TEAM_DOMAIN: string
-  CF_ACCESS_AUD: string
   EMAIL_FROM_NOREPLY: string
   EMAIL_OWNER: string
   SITE_TIMEZONE: string
@@ -55,16 +53,6 @@ export function getCdnUrl() {
 /** Site public URL. */
 export function getPublicUrl() {
   return getBindings().PUBLIC_URL
-}
-
-/** CF Access team domain for JWT verification. */
-export function getCfAccessTeamDomain() {
-  return getBindings().CF_ACCESS_TEAM_DOMAIN
-}
-
-/** CF Access audience tag for JWT verification. */
-export function getCfAccessAud() {
-  return getBindings().CF_ACCESS_AUD
 }
 
 /** Noreply sender address for auth and system emails. */

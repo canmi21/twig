@@ -2,12 +2,10 @@
 
 import { Link, Outlet, createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
-import { verifyCfAccess } from '~/server/auth'
+import { getRequestHeaders } from '@tanstack/react-start/server'
 import { getAuth } from '~/server/better-auth'
 
 interface AdminAuth {
-  email: string
   session: {
     user: { id: string; name: string; email: string; role: string | null }
   } | null
@@ -15,11 +13,9 @@ interface AdminAuth {
 
 function toAdminAuth(
   session: { user: Record<string, unknown> } | null,
-  email: string,
 ): AdminAuth {
-  if (!session) return { email, session: null }
+  if (!session) return { session: null }
   return {
-    email: session.user.email as string,
     session: {
       user: {
         id: session.user.id as string,
@@ -33,24 +29,29 @@ function toAdminAuth(
 
 const SEED_ADMIN_EMAIL = 'admin@dev.local'
 
+// Auth model: Better Auth is the single source of truth. In production,
+// the admin signs in via the email OTP flow and the resulting session
+// cookie is what gates every admin mutation (see src/server/admin-guard.ts
+// for the per-server-function check). CF Access, if configured, sits at
+// the Cloudflare edge as a pure network gate and never reaches this
+// code — it does not participate in the application-layer identity
+// model. Dev bootstraps a seed admin so the dashboard is usable
+// without manually signing in on every restart.
 const checkAuth = createServerFn().handler(async (): Promise<AdminAuth> => {
   const auth = getAuth()
   const headers = getRequestHeaders()
 
-  if (import.meta.env.DEV) {
-    // Try existing session first (user may have logged in manually)
-    const existing = await auth.api.getSession({ headers })
-    if (existing) {
-      return toAdminAuth(
-        existing as { user: Record<string, unknown> },
-        existing.user.email,
-      )
-    }
+  // Try the existing session first. Applies to both dev and prod —
+  // a user who already signed in should not trigger any fallback.
+  const existing = await auth.api.getSession({ headers })
+  if (existing) {
+    return toAdminAuth(existing as { user: Record<string, unknown> })
+  }
 
-    // No session — auto-login as seed admin for dev convenience.
-    // 1) Send OTP (stores a hash in the verification table; dev mode logs it)
-    // 2) Sign in with any OTP (SKIP_OTP_VERIFY bypasses hash comparison)
-    // tanstackStartCookies sets the session cookie on the response.
+  if (import.meta.env.DEV) {
+    // Dev auto-login as the seed admin. SKIP_OTP_VERIFY lets the OTP
+    // hash check pass with any code; tanstackStartCookies writes the
+    // session cookie onto the response.
     try {
       await auth.api.sendVerificationOTP({
         headers,
@@ -66,7 +67,6 @@ const checkAuth = createServerFn().handler(async (): Promise<AdminAuth> => {
 
       if (result?.token && result?.user) {
         return {
-          email: result.user.email as string,
           session: {
             user: {
               id: result.user.id as string,
@@ -81,9 +81,10 @@ const checkAuth = createServerFn().handler(async (): Promise<AdminAuth> => {
       // Auto-login failed (e.g. admin user not seeded yet)
     }
 
-    // Fallback: no admin user in DB yet (pre-seed state)
+    // Fallback: no admin user in DB yet (pre-seed state). The fake
+    // identity lets the dashboard render so the operator can run
+    // `just db-seed` from inside it without bootstrapping issues.
     return {
-      email: 'dev@localhost',
       session: {
         user: {
           id: 'dev',
@@ -95,15 +96,8 @@ const checkAuth = createServerFn().handler(async (): Promise<AdminAuth> => {
     }
   }
 
-  // Production: CF Access gate
-  const identity = await verifyCfAccess(getRequest())
-  if (!identity) throw new Error('Unauthorized')
-
-  const session = await auth.api.getSession({ headers })
-  return toAdminAuth(
-    session as { user: Record<string, unknown> } | null,
-    identity.email,
-  )
+  // Prod without a session: AdminGate renders the sign-in prompt.
+  return { session: null }
 })
 
 export const Route = createFileRoute('/@')({
