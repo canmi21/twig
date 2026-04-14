@@ -6,8 +6,11 @@ import remarkFrontmatter from 'remark-frontmatter'
 import remarkGfm from 'remark-gfm'
 import remarkDirective from 'remark-directive'
 import remarkRehype from 'remark-rehype'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import rehypeStringify from 'rehype-stringify'
+import { sanitizeSchema } from './sanitize-schema'
 import { parse as parseYaml } from 'yaml'
 import type { Root as MdastRoot, Nodes as MdastNode } from 'mdast'
 import type { Plugin } from 'unified'
@@ -143,6 +146,10 @@ export async function compile(source: string): Promise<CompileResult> {
     .use(remarkExtractDirectives, { components })
     .use(remarkExtractText, { store: textStore })
     .use(remarkRehype, { allowDangerousHtml: true })
+    // rehype-raw parses raw HTML strings (including the
+    // `<!--component:N-->` placeholders emitted by remark-extract-directives)
+    // into real hast nodes so rehype-sanitize can reason about them.
+    .use(rehypeRaw)
     .use(rehypeToc, { toc })
     .use(() =>
       rehypeShikiFromHighlighter(highlighter, {
@@ -150,7 +157,11 @@ export async function compile(source: string): Promise<CompileResult> {
         lazy: true,
       }),
     )
-    .use(rehypeStringify, { allowDangerousHtml: true })
+    // Sanitize after Shiki so the schema can greenlight the inline styles
+    // and token classes Shiki injects. See sanitize-schema.ts for the
+    // allowlist and the rationale behind each exception.
+    .use(rehypeSanitize, sanitizeSchema)
+    .use(rehypeStringify)
     .process(source)
 
   const frontmatter: Frontmatter = fmStore.raw
