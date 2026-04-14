@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { getAuth } from '~/server/better-auth'
 import { requireAdmin } from '~/server/admin-guard'
 import { getDb, getBucket } from '~/server/platform'
@@ -27,23 +27,38 @@ interface UserRow {
 
 const listUsers = createServerFn().handler(async (): Promise<UserRow[]> => {
   await requireAdmin()
-  const auth = getAuth()
-  const headers = getRequestHeaders()
-  const result = await auth.api.listUsers({
-    headers,
-    query: { limit: 100, sortBy: 'createdAt', sortDirection: 'desc' },
-  })
-  return (result as unknown as { users: Record<string, unknown>[] }).users.map(
-    (user) => ({
-      id: user.id as string,
-      name: user.name as string,
-      email: user.email as string,
-      role: (user.role as string | null) ?? null,
-      banned: (user.banned as boolean | null) ?? false,
-      banReason: (user.banReason as string | null) ?? null,
-      createdAt: String(user.createdAt),
-    }),
-  )
+  // Query Drizzle directly instead of going through Better Auth's admin
+  // plugin listUsers API. The plugin reads the session from incoming
+  // request headers, which on the first SSR request after an auto-login
+  // does not yet carry the freshly-issued cookie (see the dev fallback
+  // in src/server/admin-guard.ts for the same problem) — calling through
+  // the plugin would throw even though requireAdmin just passed. Going
+  // through Drizzle also removes the `as unknown as Record` cast that
+  // the plugin response forced.
+  const db = getDb()
+  const rows = await db
+    .select({
+      id: userTable.id,
+      name: userTable.name,
+      email: userTable.email,
+      role: userTable.role,
+      banned: userTable.banned,
+      banReason: userTable.banReason,
+      createdAt: userTable.createdAt,
+    })
+    .from(userTable)
+    .orderBy(desc(userTable.createdAt))
+    .limit(100)
+    .all()
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    banned: row.banned ?? false,
+    banReason: row.banReason,
+    createdAt: row.createdAt.toISOString(),
+  }))
 })
 
 const banUser = createServerFn({ method: 'POST' })
