@@ -35,13 +35,16 @@ type Schema = typeof defaultSchema
 
 const defaultAttrs = defaultSchema.attributes ?? {}
 
-function mergeAttrs(
-  tag: string,
-  extras: Array<string | [string, ...Array<string | number>]>,
-): Array<string | [string, ...Array<string | number>]> {
-  // defaultAttrs entries are either plain strings or tuples. Replace
-  // any existing className/style entry so our unrestricted version
-  // wins over the default value allowlist.
+// hast-util-sanitize's `PropertyDefinition` allows boolean/RegExp/null
+// values inside attribute tuples — wider than the narrow string/number
+// shape we actually emit. Borrow its type from defaultSchema so
+// `mergeAttrs` type-checks against the real Schema contract instead of
+// forcing a narrower subset that fails when we spread defaultAttrs back.
+type AttrDef = NonNullable<typeof defaultSchema.attributes>[string][number]
+
+function mergeAttrs(tag: string, extras: AttrDef[]): AttrDef[] {
+  // Replace any existing className/style entry so our unrestricted
+  // version wins over the default value allowlist.
   const existing = (defaultAttrs[tag] ?? []).filter((item) => {
     const name = Array.isArray(item) ? item[0] : item
     return name !== 'className' && name !== 'style'
