@@ -10,6 +10,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { eq } from 'drizzle-orm'
 import { getAuth } from '~/server/better-auth'
+import { requireAdmin } from '~/server/admin-guard'
 import { getDb, getBucket } from '~/server/platform'
 import { user as userTable } from '~/lib/database/auth-schema'
 import { formatDateShort } from '~/lib/utils/date'
@@ -25,6 +26,7 @@ interface UserRow {
 }
 
 const listUsers = createServerFn().handler(async (): Promise<UserRow[]> => {
+  await requireAdmin()
   const auth = getAuth()
   const headers = getRequestHeaders()
   const result = await auth.api.listUsers({
@@ -47,6 +49,7 @@ const listUsers = createServerFn().handler(async (): Promise<UserRow[]> => {
 const banUser = createServerFn({ method: 'POST' })
   .inputValidator((input: { userId: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const auth = getAuth()
     await auth.api.banUser({
       headers: getRequestHeaders(),
@@ -57,6 +60,7 @@ const banUser = createServerFn({ method: 'POST' })
 const unbanUser = createServerFn({ method: 'POST' })
   .inputValidator((input: { userId: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const auth = getAuth()
     await auth.api.unbanUser({
       headers: getRequestHeaders(),
@@ -67,6 +71,7 @@ const unbanUser = createServerFn({ method: 'POST' })
 const removeUser = createServerFn({ method: 'POST' })
   .inputValidator((input: { userId: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const auth = getAuth()
     await auth.api.removeUser({
       headers: getRequestHeaders(),
@@ -79,6 +84,7 @@ const updateUserAdmin = createServerFn({ method: 'POST' })
     (input: { userId: string; name?: string; role?: string }) => input,
   )
   .handler(async ({ data }) => {
+    await requireAdmin()
     const auth = getAuth()
     if (data.role !== undefined) {
       await auth.api.setRole({
@@ -101,8 +107,16 @@ const updateUserAdmin = createServerFn({ method: 'POST' })
 const adminUploadAvatar = createServerFn({ method: 'POST' })
   .inputValidator((input: { userId: string; base64: string }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
+    // Reject oversized payloads before decoding: base64 is 4/3 the size
+    // of its binary, so the string cap that matches a 3 MiB decoded cap
+    // is 3 MiB * 4/3 rounded up, plus a small tolerance for padding.
+    const MAX_AVATAR_BYTES = 3 * 1024 * 1024
+    if (data.base64.length > Math.ceil((MAX_AVATAR_BYTES * 4) / 3) + 4) {
+      throw new Error('Avatar must be under 3MB')
+    }
     const buf = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0))
-    if (buf.byteLength > 3 * 1024 * 1024) {
+    if (buf.byteLength > MAX_AVATAR_BYTES) {
       throw new Error('Avatar must be under 3MB')
     }
     const key = `avatar/${data.userId}.webp`

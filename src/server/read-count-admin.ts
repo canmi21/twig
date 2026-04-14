@@ -7,9 +7,11 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import { getPresence } from '~/server/platform'
+import { requireAdmin } from '~/server/admin-guard'
 
 export const getAllReadCounts = createServerFn({ method: 'GET' }).handler(
   async () => {
+    await requireAdmin()
     try {
       const binding = getPresence()
       const stub = binding.get(binding.idFromName('global'))
@@ -24,6 +26,7 @@ export const getAllReadCounts = createServerFn({ method: 'GET' }).handler(
 export const setReadCount = createServerFn({ method: 'POST' })
   .inputValidator((input: { cid: string; reads: number }) => input)
   .handler(async ({ data }) => {
+    await requireAdmin()
     const binding = getPresence()
     const stub = binding.get(binding.idFromName('global'))
     const url = new URL('https://do-internal/read-count')
