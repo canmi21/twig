@@ -10,8 +10,12 @@ declare global {
 		}
 
 		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
+		interface Locals {
+			theme: import('$lib/theme/script').Theme;
+		}
+		interface PageData {
+			theme: import('$lib/theme/script').Theme;
+		}
 		// interface PageState {}
 	}
 }

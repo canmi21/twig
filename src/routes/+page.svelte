@@ -1,9 +1,13 @@
 <script lang="ts">
-	let isDark = $state(false);
+	import { page } from '$app/state';
+	import { setThemeCookie } from '$lib/theme/script';
+
+	let isDark = $state(page.data.theme === 'dark');
 
 	function toggle() {
 		isDark = !isDark;
 		document.documentElement.classList.toggle('dark', isDark);
+		setThemeCookie(isDark ? 'dark' : 'light');
 	}
 </script>
 
