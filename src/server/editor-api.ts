@@ -7,7 +7,6 @@
  */
 
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
 import { getDb, getCache, getBucket } from '~/server/platform'
 import {
   getPostByCid,
@@ -29,8 +28,14 @@ import {
   upsertMediaRef,
 } from '~/lib/database/media'
 import { postSchema } from '~/lib/content/post-schema'
-import { verifyCfAccess } from '~/server/auth'
+import { requireAdmin } from '~/server/admin-guard'
 import { extractFrontmatterSource } from '~/lib/compiler/frontmatter'
+
+// Max decoded size for a single media upload. The pipeline only accepts
+// image mimes (see extFromMime below), so 10 MiB is a generous cap that
+// still protects the worker's memory budget from accidental or
+// adversarial oversized base64 payloads.
+const MAX_MEDIA_UPLOAD_BYTES = 10 * 1024 * 1024
 
 // ---------------------------------------------------------------------------
 // Get post by cid
@@ -59,10 +64,7 @@ interface SavePostData {
 export const savePost = createServerFn({ method: 'POST' })
   .inputValidator((input: SavePostData) => input)
   .handler(async ({ data }) => {
-    if (!import.meta.env.DEV) {
-      const identity = await verifyCfAccess(getRequest())
-      if (!identity) throw new Error('Unauthorized')
-    }
+    await requireAdmin()
 
     let extracted: ReturnType<typeof extractFrontmatterSource>
     try {
@@ -196,16 +198,32 @@ const extFromMime: Record<string, string> = {
 export const uploadMedia = createServerFn({ method: 'POST' })
   .inputValidator((input: UploadMediaData) => input)
   .handler(async ({ data }) => {
-    if (!import.meta.env.DEV) {
-      const identity = await verifyCfAccess(getRequest())
-      if (!identity) throw new Error('Unauthorized')
-    }
+    await requireAdmin()
 
     const ext = extFromMime[data.mime]
     if (!ext)
       return { ok: false as const, error: `Unsupported type: ${data.mime}` }
 
+    // Reject oversized payloads before allocating. base64 is ~4/3 the
+    // size of its binary, so a string longer than MAX * 4/3 (plus a
+    // little padding slack) is guaranteed to exceed the cap once
+    // decoded. Checking the string length first means adversarial
+    // callers cannot force the worker to allocate a huge Uint8Array.
+    const maxBase64 = Math.ceil((MAX_MEDIA_UPLOAD_BYTES * 4) / 3) + 4
+    if (data.base64.length > maxBase64) {
+      return {
+        ok: false as const,
+        error: `Media exceeds ${MAX_MEDIA_UPLOAD_BYTES} bytes`,
+      }
+    }
+
     const raw = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0))
+    if (raw.byteLength > MAX_MEDIA_UPLOAD_BYTES) {
+      return {
+        ok: false as const,
+        error: `Media exceeds ${MAX_MEDIA_UPLOAD_BYTES} bytes`,
+      }
+    }
     const hashBuf = await crypto.subtle.digest('SHA-256', raw)
     const hash = Array.from(new Uint8Array(hashBuf))
       .map((b) => b.toString(16).padStart(2, '0'))
