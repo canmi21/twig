@@ -145,6 +145,7 @@ export const savePost = createServerFn({ method: 'POST' })
           published: parsed.data.published,
         },
         html: compiled.html,
+        text: compiled.text,
         toc: compiled.toc,
         components: compiled.components,
       })

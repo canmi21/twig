@@ -81,6 +81,7 @@ const togglePublished = createServerFn({ method: 'POST' })
           published: true,
         },
         html: compiled.html,
+        text: compiled.text,
         toc: compiled.toc,
         components: compiled.components,
       })

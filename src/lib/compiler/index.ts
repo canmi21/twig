@@ -9,7 +9,7 @@ import remarkRehype from 'remark-rehype'
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core'
 import rehypeStringify from 'rehype-stringify'
 import { parse as parseYaml } from 'yaml'
-import type { Root as MdastRoot } from 'mdast'
+import type { Root as MdastRoot, Nodes as MdastNode } from 'mdast'
 import type { Plugin } from 'unified'
 import { createBundledHighlighter } from 'shiki/core'
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript'
@@ -37,6 +37,9 @@ export interface Frontmatter {
 export interface CompileResult {
   frontmatter: Frontmatter
   html: string
+  /** Plain-text projection of the body, derived from the mdast tree.
+   *  Used for previews and excerpts where HTML parsing would be fragile. */
+  text: string
   toc: TocEntry[]
   components: ComponentEntry[]
 }
@@ -52,6 +55,58 @@ const remarkExtractFrontmatter: Plugin<
     }
   }
 }
+
+// Node types that contribute no readable prose: raw code blocks, escape
+// hatches (html), frontmatter, structural directive widgets, horizontal
+// rules, and footnote scaffolding.
+const TEXT_SKIP_TYPES = new Set<string>([
+  'yaml',
+  'code',
+  'html',
+  'containerDirective',
+  'leafDirective',
+  'textDirective',
+  'thematicBreak',
+  'definition',
+  'footnoteDefinition',
+  'footnoteReference',
+])
+
+// Block-level containers whose completion should emit a word boundary so
+// adjacent block text (e.g. paragraphs, list items) does not run together.
+const TEXT_BLOCK_TYPES = new Set<string>([
+  'paragraph',
+  'heading',
+  'blockquote',
+  'listItem',
+  'tableRow',
+])
+
+const remarkExtractText: Plugin<[{ store: { text: string } }], MdastRoot> =
+  (options) => (tree) => {
+    const parts: string[] = []
+
+    const walk = (node: MdastNode) => {
+      if (TEXT_SKIP_TYPES.has(node.type)) return
+
+      if (node.type === 'text' || node.type === 'inlineCode') {
+        parts.push(node.value)
+        return
+      }
+
+      if ('children' in node) {
+        for (const child of node.children) {
+          walk(child as MdastNode)
+        }
+        if (TEXT_BLOCK_TYPES.has(node.type)) {
+          parts.push(' ')
+        }
+      }
+    }
+
+    walk(tree)
+    options.store.text = parts.join('').replaceAll(/\s+/g, ' ').trim()
+  }
 
 const createContentHighlighter = createBundledHighlighter({
   langs: bundledLanguages,
@@ -74,6 +129,7 @@ async function getContentHighlighter() {
 
 export async function compile(source: string): Promise<CompileResult> {
   const fmStore: { raw?: string } = {}
+  const textStore: { text: string } = { text: '' }
   const toc: TocEntry[] = []
   const components: ComponentEntry[] = []
   const highlighter = await getContentHighlighter()
@@ -85,6 +141,7 @@ export async function compile(source: string): Promise<CompileResult> {
     .use(remarkExtractFrontmatter, { store: fmStore })
     .use(remarkDirective)
     .use(remarkExtractDirectives, { components })
+    .use(remarkExtractText, { store: textStore })
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeToc, { toc })
     .use(() =>
@@ -103,6 +160,7 @@ export async function compile(source: string): Promise<CompileResult> {
   return {
     frontmatter,
     html: String(html),
+    text: textStore.text,
     toc,
     components,
   }

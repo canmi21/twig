@@ -57,14 +57,9 @@ interface HomeRecentPost {
   tags?: string[]
 }
 
-function extractTextPreview(html: string, maxChars: number): string {
-  const plain = html
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-  if (plain.length <= maxChars) return plain
-  return `${plain.slice(0, maxChars).trimEnd()}…`
+function truncatePreview(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text
+  return `${text.slice(0, maxChars).trimEnd()}…`
 }
 
 interface HomeData {
@@ -108,9 +103,7 @@ const getHomeData = createServerFn().handler(async (): Promise<HomeData> => {
         title: p.title,
         category: p.category,
         description: p.description,
-        preview: full
-          ? extractTextPreview(full.html, HOME_PREVIEW_MAX_CHARS)
-          : '',
+        preview: full ? truncatePreview(full.text, HOME_PREVIEW_MAX_CHARS) : '',
         createdAt: p.createdAt,
         tags: p.tags,
       }

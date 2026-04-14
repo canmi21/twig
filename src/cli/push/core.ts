@@ -338,6 +338,7 @@ async function executeAddOrUpdate(
   await writePostKv(kv, post.slug, {
     frontmatter: post.frontmatter,
     html: compiled.html,
+    text: compiled.text,
     toc: compiled.toc,
     components: compiled.components,
   })

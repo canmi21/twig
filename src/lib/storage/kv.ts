@@ -6,6 +6,8 @@ import type { PostRow } from '../database/posts'
 interface PostKvEntry {
   frontmatter: CompileResult['frontmatter']
   html: string
+  /** Plain-text projection of the body for previews and excerpts. */
+  text: string
   toc: CompileResult['toc']
   components: CompileResult['components']
 }

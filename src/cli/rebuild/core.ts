@@ -41,6 +41,7 @@ export async function rebuildCore(opts: {
     await writePostKv(kv, row.slug, {
       frontmatter,
       html: compiled.html,
+      text: compiled.text,
       toc: compiled.toc,
       components: compiled.components,
     })
