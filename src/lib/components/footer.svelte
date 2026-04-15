@@ -28,7 +28,7 @@
 		'inline-flex size-4 shrink-0 items-center justify-center hover:text-foreground';
 </script>
 
-<footer class="border-t border-border">
+<footer class="border-t border-divider">
 	<div class="px-5 py-3">
 		<div class="mx-auto w-full px-3 sm:px-6">
 			<div class="min-w-0 pt-4 text-foreground/72">
@@ -39,7 +39,7 @@
 				</div>
 				<div class="mt-3 flex flex-wrap items-center gap-4 text-muted-foreground">
 					<a
-						href={repoUrl}
+						href="https://github.com/canmi21"
 						target="_blank"
 						rel="noopener noreferrer"
 						aria-label="GitHub"
@@ -125,7 +125,7 @@
 	</div>
 
 	<div class="px-5 pb-3">
-		<div class="mx-3 border-t border-dashed border-border sm:mx-6"></div>
+		<div class="mx-3 border-t border-dashed border-divider sm:mx-6"></div>
 		<div
 			class="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[0.8125rem] text-muted-foreground sm:flex-row sm:items-end sm:justify-between sm:px-6"
 		>

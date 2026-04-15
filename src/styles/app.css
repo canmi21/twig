@@ -4,6 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 html {
+	--nav-h: 3.75rem;
 	background-color: var(--color-background);
 	color: var(--color-foreground);
 }
