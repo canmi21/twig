@@ -35,7 +35,11 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
-			strategy: ['cookie', 'preferredLanguage', 'baseLocale'],
+			// `preferredLanguage` is intentionally omitted — hooks.server.ts owns
+			// Accept-Language negotiation (see `resolveLocaleFromAcceptLanguage`),
+			// because Paraglide's default matcher silently routes zh-TW/zh-HK to
+			// our `zh` locale, which isn't what we want.
+			strategy: ['cookie', 'baseLocale'],
 			cookieName: 'language'
 		})
 	],

@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 
 	import { m } from '$lib/paraglide/messages';
+	import { getLocale } from '$lib/paraglide/runtime';
 
 	import GitHub from '$lib/icons/github.svelte';
 	import Bluesky from '$lib/icons/bluesky.svelte';
@@ -166,15 +167,27 @@
 					</span>
 					<span>{m['footer.status.normal']()}</span>
 				</a>
-				<a
-					href={m['footer.icp.href']()}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="inline-flex items-center gap-1 hover:text-foreground"
-				>
-					<Lollipop class="size-3.25" strokeWidth={2} />
-					<span>{m['footer.icp.text']()}</span>
-				</a>
+				{#if getLocale() === 'zh'}
+					<a
+						href="https://beian.miit.gov.cn"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-1 hover:text-foreground"
+					>
+						<Lollipop class="size-3.25" strokeWidth={2} />
+						<span>{m['footer.icp.text']()}</span>
+					</a>
+				{:else}
+					<a
+						href="https://icp.gov.moe/?keyword=20260000"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-flex items-center gap-1 hover:text-foreground"
+					>
+						<Lollipop class="size-3.25" strokeWidth={2} />
+						<span>{m['footer.icp.text']()}</span>
+					</a>
+				{/if}
 				{#if commitHash === 'dev'}
 					<a
 						href={repoUrl}
