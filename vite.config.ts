@@ -19,10 +19,18 @@ function resolveGitCommit(): string {
 	}
 }
 
+// Resolves the public origin for this deployment at config-load time.
+// Priority: PUBLIC_URL env var → hard-coded fallback.
+function resolvePublicUrl(): string {
+	if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL;
+	return 'https://canmi.net';
+}
+
 export default defineConfig({
 	plugins: [tailwindcss(), Icons({ compiler: 'svelte' }), sveltekit()],
 	define: {
-		__APP_GIT_COMMIT__: JSON.stringify(resolveGitCommit())
+		__APP_GIT_COMMIT__: JSON.stringify(resolveGitCommit()),
+		__PUBLIC_URL__: JSON.stringify(resolvePublicUrl())
 	},
 	server: {
 		port: 23315,

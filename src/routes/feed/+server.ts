@@ -3,8 +3,7 @@ import type { RequestHandler } from './$types';
 
 export const prerender = false;
 
-export const GET: RequestHandler = ({ platform }) => {
-	const baseUrl = platform?.env.PUBLIC_URL ?? 'https://canmi.net';
+export const GET: RequestHandler = () => {
 	const now = new Date();
 	const year = now.getFullYear();
 
@@ -14,16 +13,16 @@ export const GET: RequestHandler = ({ platform }) => {
 	updated.setMinutes(0, 0, 0);
 
 	const xml = generateAtomFeed({
-		id: `${baseUrl}/feed`,
+		id: `${__PUBLIC_URL__}/feed`,
 		title: 'Canmi',
 		subtitle: 'A placeholder subtitle — fill me in',
 		updated,
-		authors: [{ name: 'Canmi', email: 't@canmi.icu', uri: baseUrl }],
+		authors: [{ name: 'Canmi', email: 't@canmi.icu', uri: __PUBLIC_URL__ }],
 		links: [
-			{ href: baseUrl, rel: 'alternate', type: 'text/html' },
-			{ href: `${baseUrl}/feed`, rel: 'self', type: 'application/atom+xml' }
+			{ href: __PUBLIC_URL__, rel: 'alternate', type: 'text/html' },
+			{ href: `${__PUBLIC_URL__}/feed`, rel: 'self', type: 'application/atom+xml' }
 		],
-		icon: `${baseUrl}/favicon.svg`,
+		icon: `${__PUBLIC_URL__}/favicon.svg`,
 		rights: `© ${year} Canmi`,
 		generator: { text: 'feedsmith' },
 		categories: [{ term: 'tech' }, { term: 'life' }],
