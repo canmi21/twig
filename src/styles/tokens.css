@@ -5,7 +5,7 @@
 	--color-muted-foreground: var(--color-neutral-500);
 	--color-border: var(--color-neutral-200);
 	--color-divider: var(--color-neutral-100);
-	--color-success: #7ac8a7;
+	--color-success: #6d907e;
 	--color-destructive: var(--color-red-700);
 }
 
@@ -15,5 +15,6 @@
 	--color-muted: var(--color-neutral-800);
 	--color-border: var(--color-neutral-700);
 	--color-divider: var(--color-neutral-800);
+	--color-success: #587969;
 	--color-destructive: var(--color-red-400);
 }

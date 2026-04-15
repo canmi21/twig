@@ -35,7 +35,7 @@ All colors live in `src/styles/tokens.css` as two layers:
 | `muted-foreground` | neutral-500 | neutral-500 | Secondary text                                   |
 | `border`           | neutral-200 | neutral-700 | Outlines that must read (buttons, inputs)        |
 | `divider`          | neutral-100 | neutral-800 | Soft visual separators (nav, footer, sections)   |
-| `success`          | `#7ac8a7`   | same        | Positive status                                  |
+| `success`          | `#6d907e`   | `#587969`   | Positive status                                  |
 | `destructive`      | red-700     | red-400     | Errors                                           |
 
 **Hard rule:** project code uses semantic tokens only (`bg-background`, `text-muted-foreground`, `border-border`, …). No raw `bg-neutral-900`, no hex. New semantics go in `tokens.css` pointing at a physical `var(--color-*)`. For one-off intermediate dimming use opacity modifiers (`text-foreground/72`) — don't add a token per level.
