@@ -1,13 +1,29 @@
 <script lang="ts">
 	import '../styles/app.css';
 	import { page } from '$app/state';
+	import { baseLocale, locales } from '$lib/paraglide/runtime';
+	import { canonicalPath, htmlLangFor, localizedPath } from '$lib/i18n/urls';
 	import Footer from '$lib/components/footer.svelte';
 
 	let { data, children } = $props();
+
+	const alternateLocales = locales.filter((l) => l !== baseLocale);
 </script>
 
 <svelte:head>
-	<link rel="canonical" href="{__PUBLIC_URL__}{page.url.pathname}" />
+	<link rel="canonical" href="{__PUBLIC_URL__}{canonicalPath(page.url)}" />
+	{#each alternateLocales as locale (locale)}
+		<link
+			rel="alternate"
+			hreflang={htmlLangFor(locale)}
+			href="{__PUBLIC_URL__}{localizedPath(page.url.pathname, locale)}"
+		/>
+	{/each}
+	<link
+		rel="alternate"
+		hreflang="x-default"
+		href="{__PUBLIC_URL__}{localizedPath(page.url.pathname, baseLocale)}"
+	/>
 </svelte:head>
 
 <main class="flex min-h-svh flex-col">
