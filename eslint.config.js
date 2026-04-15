@@ -2,6 +2,7 @@ import prettier from 'eslint-config-prettier';
 import path from 'node:path';
 import { includeIgnoreFile } from '@eslint/compat';
 import js from '@eslint/js';
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import svelte from 'eslint-plugin-svelte';
 import { defineConfig } from 'eslint/config';
 import globals from 'globals';
@@ -35,6 +36,18 @@ export default defineConfig(
 				parser: ts.parser,
 				svelteConfig
 			}
+		}
+	},
+	{
+		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js', '**/*.ts', '**/*.tsx'],
+		plugins: { 'better-tailwindcss': betterTailwindcss },
+		settings: {
+			'better-tailwindcss': {
+				entryPoint: 'src/styles/app.css'
+			}
+		},
+		rules: {
+			'better-tailwindcss/enforce-canonical-classes': 'warn'
 		}
 	},
 	{

@@ -3,6 +3,7 @@
 	--color-foreground: var(--color-neutral-900);
 	--color-border: var(--color-neutral-300);
 	--color-muted: var(--color-neutral-100);
+	--color-success: #7ac8a7;
 }
 
 .dark {

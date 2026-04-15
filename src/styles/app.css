@@ -7,3 +7,11 @@ html {
 	background-color: var(--color-background);
 	color: var(--color-foreground);
 }
+
+/* Optical-weight outline for Mingcute "line" icons that otherwise read too thin
+   next to filled icons in the footer row. */
+.footer-icon-bold > svg path[fill='currentColor'] {
+	stroke: currentColor;
+	stroke-width: 0.75;
+	paint-order: stroke fill;
+}
