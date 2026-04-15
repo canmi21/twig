@@ -27,7 +27,7 @@
 		mw: IconWorld2Line,
 		en: IconTranslateLine,
 		zh: IconTranslate2Line,
-		tw: IconTranslate2Line,
+		tw: IconTranslate2AiLine,
 		ja: IconTranslate2AiLine
 	};
 
@@ -66,13 +66,14 @@
 								{@const Icon = LOCALE_ICONS[l]}
 								<DropdownMenu.Item
 									onSelect={() => handleSelect(l)}
-									class="flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1 text-left text-sm outline-none data-highlighted:bg-muted {l ===
-									currentLocale
-										? 'text-foreground'
-										: 'text-muted-foreground'}"
+									class="group flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1 text-left text-sm outline-none data-highlighted:bg-muted"
 								>
-									<span>{LOCALE_LABELS[l]}</span>
-									<Icon class="h-4 w-auto" />
+									<span class={l === currentLocale ? 'text-foreground' : 'text-muted-foreground'}
+										>{LOCALE_LABELS[l]}</span
+									>
+									<Icon
+										class="h-4 w-auto text-muted-foreground group-data-highlighted:text-foreground"
+									/>
 								</DropdownMenu.Item>
 							{/each}
 						</div>
