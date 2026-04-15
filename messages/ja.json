@@ -3,6 +3,12 @@
 	"footer.runtime.days": "もう {days} 日目だよ〜",
 	"footer.presence": "いま {count} 人がみてるよ",
 	"footer.link.visit": "{service} にいく",
+	"footer.copyright.prefix": "Copyright © {year} ",
+	"footer.copyright.middle": " / ライセンスは ",
+	"footer.copyright.suffix": " だよ〜",
+	"footer.status.normal": "システムはげんきだよ〜",
+	"footer.icp.text": "ICP 20260000",
+	"footer.icp.href": "https://icp.gov.moe/?keyword=20260000",
 	"theme.toggle.light": "あかるいテーマにする",
 	"theme.toggle.dark": "くらいテーマにする",
 	"language.switcher": "ことばをかえる"

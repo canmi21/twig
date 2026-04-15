@@ -3,6 +3,12 @@
 	"footer.runtime.days": "Running for {days} days",
 	"footer.presence": "{count} people browsing",
 	"footer.link.visit": "Go to {service}",
+	"footer.copyright.prefix": "Copyright © {year} ",
+	"footer.copyright.middle": ". Released under the ",
+	"footer.copyright.suffix": " License.",
+	"footer.status.normal": "All systems normal.",
+	"footer.icp.text": "ICP 20260000",
+	"footer.icp.href": "https://icp.gov.moe/?keyword=20260000",
 	"theme.toggle.light": "Switch to light theme",
 	"theme.toggle.dark": "Switch to dark theme",
 	"language.switcher": "Switch language"

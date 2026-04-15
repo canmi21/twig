@@ -3,6 +3,12 @@
 	"footer.runtime.days": "小站已经活了 {days} 天",
 	"footer.presence": "{count} 位小伙伴正在浏览呢",
 	"footer.link.visit": "Go to {service}",
+	"footer.copyright.prefix": "Copyright © {year} ",
+	"footer.copyright.middle": ". Released under the ",
+	"footer.copyright.suffix": " License.",
+	"footer.status.normal": "All systems normal.",
+	"footer.icp.text": "ICP 20260000",
+	"footer.icp.href": "https://icp.gov.moe/?keyword=20260000",
 	"theme.toggle.light": "Switch to light theme",
 	"theme.toggle.dark": "Switch to dark theme",
 	"language.switcher": "Switch language"

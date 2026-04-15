@@ -3,6 +3,12 @@
 	"footer.runtime.days": "小站已经活了 {days} 天",
 	"footer.presence": "{count} 位小伙伴正在浏览呢",
 	"footer.link.visit": "前往 {service}",
+	"footer.copyright.prefix": "版权所有 © {year} ",
+	"footer.copyright.middle": " 使用请遵守 ",
+	"footer.copyright.suffix": " 开源协议",
+	"footer.status.normal": "服务正常呢",
+	"footer.icp.text": "沪ICP备 2025141863号",
+	"footer.icp.href": "https://beian.miit.gov.cn",
 	"theme.toggle.light": "切换到浅色主题",
 	"theme.toggle.dark": "切换到深色主题",
 	"language.switcher": "切换语言"

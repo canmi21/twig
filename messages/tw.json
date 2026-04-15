@@ -3,6 +3,12 @@
 	"footer.runtime.days": "小站已經活了 {days} 天",
 	"footer.presence": "{count} 位小夥伴正在瀏覽呢",
 	"footer.link.visit": "前往 {service}",
+	"footer.copyright.prefix": "版權所有 © {year} ",
+	"footer.copyright.middle": " 使用請遵守 ",
+	"footer.copyright.suffix": " 開源協議",
+	"footer.status.normal": "系統正常運作中～",
+	"footer.icp.text": "ICP 20260000",
+	"footer.icp.href": "https://icp.gov.moe/?keyword=20260000",
 	"theme.toggle.light": "切換到淺色主題",
 	"theme.toggle.dark": "切換到深色主題",
 	"language.switcher": "切換語言"

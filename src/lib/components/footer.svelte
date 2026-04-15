@@ -135,21 +135,19 @@
 		<div
 			class="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[0.8125rem] text-muted-foreground sm:flex-row sm:items-end sm:justify-between sm:px-6"
 		>
-			<span class="text-left">
-				Copyright © {copyrightYear}
-				<a
+			<span class="text-left"
+				>{m['footer.copyright.prefix']({ year: copyrightYear })}<a
 					href="https://ill.li"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="hover:text-foreground">Canmi</a
-				>. Released under the
-				<a
+				>{m['footer.copyright.middle']()}<a
 					href="https://spdx.org/licenses/AGPL-3.0-or-later"
 					target="_blank"
 					rel="noopener noreferrer"
-					class="hover:text-foreground">AGPLv3 License</a
-				>.
-			</span>
+					class="hover:text-foreground">AGPLv3</a
+				>{m['footer.copyright.suffix']()}</span
+			>
 			<span class="flex flex-wrap items-center gap-x-2 text-left sm:justify-end sm:text-right">
 				<a
 					href="https://status.canmi.net/8zxeLKSP2t"
@@ -166,16 +164,16 @@
 						<span class="absolute top-1/2 left-1/2 size-1.25 -translate-1/2 rounded-full bg-success"
 						></span>
 					</span>
-					<span>All systems normal.</span>
+					<span>{m['footer.status.normal']()}</span>
 				</a>
 				<a
-					href="https://icp.gov.moe/?keyword=20260000"
+					href={m['footer.icp.href']()}
 					target="_blank"
 					rel="noopener noreferrer"
 					class="inline-flex items-center gap-1 hover:text-foreground"
 				>
 					<Lollipop class="size-3.25" strokeWidth={2} />
-					<span>ICP 20260000</span>
+					<span>{m['footer.icp.text']()}</span>
 				</a>
 				{#if commitHash === 'dev'}
 					<a
