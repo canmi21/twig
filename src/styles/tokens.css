@@ -4,8 +4,8 @@
 	--color-muted: var(--color-neutral-50);
 	--color-muted-foreground: var(--color-neutral-500);
 	--color-border: var(--color-neutral-200);
-	--color-divider: var(--color-neutral-100);
-	--color-success: #6d907e;
+	--color-divider: var(--color-neutral-200);
+	--color-success: #75d199;
 	--color-destructive: var(--color-red-700);
 }
 
