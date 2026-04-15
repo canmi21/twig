@@ -20,8 +20,9 @@
 	const accountName = 'Canmi';
 	const presenceCount = 1;
 	const copyrightYear = 2026;
-	const commitHash = 'dev';
 	const repoUrl = 'https://github.com/canmi21/taki';
+	const commitHash = __APP_GIT_COMMIT__;
+	const shortHash = commitHash.slice(0, 7);
 
 	const iconContainer =
 		'inline-flex size-4 shrink-0 items-center justify-center hover:text-foreground';
@@ -165,16 +166,29 @@
 					<Lollipop class="size-3.25" strokeWidth={2} />
 					<span>ICP 20260000</span>
 				</a>
-				<a
-					href={repoUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					title={commitHash}
-					class="inline-flex items-center gap-1 hover:text-foreground"
-				>
-					<GitMerge class="size-3.25" strokeWidth={2} />
-					<span>{commitHash}</span>
-				</a>
+				{#if commitHash === 'dev'}
+					<a
+						href={repoUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						title={commitHash}
+						class="inline-flex items-center gap-1 hover:text-foreground"
+					>
+						<GitMerge class="size-3.25" strokeWidth={2} />
+						<span>{shortHash}</span>
+					</a>
+				{:else}
+					<a
+						href="https://github.com/canmi21/taki/commit/{commitHash}"
+						target="_blank"
+						rel="noopener noreferrer"
+						title={commitHash}
+						class="inline-flex items-center gap-1 hover:text-foreground"
+					>
+						<GitMerge class="size-3.25" strokeWidth={2} />
+						<span>{shortHash}</span>
+					</a>
+				{/if}
 			</span>
 		</div>
 	</div>
