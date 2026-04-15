@@ -21,6 +21,8 @@
 html {
 	background-color: var(--color-background);
 	color: var(--color-foreground);
+	scrollbar-color: var(--color-scrollbar) transparent;
+	scrollbar-width: thin;
 }
 
 /* Optical-weight outline for Mingcute "line" icons that otherwise read too thin

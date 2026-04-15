@@ -31,10 +31,11 @@ All colors live in `src/styles/tokens.css` as two layers:
 | ------------------ | ----------- | ----------- | ------------------------------------------------ |
 | `background`       | white       | neutral-900 | Page surface                                     |
 | `foreground`       | neutral-900 | neutral-300 | Default body text                                |
-| `muted`            | neutral-50  | neutral-800 | Elevated / tinted surface (hover, raised, inset) |
+| `muted`            | neutral-100 | neutral-800 | Elevated / tinted surface (hover, raised, inset) |
 | `muted-foreground` | neutral-500 | neutral-500 | Secondary text                                   |
 | `border`           | neutral-200 | neutral-700 | Outlines that must read (buttons, inputs)        |
 | `divider`          | neutral-200 | neutral-800 | Soft visual separators (nav, footer, sections)   |
+| `scrollbar`        | neutral-300 | neutral-800 | Browser scrollbar thumb (via `scrollbar-color`)  |
 | `success`          | `#75d199`   | `#587969`   | Positive status                                  |
 | `destructive`      | red-700     | red-400     | Errors                                           |
 
