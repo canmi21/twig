@@ -6,6 +6,7 @@ bun.lockb
 .svelte-kit
 build
 .wrangler
+src/lib/paraglide
 
 # Generated
 worker-configuration.d.ts

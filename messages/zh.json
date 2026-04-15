@@ -1,0 +1,9 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"footer_greeting": "你好，{name}",
+	"footer_runtime_days": "小站已经活了 {days} 天",
+	"footer_presence": "{count} 位小伙伴正在浏览呢",
+	"footer_status_normal": "一切系统正常。",
+	"theme_toggle_to_light": "切换到浅色模式",
+	"theme_toggle_to_dark": "切换到深色模式"
+}

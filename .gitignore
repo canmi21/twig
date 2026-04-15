@@ -2,6 +2,7 @@ node_modules
 .svelte-kit
 build
 .wrangler
+src/lib/paraglide
 .env
 .env.*
 !.env.example

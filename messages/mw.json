@@ -1,0 +1,9 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"footer_greeting": "Hi～ {name} さん",
+	"footer_runtime_days": "小站 alive 了 {days} days",
+	"footer_presence": "{count} 位小伙伴 are browsing",
+	"footer_status_normal": "All systems 正常です",
+	"theme_toggle_to_light": "Switch to 浅色 モード",
+	"theme_toggle_to_dark": "Switch to 深色 モード"
+}

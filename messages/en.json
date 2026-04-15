@@ -1,0 +1,9 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"footer_greeting": "Hi, {name}",
+	"footer_runtime_days": "Site has been alive for {days} days",
+	"footer_presence": "{count} people are browsing",
+	"footer_status_normal": "All systems normal.",
+	"theme_toggle_to_light": "Switch to light mode",
+	"theme_toggle_to_dark": "Switch to dark mode"
+}

@@ -1,0 +1,9 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"footer_greeting": "こんにちは、{name}",
+	"footer_runtime_days": "サイトは {days} 日間生きています",
+	"footer_presence": "{count} 人が閲覧中",
+	"footer_status_normal": "すべてのシステムは正常です。",
+	"theme_toggle_to_light": "ライトモードに切り替え",
+	"theme_toggle_to_dark": "ダークモードに切り替え"
+}

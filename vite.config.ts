@@ -1,3 +1,4 @@
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { execFileSync } from 'node:child_process';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
@@ -27,7 +28,17 @@ function resolvePublicUrl(): string {
 }
 
 export default defineConfig({
-	plugins: [tailwindcss(), Icons({ compiler: 'svelte' }), sveltekit()],
+	plugins: [
+		tailwindcss(),
+		Icons({ compiler: 'svelte' }),
+		sveltekit(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
+			strategy: ['cookie', 'preferredLanguage', 'baseLocale'],
+			cookieName: 'language'
+		})
+	],
 	define: {
 		__APP_GIT_COMMIT__: JSON.stringify(resolveGitCommit()),
 		__PUBLIC_URL__: JSON.stringify(resolvePublicUrl())
