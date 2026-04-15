@@ -10,12 +10,13 @@ Node 25 (dev/build) → CF Workers prod via `@sveltejs/adapter-cloudflare`. Bun 
 
 Everything that can be mechanical is mechanical — treat the gate as authoritative, don't re-check by hand.
 
-| Gate                  | Runs                                                                       | When               |
-| --------------------- | -------------------------------------------------------------------------- | ------------------ |
-| Lefthook `pre-commit` | Prettier `--write` + ESLint `--fix` on staged files (parallel, auto-stage) | Every commit, auto |
-| Lefthook `commit-msg` | commitlint (Conventional Commits per `commitlint.config.js`)               | Every commit, auto |
-| `just check`          | `wrangler types` → `svelte-kit sync` → `svelte-check`                      | On demand (slow)   |
-| `bun run build`       | `wrangler types --check` → `vite build`                                    | Pre-release / CI   |
+| Gate                  | Runs                                                                                   | When               |
+| --------------------- | -------------------------------------------------------------------------------------- | ------------------ |
+| Lefthook `pre-commit` | Prettier `--write` + ESLint `--fix` on staged files + `tsc --noEmit` on the whole proj | Every commit, auto |
+| Lefthook `commit-msg` | commitlint (Conventional Commits per `commitlint.config.js`)                           | Every commit, auto |
+| `just typecheck`      | `tsc --noEmit` (fast, ~1s, TS files only)                                              | On demand          |
+| `just check`          | `wrangler types` → `svelte-kit sync` → `svelte-check` (types + a11y warnings)          | On demand (slow)   |
+| `bun run build`       | `wrangler types --check` → `vite build`                                                | Pre-release / CI   |
 
 `just check` is the authoritative type + a11y gate and the only place Svelte 5's `a11y_*` compiler warnings surface — **zero tolerance** for any of them. Run before a release or PR push; too slow for pre-commit.
 

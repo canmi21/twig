@@ -3,14 +3,17 @@ pre-commit:
   jobs:
     - name: prettier
       glob: '*.{js,ts,svelte,json,jsonc,css,md,yml,yaml,html}'
-      run: bunx prettier --write {staged_files}
+      run: ./node_modules/.bin/prettier --write --cache --cache-location node_modules/.cache/prettier-cache {staged_files}
       stage_fixed: true
     - name: eslint
       glob: '*.{js,ts,svelte}'
-      run: bunx eslint --fix {staged_files}
+      run: ./node_modules/.bin/eslint --fix {staged_files}
       stage_fixed: true
+    - name: typecheck
+      glob: '*.{ts,svelte}'
+      run: ./node_modules/.bin/tsc --noEmit
 
 commit-msg:
   jobs:
     - name: commitlint
-      run: bunx --no -- commitlint --edit {1}
+      run: ./node_modules/.bin/commitlint --edit {1}

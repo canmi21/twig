@@ -5,6 +5,10 @@ _default:
 preview:
     bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173
 
+# Fast project-wide TypeScript typecheck (.ts only, ~1s).
+typecheck:
+    ./node_modules/.bin/tsc --noEmit
+
 # Full type + a11y gate (wrangler types → svelte-kit sync → svelte-check).
 check:
     bunx wrangler types --check
