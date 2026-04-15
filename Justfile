@@ -1,0 +1,17 @@
+_default:
+    @just --list
+
+# Serve the built CF Worker bundle via miniflare on :4173.
+preview:
+    bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173
+
+# Full type + a11y gate (wrangler types → svelte-kit sync → svelte-check).
+check:
+    bunx wrangler types --check
+    bunx svelte-kit sync
+    bunx svelte-check --tsconfig ./tsconfig.json
+
+# Watch mode for the type + a11y gate.
+check-watch:
+    bunx svelte-kit sync
+    bunx svelte-check --tsconfig ./tsconfig.json --watch
