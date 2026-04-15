@@ -7,7 +7,10 @@
 	"footer.copyright.middle": ". Released under the ",
 	"footer.copyright.suffix": " License.",
 	"footer.status.normal": "All systems normal.",
+	"footer.status.aria": "Check system status",
 	"footer.icp.text": "ICP 20260000",
+	"footer.icp.aria": "View ICP filing",
+	"footer.commit.aria": "View commit {hash}",
 	"theme.toggle.light": "Switch to light theme",
 	"theme.toggle.dark": "Switch to dark theme",
 	"language.switcher": "Switch language"

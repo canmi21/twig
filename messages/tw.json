@@ -7,7 +7,10 @@
 	"footer.copyright.middle": " 使用請遵守 ",
 	"footer.copyright.suffix": " 開源協議",
 	"footer.status.normal": "系統正常運作中～",
+	"footer.status.aria": "查看系統狀態",
 	"footer.icp.text": "ICP 20260000",
+	"footer.icp.aria": "查看備案資訊",
+	"footer.commit.aria": "查看提交 {hash}",
 	"theme.toggle.light": "切換到淺色主題",
 	"theme.toggle.dark": "切換到深色主題",
 	"language.switcher": "切換語言"

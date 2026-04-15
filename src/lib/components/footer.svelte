@@ -30,7 +30,7 @@
 	const shortHash = commitHash.slice(0, 7);
 
 	const iconContainer =
-		'inline-flex size-4 shrink-0 items-center justify-center hover:text-foreground';
+		'inline-flex size-4 shrink-0 items-center justify-center hover:text-foreground focus-visible:text-foreground focus-visible:outline-none';
 </script>
 
 <footer class="border-t border-divider">
@@ -150,12 +150,7 @@
 				>{m['footer.copyright.suffix']()}</span
 			>
 			<span class="flex flex-wrap items-center gap-x-2 text-left sm:justify-end sm:text-right">
-				<a
-					href="https://status.canmi.net/8zxeLKSP2t"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="relative inline-block hover:text-foreground"
-				>
+				<span class="relative inline-block">
 					<span aria-hidden="true" class="absolute top-1/2 -left-3 size-1.5 -translate-y-1/2">
 						<span class="absolute inset-0 rounded-full bg-success motion-safe:animate-breathe"
 						></span>
@@ -165,52 +160,61 @@
 						<span class="absolute top-1/2 left-1/2 size-1.25 -translate-1/2 rounded-full bg-success"
 						></span>
 					</span>
-					<span>{m['footer.status.normal']()}</span>
-				</a>
-				{#if getLocale() === 'zh'}
 					<a
-						href="https://beian.miit.gov.cn"
+						href="https://status.canmi.net/8zxeLKSP2t"
 						target="_blank"
 						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 hover:text-foreground"
+						aria-label={m['footer.status.aria']()}
+						class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+						>{m['footer.status.normal']()}</a
 					>
-						<Lollipop class="size-3.25" strokeWidth={2} />
-						<span>{m['footer.icp.text']()}</span>
-					</a>
-				{:else}
-					<a
-						href="https://icp.gov.moe/?keyword=20260000"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="inline-flex items-center gap-1 hover:text-foreground"
-					>
-						<Lollipop class="size-3.25" strokeWidth={2} />
-						<span>{m['footer.icp.text']()}</span>
-					</a>
-				{/if}
-				{#if commitHash === 'dev'}
-					<a
-						href={repoUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						title={commitHash}
-						class="inline-flex items-center gap-1 hover:text-foreground"
-					>
-						<GitMerge class="size-3.25" strokeWidth={2} />
-						<span>{shortHash}</span>
-					</a>
-				{:else}
-					<a
-						href="https://github.com/canmi21/taki/commit/{commitHash}"
-						target="_blank"
-						rel="noopener noreferrer"
-						title={commitHash}
-						class="inline-flex items-center gap-1 hover:text-foreground"
-					>
-						<GitMerge class="size-3.25" strokeWidth={2} />
-						<span>{shortHash}</span>
-					</a>
-				{/if}
+				</span>
+				<span class="inline-flex items-center gap-1">
+					<Lollipop class="size-3.25" strokeWidth={2} aria-hidden="true" />
+					{#if getLocale() === 'zh'}
+						<a
+							href="https://beian.miit.gov.cn"
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label={m['footer.icp.aria']()}
+							class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+							>{m['footer.icp.text']()}</a
+						>
+					{:else}
+						<a
+							href="https://icp.gov.moe/?keyword=20260000"
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label={m['footer.icp.aria']()}
+							class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+							>{m['footer.icp.text']()}</a
+						>
+					{/if}
+				</span>
+				<span class="inline-flex items-center gap-1">
+					<GitMerge class="size-3.25" strokeWidth={2} aria-hidden="true" />
+					{#if commitHash === 'dev'}
+						<a
+							href={repoUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							title={commitHash}
+							aria-label={m['footer.commit.aria']({ hash: shortHash })}
+							class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+							>{shortHash}</a
+						>
+					{:else}
+						<a
+							href="https://github.com/canmi21/taki/commit/{commitHash}"
+							target="_blank"
+							rel="noopener noreferrer"
+							title={commitHash}
+							aria-label={m['footer.commit.aria']({ hash: shortHash })}
+							class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+							>{shortHash}</a
+						>
+					{/if}
+				</span>
 			</span>
 		</div>
 	</div>
