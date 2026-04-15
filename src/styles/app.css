@@ -19,7 +19,6 @@
 }
 
 html {
-	--nav-h: 3.75rem;
 	background-color: var(--color-background);
 	color: var(--color-foreground);
 }
