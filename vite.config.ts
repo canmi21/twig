@@ -7,5 +7,12 @@ export default defineConfig({
 	server: {
 		port: 23315,
 		strictPort: true
+	},
+	build: {
+		rollupOptions: {
+			output: {
+				hashCharacters: 'hex'
+			}
+		}
 	}
 });

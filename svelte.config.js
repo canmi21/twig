@@ -8,6 +8,7 @@ const config = {
 	},
 	kit: {
 		adapter: adapter(),
+		appDir: '_app',
 		files: { assets: 'public' }
 	}
 };

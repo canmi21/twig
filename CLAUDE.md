@@ -24,7 +24,7 @@ Project: twig — SvelteKit app targeting Cloudflare Workers (Workers + Static A
 | `bun run gen`     | Regenerate `worker-configuration.d.ts` from wrangler |
 | `bun run check`   | Types + svelte-check                                 |
 | `bun run knip`    | Report unused files / exports / dependencies         |
-| `bun run format`  | Prettier write (formats in place — no `--check`)     |
+| `bun run fmt`     | Prettier write (formats in place — no `--check`)     |
 | `bun run lint`    | Prettier check + ESLint                              |
 
 Do **not** use `npm`, `pnpm`, `yarn`, or `bun` as a script runtime. Bun is the installer; all scripts execute under Node via shebang.
@@ -48,7 +48,7 @@ Keep each comment to one short line when possible. No multi-paragraph docstrings
 
 ## Commit policy
 
-**Before every commit, run `bun run format`.** Always the write variant — do not run `prettier --check` or `bun run lint` as a gate, just let Prettier rewrite files in place and include the result in the commit. This keeps diffs clean and avoids commit-hook friction.
+**Before every commit, run `bun run fmt`.** Always the write variant — do not run `prettier --check` or `bun run lint` as a gate, just let Prettier rewrite files in place and include the result in the commit. This keeps diffs clean and avoids commit-hook friction.
 
 Every commit **must** follow [Conventional Commits](https://www.conventionalcommits.org/).
 

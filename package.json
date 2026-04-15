@@ -17,7 +17,7 @@
 		"gen": "wrangler types",
 		"knip": "knip",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"fmt": "prettier --write ."
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.5.0",
