@@ -36,7 +36,7 @@
 					<span>小站已经活了 {runtimeDays} 天</span>
 					<span>{presenceCount} 位小伙伴正在浏览呢</span>
 				</div>
-				<div class="mt-3 flex flex-wrap items-center gap-4 text-foreground/60">
+				<div class="mt-3 flex flex-wrap items-center gap-4 text-muted-foreground">
 					<a
 						href={repoUrl}
 						target="_blank"
@@ -126,7 +126,7 @@
 	<div class="px-5 pb-3">
 		<div class="mx-3 border-t border-dashed border-border sm:mx-6"></div>
 		<div
-			class="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[0.8125rem] text-foreground/60 sm:flex-row sm:items-end sm:justify-between sm:px-6"
+			class="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[0.8125rem] text-muted-foreground sm:flex-row sm:items-end sm:justify-between sm:px-6"
 		>
 			<span class="text-left">
 				Copyright © {copyrightYear}
@@ -145,7 +145,7 @@
 			</span>
 			<span class="flex flex-wrap items-center gap-x-2 text-left sm:justify-end sm:text-right">
 				<a
-					href="https://stats.uptimerobot.com/8zxeLKSP2t"
+					href="https://status.canmi.net/8zxeLKSP2t"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="relative inline-block hover:text-foreground"

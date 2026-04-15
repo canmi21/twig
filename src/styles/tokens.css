@@ -1,14 +1,17 @@
 @theme {
 	--color-background: var(--color-white);
 	--color-foreground: var(--color-neutral-900);
-	--color-border: var(--color-neutral-300);
-	--color-muted: var(--color-neutral-100);
+	--color-muted: var(--color-neutral-50);
+	--color-muted-foreground: var(--color-neutral-500);
+	--color-border: var(--color-neutral-200);
 	--color-success: #7ac8a7;
+	--color-destructive: var(--color-red-700);
 }
 
 .dark {
 	--color-background: var(--color-neutral-900);
-	--color-foreground: var(--color-neutral-100);
-	--color-border: var(--color-neutral-700);
+	--color-foreground: var(--color-neutral-300);
 	--color-muted: var(--color-neutral-800);
+	--color-border: var(--color-neutral-700);
+	--color-destructive: var(--color-red-400);
 }

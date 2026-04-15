@@ -81,9 +81,23 @@ Follow the rule in `~/.claude/CLAUDE.md`:
 - All stylesheets live in `src/styles/`.
 - Global stylesheet entry: `src/styles/app.css`. It imports `tailwindcss`, then `./tokens.css`, declares the `dark` custom variant, and sets base `html` background/foreground. It is imported once from `src/routes/+layout.svelte`.
 - **All colors live in `src/styles/tokens.css`** as two layers:
-  - **Physical layer:** Tailwind's built-in palette (`var(--color-white)`, `var(--color-neutral-900)`, etc.). These are OKLCH and must not be touched.
-  - **Semantic layer:** project-owned tokens (`--color-background`, `--color-foreground`, `--color-border`, `--color-muted`, …). Light values go in `@theme`, dark overrides go in `.dark`.
-- **Hard rule:** project code (`.svelte`, `.ts`, `.css`) must **only** use the semantic layer (`bg-background`, `text-foreground`, `border-border`, `hover:bg-muted`, …). Never reach through to a raw Tailwind color utility (`bg-neutral-900`, `text-white`) and never hard-code hex values. If a needed semantic does not exist yet, add it to `src/styles/tokens.css` first.
+  - **Physical layer:** Tailwind's built-in palette (`var(--color-white)`, `var(--color-neutral-300)`, `var(--color-emerald-500)`, etc.). These are OKLCH, the canonical Tailwind v4 scale, and must not be touched.
+  - **Semantic layer:** project-owned tokens. Every semantic token's value is a `var()` reference into the physical layer — never a raw hex — so any color change flows through the Tailwind scale and the whole site stays consistent. Light values go in `@theme`, dark overrides go in `.dark`. Omit the dark override when the light value already works across modes (e.g. a brand color).
+
+### Current semantic tokens
+
+| Token              | Light                  | Dark          | Use for                                          |
+| ------------------ | ---------------------- | ------------- | ------------------------------------------------ |
+| `background`       | `white`                | `neutral-900` | Page surface                                     |
+| `foreground`       | `neutral-900`          | `neutral-300` | Default body text                                |
+| `muted`            | `neutral-50`           | `neutral-800` | Elevated / tinted surface (hover, raised, inset) |
+| `muted-foreground` | `neutral-500`          | `neutral-500` | Secondary text (labels, meta, footnotes)         |
+| `border`           | `neutral-200`          | `neutral-700` | Dividers, outlines                               |
+| `success`          | `#7ac8a7` (brand mint) | same          | Positive / healthy status indicators             |
+| `destructive`      | `red-700`              | `red-400`     | Errors, dangerous actions                        |
+
+- **Hard rule:** project code (`.svelte`, `.ts`, `.css`) must **only** use the semantic layer (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `hover:bg-muted`, …). Never reach through to a raw Tailwind color utility (`bg-neutral-900`, `text-white`) and never hard-code hex values. If a needed semantic does not exist yet, add it to `src/styles/tokens.css` first — and point its value at a `var(--color-*)` from the Tailwind physical layer whenever possible.
+- For one-off intermediate dimming (e.g. "softer than body text but not quite muted"), use an opacity modifier on `foreground`: `text-foreground/72`. Don't introduce a new semantic token for every opacity level.
 - Because `@theme` emits CSS variables at runtime, redefining a token inside `.dark` automatically flips every utility that references it — you should **not** need `dark:` prefixes on semantic utilities.
 
 ## File naming
