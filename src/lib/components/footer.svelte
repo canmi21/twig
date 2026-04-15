@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+
 	import GitHub from '$lib/icons/github.svelte';
 	import Bluesky from '$lib/icons/bluesky.svelte';
 	import Telegram from '$lib/icons/telegram.svelte';
@@ -84,7 +86,7 @@
 						<Telegram class="h-3.75 w-auto flex-none" />
 					</a>
 					<a
-						href="/sitemap.xml"
+						href={resolve('/sitemap.xml')}
 						target="_blank"
 						rel="noopener noreferrer"
 						aria-label="Sitemap"
@@ -111,7 +113,7 @@
 						<IconPlanet class="h-4.75 w-auto flex-none" />
 					</a>
 					<a
-						href="/feed.xml"
+						href={resolve('/feed')}
 						target="_blank"
 						rel="noopener noreferrer"
 						aria-label="RSS"
