@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
 
 	import { m } from '$lib/paraglide/messages';
-	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
-	import { setThemeCookie } from '$lib/theme/script';
 
 	import GitHub from '$lib/icons/github.svelte';
 	import Bluesky from '$lib/icons/bluesky.svelte';
@@ -18,8 +15,6 @@
 
 	import GitMerge from '@lucide/svelte/icons/git-merge';
 	import Lollipop from '@lucide/svelte/icons/lollipop';
-	import Sun from '@lucide/svelte/icons/sun';
-	import Moon from '@lucide/svelte/icons/moon';
 
 	import Fa from 'svelte-fa';
 	import { faMap } from '@fortawesome/free-solid-svg-icons';
@@ -32,28 +27,6 @@
 	const repoUrl = 'https://github.com/canmi21/taki';
 	const commitHash = __APP_GIT_COMMIT__;
 	const shortHash = commitHash.slice(0, 7);
-	const currentLocale = getLocale();
-
-	const LOCALE_LABELS: Record<string, string> = {
-		mw: 'MW',
-		en: 'EN',
-		zh: '简',
-		tw: '繁',
-		ja: '日'
-	};
-	const nextLocale = locales[(locales.indexOf(currentLocale) + 1) % locales.length];
-
-	let isDark = $state(page.data.theme === 'dark');
-
-	function toggleTheme() {
-		isDark = !isDark;
-		document.documentElement.classList.toggle('dark', isDark);
-		setThemeCookie(isDark ? 'dark' : 'light');
-	}
-
-	function toggleLanguage() {
-		setLocale(nextLocale as Locale);
-	}
 
 	const iconContainer =
 		'inline-flex size-4 shrink-0 items-center justify-center hover:text-foreground';
@@ -62,14 +35,14 @@
 <footer class="border-t border-divider">
 	<div class="px-5 py-3">
 		<div class="mx-auto w-full px-3 sm:px-6">
-			<div class="flex items-start justify-between gap-6">
+			<div class="flex items-start gap-6">
 				<div class="min-w-0 pt-4 text-foreground/72">
 					<div class="text-xl font-semibold text-foreground">
-						{m.footer_greeting({ name: accountName })}
+						{m['footer.greeting']({ name: accountName })}
 					</div>
 					<div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-						<span>{m.footer_runtime_days({ days: runtimeDays })}</span>
-						<span>{m.footer_presence({ count: presenceCount })}</span>
+						<span>{m['footer.runtime.days']({ days: runtimeDays })}</span>
+						<span>{m['footer.presence']({ count: presenceCount })}</span>
 					</div>
 					<div class="mt-3 flex flex-wrap items-center gap-4 text-muted-foreground">
 						<a
@@ -155,28 +128,6 @@
 						</a>
 					</div>
 				</div>
-				<div class="flex shrink-0 items-center gap-3 pt-4">
-					<button
-						type="button"
-						onclick={toggleLanguage}
-						aria-label="Switch language"
-						class="text-sm text-muted-foreground hover:text-foreground"
-					>
-						{LOCALE_LABELS[nextLocale]}
-					</button>
-					<button
-						type="button"
-						onclick={toggleTheme}
-						aria-label={isDark ? m.theme_toggle_to_light() : m.theme_toggle_to_dark()}
-						class="text-muted-foreground hover:text-foreground"
-					>
-						{#if isDark}
-							<Sun class="size-4" />
-						{:else}
-							<Moon class="size-4" />
-						{/if}
-					</button>
-				</div>
 			</div>
 		</div>
 	</div>
@@ -217,7 +168,7 @@
 						<span class="absolute top-1/2 left-1/2 size-1.25 -translate-1/2 rounded-full bg-success"
 						></span>
 					</span>
-					<span>{m.footer_status_normal()}</span>
+					<span>All systems normal.</span>
 				</a>
 				<a
 					href="https://icp.gov.moe/?keyword=20260000"

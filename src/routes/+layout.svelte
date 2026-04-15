@@ -4,6 +4,7 @@
 	import { baseLocale, locales } from '$lib/paraglide/runtime';
 	import { canonicalPath, htmlLangFor, localizedPath } from '$lib/i18n/urls';
 	import Footer from '$lib/components/footer.svelte';
+	import SiteControls from '$lib/components/site-controls.svelte';
 
 	let { data, children } = $props();
 
@@ -26,6 +27,7 @@
 	/>
 </svelte:head>
 
+<SiteControls />
 <main class="flex min-h-svh flex-col">
 	{@render children()}
 </main>
