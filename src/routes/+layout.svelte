@@ -25,6 +25,7 @@
 		hreflang="x-default"
 		href="{__PUBLIC_URL__}{localizedPath(page.url.pathname, baseLocale)}"
 	/>
+	<link rel="alternate" type="application/atom+xml" title="Canmi" href="{__PUBLIC_URL__}/feed" />
 </svelte:head>
 
 <SiteControls />
