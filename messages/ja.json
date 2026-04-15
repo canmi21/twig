@@ -1,8 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"footer.greeting": "こんにちは {name} さん",
-	"footer.runtime.days": "このサイト {days} 日めだよ",
-	"footer.presence": "いま {count} 人がのぞいてるよ",
-	"theme.toggle.light": "ライトテーマに切り替え",
-	"theme.toggle.dark": "ダークテーマに切り替え"
+	"footer.runtime.days": "もう {days} 日目だよ〜",
+	"footer.presence": "いま {count} 人がみてるよ",
+	"footer.link.visit": "{service} にいく",
+	"theme.toggle.light": "あかるいテーマにする",
+	"theme.toggle.dark": "くらいテーマにする",
+	"language.switcher": "ことばをかえる"
 }

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { cubicOut } from 'svelte/easing';
+	import { Toggle } from 'bits-ui';
 
 	import { m } from '$lib/paraglide/messages';
 	import { setThemeCookie } from '$lib/theme/script';
@@ -16,9 +17,7 @@
 
 	const MoonIcon = $derived(MOONS[moonIdx]);
 
-	function toggleTheme() {
-		const next = !isDark;
-		isDark = next;
+	function handlePressedChange(next: boolean) {
 		document.documentElement.classList.toggle('dark', next);
 		setThemeCookie(next ? 'dark' : 'light');
 		// Pick a random moon when entering dark mode so every toggle feels fresh.
@@ -37,9 +36,9 @@
 	}
 </script>
 
-<button
-	type="button"
-	onclick={toggleTheme}
+<Toggle.Root
+	bind:pressed={isDark}
+	onPressedChange={handlePressedChange}
 	aria-label={isDark ? m['theme.toggle.light']() : m['theme.toggle.dark']()}
 	class="relative size-4 text-muted-foreground hover:text-foreground"
 >
@@ -52,4 +51,4 @@
 			<IconSunLine class="h-4 w-auto" />
 		</span>
 	{/if}
-</button>
+</Toggle.Root>

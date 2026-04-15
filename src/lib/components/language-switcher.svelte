@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { DropdownMenu } from 'bits-ui';
 	import { cubicOut } from 'svelte/easing';
 	import { fade } from 'svelte/transition';
 
+	import { m } from '$lib/paraglide/messages';
 	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
 
 	import IconTranslate from '~icons/mingcute/translate-2-line';
@@ -30,39 +32,15 @@
 	};
 
 	let langOpen = $state(false);
-	let langMenuRef: HTMLDivElement | undefined;
 
-	function selectLocale(l: Locale) {
-		langOpen = false;
+	function handleSelect(l: Locale) {
 		if (l !== currentLocale) setLocale(l);
 	}
-
-	$effect(() => {
-		if (!langOpen) return;
-		function onClick(e: MouseEvent) {
-			if (langMenuRef && !langMenuRef.contains(e.target as Node)) {
-				langOpen = false;
-			}
-		}
-		function onKey(e: KeyboardEvent) {
-			if (e.key === 'Escape') langOpen = false;
-		}
-		document.addEventListener('click', onClick);
-		document.addEventListener('keydown', onKey);
-		return () => {
-			document.removeEventListener('click', onClick);
-			document.removeEventListener('keydown', onKey);
-		};
-	});
 </script>
 
-<div class="relative" bind:this={langMenuRef}>
-	<button
-		type="button"
-		onclick={() => (langOpen = !langOpen)}
-		aria-label="Switch language"
-		aria-expanded={langOpen}
-		aria-haspopup="menu"
+<DropdownMenu.Root bind:open={langOpen}>
+	<DropdownMenu.Trigger
+		aria-label={m['language.switcher']()}
 		class="flex items-center text-sm text-muted-foreground hover:text-foreground"
 	>
 		<IconTranslate class="h-4 w-auto" />
@@ -72,29 +50,35 @@
 				? 'rotate-180'
 				: ''}"
 		/>
-	</button>
-	{#if langOpen}
-		<div
-			role="menu"
-			in:fade={{ duration: 200, easing: cubicOut }}
-			out:fade={{ duration: 200, easing: cubicOut }}
-			class="absolute top-full right-0 z-10 mt-2 min-w-27 overflow-hidden rounded-md border border-divider bg-background shadow-sm"
-		>
-			{#each locales as l (l)}
-				{@const Icon = LOCALE_ICONS[l]}
-				<button
-					type="button"
-					role="menuitem"
-					onclick={() => selectLocale(l)}
-					class="flex w-full items-center justify-between gap-2 px-2 py-1 text-left text-sm hover:bg-muted {l ===
-					currentLocale
-						? 'text-foreground'
-						: 'text-muted-foreground'}"
-				>
-					<span>{LOCALE_LABELS[l]}</span>
-					<Icon class="h-4 w-auto" />
-				</button>
-			{/each}
-		</div>
-	{/if}
-</div>
+	</DropdownMenu.Trigger>
+	<DropdownMenu.Portal>
+		<DropdownMenu.Content sideOffset={8} align="end" forceMount>
+			{#snippet child({ wrapperProps, props, open })}
+				{#if open}
+					<div {...wrapperProps}>
+						<div
+							{...props}
+							in:fade={{ duration: 200, easing: cubicOut }}
+							out:fade={{ duration: 200, easing: cubicOut }}
+							class="z-50 min-w-27 overflow-hidden rounded-md border border-divider bg-background shadow-sm"
+						>
+							{#each locales as l (l)}
+								{@const Icon = LOCALE_ICONS[l]}
+								<DropdownMenu.Item
+									onSelect={() => handleSelect(l)}
+									class="flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1 text-left text-sm outline-none data-highlighted:bg-muted {l ===
+									currentLocale
+										? 'text-foreground'
+										: 'text-muted-foreground'}"
+								>
+									<span>{LOCALE_LABELS[l]}</span>
+									<Icon class="h-4 w-auto" />
+								</DropdownMenu.Item>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			{/snippet}
+		</DropdownMenu.Content>
+	</DropdownMenu.Portal>
+</DropdownMenu.Root>

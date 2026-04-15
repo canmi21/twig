@@ -1,8 +1,9 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"footer.greeting": "Hi, {name}",
-	"footer.runtime.days": "Alive and well for {days} days",
-	"footer.presence": "{count} people online",
+	"footer.runtime.days": "Running for {days} days",
+	"footer.presence": "{count} people browsing",
+	"footer.link.visit": "Go to {service}",
 	"theme.toggle.light": "Switch to light theme",
-	"theme.toggle.dark": "Switch to dark theme"
+	"theme.toggle.dark": "Switch to dark theme",
+	"language.switcher": "Switch language"
 }

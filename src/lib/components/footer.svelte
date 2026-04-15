@@ -37,9 +37,7 @@
 		<div class="mx-auto w-full px-3 sm:px-6">
 			<div class="flex items-start gap-6">
 				<div class="min-w-0 pt-4 text-foreground/72">
-					<div class="text-xl font-semibold text-foreground">
-						{m['footer.greeting']({ name: accountName })}
-					</div>
+					<div class="text-xl font-semibold text-foreground">Hi, {accountName}</div>
 					<div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
 						<span>{m['footer.runtime.days']({ days: runtimeDays })}</span>
 						<span>{m['footer.presence']({ count: presenceCount })}</span>
@@ -49,7 +47,7 @@
 							href="https://github.com/canmi21"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="GitHub"
+							aria-label={m['footer.link.visit']({ service: 'GitHub' })}
 							class={iconContainer}
 						>
 							<GitHub class="size-4 flex-none" />
@@ -58,7 +56,7 @@
 							href="https://twitter.com/intent/follow?screen_name=canmi21"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="X"
+							aria-label={m['footer.link.visit']({ service: 'X (Twitter)' })}
 							class={iconContainer}
 						>
 							<IconSocialX class="h-5 w-auto flex-none" />
@@ -67,7 +65,7 @@
 							href="https://nya.one/@canmi"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="Nyaone"
+							aria-label={m['footer.link.visit']({ service: 'NyaOne' })}
 							class={iconContainer}
 						>
 							<Nyaone class="size-4 flex-none" />
@@ -76,7 +74,7 @@
 							href="https://bsky.app/profile/canmi.net"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="Bluesky"
+							aria-label={m['footer.link.visit']({ service: 'BlueSky' })}
 							class={iconContainer}
 						>
 							<Bluesky class="size-4 flex-none" />
@@ -85,7 +83,7 @@
 							href="https://t.me/canmi21"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="Telegram"
+							aria-label={m['footer.link.visit']({ service: 'Telegram' })}
 							class={iconContainer}
 						>
 							<Telegram class="h-3.75 w-auto flex-none" />
@@ -94,7 +92,7 @@
 							href={resolve('/sitemap.xml')}
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="Sitemap"
+							aria-label={m['footer.link.visit']({ service: 'Sitemap' })}
 							class={iconContainer}
 						>
 							<Fa icon={faMap} class="h-4 w-auto flex-none" />
@@ -103,7 +101,7 @@
 							href="https://www.travellings.cn/go.html"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="Travellings"
+							aria-label={m['footer.link.visit']({ service: 'Travellings' })}
 							class={iconContainer}
 						>
 							<IconTrain class="h-4.75 w-auto flex-none" />
@@ -112,7 +110,7 @@
 							href="https://travel.moe/go?travel=on"
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="TravelMoe"
+							aria-label={m['footer.link.visit']({ service: 'Moe Travel' })}
 							class="{iconContainer} footer-icon-bold"
 						>
 							<IconPlanet class="h-4.75 w-auto flex-none" />
@@ -121,7 +119,7 @@
 							href={resolve('/feed')}
 							target="_blank"
 							rel="noopener noreferrer"
-							aria-label="RSS"
+							aria-label={m['footer.link.visit']({ service: 'RSS' })}
 							class={iconContainer}
 						>
 							<IconRss class="h-4.5 w-auto flex-none" />
