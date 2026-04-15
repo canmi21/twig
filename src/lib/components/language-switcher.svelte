@@ -41,7 +41,7 @@
 <DropdownMenu.Root bind:open={langOpen}>
 	<DropdownMenu.Trigger
 		aria-label={m['language.switcher']()}
-		class="flex items-center text-sm text-muted-foreground hover:text-foreground"
+		class="flex items-center text-sm text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
 	>
 		<IconTranslate class="h-4 w-auto" />
 		<span class="ml-1">{LOCALE_LABELS[currentLocale]}</span>

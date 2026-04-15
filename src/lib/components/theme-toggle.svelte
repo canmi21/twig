@@ -40,7 +40,7 @@
 	bind:pressed={isDark}
 	onPressedChange={handlePressedChange}
 	aria-label={isDark ? m['theme.toggle.light']() : m['theme.toggle.dark']()}
-	class="relative size-4 text-muted-foreground hover:text-foreground"
+	class="relative size-4 text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
 >
 	{#if isDark}
 		<span class="absolute inset-0" in:rotateFade out:rotateFade>

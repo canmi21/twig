@@ -28,50 +28,52 @@
 			>{m['footer.status.normal']()}</a
 		>
 	</span>
-	<span class="inline-flex items-center gap-1">
-		<Lollipop class="size-3.25" strokeWidth={2} aria-hidden="true" />
-		{#if getLocale() === 'zh'}
-			<a
-				href="https://beian.miit.gov.cn"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label={m['footer.icp.aria']()}
-				class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
-				>{m['footer.icp.text']()}</a
-			>
-		{:else}
-			<a
-				href="https://icp.gov.moe/?keyword=20260000"
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label={m['footer.icp.aria']()}
-				class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
-				>{m['footer.icp.text']()}</a
-			>
-		{/if}
-	</span>
-	<span class="inline-flex items-center gap-1">
-		<GitMerge class="size-3.25" strokeWidth={2} aria-hidden="true" />
-		{#if commitHash === 'dev'}
-			<a
-				href={repoUrl}
-				target="_blank"
-				rel="noopener noreferrer"
-				title={commitHash}
-				aria-label={m['footer.commit.aria']({ hash: shortHash })}
-				class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
-				>{shortHash}</a
-			>
-		{:else}
-			<a
-				href="https://github.com/canmi21/taki/commit/{commitHash}"
-				target="_blank"
-				rel="noopener noreferrer"
-				title={commitHash}
-				aria-label={m['footer.commit.aria']({ hash: shortHash })}
-				class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
-				>{shortHash}</a
-			>
-		{/if}
-	</span>
+	{#if getLocale() === 'zh'}
+		<a
+			href="https://beian.miit.gov.cn"
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label={m['footer.icp.aria']()}
+			class="inline-flex items-center gap-1 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+		>
+			<Lollipop class="size-3.25" strokeWidth={2} aria-hidden="true" />
+			<span>{m['footer.icp.text']()}</span>
+		</a>
+	{:else}
+		<a
+			href="https://icp.gov.moe/?keyword=20260000"
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label={m['footer.icp.aria']()}
+			class="inline-flex items-center gap-1 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+		>
+			<Lollipop class="size-3.25" strokeWidth={2} aria-hidden="true" />
+			<span>{m['footer.icp.text']()}</span>
+		</a>
+	{/if}
+	{#if commitHash === 'dev'}
+		<a
+			href={repoUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			title={commitHash}
+			aria-label={m['footer.commit.aria']({ hash: shortHash })}
+			class="inline-flex items-center gap-1 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+		>
+			<GitMerge class="size-3.25" strokeWidth={2} aria-hidden="true" />
+			<span>{shortHash}</span>
+		</a>
+	{:else}
+		<a
+			href="https://github.com/canmi21/taki/commit/{commitHash}"
+			target="_blank"
+			rel="noopener noreferrer"
+			title={commitHash}
+			aria-label={m['footer.commit.aria']({ hash: shortHash })}
+			class="inline-flex items-center gap-1 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+		>
+			<GitMerge class="size-3.25" strokeWidth={2} aria-hidden="true" />
+			<span>{shortHash}</span>
+		</a>
+	{/if}
 </span>
