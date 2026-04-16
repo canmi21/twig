@@ -17,3 +17,12 @@ commit-msg:
   jobs:
     - name: commitlint
       run: ./node_modules/.bin/commitlint --edit {1}
+
+# Catches runtime-only failures that pre-commit can't see: CSS import chain,
+# vite build, a11y_* compiler warnings, wrangler type drift, and SvelteKit
+# prerender violations. Runs once per push, not per commit, so the ~10s cost
+# amortizes.
+pre-push:
+  jobs:
+    - name: build
+      run: bun run build

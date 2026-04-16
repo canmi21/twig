@@ -24,9 +24,7 @@
 		if (next) moonIdx = Math.floor(Math.random() * MOONS.length);
 	}
 
-	// Local-only rotate + fade used when the sun / moon glyph swaps. Everything
-	// else on the page flips colors instantly — this animation is scoped to the
-	// icon that was clicked. Respects prefers-reduced-motion: the rotation is
+	// Respects prefers-reduced-motion: the rotation is
 	// dropped and the duration is shortened so the swap still reads as a blink.
 	function rotateFade(_node: Element, { duration = 280 }: { duration?: number } = {}) {
 		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
