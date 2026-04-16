@@ -1,12 +1,9 @@
 {
 	"name": "twig",
-	"private": true,
 	"version": "0.2.1",
+	"private": true,
 	"license": "AGPL-3.0-or-later",
 	"type": "module",
-	"engines": {
-		"node": ">=25"
-	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "wrangler types --check && vite build",
@@ -14,13 +11,13 @@
 		"prepare": "svelte-kit sync || true; lefthook install || true",
 		"gen": "wrangler types",
 		"knip": "knip",
-		"lint": "prettier --check . && eslint .",
-		"fmt": "prettier --write ."
+		"lint": "oxfmt --check . && prettier --check '**/*.svelte' && eslint .",
+		"fmt": "oxfmt --write . && prettier --write '**/*.svelte'"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.5.0",
 		"@commitlint/config-conventional": "^20.5.0",
-		"@eslint/compat": "^2.0.4",
+		"@eslint/compat": "^2.0.5",
 		"@eslint/js": "^10.0.1",
 		"@fortawesome/free-solid-svg-icons": "^7.2.0",
 		"@iconify-json/mingcute": "^1.2.7",
@@ -30,28 +27,31 @@
 		"@sveltejs/kit": "^2.57.1",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/vite": "^4.2.2",
-		"@types/node": "^24",
+		"@types/node": "^25.6.0",
 		"bits-ui": "^2.17.3",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-better-tailwindcss": "^4.4.1",
 		"eslint-plugin-svelte": "^3.17.0",
 		"feedsmith": "^2.9.2",
-		"globals": "^17.4.0",
+		"globals": "^17.5.0",
 		"knip": "^6.4.1",
 		"lefthook": "^2.1.5",
-		"prettier": "^3.8.1",
+		"oxfmt": "^0.45.0",
+		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
-		"prettier-plugin-tailwindcss": "^0.7.2",
 		"svelte": "^5.55.4",
 		"svelte-check": "^4.4.6",
 		"svelte-fa": "^4.0.4",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^6.0.2",
-		"typescript-eslint": "^8.58.1",
+		"typescript-eslint": "^8.58.2",
 		"unplugin-icons": "^23.0.1",
 		"vite": "^8.0.8",
 		"vitest": "^4.1.4",
-		"wrangler": "^4.82.2"
+		"wrangler": "^4.83.0"
+	},
+	"engines": {
+		"node": ">=25"
 	}
 }

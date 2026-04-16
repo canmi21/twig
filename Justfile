@@ -1,13 +1,16 @@
+DEV_PORT     := "23315"
+PREVIEW_PORT := "4173"
+
 _default:
     @just --list
 
-# Run vitest (requires dev server on :23315 for integration tests).
+# Run vitest (requires dev server on :{{DEV_PORT}} for integration tests).
 test *args:
     bunx vitest {{args}}
 
-# Serve the built CF Worker bundle via miniflare on :4173.
+# Serve the built CF Worker bundle via miniflare on :{{PREVIEW_PORT}}.
 preview:
-    bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173
+    bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port {{PREVIEW_PORT}}
 
 # Fast project-wide TypeScript typecheck (.ts only, ~1s).
 typecheck:

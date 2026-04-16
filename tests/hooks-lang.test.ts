@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-const BASE = 'http://localhost:23315';
+const BASE = `http://localhost:${process.env.DEV_PORT ?? 23315}`;
 
 describe('?lang= query parameter', () => {
 	it('redirects 302 with Set-Cookie when lang is valid', async () => {

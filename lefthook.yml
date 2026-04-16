@@ -1,8 +1,12 @@
 pre-commit:
   parallel: true
   jobs:
+    - name: oxfmt
+      glob: '*.{js,ts,json,jsonc,css,md,yml,yaml,html}'
+      run: ./node_modules/.bin/oxfmt --write {staged_files}
+      stage_fixed: true
     - name: prettier
-      glob: '*.{js,ts,svelte,json,jsonc,css,md,yml,yaml,html}'
+      glob: '*.svelte'
       run: ./node_modules/.bin/prettier --write --cache --cache-location node_modules/.cache/prettier-cache {staged_files}
       stage_fixed: true
     - name: eslint

@@ -1,15 +1,3 @@
-# Lockfiles
 bun.lock
-bun.lockb
-
-# Build artifacts
-.svelte-kit
-build
-.wrangler
-src/lib/paraglide
-
-# Generated
 worker-configuration.d.ts
-
-# Public assets
 /public/

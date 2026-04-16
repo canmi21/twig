@@ -1,0 +1,12 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"endOfLine": "lf",
+	"sortTailwindcss": {
+		"stylesheet": "./src/styles/app.css"
+	},
+	"ignorePatterns": ["bun.lock", "worker-configuration.d.ts", "/public/"]
+}
