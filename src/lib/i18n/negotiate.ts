@@ -14,11 +14,8 @@ export function hasLangCookie(cookieHeader: string | null): boolean {
 	return /(?:^|; *)language=/.test(cookieHeader ?? '');
 }
 
-// Explicit Accept-Language -> locale mapping. Intentionally curated so that
-// zh-TW / zh-HK / zh-MO / zh-Hant land on `tw` (Traditional), zh-CN etc.
-// land on `zh` (Simplified), and anything unrecognised falls back to `en`.
-// `mw` is never selected automatically — it's only reachable by explicit
-// `?lang=mw` or a manual cookie write from the language switcher.
+// Curated Accept-Language → locale: zh-Hant variants → tw, zh-* → zh, else en.
+// `mw` is intentionally unreachable here — explicit ?lang=mw or cookie only.
 export function resolveLocaleFromAcceptLanguage(header: string | null): Locale {
 	if (!header) return 'en';
 	const langs = header

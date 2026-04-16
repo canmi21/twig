@@ -7,8 +7,7 @@ export const GET: RequestHandler = () => {
 	const now = new Date();
 	const year = now.getFullYear();
 
-	// Round `updated` down to the current hour so feed readers don't see a fresh
-	// timestamp on every request and trigger spurious "updated" notifications.
+	// Round to current hour to avoid spurious "updated" pings in feed readers.
 	const updated = new Date(now);
 	updated.setMinutes(0, 0, 0);
 
@@ -29,8 +28,7 @@ export const GET: RequestHandler = () => {
 		entries: []
 	});
 
-	// Feedsmith doesn't surface xml:lang as a top-level option, so inject it
-	// into the root <feed> element by hand.
+	// Feedsmith lacks xml:lang support; inject by hand.
 	const xmlWithLang = xml.replace('<feed xmlns=', '<feed xml:lang="en" xmlns=');
 
 	return new Response(xmlWithLang, {

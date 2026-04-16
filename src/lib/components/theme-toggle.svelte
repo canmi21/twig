@@ -20,12 +20,11 @@
 	function handlePressedChange(next: boolean) {
 		document.documentElement.classList.toggle('dark', next);
 		setThemeCookie(next ? 'dark' : 'light');
-		// Pick a random moon when entering dark mode so every toggle feels fresh.
+		// Randomize moon icon each time dark mode activates.
 		if (next) moonIdx = Math.floor(Math.random() * MOONS.length);
 	}
 
-	// Respects prefers-reduced-motion: the rotation is
-	// dropped and the duration is shortened so the swap still reads as a blink.
+	// Drops rotation and shortens duration when prefers-reduced-motion is active.
 	function rotateFade(_node: Element, { duration = 280 }: { duration?: number } = {}) {
 		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		return {

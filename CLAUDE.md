@@ -23,8 +23,8 @@ Everything that can be mechanical is mechanical — treat the gate as authoritat
 ## Conventions
 
 - **Chat:** Simplified Chinese. **Code / commits / docs-in-repo:** English.
-- **Filenames:** kebab-case, including component files. SvelteKit `+`-prefixed files keep their prescribed names.
-- **Comments:** English, declarative, compact. State the non-obvious _why_ — the constraint, the invariant, the workaround — never the obvious _what_. One dense sentence beats a paragraph of narration; every word earns its line, but never at the cost of a fact a future reader would need.
+- **Naming:** see [spec/naming.md](spec/naming.md).
+- **Comments:** see [spec/comments.md](spec/comments.md).
 - When the user says "commit this" without a message, write one that passes commitlint.
 
 ## Git
@@ -39,6 +39,8 @@ Each file below is the authoritative source for its topic. Edit there, not here.
 - [spec/components.md](spec/components.md) — Bits UI, accessibility
 - [spec/i18n.md](spec/i18n.md) — Paraglide, locale roles, translation rules
 - [spec/build.md](spec/build.md) — build-time constants, Vite `define`
+- [spec/comments.md](spec/comments.md) — tone, separators, svelte-ignore directives
+- [spec/naming.md](spec/naming.md) — filenames, identifiers, brand neutrality
 - [spec/testing.md](spec/testing.md) — coverage target, redundancy rule, red-green protocol
 
 ## Keeping the spec honest

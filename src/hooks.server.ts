@@ -24,14 +24,8 @@ function forceLocale(event: Parameters<Handle>[0]['event'], locale: Locale) {
 	});
 }
 
-// Locale negotiation, in priority order:
-//   1. `?lang=<locale>` query parameter (wins over everything, persists).
-//   2. Existing `language` cookie from a previous visit.
-//   3. `Accept-Language` header mapped via `resolveLocaleFromAcceptLanguage`.
-//   4. Fallback: `en`.
-// The hook mutates the request's Cookie header so Paraglide's cookie strategy
-// picks up our decision, and writes a Set-Cookie header so subsequent visits
-// keep the choice.
+// Priority: ?lang= param → language cookie → Accept-Language header → en.
+// Mutates the Cookie header so Paraglide's cookie strategy sees our decision.
 const langHandle: Handle = ({ event, resolve }) => {
 	if (ENDPOINT_ROUTES.has(event.route.id ?? '')) return resolve(event);
 	if (event.request.method !== 'GET') return resolve(event);
@@ -63,7 +57,7 @@ const langHandle: Handle = ({ event, resolve }) => {
 	return resolve(event);
 };
 
-const paraglideHandle: Handle = ({ event, resolve }) => {
+const i18nHandle: Handle = ({ event, resolve }) => {
 	if (ENDPOINT_ROUTES.has(event.route.id ?? '')) return resolve(event);
 	return paraglideMiddleware(event.request, ({ request, locale }) => {
 		event.request = request;
@@ -75,8 +69,7 @@ const paraglideHandle: Handle = ({ event, resolve }) => {
 
 const themeHandle: Handle = async ({ event, resolve }) => {
 	const cookie = event.cookies.get(THEME_COOKIE);
-	// SSR defaults to light when the cookie is missing; the inline script corrects
-	// the client synchronously before paint, so there is no flash.
+	// SSR defaults to light; the inline script corrects before paint (no flash).
 	const theme: Theme = cookie === 'dark' ? 'dark' : 'light';
 	event.locals.theme = theme;
 
@@ -88,4 +81,4 @@ const themeHandle: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle = sequence(langHandle, paraglideHandle, themeHandle);
+export const handle = sequence(langHandle, i18nHandle, themeHandle);

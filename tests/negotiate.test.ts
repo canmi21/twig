@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { hasLangCookie, resolveLocaleFromAcceptLanguage, upsertCookie } from '$lib/i18n/negotiate';
 
-// ---------------------------------------------------------------------------
-// upsertCookie
-// ---------------------------------------------------------------------------
 describe('upsertCookie', () => {
 	it('appends to an empty header', () => {
 		expect(upsertCookie('', 'language', 'en')).toBe('language=en');
@@ -29,9 +26,6 @@ describe('upsertCookie', () => {
 	});
 });
 
-// ---------------------------------------------------------------------------
-// hasLangCookie
-// ---------------------------------------------------------------------------
 describe('hasLangCookie', () => {
 	it('detects cookie at the start', () => {
 		expect(hasLangCookie('language=en; theme=dark')).toBe(true);
@@ -50,9 +44,6 @@ describe('hasLangCookie', () => {
 	});
 });
 
-// ---------------------------------------------------------------------------
-// resolveLocaleFromAcceptLanguage
-// ---------------------------------------------------------------------------
 describe('resolveLocaleFromAcceptLanguage', () => {
 	it('returns en for null header', () => {
 		expect(resolveLocaleFromAcceptLanguage(null)).toBe('en');

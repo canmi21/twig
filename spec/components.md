@@ -32,4 +32,4 @@ Soft rules the compiler can't catch:
 3. **Bits UI composite containers** (`DropdownMenu.Content`, `Popover.Content`, …) receive programmatic focus when the widget opens. Add `outline-none` to the content's inner div — visible focus belongs on items via `data-highlighted`, not on the container.
 4. **Accessible name.** Visible text preferred; otherwise `aria-label` via Paraglide `m['...']()` (never hard-coded English); otherwise `aria-labelledby`. An icon-only link with no name reads as "link" in a screen reader — always a bug.
 5. **Keyboard patterns are Bits UI's job.** Menus: Tab enters once, arrow keys navigate. Dialogs trap focus. Popovers don't. Don't hand-roll click-outside / Escape / focus trap.
-6. **No silencing.** Never use `<!-- svelte-ignore a11y_... -->` without a comment justifying why (usually there isn't one).
+6. **No silencing.** See `spec/comments.md` — svelte-ignore directives.

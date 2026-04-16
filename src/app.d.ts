@@ -1,6 +1,5 @@
 /// <reference types="unplugin-icons/types/svelte" />
-// See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
+// https://svelte.dev/docs/kit/types#app.d.ts
 declare global {
 	const __APP_GIT_COMMIT__: string;
 	const __PUBLIC_URL__: string;
@@ -14,7 +13,6 @@ declare global {
 			cf?: IncomingRequestCfProperties;
 		}
 
-		// interface Error {}
 		interface Locals {
 			theme: import('$lib/theme/script').Theme;
 		}
@@ -22,7 +20,6 @@ declare global {
 			theme: import('$lib/theme/script').Theme;
 			runtimeDays: number;
 		}
-		// interface PageState {}
 	}
 }
 

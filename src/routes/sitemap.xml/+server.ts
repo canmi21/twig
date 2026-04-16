@@ -4,7 +4,6 @@ import type { RequestHandler } from './$types';
 
 export const prerender = true;
 
-// Every public page that should appear in the sitemap.
 const ROUTES = ['/'];
 
 function hreflangLinks(pathname: string): string {
