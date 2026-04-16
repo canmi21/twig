@@ -10,6 +10,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "wrangler types --check && vite build",
+		"test": "vitest",
 		"prepare": "svelte-kit sync || true; lefthook install || true",
 		"gen": "wrangler types",
 		"knip": "knip",
@@ -50,6 +51,7 @@
 		"typescript-eslint": "^8.58.1",
 		"unplugin-icons": "^23.0.1",
 		"vite": "^8.0.8",
+		"vitest": "^4.1.4",
 		"wrangler": "^4.82.2"
 	}
 }

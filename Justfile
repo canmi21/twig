@@ -1,6 +1,10 @@
 _default:
     @just --list
 
+# Run vitest (requires dev server on :23315 for integration tests).
+test *args:
+    bunx vitest {{args}}
+
 # Serve the built CF Worker bundle via miniflare on :4173.
 preview:
     bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173

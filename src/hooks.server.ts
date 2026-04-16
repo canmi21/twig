@@ -75,12 +75,20 @@ const langHandle: Handle = ({ event, resolve }) => {
 
 	const langParam = event.url.searchParams.get('lang');
 	if (langParam && isLocale(langParam)) {
-		forceLocale(event, langParam);
 		const clean = new URL(event.url);
 		clean.searchParams.delete('lang');
+		const cookie = event.cookies.serialize(LANG_COOKIE, langParam, {
+			path: '/',
+			maxAge: LANG_COOKIE_MAX_AGE,
+			sameSite: 'lax',
+			httpOnly: false
+		});
 		return new Response(null, {
 			status: 302,
-			headers: { Location: clean.pathname + clean.search }
+			headers: {
+				Location: clean.pathname + clean.search,
+				'Set-Cookie': cookie
+			}
 		});
 	}
 
