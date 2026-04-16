@@ -1,5 +1,7 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { execFileSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
+import { dirname, join, sep } from 'node:path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import Icons from 'unplugin-icons/vite';
@@ -27,6 +29,19 @@ function resolvePublicUrl(): string {
 	return 'https://canmi.net';
 }
 
+// Walks src/routes/ at config-load time for +server.ts endpoints so hooks can
+// skip locale negotiation without a hand-maintained route list.
+function resolveServerRoutes(): string[] {
+	const routesDir = join(import.meta.dirname, 'src', 'routes');
+	return readdirSync(routesDir, { recursive: true })
+		.filter((f): f is string => typeof f === 'string' && /\+server\.[tj]s$/.test(f))
+		.map((f) => {
+			const dir = dirname(f);
+			return dir === '.' ? '/' : '/' + dir.split(sep).join('/');
+		})
+		.sort();
+}
+
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
@@ -45,7 +60,8 @@ export default defineConfig({
 	],
 	define: {
 		__APP_GIT_COMMIT__: JSON.stringify(resolveGitCommit()),
-		__PUBLIC_URL__: JSON.stringify(resolvePublicUrl())
+		__PUBLIC_URL__: JSON.stringify(resolvePublicUrl()),
+		__SERVER_ROUTES__: JSON.stringify(resolveServerRoutes())
 	},
 	server: {
 		port: 23315,

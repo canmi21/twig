@@ -8,6 +8,8 @@ import { THEME_COOKIE, themeScript, type Theme } from '$lib/theme/script';
 const LANG_COOKIE = 'language';
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
+const ENDPOINT_ROUTES = new Set<string>(__SERVER_ROUTES__);
+
 function upsertCookie(cookieHeader: string, name: string, value: string): string {
 	const pattern = new RegExp(`(^|; *)${name}=[^;]*`);
 	if (pattern.test(cookieHeader)) {
@@ -67,6 +69,7 @@ function forceLocale(event: Parameters<Handle>[0]['event'], locale: Locale) {
 // picks up our decision, and writes a Set-Cookie header so subsequent visits
 // keep the choice.
 const langHandle: Handle = ({ event, resolve }) => {
+	if (ENDPOINT_ROUTES.has(event.route.id ?? '')) return resolve(event);
 	if (event.request.method !== 'GET') return resolve(event);
 
 	const langParam = event.url.searchParams.get('lang');
@@ -80,13 +83,15 @@ const langHandle: Handle = ({ event, resolve }) => {
 	return resolve(event);
 };
 
-const paraglideHandle: Handle = ({ event, resolve }) =>
-	paraglideMiddleware(event.request, ({ request, locale }) => {
+const paraglideHandle: Handle = ({ event, resolve }) => {
+	if (ENDPOINT_ROUTES.has(event.route.id ?? '')) return resolve(event);
+	return paraglideMiddleware(event.request, ({ request, locale }) => {
 		event.request = request;
 		return resolve(event, {
 			transformPageChunk: ({ html }) => html.replace('%lang%', htmlLangFor(locale))
 		});
 	});
+};
 
 const themeHandle: Handle = async ({ event, resolve }) => {
 	const cookie = event.cookies.get(THEME_COOKIE);

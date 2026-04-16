@@ -4,6 +4,7 @@
 declare global {
 	const __APP_GIT_COMMIT__: string;
 	const __PUBLIC_URL__: string;
+	const __SERVER_ROUTES__: readonly string[];
 
 	namespace App {
 		interface Platform {
