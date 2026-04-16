@@ -26,12 +26,15 @@
 
 	// Local-only rotate + fade used when the sun / moon glyph swaps. Everything
 	// else on the page flips colors instantly — this animation is scoped to the
-	// icon that was clicked.
+	// icon that was clicked. Respects prefers-reduced-motion: the rotation is
+	// dropped and the duration is shortened so the swap still reads as a blink.
 	function rotateFade(_node: Element, { duration = 280 }: { duration?: number } = {}) {
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		return {
-			duration,
+			duration: reduced ? 120 : duration,
 			easing: cubicOut,
-			css: (t: number, u: number) => `opacity: ${t}; transform: rotate(${u * 90}deg);`
+			css: (t: number, u: number) =>
+				reduced ? `opacity: ${t};` : `opacity: ${t}; transform: rotate(${u * 90}deg);`
 		};
 	}
 </script>
@@ -40,7 +43,7 @@
 	bind:pressed={isDark}
 	onPressedChange={handlePressedChange}
 	aria-label={isDark ? m['theme.toggle.light']() : m['theme.toggle.dark']()}
-	class="relative size-4 text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+	class="focus-ring relative size-4 text-muted-foreground hover:text-foreground focus-visible:text-foreground"
 >
 	{#if isDark}
 		<span class="absolute inset-0" in:rotateFade out:rotateFade>

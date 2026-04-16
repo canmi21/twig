@@ -23,6 +23,24 @@ html {
 	color: var(--color-foreground);
 	scrollbar-color: var(--color-scrollbar) transparent;
 	scrollbar-width: thin;
+	-webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+	background-color: var(--color-muted);
+	color: var(--color-foreground);
+}
+
+/* Single source of truth for keyboard focus indication. Uses a real outline
+  (not box-shadow/ring) so forced-colors mode keeps a visible indicator and
+  recolors it with system colors automatically. Apply this class to every
+  interactive element instead of `focus-visible:outline-none`. */
+.focus-ring {
+	border-radius: 4px;
+}
+.focus-ring:focus-visible {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
 }
 
 /* Optical-weight outline for Mingcute "line" icons that otherwise read too thin

@@ -9,11 +9,11 @@
 		href="https://ill.li"
 		target="_blank"
 		rel="noopener noreferrer"
-		class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none">Canmi</a
+		class="focus-ring hover:text-foreground focus-visible:text-foreground">Canmi</a
 	>{m['footer.copyright.middle']()}<a
 		href="https://spdx.org/licenses/AGPL-3.0-or-later"
 		target="_blank"
 		rel="noopener noreferrer"
-		class="hover:text-foreground focus-visible:text-foreground focus-visible:outline-none">AGPLv3</a
+		class="focus-ring hover:text-foreground focus-visible:text-foreground">AGPLv3</a
 	>{m['footer.copyright.suffix']()}</span
 >

@@ -29,10 +29,10 @@
 	<link rel="alternate" type="application/atom+xml" title="Canmi" href="{__PUBLIC_URL__}/feed" />
 </svelte:head>
 
-<div class="fixed top-4 right-4 z-50 flex items-center gap-3">
+<header class="fixed top-4 right-4 z-50 flex items-center gap-3">
 	<LanguageSwitcher />
 	<ThemeToggle />
-</div>
+</header>
 <main class="flex min-h-svh flex-col">
 	{@render children()}
 </main>

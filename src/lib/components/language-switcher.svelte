@@ -41,7 +41,7 @@
 <DropdownMenu.Root bind:open={langOpen}>
 	<DropdownMenu.Trigger
 		aria-label={m['language.switcher']()}
-		class="flex items-center text-sm text-muted-foreground hover:text-foreground focus-visible:text-foreground focus-visible:outline-none"
+		class="focus-ring flex items-center text-sm text-muted-foreground hover:text-foreground focus-visible:text-foreground"
 	>
 		<IconTranslate class="h-4 w-auto" />
 		<span class="ml-1">{LOCALE_LABELS[currentLocale]}</span>
@@ -64,11 +64,13 @@
 						>
 							{#each locales as l (l)}
 								{@const Icon = LOCALE_ICONS[l]}
+								{@const isCurrent = l === currentLocale}
 								<DropdownMenu.Item
 									onSelect={() => handleSelect(l)}
+									aria-current={isCurrent ? 'true' : undefined}
 									class="group flex w-full cursor-pointer items-center justify-between gap-2 px-2 py-1 text-left text-sm outline-none data-highlighted:bg-muted"
 								>
-									<span class={l === currentLocale ? 'text-foreground' : 'text-muted-foreground'}
+									<span class={isCurrent ? 'text-foreground' : 'text-muted-foreground'}
 										>{LOCALE_LABELS[l]}</span
 									>
 									<Icon
