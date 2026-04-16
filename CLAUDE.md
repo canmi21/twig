@@ -39,6 +39,7 @@ Each file below is the authoritative source for its topic. Edit there, not here.
 - [spec/components.md](spec/components.md) — Bits UI, accessibility
 - [spec/i18n.md](spec/i18n.md) — Paraglide, locale roles, translation rules
 - [spec/build.md](spec/build.md) — build-time constants, Vite `define`
+- [spec/testing.md](spec/testing.md) — coverage target, redundancy rule, red-green protocol
 
 ## Keeping the spec honest
 
