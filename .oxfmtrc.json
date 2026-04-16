@@ -8,5 +8,5 @@
 	"sortTailwindcss": {
 		"stylesheet": "./src/styles/app.css"
 	},
-	"ignorePatterns": ["bun.lock", "worker-configuration.d.ts", "/public/"]
+	"ignorePatterns": ["bun.lock", "/public/"]
 }

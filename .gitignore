@@ -7,3 +7,4 @@ src/lib/paraglide
 .env.*
 !.env.example
 .DS_Store
+worker-configuration.d.ts
