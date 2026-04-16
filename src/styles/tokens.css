@@ -8,6 +8,7 @@
 	--color-scrollbar: var(--color-neutral-300);
 	--color-success: #75d199;
 	--color-destructive: var(--color-red-700);
+	--color-selection: #fef9b2;
 }
 
 .dark {
@@ -19,4 +20,5 @@
 	--color-scrollbar: var(--color-neutral-800);
 	--color-success: #587969;
 	--color-destructive: var(--color-red-400);
+	--color-selection: #4a605f;
 }

@@ -1,0 +1,11 @@
+html {
+	background-color: var(--color-background);
+	color: var(--color-foreground);
+	scrollbar-color: var(--color-scrollbar) transparent;
+	scrollbar-width: thin;
+	-webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+	background-color: var(--color-selection);
+}

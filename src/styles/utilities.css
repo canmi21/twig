@@ -1,0 +1,9 @@
+/* Canonical keyboard focus indicator. Uses outline (not ring/box-shadow) so
+  forced-colors recolors it automatically. Apply to every interactive element. */
+:where(.focus-ring) {
+	border-radius: 4px;
+}
+.focus-ring:focus-visible {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
+}
