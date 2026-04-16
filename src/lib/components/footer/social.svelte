@@ -86,9 +86,7 @@
 </script>
 
 <div class="flex flex-wrap items-center gap-4 text-muted-foreground">
-	<!-- Data-driven external link list — svelte/no-navigation-without-resolve
-	     can't statically prove each href in an each-loop, but every entry in
-	     LINKS above is typed and curated. -->
+	<!-- Curated external URLs; the rule can't trace dynamic href in an each-loop. -->
 	<!-- eslint-disable svelte/no-navigation-without-resolve -->
 	{#each LINKS as { service, href, Icon, iconClass, extraClass } (service)}
 		<a

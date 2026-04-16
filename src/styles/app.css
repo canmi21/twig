@@ -35,7 +35,7 @@ html {
   (not box-shadow/ring) so forced-colors mode keeps a visible indicator and
   recolors it with system colors automatically. Apply this class to every
   interactive element instead of `focus-visible:outline-none`. */
-.focus-ring {
+:where(.focus-ring) {
 	border-radius: 4px;
 }
 .focus-ring:focus-visible {

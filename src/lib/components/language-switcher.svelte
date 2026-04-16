@@ -60,7 +60,7 @@
 							{...props}
 							in:fade={{ duration: 200, easing: cubicOut }}
 							out:fade={{ duration: 200, easing: cubicOut }}
-							class="z-50 min-w-27 overflow-hidden rounded-md border border-divider bg-background shadow-sm"
+							class="z-50 min-w-27 overflow-hidden rounded-md border border-divider bg-background shadow-sm outline-none"
 						>
 							{#each locales as l (l)}
 								{@const Icon = LOCALE_ICONS[l]}

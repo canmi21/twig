@@ -24,6 +24,7 @@ Everything that can be mechanical is mechanical — treat the gate as authoritat
 
 - **Chat:** Simplified Chinese. **Code / commits / docs-in-repo:** English.
 - **Filenames:** kebab-case, including component files. SvelteKit `+`-prefixed files keep their prescribed names.
+- **Comments:** English, declarative, compact. State the non-obvious _why_ — the constraint, the invariant, the workaround — never the obvious _what_. One dense sentence beats a paragraph of narration; every word earns its line, but never at the cost of a fact a future reader would need.
 - When the user says "commit this" without a message, write one that passes commitlint.
 
 ## Git
