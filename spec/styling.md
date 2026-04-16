@@ -18,6 +18,7 @@
 | `scrollbar`        | neutral-300 | neutral-800 | Browser scrollbar thumb (via `scrollbar-color`)  |
 | `success`          | `#75d199`   | `#587969`   | Positive status                                  |
 | `destructive`      | red-700     | red-400     | Errors                                           |
+| `selection`        | `#fef9b2`   | `#4a605f`   | Text selection highlight (`::selection`)         |
 
 **Rules:**
 
@@ -27,6 +28,35 @@
 - No `dark:` prefix on semantic utilities — `@theme` redefinitions inside `.dark` auto-flip everything.
 
 Canonical Tailwind class scale (`size-3.25` vs `size-[0.8125rem]` etc.) is enforced mechanically by `eslint-plugin-better-tailwindcss` via the lefthook `pre-commit` job.
+
+## Styles architecture
+
+`src/styles/app.css` is the entry point. Each file owns one concern:
+
+| File             | Responsibility                                    |
+| ---------------- | ------------------------------------------------- |
+| `app.css`        | Tailwind import, `@custom-variant`, `@theme` anim |
+| `tokens.css`     | Semantic color tokens (light + `.dark` overrides) |
+| `base.css`       | Element baselines (`html`) and `::selection`      |
+| `utilities.css`  | Reusable class primitives (`.focus-ring`)         |
+| `components.css` | Scoped component patches (`.footer-icon-bold`)    |
+
+## Focus ring
+
+`.focus-ring` in `utilities.css` is the single source of truth for keyboard focus indication. Apply it to every interactive element.
+
+- Uses a real CSS `outline` (not `box-shadow` / Tailwind `ring`) so `forced-colors` mode recolors it automatically.
+- Default `border-radius: 4px` via `:where(.focus-ring)` — zero specificity, any explicit `rounded-*` on the same element wins.
+- Color: `var(--color-blue-500)` (Tailwind's canonical blue, not a project semantic token — focus ring is "system-level feedback", not brand).
+- Callers add their own `hover:text-foreground focus-visible:text-foreground` for color reinforcement; the utility only owns the outline shape.
+
+## Browser default resets
+
+Three resets in `base.css` prevent browser defaults from leaking through:
+
+- **`::selection`** — uses `var(--color-selection)` token; auto-switches light/dark.
+- **`-webkit-tap-highlight-color: transparent`** — suppresses the translucent flash on mobile tap. Acceptable because all interactive elements already have visible `focus-visible` + `hover` states.
+- **`prefers-reduced-motion`** — Tailwind utility `motion-safe:` for CSS animations (e.g. status indicator breathe). Svelte JS transitions check `window.matchMedia('(prefers-reduced-motion: reduce)')` at transition start and degrade gracefully (drop rotation, shorten duration).
 
 ## Icons
 
