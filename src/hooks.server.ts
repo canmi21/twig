@@ -56,7 +56,8 @@ function forceLocale(event: Parameters<Handle>[0]['event'], locale: Locale) {
 	event.cookies.set(LANG_COOKIE, locale, {
 		path: '/',
 		maxAge: LANG_COOKIE_MAX_AGE,
-		sameSite: 'lax'
+		sameSite: 'lax',
+		httpOnly: false
 	});
 }
 
