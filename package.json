@@ -23,6 +23,7 @@
 		"@iconify-json/mingcute": "^1.2.7",
 		"@inlang/paraglide-js": "^2.16.0",
 		"@lucide/svelte": "^1.8.0",
+		"@sentry/sveltekit": "^10.48.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
 		"@sveltejs/kit": "^2.57.1",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
