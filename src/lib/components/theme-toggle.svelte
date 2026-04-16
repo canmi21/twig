@@ -4,6 +4,7 @@
 	import { Toggle } from 'bits-ui';
 
 	import { m } from '$lib/paraglide/messages';
+	import { motion } from '$lib/motion/state.svelte';
 	import { setThemeCookie } from '$lib/theme/script';
 
 	import IconSunLine from '~icons/mingcute/sun-line';
@@ -24,14 +25,20 @@
 		if (next) moonIdx = Math.floor(Math.random() * MOONS.length);
 	}
 
-	// Drops rotation and shortens duration when prefers-reduced-motion is active.
 	function rotateFade(_node: Element, { duration = 280 }: { duration?: number } = {}) {
-		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const pref = motion.value;
+		if (pref === 'none') return { duration: 0, css: () => '' };
+		if (pref === 'reduce') {
+			return {
+				duration: 120,
+				easing: cubicOut,
+				css: (t: number) => `opacity: ${t};`
+			};
+		}
 		return {
-			duration: reduced ? 120 : duration,
+			duration,
 			easing: cubicOut,
-			css: (t: number, u: number) =>
-				reduced ? `opacity: ${t};` : `opacity: ${t}; transform: rotate(${u * 90}deg);`
+			css: (t: number, u: number) => `opacity: ${t}; transform: rotate(${u * 90}deg);`
 		};
 	}
 </script>

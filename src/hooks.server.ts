@@ -4,6 +4,7 @@ import { paraglideMiddleware } from '$lib/paraglide/server';
 import { isLocale, type Locale } from '$lib/paraglide/runtime';
 import { htmlLangFor } from '$lib/i18n/urls';
 import { hasLangCookie, resolveLocaleFromAcceptLanguage, upsertCookie } from '$lib/i18n/negotiate';
+import { motionScript } from '$lib/motion/script';
 import { THEME_COOKIE, themeScript, type Theme } from '$lib/theme/script';
 
 const LANG_COOKIE = 'language';
@@ -78,6 +79,7 @@ const themeHandle: Handle = async ({ event, resolve }) => {
 			html
 				.replace('%theme%', theme === 'dark' ? 'dark' : '')
 				.replace('%theme_script%', `<script>${themeScript}</script>`)
+				.replace('%motion_script%', `<script>${motionScript}</script>`)
 	});
 };
 

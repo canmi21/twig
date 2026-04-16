@@ -7,3 +7,15 @@
 	outline: 2px solid var(--color-blue-500);
 	outline-offset: 2px;
 }
+
+/* Motion: none — instant everything. Svelte JS-driven transitions must also
+   pass duration:0 because their internal timer ignores this CSS override. */
+:root[data-motion='none'],
+:root[data-motion='none'] *,
+:root[data-motion='none'] *::before,
+:root[data-motion='none'] *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}

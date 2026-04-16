@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 
 	import { m } from '$lib/paraglide/messages';
+	import { motion } from '$lib/motion/state.svelte';
 	import { getLocale, locales, setLocale, type Locale } from '$lib/paraglide/runtime';
 
 	import IconTranslate from '~icons/mingcute/translate-2-line';
@@ -36,6 +37,14 @@
 	function handleSelect(l: Locale) {
 		if (l !== currentLocale) setLocale(l);
 	}
+
+	// reduce: remove rotation (spatial), keep fade; none: duration 0.
+	function fadeDuration(): number {
+		const pref = motion.value;
+		if (pref === 'none') return 0;
+		if (pref === 'reduce') return 120;
+		return 200;
+	}
 </script>
 
 <DropdownMenu.Root bind:open={langOpen}>
@@ -46,9 +55,9 @@
 		<IconTranslate class="h-4 w-auto" />
 		<span class="ml-1">{LOCALE_LABELS[currentLocale]}</span>
 		<IconUpSmall
-			class="ml-px h-4 w-auto transition-transform duration-200 ease-out {langOpen
-				? 'rotate-180'
-				: ''}"
+			class="ml-px h-4 w-auto {motion.value === 'full'
+				? 'transition-transform duration-200 ease-out'
+				: ''} {langOpen ? 'rotate-180' : ''}"
 		/>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Portal>
@@ -58,8 +67,8 @@
 					<div {...wrapperProps}>
 						<div
 							{...props}
-							in:fade={{ duration: 200, easing: cubicOut }}
-							out:fade={{ duration: 200, easing: cubicOut }}
+							in:fade={{ duration: fadeDuration(), easing: cubicOut }}
+							out:fade={{ duration: fadeDuration(), easing: cubicOut }}
 							class="z-50 min-w-27 overflow-hidden rounded-md border border-divider bg-background shadow-sm outline-none"
 						>
 							{#each locales as l (l)}
