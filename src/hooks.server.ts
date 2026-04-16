@@ -76,7 +76,15 @@ const langHandle: Handle = ({ event, resolve }) => {
 	const langParam = event.url.searchParams.get('lang');
 	if (langParam && isLocale(langParam)) {
 		forceLocale(event, langParam);
-	} else if (!hasLangCookie(event.request.headers.get('cookie'))) {
+		const clean = new URL(event.url);
+		clean.searchParams.delete('lang');
+		return new Response(null, {
+			status: 302,
+			headers: { Location: clean.pathname + clean.search }
+		});
+	}
+
+	if (!hasLangCookie(event.request.headers.get('cookie'))) {
 		const chosen = resolveLocaleFromAcceptLanguage(event.request.headers.get('accept-language'));
 		forceLocale(event, chosen);
 	}
