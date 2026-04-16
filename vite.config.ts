@@ -48,7 +48,7 @@ export default defineConfig({
 		Icons({ compiler: 'svelte' }),
 		sveltekit(),
 		paraglideVitePlugin({
-			project: './project.inlang',
+			project: './.inlang',
 			outdir: './src/lib/paraglide',
 			// `preferredLanguage` is intentionally omitted — hooks.server.ts owns
 			// Accept-Language negotiation (see `resolveLocaleFromAcceptLanguage`),
