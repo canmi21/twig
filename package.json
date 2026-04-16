@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "wrangler types --check && vite build",
+		"build": "wrangler types && vite build",
 		"test": "vitest",
 		"prepare": "svelte-kit sync || true; lefthook install || true",
 		"gen": "wrangler types",

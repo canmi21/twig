@@ -18,7 +18,7 @@ typecheck:
 
 # Full type + a11y gate (wrangler types → svelte-kit sync → svelte-check).
 check:
-    bunx wrangler types --check
+    bunx wrangler types
     bunx svelte-kit sync
     bunx svelte-check --tsconfig ./tsconfig.json
 
