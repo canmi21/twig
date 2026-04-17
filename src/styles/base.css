@@ -9,3 +9,14 @@ html {
 ::selection {
 	background-color: var(--color-selection);
 }
+
+/* Default hover/focus fade on interactive elements. `:where()` gives zero
+   specificity so any utility class (`transition-none`, `duration-*`,
+   `transition-transform`, etc.) overrides or stacks freely. Scoped to color
+   properties only — transform/opacity/size stay snappy unless opted in. */
+:where(a, button, [role='button']) {
+	transition:
+		color 120ms ease,
+		background-color 120ms ease,
+		border-color 120ms ease;
+}

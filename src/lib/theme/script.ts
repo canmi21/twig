@@ -10,3 +10,22 @@ export const themeScript = `(function(){var m=document.cookie.match(/\\btheme=(l
 export function setThemeCookie(theme: Theme): void {
 	document.cookie = `${THEME_COOKIE}=${theme};path=/;max-age=${THEME_MAX_AGE};SameSite=Lax`;
 }
+
+// Swap theme without tweening the color-variable change. Injects a transition
+// suppressor before flipping .dark, then removes it after the paint so hover
+// transitions elsewhere keep working.
+export function applyTheme(theme: Theme): void {
+	const root = document.documentElement;
+
+	const suppressor = document.createElement('style');
+	suppressor.textContent = `*,*::before,*::after{transition:none !important;}`;
+	document.head.appendChild(suppressor);
+
+	root.classList.toggle('dark', theme === 'dark');
+	setThemeCookie(theme);
+
+	// Force a synchronous style flush so the color swap commits under the
+	// suppressor, then remove it on the next tick (next-themes pattern).
+	void getComputedStyle(root).backgroundColor;
+	setTimeout(() => suppressor.remove(), 1);
+}

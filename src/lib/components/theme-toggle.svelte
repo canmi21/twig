@@ -5,7 +5,7 @@
 
 	import { m } from '$lib/paraglide/messages';
 	import { motion } from '$lib/motion/state.svelte';
-	import { setThemeCookie } from '$lib/theme/script';
+	import { applyTheme } from '$lib/theme/script';
 
 	import IconSunLine from '~icons/mingcute/sun-line';
 	import IconMoonLine from '~icons/mingcute/moon-line';
@@ -19,8 +19,7 @@
 	const MoonIcon = $derived(MOONS[moonIdx]);
 
 	function handlePressedChange(next: boolean) {
-		document.documentElement.classList.toggle('dark', next);
-		setThemeCookie(next ? 'dark' : 'light');
+		applyTheme(next ? 'dark' : 'light');
 		// Randomize moon icon each time dark mode activates.
 		if (next) moonIdx = Math.floor(Math.random() * MOONS.length);
 	}
