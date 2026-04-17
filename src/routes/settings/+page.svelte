@@ -7,12 +7,15 @@
 	import WindowCard from '$lib/components/cards/window-card.svelte';
 	import SampleCard from '$lib/components/cards/sample-card.svelte';
 
+	// Track the live theme so Motion card colors follow palette + mode swaps.
+	// We route through CSS tokens rather than the palette's literal colors so
+	// any future palette automatically inherits correct preview chrome.
 	const MOTION_WINDOW = {
-		bg: '#171717',
-		titlebar: '#262626',
-		dot: '#525252',
-		border: '#404040',
-		borderHover: '#525252'
+		bg: 'var(--color-background)',
+		titlebar: 'var(--color-muted)',
+		dot: 'var(--color-muted-foreground)',
+		border: 'var(--color-border)',
+		borderHover: 'var(--color-muted-foreground)'
 	};
 
 	type PaletteColors = {
@@ -199,21 +202,24 @@
 			     Inactive cards rely on CSS transitions scoped by `.motion-tier-*`
 			     in `utilities.css` — hover flips A↔B, hover-out tweens back. -->
 			<div class={`motion-tier-${tier} relative h-full`}>
-				<!-- View A: nav item 1 active -->
+				<!-- View A: nav item 1 active.
+				     Highlight = --color-foreground, rest = --color-border, body text
+				     = --color-muted-foreground. All three read live from the root
+				     palette, so Motion previews track the selected theme. -->
 				<div
 					class="motion-layer motion-layer-a absolute inset-0 flex gap-2.5"
 					style={active ? `animation: motion-state-a-${tier} 5s ease-in-out infinite` : ''}
 				>
 					<div class="w-5 shrink-0 space-y-1">
-						<div class="h-1 w-full rounded-sm" style="background:#d4d4d4"></div>
-						<div class="h-1 w-3/5 rounded-sm" style="background:#404040"></div>
-						<div class="h-1 w-4/5 rounded-sm" style="background:#404040"></div>
+						<div class="h-1 w-full rounded-sm bg-foreground"></div>
+						<div class="h-1 w-3/5 rounded-sm bg-border"></div>
+						<div class="h-1 w-4/5 rounded-sm bg-border"></div>
 					</div>
 					<div class="flex-1 space-y-1">
-						<div class="h-1.5 w-2/5 rounded-sm" style="background:#d4d4d4"></div>
-						<div class="h-1 w-3/4 rounded-sm" style="background:#525252"></div>
-						<div class="h-1 w-1/2 rounded-sm" style="background:#525252"></div>
-						<div class="h-1 w-2/3 rounded-sm" style="background:#525252"></div>
+						<div class="h-1.5 w-2/5 rounded-sm bg-foreground"></div>
+						<div class="h-1 w-3/4 rounded-sm bg-muted-foreground"></div>
+						<div class="h-1 w-1/2 rounded-sm bg-muted-foreground"></div>
+						<div class="h-1 w-2/3 rounded-sm bg-muted-foreground"></div>
 					</div>
 				</div>
 				<!-- View B: nav item 2 active -->
@@ -222,15 +228,15 @@
 					style={active ? `animation: motion-state-b-${tier} 5s ease-in-out infinite` : ''}
 				>
 					<div class="w-5 shrink-0 space-y-1">
-						<div class="h-1 w-full rounded-sm" style="background:#404040"></div>
-						<div class="h-1 w-3/5 rounded-sm" style="background:#d4d4d4"></div>
-						<div class="h-1 w-4/5 rounded-sm" style="background:#404040"></div>
+						<div class="h-1 w-full rounded-sm bg-border"></div>
+						<div class="h-1 w-3/5 rounded-sm bg-foreground"></div>
+						<div class="h-1 w-4/5 rounded-sm bg-border"></div>
 					</div>
 					<div class="flex-1 space-y-1">
-						<div class="h-1.5 w-3/5 rounded-sm" style="background:#d4d4d4"></div>
-						<div class="h-1 w-5/6 rounded-sm" style="background:#525252"></div>
-						<div class="h-1 w-3/5 rounded-sm" style="background:#525252"></div>
-						<div class="h-1 w-1/2 rounded-sm" style="background:#525252"></div>
+						<div class="h-1.5 w-3/5 rounded-sm bg-foreground"></div>
+						<div class="h-1 w-5/6 rounded-sm bg-muted-foreground"></div>
+						<div class="h-1 w-3/5 rounded-sm bg-muted-foreground"></div>
+						<div class="h-1 w-1/2 rounded-sm bg-muted-foreground"></div>
 					</div>
 				</div>
 			</div>
