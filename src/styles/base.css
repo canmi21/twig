@@ -6,27 +6,77 @@ html {
 	-webkit-tap-highlight-color: transparent;
 }
 
-/* Composite font-family stack: Latin font first, then the primary CJK face for
-   the page language, then a coexisting CJK fallback. Simplified and Traditional
-   never appear in the same stack because they share Unicode code points with
-   conflicting glyphs — pick one; JP coexists with whichever Chinese variant is
-   primary. :lang() overrides let mixed content (e.g. an inline JP quote on an
-   SC page) render with the correct face when authors tag the element. */
+/* Composite font-family stack: specific Latin face → primary CJK face for the
+   page language → coexisting CJK fallback → generic Latin+system tail. Generics
+   must come LAST because `ui-sans-serif` / `system-ui` / `sans-serif` supply CJK
+   glyphs through OS font fallback — any of them placed before --font-cjk-* would
+   capture CJK characters and make LXGW / Noto never render. Simplified and
+   Traditional never coexist in a stack (same Unicode code points, conflicting
+   glyphs — pick one); JP pairs with whichever Chinese variant is primary.
+   :lang() overrides let mixed content (e.g. an inline JP quote on an SC page)
+   render with the correct face when authors tag the element. The __unset
+   var() fallback is a placeholder identifier that matches no installed family,
+   so the slot is skipped when the user's choice is "system". */
 html {
-	font-family: var(--font-sans), var(--font-cjk-sc), var(--font-cjk-jp);
+	font-family:
+		var(--font-sans, __unset),
+		var(--font-cjk-sc, __unset),
+		var(--font-cjk-jp, __unset),
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
 }
 html[lang='zh-TW'] {
-	font-family: var(--font-sans), var(--font-cjk-tc), var(--font-cjk-jp);
+	font-family:
+		var(--font-sans, __unset),
+		var(--font-cjk-tc, __unset),
+		var(--font-cjk-jp, __unset),
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
 }
 html[lang='ja-JP'] {
-	font-family: var(--font-sans), var(--font-cjk-jp), var(--font-cjk-sc);
+	font-family:
+		var(--font-sans, __unset),
+		var(--font-cjk-jp, __unset),
+		var(--font-cjk-sc, __unset),
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
 }
 :lang(zh-TW),
 :lang(zh-Hant) {
-	font-family: var(--font-sans), var(--font-cjk-tc), var(--font-cjk-jp);
+	font-family:
+		var(--font-sans, __unset),
+		var(--font-cjk-tc, __unset),
+		var(--font-cjk-jp, __unset),
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
 }
 :lang(ja) {
-	font-family: var(--font-sans), var(--font-cjk-jp), var(--font-cjk-sc);
+	font-family:
+		var(--font-sans, __unset),
+		var(--font-cjk-jp, __unset),
+		var(--font-cjk-sc, __unset),
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		sans-serif;
 }
 
 ::selection {

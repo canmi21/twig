@@ -1,8 +1,4 @@
 @theme {
-	--font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-	--font-cjk-sc: system-ui;
-	--font-cjk-tc: system-ui;
-	--font-cjk-jp: system-ui;
 	--color-background: var(--color-white);
 	--color-foreground: var(--color-neutral-900);
 	--color-inset: var(--color-neutral-200);
@@ -81,31 +77,32 @@
 	--color-selection: #333333;
 }
 
-/* Font family selection. `data-font` on <html> is set by hooks.server.ts from
-   the `font` cookie, then by `applyFont()` on runtime switches. `system` uses
-   the --font-sans default from @theme so no override needed. */
+/* Font family selection. --font-sans / --font-cjk-* hold SPECIFIC face names
+   only; the generic Latin fallback chain lives at the tail of the html stack
+   in base.css. Putting generics (ui-sans-serif, system-ui, sans-serif) ahead
+   of --font-cjk-* would let them capture CJK glyphs via OS font fallback
+   before the stack ever reached a specific CJK face. Left deliberately outside
+   @theme so they don't spawn useless Tailwind font-* utilities. `data-font` /
+   `data-cjk` on <html> are set by hooks.server.ts from cookies and by
+   applyFont() / applyCjkFont() on runtime switches; when unset, the var()
+   fallback in base.css inserts a no-op placeholder. */
 html[data-font='inter'] {
-	--font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+	--font-sans: 'Inter';
 }
 html[data-font='roboto'] {
-	--font-sans: 'Roboto', ui-sans-serif, system-ui, -apple-system, sans-serif;
+	--font-sans: 'Roboto';
 }
 html[data-font='source-sans'] {
-	--font-sans: 'Source Sans 3', ui-sans-serif, system-ui, -apple-system, sans-serif;
+	--font-sans: 'Source Sans 3';
 }
 
-/* CJK font selection: `data-cjk` on <html> is set by hooks.server.ts from the
-   cjk_font cookie, then by applyCjkFont() on runtime switches. System leaves
-   the defaults above which resolve via system-ui (OS picks the locale-appropriate
-   CJK face). base.css assembles `--font-cjk-sc/tc/jp` into the active stack
-   based on <html lang>. */
 html[data-cjk='noto'] {
-	--font-cjk-sc: 'Noto Sans SC', sans-serif;
-	--font-cjk-tc: 'Noto Sans TC', sans-serif;
-	--font-cjk-jp: 'Noto Sans JP', sans-serif;
+	--font-cjk-sc: 'Noto Sans SC';
+	--font-cjk-tc: 'Noto Sans TC';
+	--font-cjk-jp: 'Noto Sans JP';
 }
 html[data-cjk='lxgw'] {
-	--font-cjk-sc: 'LXGW WenKai', serif;
-	--font-cjk-tc: 'LXGW WenKai TC', serif;
-	--font-cjk-jp: 'Klee One', serif;
+	--font-cjk-sc: 'LXGW WenKai';
+	--font-cjk-tc: 'LXGW WenKai TC';
+	--font-cjk-jp: 'Klee One';
 }
