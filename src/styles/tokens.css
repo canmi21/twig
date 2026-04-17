@@ -1,6 +1,7 @@
 @theme {
 	--color-background: var(--color-white);
 	--color-foreground: var(--color-neutral-900);
+	--color-inset: var(--color-neutral-200);
 	--color-muted: var(--color-neutral-100);
 	--color-muted-foreground: var(--color-neutral-500);
 	--color-border: var(--color-neutral-200);
@@ -14,6 +15,7 @@
 .dark {
 	--color-background: var(--color-neutral-900);
 	--color-foreground: var(--color-neutral-300);
+	--color-inset: var(--color-neutral-950);
 	--color-muted: var(--color-neutral-800);
 	--color-border: var(--color-neutral-700);
 	--color-divider: var(--color-neutral-800);

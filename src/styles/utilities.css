@@ -9,13 +9,158 @@
 }
 
 /* Motion: none — instant everything. Svelte JS-driven transitions must also
-   pass duration:0 because their internal timer ignores this CSS override. */
-:root[data-motion='none'],
-:root[data-motion='none'] *,
-:root[data-motion='none'] *::before,
-:root[data-motion='none'] *::after {
+   pass duration:0 because their internal timer ignores this CSS override.
+   The `:not([data-motion-exempt] *)` guard carves out an escape hatch for the
+   motion-tier preview cards in settings: those must keep animating to demo
+   what each tier looks like, even when the user has globally picked None. */
+:root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *),
+:root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *)::before,
+:root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *)::after {
 	animation-duration: 0.01ms !important;
 	animation-iteration-count: 1 !important;
 	transition-duration: 0.01ms !important;
 	scroll-behavior: auto !important;
+}
+
+/* Motion preview keyframes — two content states (A: list, B: grid) alternate
+   on a shared 5s period so all three cards render the same interaction in
+   three flavours simultaneously. Full adds a horizontal slide to the fade,
+   Reduce keeps fade only, None is a hard cut. */
+@keyframes motion-state-a-full {
+	0%,
+	40% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	50%,
+	90% {
+		opacity: 0;
+		transform: translateX(-10px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+@keyframes motion-state-b-full {
+	0%,
+	40% {
+		opacity: 0;
+		transform: translateX(10px);
+	}
+	50%,
+	90% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(10px);
+	}
+}
+@keyframes motion-state-a-reduce {
+	0%,
+	40% {
+		opacity: 1;
+	}
+	50%,
+	90% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes motion-state-b-reduce {
+	0%,
+	40% {
+		opacity: 0;
+	}
+	50%,
+	90% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+/* None snaps at the same instant Full/Reduce start their transition (40%),
+   not when they finish (50%). Otherwise None looks like it's waiting for the
+   others to complete. */
+@keyframes motion-state-a-none {
+	0%,
+	39.99% {
+		opacity: 1;
+	}
+	40%,
+	89.99% {
+		opacity: 0;
+	}
+	90%,
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes motion-state-b-none {
+	0%,
+	39.99% {
+		opacity: 0;
+	}
+	40%,
+	89.99% {
+		opacity: 1;
+	}
+	90%,
+	100% {
+		opacity: 0;
+	}
+}
+
+/* Motion preview rest state: layer A visible, layer B hidden. Active cards'
+   inline `animation: ... infinite` drives both during the keyframe run (CSS
+   animations beat cascaded property values while active). For inactive cards,
+   hover flips A↔B and CSS transitions handle both directions — leave the card
+   mid-animation and it tweens back on its own. */
+.motion-layer-a {
+	opacity: 1;
+}
+.motion-layer-b {
+	opacity: 0;
+}
+
+/* Per-tier transition shape. Full adds a horizontal slide, Reduce is fade
+   only, None snaps. Transform defaults give each layer its entry/exit
+   direction so the :hover swap below reads as "A leaves left, B enters from
+   right". */
+.motion-tier-full .motion-layer {
+	transition:
+		opacity 400ms ease-in-out,
+		transform 400ms ease-in-out;
+}
+.motion-tier-full .motion-layer-a {
+	transform: translateX(0);
+}
+.motion-tier-full .motion-layer-b {
+	transform: translateX(10px);
+}
+
+.motion-tier-reduce .motion-layer {
+	transition: opacity 400ms ease-in-out;
+}
+
+.motion-tier-none .motion-layer {
+	transition: none;
+}
+
+.group:hover .motion-layer-a {
+	opacity: 0;
+}
+.group:hover .motion-layer-b {
+	opacity: 1;
+}
+.group:hover .motion-tier-full .motion-layer-a {
+	transform: translateX(-10px);
+}
+.group:hover .motion-tier-full .motion-layer-b {
+	transform: translateX(0);
 }

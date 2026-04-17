@@ -4,8 +4,6 @@
 	import { baseLocale, locales } from '$lib/paraglide/runtime';
 	import { canonicalPath, htmlLangFor, localizedPath } from '$lib/i18n/urls';
 	import Footer from '$lib/components/footer.svelte';
-	import LanguageSwitcher from '$lib/components/language-switcher.svelte';
-	import ThemeToggle from '$lib/components/theme-toggle.svelte';
 
 	let { data, children } = $props();
 
@@ -29,11 +27,9 @@
 	<link rel="alternate" type="application/atom+xml" title="Canmi" href="{__PUBLIC_URL__}/feed" />
 </svelte:head>
 
-<header class="fixed top-4 right-4 z-50 flex items-center gap-3">
-	<LanguageSwitcher />
-	<ThemeToggle />
-</header>
 <main class="flex min-h-svh flex-col">
 	{@render children()}
 </main>
-<Footer runtimeDays={data.runtimeDays} />
+{#if !page.url.pathname.startsWith('/settings')}
+	<Footer runtimeDays={data.runtimeDays} />
+{/if}
