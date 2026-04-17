@@ -3,13 +3,9 @@
 	import { m } from '$lib/paraglide/messages';
 	import { motion } from '$lib/motion/state.svelte';
 	import { applyTheme, type Theme } from '$lib/theme/script';
-	import ThemeCard from '$lib/components/theme-card.svelte';
-	import WindowCard from '$lib/components/window-card.svelte';
-	import SampleCard from '$lib/components/sample-card.svelte';
-	import FontSample from '$lib/components/font-sample.svelte';
-	import CjkSample from '$lib/components/cjk-sample.svelte';
-	import CodeSample from '$lib/components/code-sample.svelte';
-	import EmojiSample from '$lib/components/emoji-sample.svelte';
+	import ThemeCard from '$lib/components/cards/theme-card.svelte';
+	import WindowCard from '$lib/components/cards/window-card.svelte';
+	import SampleCard from '$lib/components/cards/sample-card.svelte';
 
 	const MOTION_WINDOW = {
 		bg: '#171717',
@@ -231,9 +227,7 @@
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.font']()}</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each FONTS as font (font.name)}
-				<SampleCard label={font.name}>
-					<FontSample family={font.family} />
-				</SampleCard>
+				<SampleCard variant="font" label={font.name} family={font.family} />
 			{/each}
 		</div>
 	</section>
@@ -244,9 +238,7 @@
 		</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each CJK_FONTS as font (font.name)}
-				<SampleCard label={font.name}>
-					<CjkSample sc={font.sc} tc={font.tc} jp={font.jp} />
-				</SampleCard>
+				<SampleCard variant="cjk" label={font.name} sc={font.sc} tc={font.tc} jp={font.jp} />
 			{/each}
 		</div>
 	</section>
@@ -257,9 +249,7 @@
 		</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each CODE_FONTS as font (font.name)}
-				<SampleCard label={font.name}>
-					<CodeSample family={font.family} />
-				</SampleCard>
+				<SampleCard variant="code" label={font.name} family={font.family} />
 			{/each}
 		</div>
 	</section>
@@ -268,9 +258,7 @@
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.emoji']()}</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each EMOJIS as emoji (emoji.name)}
-				<SampleCard label={emoji.name}>
-					<EmojiSample kind={emoji.kind} />
-				</SampleCard>
+				<SampleCard variant="emoji" label={emoji.name} kind={emoji.kind} />
 			{/each}
 		</div>
 	</section>
