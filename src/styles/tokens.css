@@ -1,5 +1,8 @@
 @theme {
 	--font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--font-cjk-sc: system-ui;
+	--font-cjk-tc: system-ui;
+	--font-cjk-jp: system-ui;
 	--color-background: var(--color-white);
 	--color-foreground: var(--color-neutral-900);
 	--color-inset: var(--color-neutral-200);
@@ -89,4 +92,20 @@ html[data-font='roboto'] {
 }
 html[data-font='source-sans'] {
 	--font-sans: 'Source Sans 3', ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* CJK font selection: `data-cjk` on <html> is set by hooks.server.ts from the
+   cjk_font cookie, then by applyCjkFont() on runtime switches. System leaves
+   the defaults above which resolve via system-ui (OS picks the locale-appropriate
+   CJK face). base.css assembles `--font-cjk-sc/tc/jp` into the active stack
+   based on <html lang>. */
+html[data-cjk='noto'] {
+	--font-cjk-sc: 'Noto Sans SC', sans-serif;
+	--font-cjk-tc: 'Noto Sans TC', sans-serif;
+	--font-cjk-jp: 'Noto Sans JP', sans-serif;
+}
+html[data-cjk='lxgw'] {
+	--font-cjk-sc: 'LXGW WenKai', serif;
+	--font-cjk-tc: 'LXGW WenKai TC', serif;
+	--font-cjk-jp: 'Klee One', serif;
 }

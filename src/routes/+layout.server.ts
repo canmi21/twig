@@ -8,6 +8,8 @@ export const load: LayoutServerLoad = ({ locals }) => {
 	return {
 		theme: locals.theme,
 		font: locals.font,
+		cjkFont: locals.cjkFont,
+		htmlLang: locals.htmlLang,
 		runtimeDays
 	};
 };

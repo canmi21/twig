@@ -1,10 +1,32 @@
 html {
 	background-color: var(--color-background);
 	color: var(--color-foreground);
-	font-family: var(--font-sans);
 	scrollbar-color: var(--color-scrollbar) transparent;
 	scrollbar-width: thin;
 	-webkit-tap-highlight-color: transparent;
+}
+
+/* Composite font-family stack: Latin font first, then the primary CJK face for
+   the page language, then a coexisting CJK fallback. Simplified and Traditional
+   never appear in the same stack because they share Unicode code points with
+   conflicting glyphs — pick one; JP coexists with whichever Chinese variant is
+   primary. :lang() overrides let mixed content (e.g. an inline JP quote on an
+   SC page) render with the correct face when authors tag the element. */
+html {
+	font-family: var(--font-sans), var(--font-cjk-sc), var(--font-cjk-jp);
+}
+html[lang='zh-TW'] {
+	font-family: var(--font-sans), var(--font-cjk-tc), var(--font-cjk-jp);
+}
+html[lang='ja-JP'] {
+	font-family: var(--font-sans), var(--font-cjk-jp), var(--font-cjk-sc);
+}
+:lang(zh-TW),
+:lang(zh-Hant) {
+	font-family: var(--font-sans), var(--font-cjk-tc), var(--font-cjk-jp);
+}
+:lang(ja) {
+	font-family: var(--font-sans), var(--font-cjk-jp), var(--font-cjk-sc);
 }
 
 ::selection {

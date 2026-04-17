@@ -10,6 +10,14 @@
 		FONTS,
 		type FontFamily
 	} from '$lib/font/script';
+	import {
+		applyCjkFont,
+		ensureAllCjkLoaded,
+		CJK_FONT_IDS,
+		CJK_FAMILIES,
+		labelFor,
+		type CjkFont
+	} from '$lib/font/cjk-script';
 	import ThemeCard from '$lib/components/cards/theme-card.svelte';
 	import WindowCard from '$lib/components/cards/window-card.svelte';
 	import SampleCard from '$lib/components/cards/sample-card.svelte';
@@ -134,12 +142,6 @@
 		}
 	];
 
-	const CJK_FONTS = [
-		{ name: 'System', sc: 'system-ui', tc: 'system-ui', jp: 'system-ui' },
-		{ name: 'Noto Sans', sc: '"Noto Sans SC"', tc: '"Noto Sans TC"', jp: '"Noto Sans JP"' },
-		{ name: 'LXGW WenKai', sc: '"LXGW WenKai"', tc: '"LXGW WenKai TC"', jp: '"LXGW WenKai"' }
-	];
-
 	const CODE_FONTS = [
 		{ name: 'Monospace', family: 'monospace' },
 		{ name: 'Maple Mono', family: '"Maple Mono", monospace' },
@@ -156,6 +158,7 @@
 
 	let currentTheme = $state<ThemeState>(page.data.theme);
 	let currentFont = $state<FontFamily>(page.data.font);
+	let currentCjkFont = $state<CjkFont>(page.data.cjkFont);
 
 	function selectTheme(next: ThemeState) {
 		currentTheme = next;
@@ -167,12 +170,18 @@
 		applyFont(next);
 	}
 
+	function selectCjkFont(next: CjkFont) {
+		currentCjkFont = next;
+		applyCjkFont(next);
+	}
+
 	// Covers the soft-navigation case where the SSR chunk already shipped the
 	// full font set for /settings — this is a no-op — and the case where the
 	// user landed on another route first and is now switching into /settings
 	// via client routing, so the extra faces need to be pulled in.
 	$effect(() => {
 		ensureAllFontsLoaded();
+		ensureAllCjkLoaded();
 	});
 </script>
 
@@ -314,8 +323,16 @@
 			{m['settings.appearance.font.cjk']()}
 		</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each CJK_FONTS as font (font.name)}
-				<SampleCard variant="cjk" label={font.name} sc={font.sc} tc={font.tc} jp={font.jp} />
+			{#each CJK_FONT_IDS as id (id)}
+				<SampleCard
+					variant="cjk"
+					label={labelFor(id, page.data.htmlLang)}
+					sc={CJK_FAMILIES[id].sc}
+					tc={CJK_FAMILIES[id].tc}
+					jp={CJK_FAMILIES[id].jp}
+					active={currentCjkFont === id}
+					onclick={() => selectCjkFont(id)}
+				/>
 			{/each}
 		</div>
 	</section>

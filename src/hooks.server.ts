@@ -19,6 +19,8 @@ import {
 	renderFontLinks,
 	type FontFamily
 } from '$lib/font/script';
+import { CJK_FONT_COOKIE, isCjkFont, renderCjkLinks, type CjkFont } from '$lib/font/cjk-script';
+import { baseLocale } from '$lib/paraglide/runtime';
 
 const LANG_COOKIE = 'language';
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -121,4 +123,27 @@ const fontHandle: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle = sequence(langHandle, i18nHandle, themeHandle, fontHandle);
+// CJK font choice drives a `<html lang>`-aware stack: the primary CJK face for
+// the current language plus one coexisting fallback (SC+JP or TC+JP or JP+SC).
+// /settings loads every CJK option's primary + fallback face pair so preview
+// cards can render their own glyphs; elsewhere only the selected choice ships.
+const cjkFontHandle: Handle = async ({ event, resolve }) => {
+	const cookie = event.cookies.get(CJK_FONT_COOKIE);
+	const cjkFont: CjkFont = isCjkFont(cookie) ? cookie : 'system';
+	event.locals.cjkFont = cjkFont;
+
+	const langCookie = event.cookies.get(LANG_COOKIE) ?? baseLocale;
+	const htmlLang = htmlLangFor(langCookie);
+	event.locals.htmlLang = htmlLang;
+
+	const isSettings =
+		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
+	const links = renderCjkLinks(cjkFont, htmlLang, isSettings);
+
+	return resolve(event, {
+		transformPageChunk: ({ html }) =>
+			html.replace('%cjk_font%', cjkFont).replace('%cjk_font_links%', links)
+	});
+};
+
+export const handle = sequence(langHandle, i18nHandle, themeHandle, fontHandle, cjkFontHandle);

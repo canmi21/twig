@@ -16,10 +16,14 @@ declare global {
 		interface Locals {
 			theme: import('$lib/theme/script').ThemeState;
 			font: import('$lib/font/script').FontFamily;
+			cjkFont: import('$lib/font/cjk-script').CjkFont;
+			htmlLang: string;
 		}
 		interface PageData {
 			theme: import('$lib/theme/script').ThemeState;
 			font: import('$lib/font/script').FontFamily;
+			cjkFont: import('$lib/font/cjk-script').CjkFont;
+			htmlLang: string;
 			runtimeDays: number;
 		}
 	}

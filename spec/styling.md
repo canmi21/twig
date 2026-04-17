@@ -68,6 +68,22 @@ Hover/interactive color changes fade by default; theme swaps snap.
 - **Scope is color-only.** `transform`, `opacity`, size properties get no default transition — opt in per-element so they don't interfere with explicit Svelte in/out, keyframes, or hover animations.
 - **Do not call `classList.toggle('dark', …)` directly** — always go through `applyTheme()` so the suppressor wraps the swap.
 
+## Typography
+
+English font faces ship from Google Fonts (`src/lib/font/script.ts`). CJK faces (`src/lib/font/cjk-script.ts`) live on two CDNs:
+
+- **Noto Sans SC/TC/JP** — Google Fonts, always-latest.
+- **LXGW WenKai** — CMBill's `cn-font-split` chunked packages on jsDelivr. Pinned to patch:
+  - SC: `@callmebill/lxgw-wenkai-web@1.522.0`
+  - TC: `lxgw-wenkai-tc-web@1.320.0`
+  - JP slot uses Google Fonts **Klee One** (LXGW was derived from it and ships no JP face).
+
+Bumping LXGW means updating the `LXGW_SC_BASE` / `LXGW_TC_BASE` constants in `cjk-script.ts` and this note in the same commit. Never use `@latest` or float a minor — stale chunks cascade across 221 unicode-range files and are painful to debug.
+
+LXGW ships static weights (`light`, `regular`, `medium`) as separate `@font-face` bundles; each weight's stylesheet is only loaded when an element actually requests that weight, so `font-light` / `font-medium` usage triggers the fetch lazily. Variable English fonts (Inter, Roboto, Source Sans 3) are one file per family.
+
+Font stack ordering (`html` / `:lang()` in `base.css`) is: English face → current-language CJK → coexisting fallback CJK. SC and TC are never loaded together (same CJK-unified code points, conflicting glyphs); JP pairs with whichever Chinese script the page is in.
+
 ## Icons
 
 - **Custom SVGs:** `src/lib/icons/*.svelte`, one per file, `class` prop + `fill="currentColor"` + `<title>`, no hard-coded size.
