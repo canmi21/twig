@@ -3,7 +3,6 @@
 	import { m } from '$lib/paraglide/messages';
 
 	let { children } = $props();
-	let sectionEl: HTMLElement;
 	let activeId = $state(page.url.hash.slice(1) || 'general');
 
 	const TABS = [
@@ -16,18 +15,31 @@
 
 	function scrollTo(id: string) {
 		activeId = id;
-		const target = sectionEl?.querySelector(`#${id}`);
-		target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	}
 
 	function handleScroll() {
-		if (!sectionEl || sectionEl.scrollTop > 20) return;
+		if (window.scrollY > 20) return;
 		activeId = 'general';
 	}
+
+	// SvelteKit's client-side scroll manager suppresses the browser's native
+	// "scroll to hash on load" behavior. Restore it explicitly so refreshing
+	// /settings#appearance lands on the right section.
+	$effect(() => {
+		const id = page.url.hash.slice(1);
+		if (!id) return;
+		activeId = id;
+		requestAnimationFrame(() => {
+			document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		});
+	});
 </script>
 
+<svelte:window onscroll={handleScroll} />
+
 <!-- Mobile: stacked column. lg+: sidebar + content side-by-side -->
-<div class="flex h-svh flex-col lg:flex-row">
+<div class="flex min-h-svh flex-col lg:flex-row">
 	<!-- Mobile top tab bar (horizontal scroll) -->
 	<nav class="shrink-0 border-b border-divider px-4 pt-4 pb-0 lg:hidden">
 		<h1 class="mb-3 text-lg font-semibold text-foreground">{m['settings.title']()}</h1>
@@ -48,7 +60,7 @@
 	</nav>
 
 	<!-- Desktop sidebar -->
-	<nav class="hidden shrink-0 self-start pt-20 pl-8 lg:block">
+	<nav class="sticky top-0 hidden h-svh shrink-0 self-start pt-20 pl-8 lg:block">
 		<div class="w-58 xl:w-[16rem]">
 			<h1 class="mb-5 pl-4 text-2xl font-semibold text-foreground">{m['settings.title']()}</h1>
 			<ul class="flex flex-col gap-1">
@@ -70,11 +82,7 @@
 		</div>
 	</nav>
 
-	<section
-		bind:this={sectionEl}
-		onscroll={handleScroll}
-		class="flex-1 overflow-y-auto px-4 pt-6 pb-12 sm:px-6 lg:pt-20 lg:pl-10 lg:pr-8"
-	>
+	<section class="flex-1 px-4 pt-6 pb-12 sm:px-6 lg:pt-20 lg:pl-10 lg:pr-8">
 		<div class="mx-auto max-w-4xl lg:pl-6 2xl:max-w-5xl">
 			{@render children()}
 		</div>
