@@ -3,6 +3,13 @@
 	import { m } from '$lib/paraglide/messages';
 	import { motion } from '$lib/motion/state.svelte';
 	import { applyTheme, type Mode, type Palette, type ThemeState } from '$lib/theme/script';
+	import {
+		applyFont,
+		ensureAllFontsLoaded,
+		FONT_IDS,
+		FONTS,
+		type FontFamily
+	} from '$lib/font/script';
 	import ThemeCard from '$lib/components/cards/theme-card.svelte';
 	import WindowCard from '$lib/components/cards/window-card.svelte';
 	import SampleCard from '$lib/components/cards/sample-card.svelte';
@@ -127,13 +134,6 @@
 		}
 	];
 
-	const FONTS = [
-		{ name: 'System', family: 'system-ui, sans-serif' },
-		{ name: 'Inter', family: 'Inter, sans-serif' },
-		{ name: 'Roboto', family: 'Roboto, sans-serif' },
-		{ name: 'Source Sans', family: '"Source Sans 3", sans-serif' }
-	];
-
 	const CJK_FONTS = [
 		{ name: 'System', sc: 'system-ui', tc: 'system-ui', jp: 'system-ui' },
 		{ name: 'Noto Sans', sc: '"Noto Sans SC"', tc: '"Noto Sans TC"', jp: '"Noto Sans JP"' },
@@ -155,11 +155,25 @@
 	];
 
 	let currentTheme = $state<ThemeState>(page.data.theme);
+	let currentFont = $state<FontFamily>(page.data.font);
 
 	function selectTheme(next: ThemeState) {
 		currentTheme = next;
 		applyTheme(next);
 	}
+
+	function selectFont(next: FontFamily) {
+		currentFont = next;
+		applyFont(next);
+	}
+
+	// Covers the soft-navigation case where the SSR chunk already shipped the
+	// full font set for /settings — this is a no-op — and the case where the
+	// user landed on another route first and is now switching into /settings
+	// via client routing, so the extra faces need to be pulled in.
+	$effect(() => {
+		ensureAllFontsLoaded();
+	});
 </script>
 
 <!-- General -->
@@ -283,8 +297,14 @@
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.font']()}</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each FONTS as font (font.name)}
-				<SampleCard variant="font" label={font.name} family={font.family} />
+			{#each FONT_IDS as id (id)}
+				<SampleCard
+					variant="font"
+					label={FONTS[id].label}
+					family={FONTS[id].stack}
+					active={currentFont === id}
+					onclick={() => selectFont(id)}
+				/>
 			{/each}
 		</div>
 	</section>

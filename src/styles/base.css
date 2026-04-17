@@ -1,6 +1,7 @@
 html {
 	background-color: var(--color-background);
 	color: var(--color-foreground);
+	font-family: var(--font-sans);
 	scrollbar-color: var(--color-scrollbar) transparent;
 	scrollbar-width: thin;
 	-webkit-tap-highlight-color: transparent;

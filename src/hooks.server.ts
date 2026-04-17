@@ -12,6 +12,13 @@ import {
 	type Mode,
 	type Palette
 } from '$lib/theme/script';
+import {
+	FONT_COOKIE,
+	LOADABLE_FONT_IDS,
+	isFontFamily,
+	renderFontLinks,
+	type FontFamily
+} from '$lib/font/script';
 
 const LANG_COOKIE = 'language';
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -96,4 +103,22 @@ const themeHandle: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle = sequence(langHandle, i18nHandle, themeHandle);
+// Scope Google Fonts network cost to the route that actually needs it:
+// /settings preloads every loadable font so the preview cards render their own
+// faces; elsewhere only the selected font ships. `system` means zero network.
+const fontHandle: Handle = async ({ event, resolve }) => {
+	const cookie = event.cookies.get(FONT_COOKIE);
+	const font: FontFamily = isFontFamily(cookie) ? cookie : 'system';
+	event.locals.font = font;
+
+	const isSettings =
+		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
+	const ids: FontFamily[] = isSettings ? LOADABLE_FONT_IDS : font === 'system' ? [] : [font];
+	const links = renderFontLinks(ids);
+
+	return resolve(event, {
+		transformPageChunk: ({ html }) => html.replace('%font%', font).replace('%font_links%', links)
+	});
+};
+
+export const handle = sequence(langHandle, i18nHandle, themeHandle, fontHandle);

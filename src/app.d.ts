@@ -15,9 +15,11 @@ declare global {
 
 		interface Locals {
 			theme: import('$lib/theme/script').ThemeState;
+			font: import('$lib/font/script').FontFamily;
 		}
 		interface PageData {
 			theme: import('$lib/theme/script').ThemeState;
+			font: import('$lib/font/script').FontFamily;
 			runtimeDays: number;
 		}
 	}

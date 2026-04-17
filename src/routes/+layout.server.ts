@@ -7,6 +7,7 @@ export const load: LayoutServerLoad = ({ locals }) => {
 	const runtimeDays = Math.max(0, Math.floor((Date.now() - SITE_STARTED_AT) / MS_PER_DAY));
 	return {
 		theme: locals.theme,
+		font: locals.font,
 		runtimeDays
 	};
 };
