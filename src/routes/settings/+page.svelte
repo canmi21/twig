@@ -5,7 +5,11 @@
 	import { applyTheme, type Theme } from '$lib/theme/script';
 	import ThemeCard from '$lib/components/theme-card.svelte';
 	import WindowCard from '$lib/components/window-card.svelte';
-	import Hash from '@lucide/svelte/icons/hash';
+	import SampleCard from '$lib/components/sample-card.svelte';
+	import FontSample from '$lib/components/font-sample.svelte';
+	import CjkSample from '$lib/components/cjk-sample.svelte';
+	import CodeSample from '$lib/components/code-sample.svelte';
+	import EmojiSample from '$lib/components/emoji-sample.svelte';
 
 	const MOTION_WINDOW = {
 		bg: '#171717',
@@ -78,9 +82,32 @@
 		}
 	];
 
-	function copyAnchor(id: string) {
-		history.replaceState(null, '', `/settings#${id}`);
-	}
+	const FONTS = [
+		{ name: 'System', family: 'system-ui, sans-serif' },
+		{ name: 'Inter', family: 'Inter, sans-serif' },
+		{ name: 'Roboto', family: 'Roboto, sans-serif' },
+		{ name: 'Source Sans', family: '"Source Sans 3", sans-serif' }
+	];
+
+	const CJK_FONTS = [
+		{ name: 'System', sc: 'system-ui', tc: 'system-ui', jp: 'system-ui' },
+		{ name: 'Noto Sans', sc: '"Noto Sans SC"', tc: '"Noto Sans TC"', jp: '"Noto Sans JP"' },
+		{ name: 'LXGW WenKai', sc: '"LXGW WenKai"', tc: '"LXGW WenKai TC"', jp: '"LXGW WenKai"' }
+	];
+
+	const CODE_FONTS = [
+		{ name: 'Monospace', family: 'monospace' },
+		{ name: 'Maple Mono', family: '"Maple Mono", monospace' },
+		{ name: 'JetBrains Mono', family: '"JetBrains Mono", monospace' },
+		{ name: 'Fira Code', family: '"Fira Code", monospace' }
+	];
+
+	const EMOJIS = [
+		{ name: 'System', kind: 'native' as const },
+		{ name: 'Twemoji', kind: 'twemoji' as const },
+		{ name: 'Noto Emoji', kind: 'noto' as const },
+		{ name: 'Fluent Emoji', kind: 'fluent' as const }
+	];
 
 	let currentTheme = $state<Theme>(page.data.theme);
 
@@ -91,33 +118,15 @@
 </script>
 
 <!-- General -->
-<div id="general" class="mb-10">
-	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
-		<button
-			onclick={() => copyAnchor('general')}
-			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
-			aria-label="Copy link"
-		>
-			<Hash class="size-3.5 text-muted-foreground" />
-		</button>
-		{m['settings.tab.general']()}
-	</h2>
+<div id="general" class="mb-10 scroll-mt-6 lg:scroll-mt-20">
+	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.general']()}</h2>
 	<p class="text-sm text-muted-foreground">General settings will go here.</p>
 </div>
 
 <!-- Appearance -->
 <hr class="mb-10 border-t border-dashed border-divider" />
-<div id="appearance" class="mb-10 space-y-10">
-	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
-		<button
-			onclick={() => copyAnchor('appearance')}
-			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
-			aria-label="Copy link"
-		>
-			<Hash class="size-3.5 text-muted-foreground" />
-		</button>
-		{m['settings.tab.appearance']()}
-	</h2>
+<div id="appearance" class="mb-10 space-y-10 scroll-mt-6 lg:scroll-mt-20">
+	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.appearance']()}</h2>
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.theme']()}</h3>
 		<div class="grid max-w-136 grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4">
@@ -216,35 +225,15 @@
 
 <!-- Typography -->
 <hr class="mb-10 border-t border-dashed border-divider" />
-<div id="typography" class="mb-10 space-y-10">
-	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
-		<button
-			onclick={() => copyAnchor('typography')}
-			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
-			aria-label="Copy link"
-		>
-			<Hash class="size-3.5 text-muted-foreground" />
-		</button>
-		{m['settings.tab.typography']()}
-	</h2>
+<div id="typography" class="mb-10 space-y-10 scroll-mt-6 lg:scroll-mt-20">
+	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.typography']()}</h2>
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.font']()}</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each [{ name: 'System', family: 'system-ui, sans-serif', sample: 'Aa' }, { name: 'Inter', family: 'Inter, sans-serif', sample: 'Aa' }, { name: 'Roboto', family: 'Roboto, sans-serif', sample: 'Aa' }, { name: 'Source Sans', family: '"Source Sans 3", sans-serif', sample: 'Aa' }] as font (font.name)}
-				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
-					<div
-						class="flex h-23.5 w-31 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
-					>
-						<span class="text-3xl text-foreground/80" style="font-family: {font.family}"
-							>{font.sample}</span
-						>
-						<span
-							class="mt-1 w-full truncate px-2 text-center text-[0.6rem] text-muted-foreground"
-							style="font-family: {font.family}">The quick brown fox</span
-						>
-					</div>
-					<span class="text-xs text-muted-foreground">{font.name}</span>
-				</button>
+			{#each FONTS as font (font.name)}
+				<SampleCard label={font.name}>
+					<FontSample family={font.family} />
+				</SampleCard>
 			{/each}
 		</div>
 	</section>
@@ -254,24 +243,10 @@
 			{m['settings.appearance.font.cjk']()}
 		</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each [{ name: 'System', sc: 'system-ui', tc: 'system-ui', jp: 'system-ui' }, { name: 'Noto Sans', sc: '"Noto Sans SC"', tc: '"Noto Sans TC"', jp: '"Noto Sans JP"' }, { name: 'LXGW WenKai', sc: '"LXGW WenKai"', tc: '"LXGW WenKai TC"', jp: '"LXGW WenKai"' }] as font (font.name)}
-				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
-					<div
-						class="flex h-23.5 w-31 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
-					>
-						<span
-							class="text-3xl text-foreground/80"
-							style="font-family: {font.sc}, {font.tc}, {font.jp}, serif"
-							>{m['settings.appearance.font.cjk.preview']()}</span
-						>
-						<span
-							class="mt-1 w-full truncate px-2 text-center text-[0.6rem] text-muted-foreground"
-							style="font-family: {font.sc}, {font.tc}, {font.jp}, serif"
-							>{m['settings.appearance.font.cjk.sample']()}</span
-						>
-					</div>
-					<span class="text-xs text-muted-foreground">{font.name}</span>
-				</button>
+			{#each CJK_FONTS as font (font.name)}
+				<SampleCard label={font.name}>
+					<CjkSample sc={font.sc} tc={font.tc} jp={font.jp} />
+				</SampleCard>
 			{/each}
 		</div>
 	</section>
@@ -281,20 +256,10 @@
 			{m['settings.appearance.code.font']()}
 		</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each [{ name: 'Monospace', family: 'monospace' }, { name: 'Maple Mono', family: '"Maple Mono", monospace' }, { name: 'JetBrains Mono', family: '"JetBrains Mono", monospace' }, { name: 'Fira Code', family: '"Fira Code", monospace' }] as font (font.name)}
-				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
-					<div
-						class="flex h-23.5 w-31 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
-					>
-						<span class="text-2xl text-foreground/80" style="font-family: {font.family}">=&gt;</span
-						>
-						<span
-							class="mt-1 w-full truncate px-2 text-center text-[0.55rem] text-muted-foreground"
-							style="font-family: {font.family}">fn main() {'{'} 0 }</span
-						>
-					</div>
-					<span class="text-xs text-muted-foreground">{font.name}</span>
-				</button>
+			{#each CODE_FONTS as font (font.name)}
+				<SampleCard label={font.name}>
+					<CodeSample family={font.family} />
+				</SampleCard>
 			{/each}
 		</div>
 	</section>
@@ -302,43 +267,10 @@
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.emoji']()}</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each [{ name: 'System', type: 'native' }, { name: 'Twemoji', type: 'svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/' }, { name: 'Noto Emoji', type: 'svg', base: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/' }, { name: 'Fluent Emoji', type: 'svg', base: 'https://cdn.jsdelivr.net/gh/user/fluentui-emoji@main/assets/' }] as emoji (emoji.name)}
-				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
-					<div
-						class="flex h-23.5 w-31 items-center justify-center gap-1.5 overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
-					>
-						{#if emoji.type === 'native'}
-							<span class="text-[1.75rem] leading-none">😊</span>
-							<span class="text-[1.75rem] leading-none">🔥</span>
-							<span class="text-[1.75rem] leading-none">🎉</span>
-						{:else if emoji.name === 'Twemoji'}
-							<img src="{emoji.base}1f60a.svg" alt="😊" class="size-7" />
-							<img src="{emoji.base}1f525.svg" alt="🔥" class="size-7" />
-							<img src="{emoji.base}1f389.svg" alt="🎉" class="size-7" />
-						{:else if emoji.name === 'Noto Emoji'}
-							<img src="{emoji.base}emoji_u1f60a.svg" alt="😊" class="size-7" />
-							<img src="{emoji.base}emoji_u1f525.svg" alt="🔥" class="size-7" />
-							<img src="{emoji.base}emoji_u1f389.svg" alt="🎉" class="size-7" />
-						{:else if emoji.name === 'Fluent Emoji'}
-							<img
-								src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Smiling%20face%20with%20smiling%20eyes/3D/smiling_face_with_smiling_eyes_3d.png"
-								alt="😊"
-								class="size-7"
-							/>
-							<img
-								src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Fire/3D/fire_3d.png"
-								alt="🔥"
-								class="size-7"
-							/>
-							<img
-								src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Party%20popper/3D/party_popper_3d.png"
-								alt="🎉"
-								class="size-7"
-							/>
-						{/if}
-					</div>
-					<span class="text-xs text-muted-foreground">{emoji.name}</span>
-				</button>
+			{#each EMOJIS as emoji (emoji.name)}
+				<SampleCard label={emoji.name}>
+					<EmojiSample kind={emoji.kind} />
+				</SampleCard>
 			{/each}
 		</div>
 	</section>
@@ -346,32 +278,14 @@
 
 <!-- Account -->
 <hr class="mb-10 border-t border-dashed border-divider" />
-<div id="account" class="mb-10">
-	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
-		<button
-			onclick={() => copyAnchor('account')}
-			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
-			aria-label="Copy link"
-		>
-			<Hash class="size-3.5 text-muted-foreground" />
-		</button>
-		{m['settings.tab.account']()}
-	</h2>
+<div id="account" class="mb-10 scroll-mt-6 lg:scroll-mt-20">
+	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.account']()}</h2>
 	<p class="text-sm text-muted-foreground">Account settings will go here.</p>
 </div>
 
 <!-- Privacy -->
 <hr class="mb-10 border-t border-dashed border-divider" />
-<div id="privacy" class="mb-10">
-	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
-		<button
-			onclick={() => copyAnchor('privacy')}
-			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
-			aria-label="Copy link"
-		>
-			<Hash class="size-3.5 text-muted-foreground" />
-		</button>
-		{m['settings.tab.privacy']()}
-	</h2>
+<div id="privacy" class="mb-10 scroll-mt-6 lg:scroll-mt-20">
+	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.privacy']()}</h2>
 	<p class="text-sm text-muted-foreground">Privacy settings will go here.</p>
 </div>
