@@ -28,9 +28,13 @@
 	}: Props = $props();
 </script>
 
-<button {onclick} class="group flex flex-col items-center gap-2" class:cursor-default={!onclick}>
+<button
+	{onclick}
+	class="group flex flex-col items-center gap-2 focus-visible:outline-none"
+	class:cursor-default={!onclick}
+>
 	<div
-		class="preview flex aspect-124/94 w-full flex-col overflow-hidden rounded-lg border-2"
+		class="preview focus-ring-inner flex aspect-124/94 w-full flex-col overflow-hidden rounded-lg border-2"
 		style:background={bg}
 		style:--border-idle={border}
 		style:--border-hover={borderHover}
@@ -60,5 +64,12 @@
 	}
 	.preview:not(:global(.border-blue-500)):hover {
 		border-color: var(--border-hover);
+	}
+	/* Sit the focus ring fully on top of the 2px border. On an active
+	   (border-blue-500) card the two blues coincide and there's no visible
+	   change; on idle cards the blue outline simply replaces the gray border
+	   for the duration of focus. Canonical 2px ring stays untouched. */
+	:focus-visible .preview {
+		outline-offset: -2px;
 	}
 </style>

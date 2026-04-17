@@ -95,7 +95,7 @@
 	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
 		<button
 			onclick={() => copyAnchor('general')}
-			class="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100"
+			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
 			aria-label="Copy link"
 		>
 			<Hash class="size-3.5 text-muted-foreground" />
@@ -111,7 +111,7 @@
 	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
 		<button
 			onclick={() => copyAnchor('appearance')}
-			class="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100"
+			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
 			aria-label="Copy link"
 		>
 			<Hash class="size-3.5 text-muted-foreground" />
@@ -220,7 +220,7 @@
 	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
 		<button
 			onclick={() => copyAnchor('typography')}
-			class="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100"
+			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
 			aria-label="Copy link"
 		>
 			<Hash class="size-3.5 text-muted-foreground" />
@@ -231,7 +231,7 @@
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.font']()}</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each [{ name: 'System', family: 'system-ui, sans-serif', sample: 'Aa' }, { name: 'Inter', family: 'Inter, sans-serif', sample: 'Aa' }, { name: 'Roboto', family: 'Roboto, sans-serif', sample: 'Aa' }, { name: 'Source Sans', family: '"Source Sans 3", sans-serif', sample: 'Aa' }] as font (font.name)}
-				<button class="group flex flex-col items-center gap-2 cursor-default">
+				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
 					<div
 						class="flex h-23.5 w-31 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
 					>
@@ -255,7 +255,7 @@
 		</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each [{ name: 'System', sc: 'system-ui', tc: 'system-ui', jp: 'system-ui' }, { name: 'Noto Sans', sc: '"Noto Sans SC"', tc: '"Noto Sans TC"', jp: '"Noto Sans JP"' }, { name: 'LXGW WenKai', sc: '"LXGW WenKai"', tc: '"LXGW WenKai TC"', jp: '"LXGW WenKai"' }] as font (font.name)}
-				<button class="group flex flex-col items-center gap-2 cursor-default">
+				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
 					<div
 						class="flex h-23.5 w-31 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
 					>
@@ -282,12 +282,11 @@
 		</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each [{ name: 'Monospace', family: 'monospace' }, { name: 'Maple Mono', family: '"Maple Mono", monospace' }, { name: 'JetBrains Mono', family: '"JetBrains Mono", monospace' }, { name: 'Fira Code', family: '"Fira Code", monospace' }] as font (font.name)}
-				<button class="group flex flex-col items-center gap-2 cursor-default">
+				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
 					<div
 						class="flex h-23.5 w-31 flex-col items-center justify-center overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
 					>
-						<span class="text-2xl text-foreground/80" style="font-family: {font.family}"
-							>=&gt;</span
+						<span class="text-2xl text-foreground/80" style="font-family: {font.family}">=&gt;</span
 						>
 						<span
 							class="mt-1 w-full truncate px-2 text-center text-[0.55rem] text-muted-foreground"
@@ -304,7 +303,7 @@
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.emoji']()}</h3>
 		<div class="flex flex-wrap gap-4">
 			{#each [{ name: 'System', type: 'native' }, { name: 'Twemoji', type: 'svg', base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/' }, { name: 'Noto Emoji', type: 'svg', base: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/' }, { name: 'Fluent Emoji', type: 'svg', base: 'https://cdn.jsdelivr.net/gh/user/fluentui-emoji@main/assets/' }] as emoji (emoji.name)}
-				<button class="group flex flex-col items-center gap-2 cursor-default">
+				<button class="group focus-ring flex flex-col items-center gap-2 cursor-default">
 					<div
 						class="flex h-23.5 w-31 items-center justify-center gap-1.5 overflow-hidden rounded-lg border-2 border-border hover:border-muted-foreground/50"
 					>
@@ -351,7 +350,7 @@
 	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
 		<button
 			onclick={() => copyAnchor('account')}
-			class="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100"
+			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
 			aria-label="Copy link"
 		>
 			<Hash class="size-3.5 text-muted-foreground" />
@@ -367,7 +366,7 @@
 	<h2 class="group/title relative mb-4 text-base font-semibold text-foreground">
 		<button
 			onclick={() => copyAnchor('privacy')}
-			class="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100"
+			class="focus-ring absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover/title:opacity-100 focus-visible:opacity-100"
 			aria-label="Copy link"
 		>
 			<Hash class="size-3.5 text-muted-foreground" />

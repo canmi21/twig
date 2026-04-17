@@ -48,7 +48,7 @@
 				{@const active = activeId === tab.id}
 				<button
 					onclick={() => scrollTo(tab.id)}
-					class="shrink-0 border-b-2 px-3 pb-2 text-sm whitespace-nowrap {active
+					class="focus-ring shrink-0 border-b-2 px-3 pb-2 text-sm whitespace-nowrap focus-visible:text-foreground {active
 						? 'border-foreground text-foreground'
 						: 'border-transparent text-muted-foreground hover:text-foreground'}"
 					aria-current={active ? 'page' : undefined}
@@ -69,12 +69,12 @@
 					<li>
 						<button
 							onclick={() => scrollTo(tab.id)}
-							class="block w-full rounded-lg px-4 py-2 text-left text-sm {active
+							class="block w-full rounded-lg px-4 py-2 text-left text-sm focus-visible:text-foreground focus-visible:outline-none {active
 								? 'bg-inset text-foreground'
 								: 'text-muted-foreground hover:text-foreground hover:bg-inset/50'}"
 							aria-current={active ? 'page' : undefined}
 						>
-							{tab.label()}
+							<span class="focus-ring-inner">{tab.label()}</span>
 						</button>
 					</li>
 				{/each}

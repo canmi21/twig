@@ -8,6 +8,18 @@
 	outline-offset: 2px;
 }
 
+/* Sibling of `.focus-ring` for buttons whose hit area wraps a composite
+   (card + caption, nav row + label). Outline hugs only the marked child;
+   the focusable ancestor must add `focus-visible:outline-none` to drop its
+   default browser ring. */
+:where(.focus-ring-inner) {
+	border-radius: 4px;
+}
+:focus-visible .focus-ring-inner {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
+}
+
 /* Motion: none — instant everything. Svelte JS-driven transitions must also
    pass duration:0 because their internal timer ignores this CSS override.
    The `:not([data-motion-exempt] *)` guard carves out an escape hatch for the
