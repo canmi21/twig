@@ -14,10 +14,10 @@ declare global {
 		}
 
 		interface Locals {
-			theme: import('$lib/theme/script').Theme;
+			theme: import('$lib/theme/script').ThemeState;
 		}
 		interface PageData {
-			theme: import('$lib/theme/script').Theme;
+			theme: import('$lib/theme/script').ThemeState;
 			runtimeDays: number;
 		}
 	}

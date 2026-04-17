@@ -13,13 +13,13 @@
 
 	const MOONS = [IconMoonLine, IconMoonStarsLine];
 
-	let isDark = $state(page.data.theme === 'dark');
+	let isDark = $state(page.data.theme.mode === 'dark');
 	let moonIdx = $state(0);
 
 	const MoonIcon = $derived(MOONS[moonIdx]);
 
 	function handlePressedChange(next: boolean) {
-		applyTheme(next ? 'dark' : 'light');
+		applyTheme({ mode: next ? 'dark' : 'light' });
 		// Randomize moon icon each time dark mode activates.
 		if (next) moonIdx = Math.floor(Math.random() * MOONS.length);
 	}

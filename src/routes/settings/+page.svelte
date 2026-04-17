@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { m } from '$lib/paraglide/messages';
 	import { motion } from '$lib/motion/state.svelte';
-	import { applyTheme, type Theme } from '$lib/theme/script';
+	import { applyTheme, type Mode, type Palette, type ThemeState } from '$lib/theme/script';
 	import ThemeCard from '$lib/components/cards/theme-card.svelte';
 	import WindowCard from '$lib/components/cards/window-card.svelte';
 	import SampleCard from '$lib/components/cards/sample-card.svelte';
@@ -15,11 +15,27 @@
 		borderHover: '#525252'
 	};
 
-	const THEMES = [
+	type PaletteColors = {
+		bg: string;
+		titlebar: string;
+		dot: string;
+		sidebar: string;
+		title: string;
+		body: string;
+		border: string;
+		borderHover: string;
+	};
+
+	const THEMES: {
+		palette: Palette;
+		mode: Mode;
+		label: string;
+		colors: PaletteColors;
+	}[] = [
 		{
-			id: 'light',
-			label: 'Light',
-			selectable: true,
+			palette: 'neutral',
+			mode: 'light',
+			label: 'Morning Mist',
 			colors: {
 				bg: '#fff',
 				titlebar: '#f5f5f5',
@@ -32,9 +48,9 @@
 			}
 		},
 		{
-			id: 'dark',
-			label: 'Dark',
-			selectable: true,
+			palette: 'neutral',
+			mode: 'dark',
+			label: 'Midnight Sky',
 			colors: {
 				bg: '#171717',
 				titlebar: '#262626',
@@ -47,9 +63,24 @@
 			}
 		},
 		{
-			id: 'nord',
-			label: 'Nord',
-			selectable: false,
+			palette: 'nord',
+			mode: 'light',
+			label: 'Snow Storm',
+			colors: {
+				bg: '#eceff4',
+				titlebar: '#e5e9f0',
+				dot: '#d8dee9',
+				sidebar: '#e5e9f0',
+				title: '#2e3440',
+				body: '#4c566a',
+				border: '#d8dee9',
+				borderHover: '#c8cdd4'
+			}
+		},
+		{
+			palette: 'nord',
+			mode: 'dark',
+			label: 'Polar Night',
 			colors: {
 				bg: '#2e3440',
 				titlebar: '#3b4252',
@@ -62,16 +93,31 @@
 			}
 		},
 		{
-			id: 'black',
-			label: 'Black',
-			selectable: false,
+			palette: 'contrast',
+			mode: 'light',
+			label: 'Pearl White',
 			colors: {
-				bg: '#000',
+				bg: '#ffffff',
+				titlebar: '#fafafa',
+				dot: '#eaeaea',
+				sidebar: '#fafafa',
+				title: '#000000',
+				body: '#666666',
+				border: '#eaeaea',
+				borderHover: '#d4d4d4'
+			}
+		},
+		{
+			palette: 'contrast',
+			mode: 'dark',
+			label: 'Obsidian Black',
+			colors: {
+				bg: '#000000',
 				titlebar: '#0a0a0a',
-				dot: '#333',
+				dot: '#333333',
 				sidebar: '#1a1a1a',
 				title: '#ededed',
-				body: '#333',
+				body: '#888888',
 				border: '#282828',
 				borderHover: '#3a3a3a'
 			}
@@ -105,11 +151,11 @@
 		{ name: 'Fluent Emoji', kind: 'fluent' as const }
 	];
 
-	let currentTheme = $state<Theme>(page.data.theme);
+	let currentTheme = $state<ThemeState>(page.data.theme);
 
-	function selectTheme(theme: Theme) {
-		currentTheme = theme;
-		applyTheme(theme);
+	function selectTheme(next: ThemeState) {
+		currentTheme = next;
+		applyTheme(next);
 	}
 </script>
 
@@ -125,12 +171,12 @@
 	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.appearance']()}</h2>
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.theme']()}</h3>
-		<div class="grid max-w-136 grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4">
-			{#each THEMES as theme (theme.id)}
+		<div class="grid max-w-104 grid-cols-3 gap-3 sm:max-w-212 sm:grid-cols-6 sm:gap-4">
+			{#each THEMES as theme (`${theme.palette}-${theme.mode}`)}
 				<ThemeCard
 					label={theme.label}
-					active={currentTheme === theme.id}
-					onclick={theme.selectable ? () => selectTheme(theme.id as Theme) : undefined}
+					active={currentTheme.palette === theme.palette && currentTheme.mode === theme.mode}
+					onclick={() => selectTheme({ mode: theme.mode, palette: theme.palette })}
 					colors={theme.colors}
 				/>
 			{/each}

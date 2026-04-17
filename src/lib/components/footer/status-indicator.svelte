@@ -15,7 +15,7 @@
 		<span class="absolute top-1/2 left-1/2 size-1.25 -translate-1/2 rounded-full bg-success"></span>
 	</span>
 	<a
-		href="https://status.canmi.net/8zxeLKSP2t"
+		href="https://now.innc.cc"
 		target="_blank"
 		rel="noopener noreferrer"
 		aria-label={m['footer.status.aria']()}

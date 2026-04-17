@@ -5,7 +5,13 @@ import { isLocale, type Locale } from '$lib/paraglide/runtime';
 import { htmlLangFor } from '$lib/i18n/urls';
 import { hasLangCookie, resolveLocaleFromAcceptLanguage, upsertCookie } from '$lib/i18n/negotiate';
 import { motionScript } from '$lib/motion/script';
-import { THEME_COOKIE, themeScript, type Theme } from '$lib/theme/script';
+import {
+	MODE_COOKIE,
+	PALETTE_COOKIE,
+	themeScript,
+	type Mode,
+	type Palette
+} from '$lib/theme/script';
 
 const LANG_COOKIE = 'language';
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -69,15 +75,22 @@ const i18nHandle: Handle = ({ event, resolve }) => {
 };
 
 const themeHandle: Handle = async ({ event, resolve }) => {
-	const cookie = event.cookies.get(THEME_COOKIE);
-	// SSR defaults to light; the inline script corrects before paint (no flash).
-	const theme: Theme = cookie === 'dark' ? 'dark' : 'light';
-	event.locals.theme = theme;
+	const modeCookie = event.cookies.get(MODE_COOKIE);
+	const paletteCookie = event.cookies.get(PALETTE_COOKIE);
+	// SSR defaults to light + neutral; the inline script corrects before paint (no flash).
+	const mode: Mode = modeCookie === 'dark' ? 'dark' : 'light';
+	const palette: Palette =
+		paletteCookie === 'nord' || paletteCookie === 'contrast' ? paletteCookie : 'neutral';
+	event.locals.theme = { mode, palette };
+
+	const cls = [mode === 'dark' ? 'dark' : '', palette !== 'neutral' ? palette : '']
+		.filter(Boolean)
+		.join(' ');
 
 	return resolve(event, {
 		transformPageChunk: ({ html }) =>
 			html
-				.replace('%theme%', theme === 'dark' ? 'dark' : '')
+				.replace('%theme%', cls)
 				.replace('%theme_script%', `<script>${themeScript}</script>`)
 				.replace('%motion_script%', `<script>${motionScript}</script>`)
 	});
