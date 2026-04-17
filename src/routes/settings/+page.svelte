@@ -35,7 +35,7 @@
 		{
 			palette: 'neutral',
 			mode: 'light',
-			label: 'Morning Mist',
+			label: 'Chalk White',
 			colors: {
 				bg: '#fff',
 				titlebar: '#f5f5f5',
@@ -50,7 +50,7 @@
 		{
 			palette: 'neutral',
 			mode: 'dark',
-			label: 'Midnight Sky',
+			label: 'Charcoal Black',
 			colors: {
 				bg: '#171717',
 				titlebar: '#262626',
@@ -171,7 +171,12 @@
 	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.appearance']()}</h2>
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.theme']()}</h3>
-		<div class="grid max-w-104 grid-cols-3 gap-3 sm:max-w-212 sm:grid-cols-6 sm:gap-4">
+		<!-- Column-first flow at 3×2 keeps lights on the top row and darks on the
+		    bottom so each column is a light/dark pair. At sm+ it collapses back
+		    to a single 6-col row, so grid-flow-row preserves the source order. -->
+		<div
+			class="grid max-w-104 grid-flow-col grid-cols-3 grid-rows-2 gap-3 sm:max-w-212 sm:grid-flow-row sm:grid-cols-6 sm:grid-rows-1 sm:gap-4"
+		>
 			{#each THEMES as theme (`${theme.palette}-${theme.mode}`)}
 				<ThemeCard
 					label={theme.label}
