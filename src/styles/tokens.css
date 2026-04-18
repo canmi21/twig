@@ -77,23 +77,27 @@
 	--color-selection: #333333;
 }
 
-/* Font family selection. --font-sans / --font-cjk-* hold SPECIFIC face names
+/* Font family selection. --font-latin / --font-cjk-* hold SPECIFIC face names
    only; the generic Latin fallback chain lives at the tail of the html stack
    in base.css. Putting generics (ui-sans-serif, system-ui, sans-serif) ahead
    of --font-cjk-* would let them capture CJK glyphs via OS font fallback
-   before the stack ever reached a specific CJK face. Left deliberately outside
+   before the stack ever reached a specific CJK face. Naming-wise --font-sans
+   is reserved: Tailwind v4 pre-declares it on :root with its full generic
+   stack to power `.font-sans`, so reusing that name would leak generics into
+   the Latin slot whenever data-font is 'system' (no override → var() resolves
+   to Tailwind's value, never our __unset fallback). Left deliberately outside
    @theme so they don't spawn useless Tailwind font-* utilities. `data-font` /
    `data-cjk` on <html> are set by hooks.server.ts from cookies and by
    applyFont() / applyCjkFont() on runtime switches; when unset, the var()
    fallback in base.css inserts a no-op placeholder. */
 html[data-font='inter'] {
-	--font-sans: 'Inter';
+	--font-latin: 'Inter';
 }
 html[data-font='roboto'] {
-	--font-sans: 'Roboto';
+	--font-latin: 'Roboto';
 }
 html[data-font='source-sans'] {
-	--font-sans: 'Source Sans 3';
+	--font-latin: 'Source Sans 3';
 }
 
 html[data-cjk='noto'] {

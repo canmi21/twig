@@ -10,16 +10,20 @@ html {
    page language → coexisting CJK fallback → generic Latin+system tail. Generics
    must come LAST because `ui-sans-serif` / `system-ui` / `sans-serif` supply CJK
    glyphs through OS font fallback — any of them placed before --font-cjk-* would
-   capture CJK characters and make LXGW / Noto never render. Simplified and
-   Traditional never coexist in a stack (same Unicode code points, conflicting
-   glyphs — pick one); JP pairs with whichever Chinese variant is primary.
-   :lang() overrides let mixed content (e.g. an inline JP quote on an SC page)
-   render with the correct face when authors tag the element. The __unset
-   var() fallback is a placeholder identifier that matches no installed family,
-   so the slot is skipped when the user's choice is "system". */
+   capture CJK characters and make LXGW / Noto never render. The Latin slot uses
+   --font-latin (not --font-sans) because Tailwind v4 pre-declares --font-sans on
+   :root with its full generic stack; var(--font-sans, __unset) would silently
+   pull that stack in whenever the user picks "system", re-introducing the same
+   generic-capture bug. Simplified and Traditional never coexist in a stack
+   (same Unicode code points, conflicting glyphs — pick one); JP pairs with
+   whichever Chinese variant is primary. :lang() overrides let mixed content
+   (e.g. an inline JP quote on an SC page) render with the correct face when
+   authors tag the element. The __unset var() fallback is a placeholder
+   identifier that matches no installed family, so the slot is skipped when
+   the user's choice is "system". */
 html {
 	font-family:
-		var(--font-sans, __unset),
+		var(--font-latin, __unset),
 		var(--font-cjk-sc, __unset),
 		var(--font-cjk-jp, __unset),
 		ui-sans-serif,
@@ -31,7 +35,7 @@ html {
 }
 html[lang='zh-TW'] {
 	font-family:
-		var(--font-sans, __unset),
+		var(--font-latin, __unset),
 		var(--font-cjk-tc, __unset),
 		var(--font-cjk-jp, __unset),
 		ui-sans-serif,
@@ -43,7 +47,7 @@ html[lang='zh-TW'] {
 }
 html[lang='ja-JP'] {
 	font-family:
-		var(--font-sans, __unset),
+		var(--font-latin, __unset),
 		var(--font-cjk-jp, __unset),
 		var(--font-cjk-sc, __unset),
 		ui-sans-serif,
@@ -56,7 +60,7 @@ html[lang='ja-JP'] {
 :lang(zh-TW),
 :lang(zh-Hant) {
 	font-family:
-		var(--font-sans, __unset),
+		var(--font-latin, __unset),
 		var(--font-cjk-tc, __unset),
 		var(--font-cjk-jp, __unset),
 		ui-sans-serif,
@@ -68,7 +72,7 @@ html[lang='ja-JP'] {
 }
 :lang(ja) {
 	font-family:
-		var(--font-sans, __unset),
+		var(--font-latin, __unset),
 		var(--font-cjk-jp, __unset),
 		var(--font-cjk-sc, __unset),
 		ui-sans-serif,
