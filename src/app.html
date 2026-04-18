@@ -5,6 +5,7 @@
 	data-font="%font%"
 	data-cjk="%cjk_font%"
 	data-code-font="%code_font%"
+	data-emoji="%emoji_font%"
 >
 	<head>
 		<meta charset="utf-8" />
@@ -13,7 +14,8 @@
 		<link rel="icon" type="image/svg+xml" sizes="any" href="%sveltekit.assets%/favicon.svg" />
 		<link rel="icon" type="image/png" sizes="96x96" href="%sveltekit.assets%/favicon-96x96.png" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
-		%font_links% %cjk_font_links% %code_font_links% %theme_script% %motion_script% %sveltekit.head%
+		%font_links% %cjk_font_links% %code_font_links% %emoji_links% %theme_script% %motion_script%
+		%sveltekit.head%
 		<script
 			defer
 			src="https://cloud.umami.is/script.js"

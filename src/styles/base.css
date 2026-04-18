@@ -7,20 +7,24 @@ html {
 }
 
 /* Composite font-family stack: specific Latin face → primary CJK face for the
-   page language → coexisting CJK fallback → generic Latin+system tail. Generics
-   must come LAST because `ui-sans-serif` / `system-ui` / `sans-serif` supply CJK
-   glyphs through OS font fallback — any of them placed before --font-cjk-* would
-   capture CJK characters and make LXGW / Noto never render. The Latin slot uses
-   --font-latin (not --font-sans) because Tailwind v4 pre-declares --font-sans on
-   :root with its full generic stack; var(--font-sans, __unset) would silently
-   pull that stack in whenever the user picks "system", re-introducing the same
-   generic-capture bug. Simplified and Traditional never coexist in a stack
-   (same Unicode code points, conflicting glyphs — pick one); JP pairs with
-   whichever Chinese variant is primary. :lang() overrides let mixed content
-   (e.g. an inline JP quote on an SC page) render with the correct face when
-   authors tag the element. The __unset var() fallback is a placeholder
-   identifier that matches no installed family, so the slot is skipped when
-   the user's choice is "system". */
+   page language → coexisting CJK fallback → generic Latin+system tail → emoji
+   face → OS emoji fallbacks. Generics must come before the emoji tail but after
+   all --font-cjk-* slots: `ui-sans-serif` / `system-ui` / `sans-serif` supply
+   CJK glyphs through OS font fallback, so any of them placed before --font-cjk-*
+   would capture CJK characters and make LXGW / Noto never render. The Latin
+   slot uses --font-latin (not --font-sans) because Tailwind v4 pre-declares
+   --font-sans on :root with its full generic stack; var(--font-sans, __unset)
+   would silently pull that stack in whenever the user picks "system",
+   re-introducing the same generic-capture bug. Simplified and Traditional
+   never coexist in a stack (same Unicode code points, conflicting glyphs —
+   pick one); JP pairs with whichever Chinese variant is primary. :lang()
+   overrides let mixed content (e.g. an inline JP quote on an SC page) render
+   with the correct face when authors tag the element. The __unset var()
+   fallback is a placeholder identifier that matches no installed family, so
+   the slot is skipped when the user's choice is "system". Emoji codepoints
+   don't overlap with Latin/CJK so the emoji slot is safe at the tail, and the
+   explicit OS emoji families after it make fallback deterministic (including
+   for glyphs Twemoji/Noto don't cover). */
 html {
 	font-family:
 		var(--font-latin, __unset),
@@ -31,7 +35,11 @@ html {
 		-apple-system,
 		'Segoe UI',
 		Roboto,
-		sans-serif;
+		sans-serif,
+		var(--font-emoji, __unset),
+		'Apple Color Emoji',
+		'Segoe UI Emoji',
+		'Noto Color Emoji';
 }
 html[lang='zh-TW'] {
 	font-family:
@@ -43,7 +51,11 @@ html[lang='zh-TW'] {
 		-apple-system,
 		'Segoe UI',
 		Roboto,
-		sans-serif;
+		sans-serif,
+		var(--font-emoji, __unset),
+		'Apple Color Emoji',
+		'Segoe UI Emoji',
+		'Noto Color Emoji';
 }
 html[lang='ja-JP'] {
 	font-family:
@@ -55,7 +67,11 @@ html[lang='ja-JP'] {
 		-apple-system,
 		'Segoe UI',
 		Roboto,
-		sans-serif;
+		sans-serif,
+		var(--font-emoji, __unset),
+		'Apple Color Emoji',
+		'Segoe UI Emoji',
+		'Noto Color Emoji';
 }
 :lang(zh-TW),
 :lang(zh-Hant) {
@@ -68,7 +84,11 @@ html[lang='ja-JP'] {
 		-apple-system,
 		'Segoe UI',
 		Roboto,
-		sans-serif;
+		sans-serif,
+		var(--font-emoji, __unset),
+		'Apple Color Emoji',
+		'Segoe UI Emoji',
+		'Noto Color Emoji';
 }
 :lang(ja) {
 	font-family:
@@ -80,7 +100,11 @@ html[lang='ja-JP'] {
 		-apple-system,
 		'Segoe UI',
 		Roboto,
-		sans-serif;
+		sans-serif,
+		var(--font-emoji, __unset),
+		'Apple Color Emoji',
+		'Segoe UI Emoji',
+		'Noto Color Emoji';
 }
 
 /* Code-block typography. Scoped to the two core tags (pre/code) so Markdown,

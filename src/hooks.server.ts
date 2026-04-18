@@ -26,6 +26,12 @@ import {
 	renderCodeLinks,
 	type CodeFont
 } from '$lib/font/code-script';
+import {
+	EMOJI_FONT_COOKIE,
+	isEmojiFont,
+	renderEmojiLinks,
+	type EmojiFont
+} from '$lib/font/emoji-script';
 import { baseLocale } from '$lib/paraglide/runtime';
 
 const LANG_COOKIE = 'language';
@@ -171,11 +177,32 @@ const codeFontHandle: Handle = async ({ event, resolve }) => {
 	});
 };
 
+// Emoji font handle mirrors codeFontHandle. `system` means zero network (browser
+// resolves the tail 'Apple Color Emoji' / 'Segoe UI Emoji' / 'Noto Color Emoji'
+// fallbacks declared in base.css). Twemoji ships one pinned woff2 from jsDelivr;
+// Noto Color Emoji comes from Google Fonts as a single face (not subset-split —
+// emoji presentation sequences must stay intact across code points).
+const emojiFontHandle: Handle = async ({ event, resolve }) => {
+	const cookie = event.cookies.get(EMOJI_FONT_COOKIE);
+	const emojiFont: EmojiFont = isEmojiFont(cookie) ? cookie : 'system';
+	event.locals.emojiFont = emojiFont;
+
+	const isSettings =
+		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
+	const links = renderEmojiLinks(emojiFont, isSettings);
+
+	return resolve(event, {
+		transformPageChunk: ({ html }) =>
+			html.replace('%emoji_font%', emojiFont).replace('%emoji_links%', links)
+	});
+};
+
 export const handle = sequence(
 	langHandle,
 	i18nHandle,
 	themeHandle,
 	fontHandle,
 	cjkFontHandle,
-	codeFontHandle
+	codeFontHandle,
+	emojiFontHandle
 );

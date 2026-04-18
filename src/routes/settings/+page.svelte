@@ -26,9 +26,18 @@
 		CODE_FONT_LABELS,
 		type CodeFont
 	} from '$lib/font/code-script';
+	import {
+		applyEmojiFont,
+		ensureAllEmojiLoaded,
+		EMOJI_FONT_IDS,
+		EMOJI_FAMILIES,
+		EMOJI_FONT_LABELS,
+		type EmojiFont
+	} from '$lib/font/emoji-script';
 	import ThemeCard from '$lib/components/cards/theme-card.svelte';
 	import WindowCard from '$lib/components/cards/window-card.svelte';
 	import SampleCard from '$lib/components/cards/sample-card.svelte';
+	import CardRow from '$lib/components/cards/card-row.svelte';
 
 	// Track the live theme so Motion card colors follow palette + mode swaps.
 	// We route through CSS tokens rather than the palette's literal colors so
@@ -150,17 +159,11 @@
 		}
 	];
 
-	const EMOJIS = [
-		{ name: 'System', kind: 'native' as const },
-		{ name: 'Twemoji', kind: 'twemoji' as const },
-		{ name: 'Noto Emoji', kind: 'noto' as const },
-		{ name: 'Fluent Emoji', kind: 'fluent' as const }
-	];
-
 	let currentTheme = $state<ThemeState>(page.data.theme);
 	let currentFont = $state<FontFamily>(page.data.font);
 	let currentCjkFont = $state<CjkFont>(page.data.cjkFont);
 	let currentCodeFont = $state<CodeFont>(page.data.codeFont);
+	let currentEmojiFont = $state<EmojiFont>(page.data.emojiFont);
 
 	function selectTheme(next: ThemeState) {
 		currentTheme = next;
@@ -182,6 +185,11 @@
 		applyCodeFont(next);
 	}
 
+	function selectEmojiFont(next: EmojiFont) {
+		currentEmojiFont = next;
+		applyEmojiFont(next);
+	}
+
 	// Covers the soft-navigation case where the SSR chunk already shipped the
 	// full font set for /settings — this is a no-op — and the case where the
 	// user landed on another route first and is now switching into /settings
@@ -190,6 +198,7 @@
 		ensureAllFontsLoaded();
 		ensureAllCjkLoaded();
 		ensureAllCodeLoaded();
+		ensureAllEmojiLoaded();
 	});
 </script>
 
@@ -208,7 +217,8 @@
 		<!-- Column-first flow at 3×2 keeps lights on the top row and darks on the
 		    bottom so each column is a light/dark pair. At sm+ it collapses back
 		    to a single 6-col row, so grid-flow-row preserves the source order. -->
-		<div
+		<CardRow
+			layout="custom"
 			class="grid max-w-104 grid-flow-col grid-cols-3 grid-rows-2 gap-3 sm:max-w-212 sm:grid-flow-row sm:grid-cols-6 sm:grid-rows-1 sm:gap-4"
 		>
 			{#each THEMES as theme (`${theme.palette}-${theme.mode}`)}
@@ -219,7 +229,7 @@
 					colors={theme.colors}
 				/>
 			{/each}
-		</div>
+		</CardRow>
 	</section>
 
 	<section>
@@ -273,7 +283,7 @@
 			</div>
 		{/snippet}
 
-		<div class="grid max-w-104 grid-cols-3 gap-3 sm:gap-4">
+		<CardRow layout="wrap" cols={{ base: 3 }}>
 			<WindowCard
 				label={m['settings.appearance.motion.full']()}
 				active={motion.value === 'full'}
@@ -303,7 +313,7 @@
 			>
 				{@render motionBody('none', motion.value === 'none')}
 			</WindowCard>
-		</div>
+		</CardRow>
 	</section>
 </div>
 
@@ -313,7 +323,7 @@
 	<h2 class="mb-4 text-base font-semibold text-foreground">{m['settings.tab.typography']()}</h2>
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.font']()}</h3>
-		<div class="flex flex-wrap gap-4">
+		<CardRow layout="scroll" cols={{ base: 3, sm: 4 }}>
 			{#each FONT_IDS as id (id)}
 				<SampleCard
 					variant="font"
@@ -323,14 +333,14 @@
 					onclick={() => selectFont(id)}
 				/>
 			{/each}
-		</div>
+		</CardRow>
 	</section>
 
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">
 			{m['settings.appearance.font.cjk']()}
 		</h3>
-		<div class="flex flex-wrap gap-4">
+		<CardRow layout="scroll" cols={{ base: 3 }}>
 			{#each CJK_FONT_IDS as id (id)}
 				<SampleCard
 					variant="cjk"
@@ -342,14 +352,14 @@
 					onclick={() => selectCjkFont(id)}
 				/>
 			{/each}
-		</div>
+		</CardRow>
 	</section>
 
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">
 			{m['settings.appearance.code.font']()}
 		</h3>
-		<div class="flex flex-wrap gap-4">
+		<CardRow layout="scroll" cols={{ base: 3, sm: 4 }}>
 			{#each CODE_FONT_IDS as id (id)}
 				<SampleCard
 					variant="code"
@@ -359,16 +369,22 @@
 					onclick={() => selectCodeFont(id)}
 				/>
 			{/each}
-		</div>
+		</CardRow>
 	</section>
 
 	<section>
 		<h3 class="mb-4 text-sm font-semibold text-foreground">{m['settings.appearance.emoji']()}</h3>
-		<div class="flex flex-wrap gap-4">
-			{#each EMOJIS as emoji (emoji.name)}
-				<SampleCard variant="emoji" label={emoji.name} kind={emoji.kind} />
+		<CardRow layout="scroll" cols={{ base: 3 }}>
+			{#each EMOJI_FONT_IDS as id (id)}
+				<SampleCard
+					variant="emoji"
+					label={EMOJI_FONT_LABELS[id]}
+					family={EMOJI_FAMILIES[id]}
+					active={currentEmojiFont === id}
+					onclick={() => selectEmojiFont(id)}
+				/>
 			{/each}
-		</div>
+		</CardRow>
 	</section>
 </div>
 

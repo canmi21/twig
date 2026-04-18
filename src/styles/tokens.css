@@ -124,3 +124,16 @@ html[data-code-font='jetbrains'] {
 html[data-code-font='fira'] {
 	--font-code: 'Fira Code';
 }
+
+/* Emoji font. --font-emoji holds only a specific face name; the OS emoji
+   fallbacks ('Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji') live
+   at the tail of the html stack in base.css, so data-emoji='system' simply
+   resolves the var() to __unset and those fallbacks win. Unlike Latin/CJK,
+   emoji codepoints don't collide with text faces, so placement at the end of
+   the stack is safe. */
+html[data-emoji='twemoji'] {
+	--font-emoji: 'Twemoji';
+}
+html[data-emoji='noto'] {
+	--font-emoji: 'Noto Color Emoji';
+}

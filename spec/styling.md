@@ -91,7 +91,14 @@ Code faces (`src/lib/font/code-script.ts`) auto-apply to `<pre>`, `<code>`, and 
 
 `Monospace` is the no-network default (CSS generic only), matching the `System` role in the Latin / CJK selectors.
 
-The Latin and code slots use `--font-latin` and `--font-code` respectively, **not** `--font-sans` / `--font-mono`. Tailwind v4 pre-declares those two variables on `:root` to drive `.font-sans` / `.font-mono` utilities; overloading them would make `var(--font-sans, __unset)` never fall through to `__unset`, leaking Tailwind's full generic stack (including `ui-sans-serif`, which OS-level CJK fallback treats as a CJK face) ahead of our specific face. Keep our slot variables outside that namespace.
+Emoji faces (`src/lib/font/emoji-script.ts`) attach at the tail of every `html` / `:lang()` stack, followed by explicit OS emoji fallbacks (`'Apple Color Emoji'`, `'Segoe UI Emoji'`, `'Noto Color Emoji'`) so `System` is deterministic without loading anything:
+
+- **Twemoji** — `twemoji-colr-font@15.0.3` on jsDelivr (Tilman Vatteroth's upstream-tracking COLR/CPAL build; Mozilla's own repo only ships the `.ttf` as a GitHub release artifact, which jsDelivr doesn't mirror). One woff2, no subset split.
+- **Noto Color Emoji** — Google Fonts, served as a single face (not subsetted — emoji presentation sequences must stay intact across code points).
+
+No Fluent option: Microsoft ships Fluent Emoji as SVG/PNG assets only, with no official web font. Supporting it would require a DOM-rewriting pipeline (walk text nodes, swap emoji codepoints for `<img>` tags), which is a different architecture from the three font-stack–based selectors; the ROI didn't justify it.
+
+The Latin and code slots use `--font-latin` and `--font-code` respectively, **not** `--font-sans` / `--font-mono`. Tailwind v4 pre-declares those two variables on `:root` to drive `.font-sans` / `.font-mono` utilities; overloading them would make `var(--font-sans, __unset)` never fall through to `__unset`, leaking Tailwind's full generic stack (including `ui-sans-serif`, which OS-level CJK fallback treats as a CJK face) ahead of our specific face. Keep our slot variables outside that namespace. `--font-emoji` follows the same rule (Tailwind doesn't reserve it today, but staying in our own namespace is cheap insurance).
 
 ## Icons
 

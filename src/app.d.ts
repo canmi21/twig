@@ -18,6 +18,7 @@ declare global {
 			font: import('$lib/font/script').FontFamily;
 			cjkFont: import('$lib/font/cjk-script').CjkFont;
 			codeFont: import('$lib/font/code-script').CodeFont;
+			emojiFont: import('$lib/font/emoji-script').EmojiFont;
 			htmlLang: string;
 		}
 		interface PageData {
@@ -25,6 +26,7 @@ declare global {
 			font: import('$lib/font/script').FontFamily;
 			cjkFont: import('$lib/font/cjk-script').CjkFont;
 			codeFont: import('$lib/font/code-script').CodeFont;
+			emojiFont: import('$lib/font/emoji-script').EmojiFont;
 			htmlLang: string;
 			runtimeDays: number;
 		}
