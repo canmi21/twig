@@ -110,3 +110,17 @@ html[data-cjk='lxgw'] {
 	--font-cjk-tc: 'LXGW WenKai TC';
 	--font-cjk-jp: 'Klee One';
 }
+
+/* Code font. --font-code (not --font-mono) for the same reason --font-latin
+   isn't --font-sans: Tailwind v4 pre-declares --font-mono on :root for the
+   .font-mono utility, so reusing the name would leak Tailwind's generic stack
+   into pre/code whenever data-code-font is 'monospace'. */
+html[data-code-font='maple'] {
+	--font-code: 'Maple Mono';
+}
+html[data-code-font='jetbrains'] {
+	--font-code: 'JetBrains Mono';
+}
+html[data-code-font='fira'] {
+	--font-code: 'Fira Code';
+}

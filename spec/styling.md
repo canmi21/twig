@@ -84,6 +84,15 @@ LXGW ships static weights (`light`, `regular`, `medium`) as separate `@font-face
 
 Font stack ordering (`html` / `:lang()` in `base.css`) is: English face → current-language CJK → coexisting fallback CJK. SC and TC are never loaded together (same CJK-unified code points, conflicting glyphs); JP pairs with whichever Chinese script the page is in.
 
+Code faces (`src/lib/font/code-script.ts`) auto-apply to `<pre>`, `<code>`, and anything opted in via `.font-code`:
+
+- **JetBrains Mono / Fira Code** — Google Fonts, `wght@400;700`.
+- **Maple Mono** — Fontsource on jsDelivr, pinned to patch (`@fontsource/maple-mono@5.2.6`). 400 and 700 are separate stylesheets (`latin-400.css`, `latin-700.css`); both ship at route time but neither actually fetches woff2 until a glyph renders at that weight. Bump the version in `code-script.ts` and this note in one commit.
+
+`Monospace` is the no-network default (CSS generic only), matching the `System` role in the Latin / CJK selectors.
+
+The Latin and code slots use `--font-latin` and `--font-code` respectively, **not** `--font-sans` / `--font-mono`. Tailwind v4 pre-declares those two variables on `:root` to drive `.font-sans` / `.font-mono` utilities; overloading them would make `var(--font-sans, __unset)` never fall through to `__unset`, leaking Tailwind's full generic stack (including `ui-sans-serif`, which OS-level CJK fallback treats as a CJK face) ahead of our specific face. Keep our slot variables outside that namespace.
+
 ## Icons
 
 - **Custom SVGs:** `src/lib/icons/*.svelte`, one per file, `class` prop + `fill="currentColor"` + `<title>`, no hard-coded size.

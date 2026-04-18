@@ -9,6 +9,7 @@ export const load: LayoutServerLoad = ({ locals }) => {
 		theme: locals.theme,
 		font: locals.font,
 		cjkFont: locals.cjkFont,
+		codeFont: locals.codeFont,
 		htmlLang: locals.htmlLang,
 		runtimeDays
 	};

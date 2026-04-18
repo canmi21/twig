@@ -18,6 +18,14 @@
 		labelFor,
 		type CjkFont
 	} from '$lib/font/cjk-script';
+	import {
+		applyCodeFont,
+		ensureAllCodeLoaded,
+		CODE_FONT_IDS,
+		CODE_FAMILIES,
+		CODE_FONT_LABELS,
+		type CodeFont
+	} from '$lib/font/code-script';
 	import ThemeCard from '$lib/components/cards/theme-card.svelte';
 	import WindowCard from '$lib/components/cards/window-card.svelte';
 	import SampleCard from '$lib/components/cards/sample-card.svelte';
@@ -142,13 +150,6 @@
 		}
 	];
 
-	const CODE_FONTS = [
-		{ name: 'Monospace', family: 'monospace' },
-		{ name: 'Maple Mono', family: '"Maple Mono", monospace' },
-		{ name: 'JetBrains Mono', family: '"JetBrains Mono", monospace' },
-		{ name: 'Fira Code', family: '"Fira Code", monospace' }
-	];
-
 	const EMOJIS = [
 		{ name: 'System', kind: 'native' as const },
 		{ name: 'Twemoji', kind: 'twemoji' as const },
@@ -159,6 +160,7 @@
 	let currentTheme = $state<ThemeState>(page.data.theme);
 	let currentFont = $state<FontFamily>(page.data.font);
 	let currentCjkFont = $state<CjkFont>(page.data.cjkFont);
+	let currentCodeFont = $state<CodeFont>(page.data.codeFont);
 
 	function selectTheme(next: ThemeState) {
 		currentTheme = next;
@@ -175,6 +177,11 @@
 		applyCjkFont(next);
 	}
 
+	function selectCodeFont(next: CodeFont) {
+		currentCodeFont = next;
+		applyCodeFont(next);
+	}
+
 	// Covers the soft-navigation case where the SSR chunk already shipped the
 	// full font set for /settings — this is a no-op — and the case where the
 	// user landed on another route first and is now switching into /settings
@@ -182,6 +189,7 @@
 	$effect(() => {
 		ensureAllFontsLoaded();
 		ensureAllCjkLoaded();
+		ensureAllCodeLoaded();
 	});
 </script>
 
@@ -342,8 +350,14 @@
 			{m['settings.appearance.code.font']()}
 		</h3>
 		<div class="flex flex-wrap gap-4">
-			{#each CODE_FONTS as font (font.name)}
-				<SampleCard variant="code" label={font.name} family={font.family} />
+			{#each CODE_FONT_IDS as id (id)}
+				<SampleCard
+					variant="code"
+					label={CODE_FONT_LABELS[id]}
+					family={CODE_FAMILIES[id]}
+					active={currentCodeFont === id}
+					onclick={() => selectCodeFont(id)}
+				/>
 			{/each}
 		</div>
 	</section>

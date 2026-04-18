@@ -17,12 +17,14 @@ declare global {
 			theme: import('$lib/theme/script').ThemeState;
 			font: import('$lib/font/script').FontFamily;
 			cjkFont: import('$lib/font/cjk-script').CjkFont;
+			codeFont: import('$lib/font/code-script').CodeFont;
 			htmlLang: string;
 		}
 		interface PageData {
 			theme: import('$lib/theme/script').ThemeState;
 			font: import('$lib/font/script').FontFamily;
 			cjkFont: import('$lib/font/cjk-script').CjkFont;
+			codeFont: import('$lib/font/code-script').CodeFont;
 			htmlLang: string;
 			runtimeDays: number;
 		}

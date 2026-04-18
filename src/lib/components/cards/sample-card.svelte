@@ -65,7 +65,9 @@
 			</div>
 		{:else if props.variant === 'code'}
 			<div class="flex h-full flex-col items-center justify-center">
-				<span class="text-2xl text-foreground/80" style="font-family: {props.family}">=&gt;</span>
+				<span class="text-2xl text-foreground/80" style="font-family: {props.family}"
+					>&lt;/&gt;</span
+				>
 				<span
 					class="mt-1 w-full truncate px-2 text-center text-[0.55rem] text-muted-foreground"
 					style="font-family: {props.family}">fn main() {'{'} 0 }</span

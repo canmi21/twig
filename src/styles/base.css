@@ -83,6 +83,19 @@ html[lang='ja-JP'] {
 		sans-serif;
 }
 
+/* Code-block typography. Scoped to the two core tags (pre/code) so Markdown,
+   MDX, and plain HTML all pick it up automatically. `.font-code` is the escape
+   hatch for inline tokens that can't wrap in <code> (e.g. a CLI flag inside a
+   paragraph authored as regular text). --font-code rather than --font-mono
+   keeps us out of Tailwind v4's reserved variable space. */
+pre,
+code,
+.font-code {
+	font-family:
+		var(--font-code, __unset), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+		'Liberation Mono', 'Courier New', monospace;
+}
+
 ::selection {
 	background-color: var(--color-selection);
 }

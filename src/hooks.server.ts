@@ -20,6 +20,12 @@ import {
 	type FontFamily
 } from '$lib/font/script';
 import { CJK_FONT_COOKIE, isCjkFont, renderCjkLinks, type CjkFont } from '$lib/font/cjk-script';
+import {
+	CODE_FONT_COOKIE,
+	isCodeFont,
+	renderCodeLinks,
+	type CodeFont
+} from '$lib/font/code-script';
 import { baseLocale } from '$lib/paraglide/runtime';
 
 const LANG_COOKIE = 'language';
@@ -146,4 +152,30 @@ const cjkFontHandle: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle = sequence(langHandle, i18nHandle, themeHandle, fontHandle, cjkFontHandle);
+// Code font handle mirrors fontHandle: default `monospace` means CSS generic
+// only — zero network cost. Loadable picks ship their @font-face CSS, which
+// registers unicode-range subsets; woff2 downloads are deferred until a <pre>
+// or <code> element renders a glyph at the requested weight.
+const codeFontHandle: Handle = async ({ event, resolve }) => {
+	const cookie = event.cookies.get(CODE_FONT_COOKIE);
+	const codeFont: CodeFont = isCodeFont(cookie) ? cookie : 'monospace';
+	event.locals.codeFont = codeFont;
+
+	const isSettings =
+		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
+	const links = renderCodeLinks(codeFont, isSettings);
+
+	return resolve(event, {
+		transformPageChunk: ({ html }) =>
+			html.replace('%code_font%', codeFont).replace('%code_font_links%', links)
+	});
+};
+
+export const handle = sequence(
+	langHandle,
+	i18nHandle,
+	themeHandle,
+	fontHandle,
+	cjkFontHandle,
+	codeFontHandle
+);
