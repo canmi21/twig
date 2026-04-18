@@ -357,11 +357,8 @@
 						     by `.motion-tier-*` in `utilities.css` — hover flips A↔B,
 						     hover-out tweens back. -->
 						<div class={`motion-tier-${option.key} relative h-full`}>
-							<!-- View A: nav item 1 active.
-							     Highlight = --color-foreground, rest = --color-border, body
-							     text = --color-muted-foreground. All three read live from
-							     the root palette, so Motion previews track the selected
-							     theme. -->
+							<!-- View A/B colors read live from the root palette (foreground,
+							     border, muted-foreground) so previews track the active theme. -->
 							<div
 								class="motion-layer motion-layer-a absolute inset-0 flex gap-2.5"
 								style={pressed
@@ -380,7 +377,6 @@
 									<div class="h-1 w-2/3 rounded-sm bg-muted-foreground"></div>
 								</div>
 							</div>
-							<!-- View B: nav item 2 active -->
 							<div
 								class="motion-layer motion-layer-b absolute inset-0 flex gap-2.5"
 								style={pressed

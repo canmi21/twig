@@ -38,9 +38,7 @@
 
 <svelte:window onscroll={handleScroll} />
 
-<!-- Mobile: stacked column. lg+: sidebar + content side-by-side -->
 <div class="flex min-h-svh flex-col lg:flex-row">
-	<!-- Mobile top tab bar (horizontal scroll) -->
 	<nav class="shrink-0 border-b border-divider px-4 pt-4 pb-0 lg:hidden">
 		<h1 class="mb-3 text-lg font-semibold text-foreground">{m['settings.title']()}</h1>
 		<div class="-mb-px flex gap-1 overflow-x-auto">
@@ -59,7 +57,6 @@
 		</div>
 	</nav>
 
-	<!-- Desktop sidebar -->
 	<nav class="sticky top-0 hidden h-svh shrink-0 self-start pt-20 pl-8 lg:block">
 		<div class="w-58 xl:w-[16rem]">
 			<h1 class="mb-5 pl-4 text-2xl font-semibold text-foreground">{m['settings.title']()}</h1>

@@ -1,6 +1,5 @@
 import type { Locale } from '$lib/paraglide/runtime';
 
-// Replaces or appends a name=value pair in a cookie header string.
 export function upsertCookie(cookieHeader: string, name: string, value: string): string {
 	const pattern = new RegExp(`(^|; *)${name}=[^;]*`);
 	if (pattern.test(cookieHeader)) {
@@ -9,7 +8,6 @@ export function upsertCookie(cookieHeader: string, name: string, value: string):
 	return cookieHeader ? `${cookieHeader}; ${name}=${value}` : `${name}=${value}`;
 }
 
-// Checks whether a `language=` cookie is present in the header.
 export function hasLangCookie(cookieHeader: string | null): boolean {
 	return /(?:^|; *)language=/.test(cookieHeader ?? '');
 }

@@ -20,7 +20,6 @@
 
 	function handlePressedChange(next: boolean) {
 		applyTheme({ mode: next ? 'dark' : 'light' });
-		// Randomize moon icon each time dark mode activates.
 		if (next) moonIdx = Math.floor(Math.random() * MOONS.length);
 	}
 

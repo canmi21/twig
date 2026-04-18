@@ -122,8 +122,6 @@ export function renderCjkLinks(cjk: CjkFont, htmlLang: string, isSettings: boole
 	return ['<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>', ...body].join('');
 }
 
-// --- Client-side ---
-
 export function setCjkFontCookie(cjk: CjkFont): void {
 	document.cookie = `${CJK_FONT_COOKIE}=${cjk};path=/;max-age=${COOKIE_MAX_AGE};SameSite=Lax`;
 }

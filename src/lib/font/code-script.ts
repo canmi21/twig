@@ -83,8 +83,6 @@ export function renderCodeLinks(code: CodeFont, isSettings: boolean): string {
 	return [...pre, ...body].join('');
 }
 
-// --- Client-side ---
-
 export function setCodeFontCookie(code: CodeFont): void {
 	document.cookie = `${CODE_FONT_COOKIE}=${code};path=/;max-age=${COOKIE_MAX_AGE};SameSite=Lax`;
 }

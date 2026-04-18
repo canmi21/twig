@@ -75,8 +75,6 @@ export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean): string 
 	return [...pre, ...body].join('');
 }
 
-// --- Client-side ---
-
 export function setEmojiFontCookie(emoji: EmojiFont): void {
 	document.cookie = `${EMOJI_FONT_COOKIE}=${emoji};path=/;max-age=${COOKIE_MAX_AGE};SameSite=Lax`;
 }
