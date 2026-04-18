@@ -11,7 +11,7 @@
 	type Props = {
 		label: string;
 		active?: boolean;
-		onclick?: (() => void) | undefined;
+		buttonProps?: Record<string, unknown>;
 	} & Variant;
 
 	let props: Props = $props();
@@ -28,7 +28,7 @@
 	}
 </script>
 
-<CardFrame label={props.label} active={props.active} onclick={props.onclick}>
+<CardFrame label={props.label} active={props.active} buttonProps={props.buttonProps}>
 	{#if props.variant === 'font'}
 		<div class="flex h-full flex-col items-center justify-center">
 			<span class="text-3xl text-foreground/80" style="font-family: {props.family}"

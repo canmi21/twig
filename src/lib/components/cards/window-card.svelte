@@ -5,7 +5,7 @@
 	interface Props {
 		label: string;
 		active?: boolean;
-		onclick?: (() => void) | undefined;
+		buttonProps?: Record<string, unknown>;
 		bg: string;
 		titlebar: string;
 		dot: string;
@@ -18,7 +18,7 @@
 	let {
 		label,
 		active = false,
-		onclick,
+		buttonProps,
 		bg,
 		titlebar,
 		dot,
@@ -29,7 +29,7 @@
 	}: Props = $props();
 </script>
 
-<CardFrame {label} {active} {onclick} {bg} borderIdle={border} {borderHover} {attrs}>
+<CardFrame {label} {active} {buttonProps} {bg} borderIdle={border} {borderHover} {attrs}>
 	<div class="flex h-full flex-col">
 		<div class="flex h-3 items-center gap-1 px-2" style:background={titlebar}>
 			<span class="size-1 rounded-full" style:background={dot}></span>

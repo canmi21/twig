@@ -51,6 +51,15 @@ Canonical Tailwind class scale (`size-3.25` vs `size-[0.8125rem]` etc.) is enfor
 - Color: `var(--color-blue-500)` (Tailwind's canonical blue, not a project semantic token — focus ring is "system-level feedback", not brand).
 - Callers add their own `hover:text-foreground focus-visible:text-foreground` for color reinforcement; the utility only owns the outline shape.
 
+Two variants cover every focusable element with no visible border of its own:
+
+| Class               | Offset | Use for                                                       |
+| ------------------- | ------ | ------------------------------------------------------------- |
+| `.focus-ring`       | `+2px` | Focusable element itself                                      |
+| `.focus-ring-inner` | `+2px` | Composite button — ring hugs a marked child, not the hit area |
+
+**Elements that already render their own visible 2px border** (e.g. card previews in `card-frame.svelte`) don't use either utility — they recolor their own border to `var(--color-blue-500)` on `:focus-visible`, plus a `outline: 2px solid transparent` stub for `forced-colors`. Stacking a negative-offset outline over an existing border makes Chromium/WebKit reconcile two corner-radii on every paint and can briefly render a 1-frame "too large" ring during Tab transitions; recoloring the already-rendered border has no geometry to resolve.
+
 ## Browser default resets
 
 Three resets in `base.css` prevent browser defaults from leaking through:

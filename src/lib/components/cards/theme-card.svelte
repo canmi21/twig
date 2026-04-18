@@ -4,7 +4,7 @@
 	interface Props {
 		label: string;
 		active?: boolean;
-		onclick?: (() => void) | undefined;
+		buttonProps?: Record<string, unknown>;
 		colors: {
 			bg: string;
 			titlebar: string;
@@ -17,13 +17,13 @@
 		};
 	}
 
-	let { label, active = false, onclick, colors: c }: Props = $props();
+	let { label, active = false, buttonProps, colors: c }: Props = $props();
 </script>
 
 <WindowCard
 	{label}
 	{active}
-	{onclick}
+	{buttonProps}
 	bg={c.bg}
 	titlebar={c.titlebar}
 	dot={c.dot}
