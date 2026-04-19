@@ -133,7 +133,7 @@
 			<ul class="relative flex flex-col gap-1">
 				{#if showSlider && pill.h > 0}
 					<span
-						class="pointer-events-none absolute inset-x-0  rounded-lg bg-inset transition-[transform,height] duration-220 ease-out"
+						class="pointer-events-none absolute inset-x-0 rounded-lg bg-inset transition-[transform,height] duration-220 ease-out"
 						style:transform="translateY({pill.y}px)"
 						style:height="{pill.h}px"
 					></span>
