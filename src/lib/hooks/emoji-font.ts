@@ -14,7 +14,7 @@ import { isSettingsPath } from './shared';
 // emoji presentation sequences must stay intact across code points).
 export const emojiFontHandle: Handle = async ({ event, resolve }) => {
 	const cookie = event.cookies.get(EMOJI_FONT_COOKIE);
-	const emojiFont: EmojiFont = isEmojiFont(cookie) ? cookie : 'system';
+	const emojiFont: EmojiFont = isEmojiFont(cookie) ? cookie : 'twemoji';
 	event.locals.emojiFont = emojiFont;
 
 	const links = renderEmojiLinks(emojiFont, isSettingsPath(event.url.pathname), event.locals.cdn);
