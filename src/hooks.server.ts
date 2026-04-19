@@ -33,6 +33,7 @@ import {
 	type EmojiFont
 } from '$lib/font/emoji-script';
 import { baseLocale } from '$lib/paraglide/runtime';
+import { DEFAULT_HOSTS, resolveCdnHosts } from '$lib/cdn/hosts';
 
 const LANG_COOKIE = 'language';
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -95,6 +96,16 @@ const i18nHandle: Handle = ({ event, resolve }) => {
 	});
 };
 
+// CN / IR / RU can't reach Google Fonts reliably, and CN also can't reach
+// cdn.jsdelivr.net since its ICP revocation. Pick the mirror set once from
+// request.cf.country so SSR emits working origins for blocked regions
+// without any client-side probing. Dev / prerender have no cf → defaults.
+const cdnHandle: Handle = async ({ event, resolve }) => {
+	const country = event.platform?.cf?.country;
+	event.locals.cdn = country ? resolveCdnHosts(country) : DEFAULT_HOSTS;
+	return resolve(event);
+};
+
 const themeHandle: Handle = async ({ event, resolve }) => {
 	const modeCookie = event.cookies.get(MODE_COOKIE);
 	const paletteCookie = event.cookies.get(PALETTE_COOKIE);
@@ -128,7 +139,7 @@ const fontHandle: Handle = async ({ event, resolve }) => {
 	const isSettings =
 		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
 	const ids: FontFamily[] = isSettings ? LOADABLE_FONT_IDS : font === 'system' ? [] : [font];
-	const links = renderFontLinks(ids);
+	const links = renderFontLinks(ids, event.locals.cdn);
 
 	return resolve(event, {
 		transformPageChunk: ({ html }) => html.replace('%font%', font).replace('%font_links%', links)
@@ -150,7 +161,7 @@ const cjkFontHandle: Handle = async ({ event, resolve }) => {
 
 	const isSettings =
 		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
-	const links = renderCjkLinks(cjkFont, htmlLang, isSettings);
+	const links = renderCjkLinks(cjkFont, htmlLang, isSettings, event.locals.cdn);
 
 	return resolve(event, {
 		transformPageChunk: ({ html }) =>
@@ -169,7 +180,7 @@ const codeFontHandle: Handle = async ({ event, resolve }) => {
 
 	const isSettings =
 		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
-	const links = renderCodeLinks(codeFont, isSettings);
+	const links = renderCodeLinks(codeFont, isSettings, event.locals.cdn);
 
 	return resolve(event, {
 		transformPageChunk: ({ html }) =>
@@ -189,7 +200,7 @@ const emojiFontHandle: Handle = async ({ event, resolve }) => {
 
 	const isSettings =
 		event.url.pathname === '/settings' || event.url.pathname.startsWith('/settings/');
-	const links = renderEmojiLinks(emojiFont, isSettings);
+	const links = renderEmojiLinks(emojiFont, isSettings, event.locals.cdn);
 
 	return resolve(event, {
 		transformPageChunk: ({ html }) =>
@@ -200,6 +211,7 @@ const emojiFontHandle: Handle = async ({ event, resolve }) => {
 export const handle = sequence(
 	langHandle,
 	i18nHandle,
+	cdnHandle,
 	themeHandle,
 	fontHandle,
 	cjkFontHandle,

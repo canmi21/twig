@@ -1,3 +1,5 @@
+import { getClientCdnHosts, type CdnHosts } from '$lib/cdn/hosts';
+
 export type EmojiFont = 'system' | 'twemoji' | 'noto';
 
 export const EMOJI_FONT_COOKIE = 'emoji_font';
@@ -8,11 +10,11 @@ export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 // artifact, which jsDelivr doesn't mirror. Tilman Vatteroth's npm build tracks
 // upstream Twemoji at the same version and provides a ready woff2 + @font-face
 // stylesheet; pin to patch and bump in spec/styling.md in the same commit.
-const TWEMOJI_CSS = 'https://cdn.jsdelivr.net/npm/twemoji-colr-font@15.0.3/twemoji.css';
+const TWEMOJI_PKG = 'twemoji-colr-font@15.0.3/twemoji.css';
 // Google Fonts serves Noto Color Emoji as a single woff2 with font-display: swap.
 // No subset split — emoji presentation sequences must stay intact across
 // unicode-range slices, so the whole face ships as one file (~410 KB).
-const NOTO_CSS = 'https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap';
+const NOTO_PARAMS = 'family=Noto+Color+Emoji&display=swap';
 
 export const EMOJI_FONT_LABELS: Record<EmojiFont, string> = {
 	system: 'System',
@@ -36,16 +38,16 @@ export function isEmojiFont(v: unknown): v is EmojiFont {
 	return v === 'system' || v === 'twemoji' || v === 'noto';
 }
 
-function linksFor(emoji: EmojiFont): string[] {
+function linksFor(emoji: EmojiFont, hosts: CdnHosts): string[] {
 	if (emoji === 'system') return [];
-	if (emoji === 'twemoji') return [TWEMOJI_CSS];
-	return [NOTO_CSS];
+	if (emoji === 'twemoji') return [`https://${hosts.jsdelivr}/npm/${TWEMOJI_PKG}`];
+	return [`https://${hosts.googleFontsCss}/css2?${NOTO_PARAMS}`];
 }
 
 // SSR entry. /settings preloads every loadable choice so preview cards render
 // their own faces; elsewhere only the selected choice ships. `system` maps to
 // the OS emoji font and needs zero network.
-export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean): string {
+export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean, hosts: CdnHosts): string {
 	const choices: EmojiFont[] = isSettings
 		? LOADABLE_EMOJI_FONT_IDS
 		: emoji === 'system'
@@ -56,7 +58,7 @@ export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean): string 
 	const seen = new Set<string>();
 	const body: string[] = [];
 	for (const choice of choices) {
-		for (const url of linksFor(choice)) {
+		for (const url of linksFor(choice, hosts)) {
 			if (seen.has(url)) continue;
 			seen.add(url);
 			body.push(`<link rel="stylesheet" href="${url}" data-emoji-link>`);
@@ -67,10 +69,11 @@ export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean): string 
 	const usesGoogle = choices.includes('noto');
 	const usesJsdelivr = choices.includes('twemoji');
 	const pre: string[] = [];
-	if (usesJsdelivr) pre.push('<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>');
+	if (usesJsdelivr)
+		pre.push(`<link rel="preconnect" href="https://${hosts.jsdelivr}" crossorigin>`);
 	if (usesGoogle) {
-		pre.push('<link rel="preconnect" href="https://fonts.googleapis.com">');
-		pre.push('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>');
+		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`);
+		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`);
 	}
 	return [...pre, ...body].join('');
 }
@@ -101,12 +104,13 @@ function injectLinks(urls: string[]): void {
 }
 
 export function ensureEmojiLoadedForPage(emoji: EmojiFont): void {
-	injectLinks(linksFor(emoji));
+	injectLinks(linksFor(emoji, getClientCdnHosts()));
 }
 
 export function ensureAllEmojiLoaded(): void {
+	const hosts = getClientCdnHosts();
 	for (const emoji of LOADABLE_EMOJI_FONT_IDS) {
-		injectLinks(linksFor(emoji));
+		injectLinks(linksFor(emoji, hosts));
 	}
 }
 

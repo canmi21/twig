@@ -1,3 +1,5 @@
+import { getClientCdnHosts, type CdnHosts } from '$lib/cdn/hosts';
+
 export type FontFamily = 'system' | 'inter' | 'roboto' | 'source-sans';
 
 export const FONT_COOKIE = 'font';
@@ -41,9 +43,10 @@ export function isFontFamily(value: unknown): value is FontFamily {
 	return typeof value === 'string' && value in FONTS;
 }
 
-// Collapse multiple families into a single fonts.googleapis.com request so the
-// browser opens one connection, one CSS parse, one cache entry.
-export function buildFontsHref(ids: readonly FontFamily[]): string | null {
+// Collapse multiple families into a single request so the browser opens one
+// connection, one CSS parse, one cache entry. Host swaps to a mirror for
+// blocked regions — loli.net's /css2 endpoint is wire-compatible.
+export function buildFontsHref(ids: readonly FontFamily[], hosts: CdnHosts): string | null {
 	const params: string[] = [];
 	for (const id of ids) {
 		const family = FONTS[id].googleFamily;
@@ -51,18 +54,18 @@ export function buildFontsHref(ids: readonly FontFamily[]): string | null {
 		params.push(`family=${encodeURIComponent(family).replace(/%20/g, '+')}:wght@${WEIGHTS}`);
 	}
 	if (params.length === 0) return null;
-	return `https://fonts.googleapis.com/css2?${params.join('&')}&display=swap`;
+	return `https://${hosts.googleFontsCss}/css2?${params.join('&')}&display=swap`;
 }
 
 // SSR-rendered <link> tags for the given font set. Tagged with data-font-ids
 // so the client can detect "SSR already loaded these" and skip re-injection.
-export function renderFontLinks(ids: readonly FontFamily[]): string {
-	const href = buildFontsHref(ids);
+export function renderFontLinks(ids: readonly FontFamily[], hosts: CdnHosts): string {
+	const href = buildFontsHref(ids, hosts);
 	if (!href) return '';
 	const tag = ids.filter((id) => FONTS[id].googleFamily !== null).join(' ');
 	return [
-		'<link rel="preconnect" href="https://fonts.googleapis.com">',
-		'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+		`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`,
+		`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`,
 		`<link rel="stylesheet" href="${href}" data-font-ids="${tag}">`
 	].join('');
 }
@@ -88,7 +91,7 @@ function hasSsrLink(id: FontFamily): boolean {
 export function ensureFontLoaded(id: FontFamily): void {
 	if (FONTS[id].googleFamily === null) return;
 	if (loadedRuntime.has(id) || hasSsrLink(id)) return;
-	const href = buildFontsHref([id]);
+	const href = buildFontsHref([id], getClientCdnHosts());
 	if (!href) return;
 	const link = document.createElement('link');
 	link.rel = 'stylesheet';

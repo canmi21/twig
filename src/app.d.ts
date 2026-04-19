@@ -20,6 +20,7 @@ declare global {
 			codeFont: import('$lib/font/code-script').CodeFont;
 			emojiFont: import('$lib/font/emoji-script').EmojiFont;
 			htmlLang: string;
+			cdn: import('$lib/cdn/hosts').CdnHosts;
 		}
 		interface PageData {
 			theme: import('$lib/theme/script').ThemeState;
@@ -29,6 +30,7 @@ declare global {
 			emojiFont: import('$lib/font/emoji-script').EmojiFont;
 			htmlLang: string;
 			runtimeDays: number;
+			cdn: import('$lib/cdn/hosts').CdnHosts;
 		}
 	}
 }

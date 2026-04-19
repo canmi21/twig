@@ -1,3 +1,5 @@
+import { getClientCdnHosts, type CdnHosts } from '$lib/cdn/hosts';
+
 export type CjkFont = 'system' | 'noto' | 'lxgw';
 export type CjkLang = 'sc' | 'tc' | 'jp';
 
@@ -7,8 +9,8 @@ export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 // LXGW WenKai ships via CMBill's cn-font-split chunked packages on jsDelivr.
 // Pinned to the exact release synced from upstream — bump these two constants
 // (and the version note in spec/styling.md) when picking up a new upstream.
-const LXGW_SC_BASE = 'https://cdn.jsdelivr.net/npm/@callmebill/lxgw-wenkai-web@1.522.0';
-const LXGW_TC_BASE = 'https://cdn.jsdelivr.net/npm/lxgw-wenkai-tc-web@1.320.0';
+const LXGW_SC_PKG = '@callmebill/lxgw-wenkai-web@1.522.0';
+const LXGW_TC_PKG = 'lxgw-wenkai-tc-web@1.320.0';
 
 // LXGW ships 3 static weights. We declare all three so browsers lazy-load the
 // weight that each element actually renders (font-light → 300, base → 400,
@@ -70,7 +72,7 @@ export function langsForHtmlLang(htmlLang: string): CjkLang[] {
 	return ['sc', 'jp'];
 }
 
-function linksFor(cjk: CjkFont, langs: readonly CjkLang[]): string[] {
+function linksFor(cjk: CjkFont, langs: readonly CjkLang[], hosts: CdnHosts): string[] {
 	if (cjk === 'system') return [];
 
 	if (cjk === 'noto') {
@@ -79,18 +81,20 @@ function linksFor(cjk: CjkFont, langs: readonly CjkLang[]): string[] {
 		if (langs.includes('tc')) families.push(GOOGLE_NOTO_TC);
 		if (langs.includes('jp')) families.push(GOOGLE_NOTO_JP);
 		if (families.length === 0) return [];
-		return [`https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`];
+		return [`https://${hosts.googleFontsCss}/css2?${families.join('&')}&display=swap`];
 	}
 
+	const scBase = `https://${hosts.jsdelivr}/npm/${LXGW_SC_PKG}`;
+	const tcBase = `https://${hosts.jsdelivr}/npm/${LXGW_TC_PKG}`;
 	const urls: string[] = [];
 	if (langs.includes('sc')) {
-		for (const w of LXGW_WEIGHTS) urls.push(`${LXGW_SC_BASE}/lxgwwenkai-${w}/result.css`);
+		for (const w of LXGW_WEIGHTS) urls.push(`${scBase}/lxgwwenkai-${w}/result.css`);
 	}
 	if (langs.includes('tc')) {
-		for (const w of LXGW_WEIGHTS) urls.push(`${LXGW_TC_BASE}/lxgwwenkaitc-${w}/result.css`);
+		for (const w of LXGW_WEIGHTS) urls.push(`${tcBase}/lxgwwenkaitc-${w}/result.css`);
 	}
 	if (langs.includes('jp')) {
-		urls.push(`https://fonts.googleapis.com/css2?${GOOGLE_KLEE}&display=swap`);
+		urls.push(`https://${hosts.googleFontsCss}/css2?${GOOGLE_KLEE}&display=swap`);
 	}
 	return urls;
 }
@@ -99,7 +103,12 @@ function linksFor(cjk: CjkFont, langs: readonly CjkLang[]): string[] {
 // own glyphs; elsewhere only the selected choice ships. Language scope is
 // always (primary, fallback) — simplified + traditional are never loaded
 // together to avoid CJK-unified-code-point glyph conflicts.
-export function renderCjkLinks(cjk: CjkFont, htmlLang: string, isSettings: boolean): string {
+export function renderCjkLinks(
+	cjk: CjkFont,
+	htmlLang: string,
+	isSettings: boolean,
+	hosts: CdnHosts
+): string {
 	const choices: CjkFont[] = isSettings
 		? (['noto', 'lxgw'] as const).slice()
 		: cjk === 'system'
@@ -110,16 +119,27 @@ export function renderCjkLinks(cjk: CjkFont, htmlLang: string, isSettings: boole
 	const langs = langsForHtmlLang(htmlLang);
 	const seen = new Set<string>();
 	const body: string[] = [];
+	let needsJsdelivr = false;
+	let needsGoogle = false;
 	for (const choice of choices) {
-		for (const url of linksFor(choice, langs)) {
+		for (const url of linksFor(choice, langs, hosts)) {
 			if (seen.has(url)) continue;
 			seen.add(url);
 			body.push(`<link rel="stylesheet" href="${url}" data-cjk-link>`);
+			if (url.includes(hosts.jsdelivr)) needsJsdelivr = true;
+			if (url.includes(hosts.googleFontsCss)) needsGoogle = true;
 		}
 	}
 	if (body.length === 0) return '';
 
-	return ['<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>', ...body].join('');
+	const pre: string[] = [];
+	if (needsJsdelivr)
+		pre.push(`<link rel="preconnect" href="https://${hosts.jsdelivr}" crossorigin>`);
+	if (needsGoogle) {
+		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`);
+		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`);
+	}
+	return [...pre, ...body].join('');
 }
 
 export function setCjkFontCookie(cjk: CjkFont): void {
@@ -149,13 +169,14 @@ function injectLinks(urls: string[]): void {
 
 export function ensureCjkLoadedForPage(cjk: CjkFont): void {
 	const langs = langsForHtmlLang(document.documentElement.lang);
-	injectLinks(linksFor(cjk, langs));
+	injectLinks(linksFor(cjk, langs, getClientCdnHosts()));
 }
 
 export function ensureAllCjkLoaded(): void {
 	const langs = langsForHtmlLang(document.documentElement.lang);
+	const hosts = getClientCdnHosts();
 	for (const cjk of ['noto', 'lxgw'] as const) {
-		injectLinks(linksFor(cjk, langs));
+		injectLinks(linksFor(cjk, langs, hosts));
 	}
 }
 

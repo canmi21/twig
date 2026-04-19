@@ -12,6 +12,7 @@ export const load: LayoutServerLoad = ({ locals }) => {
 		codeFont: locals.codeFont,
 		emojiFont: locals.emojiFont,
 		htmlLang: locals.htmlLang,
-		runtimeDays
+		runtimeDays,
+		cdn: locals.cdn
 	};
 };

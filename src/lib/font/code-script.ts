@@ -1,3 +1,5 @@
+import { getClientCdnHosts, type CdnHosts } from '$lib/cdn/hosts';
+
 export type CodeFont = 'monospace' | 'maple' | 'jetbrains' | 'fira';
 
 export const CODE_FONT_COOKIE = 'code_font';
@@ -8,7 +10,7 @@ export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 // tag only registers @font-face declarations — actual woff2 files don't fetch
 // until an element renders a glyph that needs them. Pinned to patch; bump here
 // and in spec/styling.md in one commit.
-const MAPLE_BASE = 'https://cdn.jsdelivr.net/npm/@fontsource/maple-mono@5.2.6';
+const MAPLE_PKG = '@fontsource/maple-mono@5.2.6';
 
 export const CODE_FONT_LABELS: Record<CodeFont, string> = {
 	monospace: 'Monospace',
@@ -39,21 +41,22 @@ export function isCodeFont(v: unknown): v is CodeFont {
 // Fontsource splits them across two stylesheets. Neither approach pre-pulls
 // woff2 — font-display: swap + unicode-range defer the actual download until
 // a rendered glyph demands the weight.
-function linksFor(code: CodeFont): string[] {
+function linksFor(code: CodeFont, hosts: CdnHosts): string[] {
 	if (code === 'monospace') return [];
 	if (code === 'maple') {
-		return [`${MAPLE_BASE}/latin-400.css`, `${MAPLE_BASE}/latin-700.css`];
+		const base = `https://${hosts.jsdelivr}/npm/${MAPLE_PKG}`;
+		return [`${base}/latin-400.css`, `${base}/latin-700.css`];
 	}
 	if (code === 'jetbrains') {
-		return ['https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap'];
+		return [`https://${hosts.googleFontsCss}/css2?family=JetBrains+Mono:wght@400;700&display=swap`];
 	}
-	return ['https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap'];
+	return [`https://${hosts.googleFontsCss}/css2?family=Fira+Code:wght@400;700&display=swap`];
 }
 
 // SSR entry. /settings preloads every loadable choice so preview cards render
 // their own faces; elsewhere only the selected choice ships. `monospace` maps
 // to the CSS generic and needs zero network.
-export function renderCodeLinks(code: CodeFont, isSettings: boolean): string {
+export function renderCodeLinks(code: CodeFont, isSettings: boolean, hosts: CdnHosts): string {
 	const choices: CodeFont[] = isSettings
 		? LOADABLE_CODE_FONT_IDS
 		: code === 'monospace'
@@ -64,7 +67,7 @@ export function renderCodeLinks(code: CodeFont, isSettings: boolean): string {
 	const seen = new Set<string>();
 	const body: string[] = [];
 	for (const choice of choices) {
-		for (const url of linksFor(choice)) {
+		for (const url of linksFor(choice, hosts)) {
 			if (seen.has(url)) continue;
 			seen.add(url);
 			body.push(`<link rel="stylesheet" href="${url}" data-code-link>`);
@@ -75,10 +78,11 @@ export function renderCodeLinks(code: CodeFont, isSettings: boolean): string {
 	const usesGoogle = choices.some((c) => c === 'jetbrains' || c === 'fira');
 	const usesJsdelivr = choices.includes('maple');
 	const pre: string[] = [];
-	if (usesJsdelivr) pre.push('<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>');
+	if (usesJsdelivr)
+		pre.push(`<link rel="preconnect" href="https://${hosts.jsdelivr}" crossorigin>`);
 	if (usesGoogle) {
-		pre.push('<link rel="preconnect" href="https://fonts.googleapis.com">');
-		pre.push('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>');
+		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`);
+		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`);
 	}
 	return [...pre, ...body].join('');
 }
@@ -109,12 +113,13 @@ function injectLinks(urls: string[]): void {
 }
 
 export function ensureCodeLoadedForPage(code: CodeFont): void {
-	injectLinks(linksFor(code));
+	injectLinks(linksFor(code, getClientCdnHosts()));
 }
 
 export function ensureAllCodeLoaded(): void {
+	const hosts = getClientCdnHosts();
 	for (const code of LOADABLE_CODE_FONT_IDS) {
-		injectLinks(linksFor(code));
+		injectLinks(linksFor(code, hosts));
 	}
 }
 
