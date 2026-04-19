@@ -7,7 +7,7 @@
 	"footer.greeting.placeholder": "なまえ",
 	"footer.greeting.invalid.title": "なまえ ほぞんできなかった",
 	"footer.greeting.invalid.length": "2〜16 もじにしてね",
-	"footer.greeting.invalid.chars": "つかえるのは えいすうじ・ちゅうごくご・にほんご・- ・_ だけだよ",
+	"footer.greeting.invalid.chars": "つかえるのは にほんご・えいすうじ・ハイフン・アンダースコア だよ",
 	"notification.dismiss": "とじる",
 	"footer.runtime.days": "もう {days} 日目だよ〜",
 	"footer.presence": "いま {count} 人がみてるよ",

@@ -111,8 +111,7 @@
 			type="button"
 			onclick={enterEdit}
 			aria-label={m['footer.greeting.edit']()}
-			class="focus-ring cursor-text rounded-sm underline decoration-transparent underline-offset-4 transition-[text-decoration-color] duration-150 hover:decoration-current"
-			>{displayName}</button
+			class="focus-ring cursor-text rounded-sm">{displayName}</button
 		>{/if}&nbsp;{#if showWave}<Tooltip.Provider delayDuration={300}>
 			<Tooltip.Root>
 				<Tooltip.Trigger

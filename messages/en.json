@@ -7,7 +7,7 @@
 	"footer.greeting.placeholder": "Your name",
 	"footer.greeting.invalid.title": "Name not saved",
 	"footer.greeting.invalid.length": "Use 2 to 16 characters.",
-	"footer.greeting.invalid.chars": "Letters, digits, Chinese/Japanese, - and _ only.",
+	"footer.greeting.invalid.chars": "Use letters, digits, hyphens, or underscores.",
 	"notification.dismiss": "Dismiss",
 	"footer.runtime.days": "Running for {days} days",
 	"footer.presence": "{count} people browsing",
