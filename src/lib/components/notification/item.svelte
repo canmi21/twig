@@ -51,26 +51,35 @@
 		rafId = requestAnimationFrame(tick);
 	}
 
-	function pause() {
+	function stop() {
 		if (rafId !== null) {
 			cancelAnimationFrame(rafId);
 			rafId = null;
 		}
 	}
 
+	// Hover on any toast pauses all of them — driven by the shared counter in
+	// the store. This effect is the single bridge between global paused state
+	// and this item's rAF loop.
+	$effect(() => {
+		if (notifications.paused) stop();
+		else start();
+	});
+
 	onMount(() => {
-		start();
 		return () => {
 			if (rafId !== null) cancelAnimationFrame(rafId);
 		};
 	});
 
-	// Only the left edge takes the kind color; other sides stay `border-border`.
+	// Left accent as an absolute strip (see .toast-accent). Keeps the card's
+	// border uniformly 1px so rounded corners stay clean. Info reuses the
+	// border color so the strip visually disappears for neutral toasts.
 	const accent = {
-		info: 'border-l-border',
-		success: 'border-l-success',
-		warn: 'border-l-yellow-500/60',
-		error: 'border-l-destructive'
+		info: 'bg-border',
+		success: 'bg-success',
+		warn: 'bg-yellow-500/60',
+		error: 'bg-destructive'
 	} as const;
 
 	function flyParams() {
@@ -90,17 +99,16 @@
 <div
 	role={item.kind === 'error' ? 'alert' : 'status'}
 	aria-live={item.kind === 'error' ? 'assertive' : 'polite'}
-	onmouseenter={pause}
-	onmouseleave={start}
-	onfocusin={pause}
-	onfocusout={start}
+	onmouseenter={notifications.hoverEnter}
+	onmouseleave={notifications.hoverLeave}
+	onfocusin={notifications.hoverEnter}
+	onfocusout={notifications.hoverLeave}
 	in:fly={flyParams()}
 	out:fade={fadeParams()}
-	class="toast pointer-events-auto relative flex w-80 items-start gap-3 overflow-hidden rounded-md border-l-4 border border-border bg-muted p-3 shadow-md {accent[
-		item.kind
-	]}"
+	class="toast group pointer-events-auto relative flex w-80 items-start gap-3 overflow-hidden rounded-md border border-border bg-muted p-3 shadow-md"
 >
 	<span aria-hidden="true" class="toast-bar" style={barStyle}></span>
+	<span aria-hidden="true" class="toast-accent {accent[item.kind]}"></span>
 	<div class="min-w-0 flex-1">
 		<div class="text-sm font-medium text-foreground">{item.title}</div>
 		{#if item.body}
@@ -111,7 +119,7 @@
 		type="button"
 		onclick={() => notifications.dismiss(item.id)}
 		aria-label={m['notification.dismiss']()}
-		class="focus-ring shrink-0 rounded-sm text-muted-foreground hover:text-foreground"
+		class="focus-ring shrink-0 rounded-sm text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100"
 	>
 		<X class="size-4" />
 	</button>

@@ -18,3 +18,17 @@
 	background: color-mix(in oklch, var(--color-muted-foreground) 55%, transparent);
 	pointer-events: none;
 }
+
+/* Kind accent — absolute strip instead of an asymmetric left border, so the
+   card's four corners share one 1px border geometry and the rounded-md arc
+   stays clean. Inset by 1px and fully rounded to soften the strip's ends into
+   a capsule that overlays the lifetime bar at the bottom-left corner. */
+.toast-accent {
+	position: absolute;
+	top: 1px;
+	bottom: 1px;
+	left: 0;
+	width: 3px;
+	border-radius: 9999px;
+	pointer-events: none;
+}
