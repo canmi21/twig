@@ -278,273 +278,245 @@
 	});
 </script>
 
-<SettingSection
-	id="general"
-	title={m['settings.tab.general']()}
-	description={m['settings.tab.general.desc']()}
->
+<!-- Top-level anchors (#general, #appearance, #typography) land on the divider
+     or the page top; only level-3 sections render a visible header. -->
+<div id="general" class="mb-10 scroll-mt-6 lg:scroll-mt-20">
 	<p class="text-sm text-muted-foreground">{m['settings.tab.general.wip']()}</p>
-</SettingSection>
+</div>
 
-<hr class="mb-10 border-t border-dashed border-divider" />
-
-<SettingSection
+<hr
 	id="appearance"
-	title={m['settings.tab.appearance']()}
-	description={m['settings.tab.appearance.desc']()}
->
-	<div class="space-y-10">
-		<SettingSection
-			id="appearance-theme"
-			title={m['settings.appearance.theme']()}
-			description={m['settings.appearance.theme.desc']()}
-			level={3}
-		>
-			<!-- Column-first flow at 3×2 keeps lights on the top row and darks on the
-			    bottom so each column is a light/dark pair. At sm+ it collapses back
-			    to a single 6-col row, so grid-flow-row preserves the source order. -->
-			<SettingOptions
-				value={themeKey}
-				onValueChange={selectTheme}
-				options={themeOptions}
-				layout="custom"
-				class="grid max-w-104 grid-flow-col grid-cols-3 grid-rows-2 gap-3 sm:max-w-212 sm:grid-flow-row sm:grid-cols-6 sm:grid-rows-1 sm:gap-4"
-				ariaLabelledby="appearance-theme-title"
-				ariaDescribedby="appearance-theme-desc"
-			>
-				{#snippet card({ option, props, pressed })}
-					{@const data = themeOptions.find((o) => o.key === option.key)?.data}
-					{#if data}
-						<ThemeCard
-							label={option.label}
-							active={pressed}
-							buttonProps={props}
-							colors={data.colors}
-						/>
-					{/if}
-				{/snippet}
-			</SettingOptions>
-		</SettingSection>
+	class="mb-10 scroll-mt-6 border-t border-dashed border-divider lg:scroll-mt-20"
+/>
 
-		<SettingSection
-			id="appearance-motion"
-			title={m['settings.appearance.motion']()}
-			description={m['settings.appearance.motion.desc']()}
-			level={3}
+<div class="mb-10 space-y-10">
+	<SettingSection
+		id="appearance-theme"
+		title={m['settings.appearance.theme']()}
+		description={m['settings.appearance.theme.desc']()}
+		level={3}
+	>
+		<!-- Column-first flow at 3×2 keeps lights on the top row and darks on the
+		    bottom so each column is a light/dark pair. At sm+ it collapses back
+		    to a single 6-col row, so grid-flow-row preserves the source order. -->
+		<SettingOptions
+			value={themeKey}
+			onValueChange={selectTheme}
+			options={themeOptions}
+			layout="custom"
+			class="grid max-w-104 grid-flow-col grid-cols-3 grid-rows-2 gap-3 sm:max-w-212 sm:grid-flow-row sm:grid-cols-6 sm:grid-rows-1 sm:gap-4"
+			ariaLabelledby="appearance-theme-title"
+			ariaDescribedby="appearance-theme-desc"
 		>
-			<SettingOptions
-				value={motion.value}
-				onValueChange={selectMotion}
-				options={motionOptions}
-				layout="wrap"
-				cols={{ base: 3 }}
-				ariaLabelledby="appearance-motion-title"
-				ariaDescribedby="appearance-motion-desc"
-			>
-				{#snippet card({ option, props, pressed })}
-					<WindowCard
+			{#snippet card({ option, props, pressed })}
+				{@const data = themeOptions.find((o) => o.key === option.key)?.data}
+				{#if data}
+					<ThemeCard
 						label={option.label}
 						active={pressed}
 						buttonProps={props}
-						{...MOTION_WINDOW}
-						attrs={{ 'data-motion-exempt': '' }}
-					>
-						<!-- Two views alternate: each has its own sidebar with a different
-						     nav item highlighted + a different body list. Mirrors the
-						     actual sidebar-tab-switch interaction this settings page
-						     itself uses. Active card loops forever via inline keyframe
-						     `animation`. Inactive cards rely on CSS transitions scoped
-						     by `.motion-tier-*` in `utilities.css` — hover flips A↔B,
-						     hover-out tweens back. -->
-						<div class={`motion-tier-${option.key} relative h-full`}>
-							<!-- View A/B colors read live from the root palette (foreground,
-							     border, muted-foreground) so previews track the active theme. -->
-							<div
-								class="motion-layer motion-layer-a absolute inset-0 flex gap-2.5"
-								style={pressed
-									? `animation: motion-state-a-${option.key} 5s ease-in-out infinite`
-									: ''}
-							>
-								<div class="w-5 shrink-0 space-y-1">
-									<div class="h-1 w-full rounded-sm bg-foreground"></div>
-									<div class="h-1 w-3/5 rounded-sm bg-border"></div>
-									<div class="h-1 w-4/5 rounded-sm bg-border"></div>
-								</div>
-								<div class="flex-1 space-y-1">
-									<div class="h-1.5 w-2/5 rounded-sm bg-foreground"></div>
-									<div class="h-1 w-3/4 rounded-sm bg-muted-foreground"></div>
-									<div class="h-1 w-1/2 rounded-sm bg-muted-foreground"></div>
-									<div class="h-1 w-2/3 rounded-sm bg-muted-foreground"></div>
-								</div>
+						colors={data.colors}
+					/>
+				{/if}
+			{/snippet}
+		</SettingOptions>
+	</SettingSection>
+
+	<SettingSection
+		id="appearance-motion"
+		title={m['settings.appearance.motion']()}
+		description={m['settings.appearance.motion.desc']()}
+		level={3}
+	>
+		<SettingOptions
+			value={motion.value}
+			onValueChange={selectMotion}
+			options={motionOptions}
+			layout="wrap"
+			cols={{ base: 3 }}
+			ariaLabelledby="appearance-motion-title"
+			ariaDescribedby="appearance-motion-desc"
+		>
+			{#snippet card({ option, props, pressed })}
+				<WindowCard
+					label={option.label}
+					active={pressed}
+					buttonProps={props}
+					{...MOTION_WINDOW}
+					attrs={{ 'data-motion-exempt': '' }}
+				>
+					<!-- Two views alternate: each has its own sidebar with a different
+					     nav item highlighted + a different body list. Mirrors the
+					     actual sidebar-tab-switch interaction this settings page
+					     itself uses. Active card loops forever via inline keyframe
+					     `animation`. Inactive cards rely on CSS transitions scoped
+					     by `.motion-tier-*` in `utilities.css` — hover flips A↔B,
+					     hover-out tweens back. -->
+					<div class={`motion-tier-${option.key} relative h-full`}>
+						<!-- View A/B colors read live from the root palette (foreground,
+						     border, muted-foreground) so previews track the active theme. -->
+						<div
+							class="motion-layer motion-layer-a absolute inset-0 flex gap-2.5"
+							style={pressed
+								? `animation: motion-state-a-${option.key} 5s ease-in-out infinite`
+								: ''}
+						>
+							<div class="w-5 shrink-0 space-y-1">
+								<div class="h-1 w-full rounded-sm bg-foreground"></div>
+								<div class="h-1 w-3/5 rounded-sm bg-border"></div>
+								<div class="h-1 w-4/5 rounded-sm bg-border"></div>
 							</div>
-							<div
-								class="motion-layer motion-layer-b absolute inset-0 flex gap-2.5"
-								style={pressed
-									? `animation: motion-state-b-${option.key} 5s ease-in-out infinite`
-									: ''}
-							>
-								<div class="w-5 shrink-0 space-y-1">
-									<div class="h-1 w-full rounded-sm bg-border"></div>
-									<div class="h-1 w-3/5 rounded-sm bg-foreground"></div>
-									<div class="h-1 w-4/5 rounded-sm bg-border"></div>
-								</div>
-								<div class="flex-1 space-y-1">
-									<div class="h-1.5 w-3/5 rounded-sm bg-foreground"></div>
-									<div class="h-1 w-5/6 rounded-sm bg-muted-foreground"></div>
-									<div class="h-1 w-3/5 rounded-sm bg-muted-foreground"></div>
-									<div class="h-1 w-1/2 rounded-sm bg-muted-foreground"></div>
-								</div>
+							<div class="flex-1 space-y-1">
+								<div class="h-1.5 w-2/5 rounded-sm bg-foreground"></div>
+								<div class="h-1 w-3/4 rounded-sm bg-muted-foreground"></div>
+								<div class="h-1 w-1/2 rounded-sm bg-muted-foreground"></div>
+								<div class="h-1 w-2/3 rounded-sm bg-muted-foreground"></div>
 							</div>
 						</div>
-					</WindowCard>
-				{/snippet}
-			</SettingOptions>
-		</SettingSection>
-	</div>
-</SettingSection>
+						<div
+							class="motion-layer motion-layer-b absolute inset-0 flex gap-2.5"
+							style={pressed
+								? `animation: motion-state-b-${option.key} 5s ease-in-out infinite`
+								: ''}
+						>
+							<div class="w-5 shrink-0 space-y-1">
+								<div class="h-1 w-full rounded-sm bg-border"></div>
+								<div class="h-1 w-3/5 rounded-sm bg-foreground"></div>
+								<div class="h-1 w-4/5 rounded-sm bg-border"></div>
+							</div>
+							<div class="flex-1 space-y-1">
+								<div class="h-1.5 w-3/5 rounded-sm bg-foreground"></div>
+								<div class="h-1 w-5/6 rounded-sm bg-muted-foreground"></div>
+								<div class="h-1 w-3/5 rounded-sm bg-muted-foreground"></div>
+								<div class="h-1 w-1/2 rounded-sm bg-muted-foreground"></div>
+							</div>
+						</div>
+					</div>
+				</WindowCard>
+			{/snippet}
+		</SettingOptions>
+	</SettingSection>
+</div>
 
-<hr class="mb-10 border-t border-dashed border-divider" />
-
-<SettingSection
+<hr
 	id="typography"
-	title={m['settings.tab.typography']()}
-	description={m['settings.tab.typography.desc']()}
->
-	<div class="space-y-10">
-		<SettingSection
-			id="typography-font"
-			title={m['settings.appearance.font']()}
-			description={m['settings.appearance.font.desc']()}
-			level={3}
+	class="mb-10 scroll-mt-6 border-t border-dashed border-divider lg:scroll-mt-20"
+/>
+
+<div class="space-y-10">
+	<SettingSection
+		id="typography-font"
+		title={m['settings.appearance.font']()}
+		description={m['settings.appearance.font.desc']()}
+		level={3}
+	>
+		<SettingOptions
+			value={currentFont}
+			onValueChange={selectFont}
+			options={fontOptions}
+			layout="scroll"
+			cols={{ base: 3, sm: 4 }}
+			ariaLabelledby="typography-font-title"
+			ariaDescribedby="typography-font-desc"
 		>
-			<SettingOptions
-				value={currentFont}
-				onValueChange={selectFont}
-				options={fontOptions}
-				layout="scroll"
-				cols={{ base: 3, sm: 4 }}
-				ariaLabelledby="typography-font-title"
-				ariaDescribedby="typography-font-desc"
-			>
-				{#snippet card({ option, props, pressed })}
-					{@const family = fontOptions.find((o) => o.key === option.key)?.family ?? ''}
+			{#snippet card({ option, props, pressed })}
+				{@const family = fontOptions.find((o) => o.key === option.key)?.family ?? ''}
+				<SampleCard
+					variant="font"
+					label={option.label}
+					{family}
+					active={pressed}
+					buttonProps={props}
+				/>
+			{/snippet}
+		</SettingOptions>
+	</SettingSection>
+
+	<SettingSection
+		id="typography-cjk"
+		title={m['settings.appearance.font.cjk']()}
+		description={m['settings.appearance.font.cjk.desc']()}
+		level={3}
+	>
+		<SettingOptions
+			value={currentCjkFont}
+			onValueChange={selectCjk}
+			options={cjkOptions}
+			layout="scroll"
+			cols={{ base: 3 }}
+			ariaLabelledby="typography-cjk-title"
+			ariaDescribedby="typography-cjk-desc"
+		>
+			{#snippet card({ option, props, pressed })}
+				{@const data = cjkOptions.find((o) => o.key === option.key)}
+				{#if data}
 					<SampleCard
-						variant="font"
+						variant="cjk"
 						label={option.label}
-						{family}
+						sc={data.sc}
+						tc={data.tc}
+						jp={data.jp}
 						active={pressed}
 						buttonProps={props}
 					/>
-				{/snippet}
-			</SettingOptions>
-		</SettingSection>
+				{/if}
+			{/snippet}
+		</SettingOptions>
+	</SettingSection>
 
-		<SettingSection
-			id="typography-cjk"
-			title={m['settings.appearance.font.cjk']()}
-			description={m['settings.appearance.font.cjk.desc']()}
-			level={3}
+	<SettingSection
+		id="typography-code"
+		title={m['settings.appearance.code.font']()}
+		description={m['settings.appearance.code.font.desc']()}
+		level={3}
+	>
+		<SettingOptions
+			value={currentCodeFont}
+			onValueChange={selectCode}
+			options={codeOptions}
+			layout="scroll"
+			cols={{ base: 3, sm: 4 }}
+			ariaLabelledby="typography-code-title"
+			ariaDescribedby="typography-code-desc"
 		>
-			<SettingOptions
-				value={currentCjkFont}
-				onValueChange={selectCjk}
-				options={cjkOptions}
-				layout="scroll"
-				cols={{ base: 3 }}
-				ariaLabelledby="typography-cjk-title"
-				ariaDescribedby="typography-cjk-desc"
-			>
-				{#snippet card({ option, props, pressed })}
-					{@const data = cjkOptions.find((o) => o.key === option.key)}
-					{#if data}
-						<SampleCard
-							variant="cjk"
-							label={option.label}
-							sc={data.sc}
-							tc={data.tc}
-							jp={data.jp}
-							active={pressed}
-							buttonProps={props}
-						/>
-					{/if}
-				{/snippet}
-			</SettingOptions>
-		</SettingSection>
+			{#snippet card({ option, props, pressed })}
+				{@const family = codeOptions.find((o) => o.key === option.key)?.family ?? ''}
+				<SampleCard
+					variant="code"
+					label={option.label}
+					{family}
+					active={pressed}
+					buttonProps={props}
+				/>
+			{/snippet}
+		</SettingOptions>
+	</SettingSection>
 
-		<SettingSection
-			id="typography-code"
-			title={m['settings.appearance.code.font']()}
-			description={m['settings.appearance.code.font.desc']()}
-			level={3}
+	<SettingSection
+		id="typography-emoji"
+		title={m['settings.appearance.emoji']()}
+		description={m['settings.appearance.emoji.desc']()}
+		level={3}
+	>
+		<SettingOptions
+			value={currentEmojiFont}
+			onValueChange={selectEmoji}
+			options={emojiOptions}
+			layout="scroll"
+			cols={{ base: 3 }}
+			ariaLabelledby="typography-emoji-title"
+			ariaDescribedby="typography-emoji-desc"
 		>
-			<SettingOptions
-				value={currentCodeFont}
-				onValueChange={selectCode}
-				options={codeOptions}
-				layout="scroll"
-				cols={{ base: 3, sm: 4 }}
-				ariaLabelledby="typography-code-title"
-				ariaDescribedby="typography-code-desc"
-			>
-				{#snippet card({ option, props, pressed })}
-					{@const family = codeOptions.find((o) => o.key === option.key)?.family ?? ''}
-					<SampleCard
-						variant="code"
-						label={option.label}
-						{family}
-						active={pressed}
-						buttonProps={props}
-					/>
-				{/snippet}
-			</SettingOptions>
-		</SettingSection>
-
-		<SettingSection
-			id="typography-emoji"
-			title={m['settings.appearance.emoji']()}
-			description={m['settings.appearance.emoji.desc']()}
-			level={3}
-		>
-			<SettingOptions
-				value={currentEmojiFont}
-				onValueChange={selectEmoji}
-				options={emojiOptions}
-				layout="scroll"
-				cols={{ base: 3 }}
-				ariaLabelledby="typography-emoji-title"
-				ariaDescribedby="typography-emoji-desc"
-			>
-				{#snippet card({ option, props, pressed })}
-					{@const family = emojiOptions.find((o) => o.key === option.key)?.family ?? ''}
-					<SampleCard
-						variant="emoji"
-						label={option.label}
-						{family}
-						active={pressed}
-						buttonProps={props}
-					/>
-				{/snippet}
-			</SettingOptions>
-		</SettingSection>
-	</div>
-</SettingSection>
-
-<hr class="mb-10 border-t border-dashed border-divider" />
-
-<SettingSection
-	id="account"
-	title={m['settings.tab.account']()}
-	description={m['settings.tab.account.desc']()}
->
-	<p class="text-sm text-muted-foreground">{m['settings.tab.account.wip']()}</p>
-</SettingSection>
-
-<hr class="mb-10 border-t border-dashed border-divider" />
-
-<SettingSection
-	id="privacy"
-	title={m['settings.tab.privacy']()}
-	description={m['settings.tab.privacy.desc']()}
->
-	<p class="text-sm text-muted-foreground">{m['settings.tab.privacy.wip']()}</p>
-</SettingSection>
+			{#snippet card({ option, props, pressed })}
+				{@const family = emojiOptions.find((o) => o.key === option.key)?.family ?? ''}
+				<SampleCard
+					variant="emoji"
+					label={option.label}
+					{family}
+					active={pressed}
+					buttonProps={props}
+				/>
+			{/snippet}
+		</SettingOptions>
+	</SettingSection>
+</div>

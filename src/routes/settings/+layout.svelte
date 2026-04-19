@@ -8,9 +8,7 @@
 	const TABS = [
 		{ id: 'general', label: () => m['settings.tab.general']() },
 		{ id: 'appearance', label: () => m['settings.tab.appearance']() },
-		{ id: 'typography', label: () => m['settings.tab.typography']() },
-		{ id: 'account', label: () => m['settings.tab.account']() },
-		{ id: 'privacy', label: () => m['settings.tab.privacy']() }
+		{ id: 'typography', label: () => m['settings.tab.typography']() }
 	] as const;
 
 	function scrollTo(id: string) {
