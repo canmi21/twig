@@ -1,85 +1,10 @@
 <script lang="ts">
 	import LanguageSwitcher from '$lib/components/toggles/language-switcher.svelte';
 	import ThemeToggle from '$lib/components/toggles/theme-toggle.svelte';
-	import { notifications } from '$lib/notification/state.svelte';
 </script>
 
 <header class="fixed top-4 right-4 z-50 flex items-center gap-3">
 	<LanguageSwitcher />
 	<ThemeToggle />
 </header>
-<div class="flex flex-1 flex-col items-center justify-center gap-6 text-muted-foreground">
-	<p>hello, world</p>
-	<div class="flex flex-wrap justify-center gap-2">
-		<button
-			type="button"
-			onclick={() =>
-				notifications.push({
-					title: 'Heads up',
-					body: 'Default 5s toast — hover to pause.',
-					kind: 'info'
-				})}
-			class="focus-ring rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground hover:bg-inset"
-		>
-			Info · 5s
-		</button>
-		<button
-			type="button"
-			onclick={() =>
-				notifications.push({
-					title: 'Saved',
-					body: 'Short success ping.',
-					kind: 'success',
-					duration: 2500
-				})}
-			class="focus-ring rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground hover:bg-inset"
-		>
-			Success · 2.5s
-		</button>
-		<button
-			type="button"
-			onclick={() =>
-				notifications.push({
-					title: 'Careful',
-					body: 'Something looks off.',
-					kind: 'warn'
-				})}
-			class="focus-ring rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground hover:bg-inset"
-		>
-			Warn · 5s
-		</button>
-		<button
-			type="button"
-			onclick={() =>
-				notifications.push({
-					title: 'Failed',
-					body: 'Error kind — stays 8s, announces assertively.',
-					kind: 'error',
-					duration: 8000
-				})}
-			class="focus-ring rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground hover:bg-inset"
-		>
-			Error · 8s
-		</button>
-		<button
-			type="button"
-			onclick={() =>
-				notifications.push({
-					title: 'Pinned',
-					body: 'Stays until you hit the × button.',
-					kind: 'info',
-					duration: 'pinned'
-				})}
-			class="focus-ring rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-foreground hover:bg-inset"
-		>
-			Pinned
-		</button>
-		<button
-			type="button"
-			onclick={() => notifications.clear()}
-			class="focus-ring rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-		>
-			Clear all
-		</button>
-	</div>
-</div>
+<div class="flex flex-1 items-center justify-center text-muted-foreground">hello, world</div>

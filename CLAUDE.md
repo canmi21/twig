@@ -40,6 +40,7 @@ Each file below is the authoritative source for its topic. Edit there, not here.
 - [spec/i18n.md](spec/i18n.md) — Paraglide, locale roles, translation rules
 - [spec/build.md](spec/build.md) — build-time constants, Vite `define`
 - [spec/comments.md](spec/comments.md) — tone, separators, svelte-ignore directives
+- [spec/dev-routes.md](spec/dev-routes.md) — `/dev/*` sandbox, dev-only gate, i18n exemption
 - [spec/motion.md](spec/motion.md) — three-tier preference (full / reduce / none), per-component rules
 - [spec/naming.md](spec/naming.md) — filenames, identifiers, brand neutrality
 - [spec/testing.md](spec/testing.md) — coverage target, redundancy rule, red-green protocol
