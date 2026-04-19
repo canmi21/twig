@@ -176,3 +176,58 @@
 .group:hover .motion-tier-full .motion-layer-b {
 	transform: translateX(0);
 }
+
+/* Card press feedback. A short overlay pulse (opacity only) confirms the
+   click on selection cards that were otherwise instant; Full adds a micro
+   scale dip on the frame itself. Reduce keeps the opacity pulse only —
+   scale is spatial. None is flattened by the global animation-kill rule. */
+@keyframes press-flash {
+	0% {
+		opacity: 0;
+	}
+	40% {
+		opacity: 0.22;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+.press-flash {
+	animation: press-flash 180ms ease-out;
+}
+
+@keyframes press-scale {
+	0% {
+		transform: scale(1);
+	}
+	40% {
+		transform: scale(0.985);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+.press-scale {
+	animation: press-scale 180ms ease-out;
+}
+
+/* Hash-target heading pulse — brief color flash on the <h3> of the section
+   that just scrolled into view. Color-only (non-spatial), so Reduce keeps
+   it, just shorter. None is flattened by the global rule. */
+@keyframes heading-pulse {
+	0% {
+		color: var(--color-foreground);
+	}
+	40% {
+		color: var(--color-blue-500);
+	}
+	100% {
+		color: var(--color-foreground);
+	}
+}
+.heading-pulse {
+	animation: heading-pulse 250ms ease-out;
+}
+:root[data-motion='reduce'] .heading-pulse {
+	animation-duration: 150ms;
+}

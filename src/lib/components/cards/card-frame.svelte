@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { motion } from '$lib/motion/state.svelte';
 
 	interface Props {
 		label: string;
@@ -36,23 +37,48 @@
 		attrs,
 		children
 	}: Props = $props();
+
+	// Single-shot press feedback. We skip in `none` because (a) the global CSS
+	// rule flattens the animation anyway and (b) without a running animation
+	// the `animationend` event never fires, so `flashing` would stay true and
+	// block repeated clicks. Full and Reduce both pulse the overlay; only Full
+	// adds the scale dip (spatial).
+	let flashing = $state(false);
+
+	function handleClick(e: Event) {
+		(buttonProps?.onclick as ((e: Event) => void) | undefined)?.(e);
+		if (motion.value === 'none') return;
+		flashing = true;
+	}
+
+	const mergedProps = $derived(
+		buttonProps?.onclick ? { ...buttonProps, onclick: handleClick } : buttonProps
+	);
+	const doScale = $derived(flashing && motion.value === 'full');
 </script>
 
 <button
-	{...buttonProps}
+	{...mergedProps}
 	type="button"
 	class="group flex w-full flex-col items-center gap-2 outline-none"
 	class:cursor-default={!buttonProps?.onclick && !buttonProps?.role}
 >
 	<div
-		class="frame aspect-124/94 w-full overflow-hidden rounded-lg border-2"
+		class="frame relative aspect-124/94 w-full overflow-hidden rounded-lg border-2"
 		class:border-blue-500={active}
+		class:press-scale={doScale}
 		style:background={bg}
 		style:--border-idle={borderIdle ?? 'var(--color-border)'}
 		style:--border-hover={borderHover ??
 			'color-mix(in oklch, var(--color-muted-foreground) 50%, transparent)'}
 		{...attrs}
 	>
+		{#if flashing}
+			<span
+				class="press-flash pointer-events-none absolute inset-0 bg-blue-500"
+				onanimationend={() => (flashing = false)}
+			></span>
+		{/if}
 		{@render children()}
 	</div>
 	<span
