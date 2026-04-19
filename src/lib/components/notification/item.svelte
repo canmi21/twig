@@ -13,16 +13,21 @@
 
 	// Single source of truth — `remaining` drives both the visual bar and the
 	// dismissal. rAF decrements it per frame; hover/focus cancel the frame and
-	// freeze everything on the same tick.
-	const totalMs = typeof item.duration === 'number' ? item.duration : 0;
-	let remaining = $state(totalMs);
+	// freeze everything on the same tick. `item.duration` is immutable per
+	// mounted toast (items are keyed by id), so the seed effect runs once.
+	let remaining = $state(0);
 	let lastTickAt = 0;
 	let rafId: number | null = null;
 
+	$effect.pre(() => {
+		remaining = typeof item.duration === 'number' ? item.duration : 0;
+	});
+
 	const progress = $derived.by(() => {
 		if (item.duration === 'pinned') return 1;
-		if (totalMs === 0) return 0;
-		return Math.max(0, Math.min(1, remaining / totalMs));
+		const total = typeof item.duration === 'number' ? item.duration : 0;
+		if (total === 0) return 0;
+		return Math.max(0, Math.min(1, remaining / total));
 	});
 
 	const barStyle = $derived.by(() => {
