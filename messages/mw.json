@@ -1,7 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"footer.greeting.prefix": "Hi, ",
-	"footer.greeting.stranger": "friend",
+	"footer.greeting.stranger": "小可爱",
 	"footer.greeting.edit": "Change name",
 	"footer.greeting.tip": "告诉我你的名字吧？",
 	"footer.greeting.placeholder": "Your name",

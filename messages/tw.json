@@ -5,7 +5,7 @@
 	"footer.greeting.edit": "修改名字",
 	"footer.greeting.tip": "告訴我你叫什麼吧",
 	"footer.greeting.placeholder": "你的名字",
-	"footer.greeting.invalid.title": "名字沒存上",
+	"footer.greeting.invalid.title": "名字沒存上呢",
 	"footer.greeting.invalid.length": "需要 2 到 16 個字元",
 	"footer.greeting.invalid.chars": "只能用中英文、數字、連字號或底線",
 	"notification.dismiss": "關閉",
