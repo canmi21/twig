@@ -3,8 +3,8 @@
 	import { motion } from '$lib/motion/state.svelte';
 </script>
 
-<span class="relative inline-block">
-	<span aria-hidden="true" class="absolute top-1/2 -left-3 size-1.5 -translate-y-1/2">
+<span class="inline-flex items-center gap-1.5">
+	<span aria-hidden="true" class="relative inline-block size-1.5">
 		<span
 			class="absolute inset-0 rounded-full bg-success {motion.value === 'full'
 				? 'animate-breathe'

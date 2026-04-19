@@ -2,7 +2,9 @@
 	import Greeting from './footer/greeting.svelte';
 	import Social from './footer/social.svelte';
 	import Copyright from './footer/copyright.svelte';
-	import Meta from './footer/meta.svelte';
+	import StatusIndicator from './footer/status-indicator.svelte';
+	import IcpLink from './footer/icp-link.svelte';
+	import CommitLink from './footer/commit-link.svelte';
 
 	let { runtimeDays }: { runtimeDays: number } = $props();
 </script>
@@ -20,12 +22,22 @@
 	</div>
 
 	<div class="px-5 pb-3">
-		<div class="mx-3 border-t border-dashed border-divider sm:mx-6"></div>
-		<div
-			class="flex w-full flex-col gap-y-1.5 px-3 pt-3 text-[0.8125rem] text-muted-foreground sm:flex-row sm:items-end sm:justify-between sm:px-6"
-		>
-			<Copyright />
-			<Meta />
+		<div class="mx-auto w-full px-3 sm:px-6">
+			<div class="border-t border-dashed border-divider"></div>
+			<div
+				class="grid w-full grid-cols-[1fr_auto] items-end gap-x-3 gap-y-1.5 pt-3 text-[0.8125rem] text-muted-foreground sm:grid-cols-[1fr_auto_auto_auto] sm:gap-x-2"
+			>
+				<Copyright />
+				<div class="hidden sm:order-2 sm:block">
+					<StatusIndicator />
+				</div>
+				<div class="order-2 sm:order-3">
+					<IcpLink />
+				</div>
+				<div class="hidden sm:order-4 sm:block">
+					<CommitLink />
+				</div>
+			</div>
 		</div>
 	</div>
 </footer>
