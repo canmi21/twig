@@ -5,6 +5,7 @@
 	import { canonicalPath, htmlLangFor, localizedPath } from '$lib/i18n/urls';
 	import { setClientCdnHosts } from '$lib/cdn/hosts';
 	import Footer from '$lib/components/footer.svelte';
+	import NotificationHost from '$lib/components/notification/host.svelte';
 
 	let { data, children } = $props();
 
@@ -42,3 +43,4 @@
 {#if !page.url.pathname.startsWith('/settings')}
 	<Footer runtimeDays={data.runtimeDays} />
 {/if}
+<NotificationHost />

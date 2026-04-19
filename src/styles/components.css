@@ -5,3 +5,16 @@
 	stroke-width: 0.75;
 	paint-order: stroke fill;
 }
+
+/* Notification lifetime bar — 3px neutral strip at the bottom. Geometry
+   (scaleX or opacity) is driven per-frame from item.svelte via inline style;
+   a single rAF loop decrements `remaining`, so hover pause freezes bar and
+   dismissal on the same tick. Keeping this CSS minimal means no dual-system
+   drift between a CSS keyframe and a JS timer. */
+.toast-bar {
+	position: absolute;
+	inset: auto 0 0 0;
+	height: 3px;
+	background: color-mix(in oklch, var(--color-muted-foreground) 55%, transparent);
+	pointer-events: none;
+}

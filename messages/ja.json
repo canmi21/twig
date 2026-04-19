@@ -1,5 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"notification.dismiss": "とじる",
 	"footer.runtime.days": "もう {days} 日目だよ〜",
 	"footer.presence": "いま {count} 人がみてるよ",
 	"footer.link.visit": "{service} にいく",

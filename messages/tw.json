@@ -1,5 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"notification.dismiss": "關閉",
 	"footer.runtime.days": "小站已經活了 {days} 天",
 	"footer.presence": "{count} 位小夥伴正在瀏覽呢",
 	"footer.link.visit": "前往 {service}",

@@ -1,5 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"notification.dismiss": "Dismiss",
 	"footer.runtime.days": "Running for {days} days",
 	"footer.presence": "{count} people browsing",
 	"footer.link.visit": "Go to {service}",
