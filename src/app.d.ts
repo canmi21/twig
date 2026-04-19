@@ -14,20 +14,20 @@ declare global {
 		}
 
 		interface Locals {
-			theme: import('$lib/theme/script').ThemeState;
-			font: import('$lib/font/script').FontFamily;
-			cjkFont: import('$lib/font/cjk-script').CjkFont;
-			codeFont: import('$lib/font/code-script').CodeFont;
-			emojiFont: import('$lib/font/emoji-script').EmojiFont;
+			theme: import('$lib/theme/data').ThemeState;
+			font: import('$lib/font/data').FontFamily;
+			cjkFont: import('$lib/font/cjk-data').CjkFont;
+			codeFont: import('$lib/font/code-data').CodeFont;
+			emojiFont: import('$lib/font/emoji-data').EmojiFont;
 			htmlLang: string;
 			cdn: import('$lib/cdn/hosts').CdnHosts;
 		}
 		interface PageData {
-			theme: import('$lib/theme/script').ThemeState;
-			font: import('$lib/font/script').FontFamily;
-			cjkFont: import('$lib/font/cjk-script').CjkFont;
-			codeFont: import('$lib/font/code-script').CodeFont;
-			emojiFont: import('$lib/font/emoji-script').EmojiFont;
+			theme: import('$lib/theme/data').ThemeState;
+			font: import('$lib/font/data').FontFamily;
+			cjkFont: import('$lib/font/cjk-data').CjkFont;
+			codeFont: import('$lib/font/code-data').CodeFont;
+			emojiFont: import('$lib/font/emoji-data').EmojiFont;
 			htmlLang: string;
 			runtimeDays: number;
 			cdn: import('$lib/cdn/hosts').CdnHosts;

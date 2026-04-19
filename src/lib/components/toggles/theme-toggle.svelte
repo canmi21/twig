@@ -5,7 +5,7 @@
 
 	import { m } from '$lib/paraglide/messages';
 	import { motion } from '$lib/motion/state.svelte';
-	import { applyTheme } from '$lib/theme/script';
+	import { applyTheme } from '$lib/theme/client';
 
 	import IconSunLine from '~icons/mingcute/sun-line';
 	import IconMoonLine from '~icons/mingcute/moon-line';

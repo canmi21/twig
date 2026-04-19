@@ -1,4 +1,4 @@
-import { getClientCdnHosts, type CdnHosts } from '$lib/cdn/hosts';
+import type { CdnHosts } from '$lib/cdn/hosts';
 
 export type EmojiFont = 'system' | 'twemoji' | 'noto';
 
@@ -38,7 +38,7 @@ export function isEmojiFont(v: unknown): v is EmojiFont {
 	return v === 'system' || v === 'twemoji' || v === 'noto';
 }
 
-function linksFor(emoji: EmojiFont, hosts: CdnHosts): string[] {
+export function linksFor(emoji: EmojiFont, hosts: CdnHosts): string[] {
 	if (emoji === 'system') return [];
 	if (emoji === 'twemoji') return [`https://${hosts.packageCdn}/npm/${TWEMOJI_PKG}`];
 	return [`https://${hosts.fontsCss}/css2?${NOTO_PARAMS}`];
@@ -76,46 +76,4 @@ export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean, hosts: C
 		pre.push(`<link rel="preconnect" href="https://${hosts.fontsStatic}" crossorigin>`);
 	}
 	return [...pre, ...body].join('');
-}
-
-export function setEmojiFontCookie(emoji: EmojiFont): void {
-	document.cookie = `${EMOJI_FONT_COOKIE}=${emoji};path=/;max-age=${COOKIE_MAX_AGE};SameSite=Lax`;
-}
-
-const loadedRuntime = new Set<string>();
-
-function hasLinkInDom(href: string): boolean {
-	return document.head.querySelector(`link[href="${href}"]`) !== null;
-}
-
-function injectLinks(urls: string[]): void {
-	for (const url of urls) {
-		if (loadedRuntime.has(url) || hasLinkInDom(url)) {
-			loadedRuntime.add(url);
-			continue;
-		}
-		const link = document.createElement('link');
-		link.rel = 'stylesheet';
-		link.href = url;
-		link.dataset.emojiLink = '';
-		document.head.appendChild(link);
-		loadedRuntime.add(url);
-	}
-}
-
-export function ensureEmojiLoadedForPage(emoji: EmojiFont): void {
-	injectLinks(linksFor(emoji, getClientCdnHosts()));
-}
-
-export function ensureAllEmojiLoaded(): void {
-	const hosts = getClientCdnHosts();
-	for (const emoji of LOADABLE_EMOJI_FONT_IDS) {
-		injectLinks(linksFor(emoji, hosts));
-	}
-}
-
-export function applyEmojiFont(emoji: EmojiFont): void {
-	ensureEmojiLoadedForPage(emoji);
-	setEmojiFontCookie(emoji);
-	document.documentElement.dataset.emoji = emoji;
 }

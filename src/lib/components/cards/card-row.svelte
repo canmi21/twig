@@ -56,10 +56,8 @@
 {/if}
 
 <style>
-	/* --card-cap is the design-system card-width DNA: motion's max-w-104
-	   (26rem) / 3 cols ≈ 131px. Every card across the settings page lands
-	   on this width at sm+ — grids sized in "cap units" keep sections
-	   visually consistent regardless of their col count. */
+	/* --card-cap = motion's max-w-104 (26rem) / 3 ≈ 131px — the shared
+	   card-width DNA every section sizes to, so densities stay consistent. */
 	.card-row {
 		--card-cap: 8.1875rem;
 		--gap: 0.75rem;
@@ -102,11 +100,8 @@
 		}
 	}
 
-	/* Fluid flex-basis sizes each card to 1/N of the visible row; max-width
-	   caps each to --card-cap so cards stay on-DNA at all viewports. On
-	   narrow phones the calc dominates (viewport ÷ cols < cap) so cards
-	   shrink to fill naturally; only on tweener widths (500–640px) does
-	   the cap leave trailing whitespace, matching theme's max-w-104. */
+	/* Each card is min(viewport/cols, --card-cap): phones fill, desktops
+	   cap; only the 500–640px tweener leaves trailing whitespace by design. */
 	.card-row-scroll {
 		display: flex;
 		overflow-x: auto;

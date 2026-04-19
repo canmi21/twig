@@ -38,11 +38,8 @@
 		children
 	}: Props = $props();
 
-	// Single-shot press feedback. We skip in `none` because (a) the global CSS
-	// rule flattens the animation anyway and (b) without a running animation
-	// the `animationend` event never fires, so `flashing` would stay true and
-	// block repeated clicks. Full and Reduce both pulse the overlay; only Full
-	// adds the scale dip (spatial).
+	// Skip press feedback in motion=none: the CSS rule flattens the animation,
+	// so `animationend` never fires and `flashing` would latch true.
 	let flashing = $state(false);
 
 	function handleClick(e: Event) {
@@ -99,18 +96,8 @@
 	.frame:not(:global(.border-blue-500)):hover {
 		border-color: var(--border-hover);
 	}
-	/* Focus indicator: recolor the element's own 2px border to blue rather than
-	   overlaying a negative-offset outline. Two wins:
-	   - No geometry reconciliation — the 2px is already rendered, we only swap
-	     its colour, so Chromium/WebKit can't paint a transient "too large"
-	     frame the way a stacked outline with negative offset can.
-	   - `forced-colors` mode still gets a real indicator: the UA recolours
-	     border-colour to system highlight the same way it does an outline, so
-	     we don't need a `transparent`-outline stub (which, paired with the
-	     button's always-off outline, risked painting as a 1-frame white flash
-	     on first Tab-focus in some macOS Chromium paint cycles).
-	   Listed after the idle/hover rules above so it wins on source order at
-	   equal specificity. */
+	/* Recolour the existing 2px border for focus (instead of a negative-offset
+	   outline) to avoid a 1-frame paint flash and keep forced-colors working. */
 	:global(:focus-visible) .frame:not(:global(.border-blue-500)) {
 		border-color: var(--color-blue-500);
 	}
