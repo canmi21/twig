@@ -1,5 +1,13 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"footer.greeting.prefix": "你好，",
+	"footer.greeting.stranger": "朋友",
+	"footer.greeting.edit": "修改名字",
+	"footer.greeting.tip": "告诉我你叫什么吧",
+	"footer.greeting.placeholder": "你的名字",
+	"footer.greeting.invalid.title": "名字没存上",
+	"footer.greeting.invalid.length": "需要 2 到 16 个字符",
+	"footer.greeting.invalid.chars": "只能用字母、数字、中日文、- 和 _",
 	"notification.dismiss": "关闭",
 	"footer.runtime.days": "小站已经活了 {days} 天",
 	"footer.presence": "{count} 位小伙伴正在浏览呢",

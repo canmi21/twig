@@ -6,6 +6,48 @@
 	paint-order: stroke fill;
 }
 
+/* Footer greeting 👋 — waves only while the visitor hasn't set a name yet,
+   then the wave element is removed from the DOM by the component. The three
+   motion tiers mirror the rule in spec/motion.md: full = keep attracting
+   attention; reduce = halve amplitude, double period, cap at two cycles;
+   none = static emoji. Pivot is the wrist area (bottom-right-ish). */
+.greeting-wave {
+	display: inline-block;
+	transform-origin: 70% 70%;
+}
+
+@keyframes greeting-wave {
+	0%,
+	60%,
+	100% {
+		transform: rotate(0deg);
+	}
+	10% {
+		transform: rotate(14deg);
+	}
+	20% {
+		transform: rotate(-8deg);
+	}
+	30% {
+		transform: rotate(14deg);
+	}
+	40% {
+		transform: rotate(-4deg);
+	}
+	50% {
+		transform: rotate(10deg);
+	}
+}
+
+html[data-motion='full'] .greeting-wave {
+	animation: greeting-wave 2.4s ease-in-out 0.4s infinite;
+}
+
+html[data-motion='reduce'] .greeting-wave {
+	animation: greeting-wave 3.6s ease-in-out 0.4s 2;
+	animation-timing-function: ease-in-out;
+}
+
 /* Notification lifetime bar — 3px neutral strip at the bottom. Geometry
    (scaleX or opacity) is driven per-frame from item.svelte via inline style;
    a single rAF loop decrements `remaining`, so hover pause freezes bar and

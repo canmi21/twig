@@ -1,5 +1,13 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"footer.greeting.prefix": "こんにちは、",
+	"footer.greeting.stranger": "ともだち",
+	"footer.greeting.edit": "なまえをかえる",
+	"footer.greeting.tip": "なまえ おしえて〜",
+	"footer.greeting.placeholder": "なまえ",
+	"footer.greeting.invalid.title": "なまえ ほぞんできなかった",
+	"footer.greeting.invalid.length": "2〜16 もじにしてね",
+	"footer.greeting.invalid.chars": "つかえるのは えいすうじ・ちゅうごくご・にほんご・- ・_ だけだよ",
 	"notification.dismiss": "とじる",
 	"footer.runtime.days": "もう {days} 日目だよ〜",
 	"footer.presence": "いま {count} 人がみてるよ",
