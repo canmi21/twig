@@ -1,13 +1,13 @@
 export type CdnHosts = {
-	googleFontsCss: string;
-	googleFontsStatic: string;
-	jsdelivr: string;
+	fontsCss: string;
+	fontsStatic: string;
+	packageCdn: string;
 };
 
 export const DEFAULT_HOSTS: CdnHosts = {
-	googleFontsCss: 'fonts.googleapis.com',
-	googleFontsStatic: 'fonts.gstatic.com',
-	jsdelivr: 'cdn.jsdelivr.net'
+	fontsCss: 'fonts.googleapis.com',
+	fontsStatic: 'fonts.gstatic.com',
+	packageCdn: 'cdn.jsdelivr.net'
 };
 
 // fonts.loli.net proxies Google Fonts end-to-end: the CSS endpoint matches
@@ -22,19 +22,19 @@ const LOLI_STATIC = 'gstatic.loli.net';
 // block on the apex host. No guarantee it stays that way.
 const FASTLY_JSDELIVR = 'fastly.jsdelivr.net';
 
-const GOOGLE_BLOCKED = new Set(['CN', 'IR', 'RU']);
-const JSDELIVR_BLOCKED = new Set(['CN']);
+const FONTS_CDN_BLOCKED = new Set(['CN', 'IR', 'RU']);
+const PACKAGE_CDN_BLOCKED = new Set(['CN']);
 
 export function resolveCdnHosts(country: string | undefined): CdnHosts {
 	const cc = country?.toUpperCase();
 	if (!cc) return DEFAULT_HOSTS;
-	const googleBlocked = GOOGLE_BLOCKED.has(cc);
-	const jsdelivrBlocked = JSDELIVR_BLOCKED.has(cc);
-	if (!googleBlocked && !jsdelivrBlocked) return DEFAULT_HOSTS;
+	const fontsCdnBlocked = FONTS_CDN_BLOCKED.has(cc);
+	const packageCdnBlocked = PACKAGE_CDN_BLOCKED.has(cc);
+	if (!fontsCdnBlocked && !packageCdnBlocked) return DEFAULT_HOSTS;
 	return {
-		googleFontsCss: googleBlocked ? LOLI_CSS : DEFAULT_HOSTS.googleFontsCss,
-		googleFontsStatic: googleBlocked ? LOLI_STATIC : DEFAULT_HOSTS.googleFontsStatic,
-		jsdelivr: jsdelivrBlocked ? FASTLY_JSDELIVR : DEFAULT_HOSTS.jsdelivr
+		fontsCss: fontsCdnBlocked ? LOLI_CSS : DEFAULT_HOSTS.fontsCss,
+		fontsStatic: fontsCdnBlocked ? LOLI_STATIC : DEFAULT_HOSTS.fontsStatic,
+		packageCdn: packageCdnBlocked ? FASTLY_JSDELIVR : DEFAULT_HOSTS.packageCdn
 	};
 }
 

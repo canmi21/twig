@@ -17,10 +17,10 @@ const LXGW_TC_PKG = 'lxgw-wenkai-tc-web@1.320.0';
 // font-medium → 500). font-semibold/bold synthesize from 500.
 const LXGW_WEIGHTS = ['light', 'regular', 'medium'] as const;
 
-const GOOGLE_KLEE = 'family=Klee+One:wght@400;600';
-const GOOGLE_NOTO_SC = 'family=Noto+Sans+SC:wght@400;500;600;700';
-const GOOGLE_NOTO_TC = 'family=Noto+Sans+TC:wght@400;500;600;700';
-const GOOGLE_NOTO_JP = 'family=Noto+Sans+JP:wght@400;500;600;700';
+const KLEE_PARAMS = 'family=Klee+One:wght@400;600';
+const NOTO_SC_PARAMS = 'family=Noto+Sans+SC:wght@400;500;600;700';
+const NOTO_TC_PARAMS = 'family=Noto+Sans+TC:wght@400;500;600;700';
+const NOTO_JP_PARAMS = 'family=Noto+Sans+JP:wght@400;500;600;700';
 
 // Card labels. The LXGW pack swaps to "Klee One" on Japanese pages because
 // that's the actual face rendering JP text (LXGW WenKai doesn't ship JP; we
@@ -77,15 +77,15 @@ function linksFor(cjk: CjkFont, langs: readonly CjkLang[], hosts: CdnHosts): str
 
 	if (cjk === 'noto') {
 		const families: string[] = [];
-		if (langs.includes('sc')) families.push(GOOGLE_NOTO_SC);
-		if (langs.includes('tc')) families.push(GOOGLE_NOTO_TC);
-		if (langs.includes('jp')) families.push(GOOGLE_NOTO_JP);
+		if (langs.includes('sc')) families.push(NOTO_SC_PARAMS);
+		if (langs.includes('tc')) families.push(NOTO_TC_PARAMS);
+		if (langs.includes('jp')) families.push(NOTO_JP_PARAMS);
 		if (families.length === 0) return [];
-		return [`https://${hosts.googleFontsCss}/css2?${families.join('&')}&display=swap`];
+		return [`https://${hosts.fontsCss}/css2?${families.join('&')}&display=swap`];
 	}
 
-	const scBase = `https://${hosts.jsdelivr}/npm/${LXGW_SC_PKG}`;
-	const tcBase = `https://${hosts.jsdelivr}/npm/${LXGW_TC_PKG}`;
+	const scBase = `https://${hosts.packageCdn}/npm/${LXGW_SC_PKG}`;
+	const tcBase = `https://${hosts.packageCdn}/npm/${LXGW_TC_PKG}`;
 	const urls: string[] = [];
 	if (langs.includes('sc')) {
 		for (const w of LXGW_WEIGHTS) urls.push(`${scBase}/lxgwwenkai-${w}/result.css`);
@@ -94,7 +94,7 @@ function linksFor(cjk: CjkFont, langs: readonly CjkLang[], hosts: CdnHosts): str
 		for (const w of LXGW_WEIGHTS) urls.push(`${tcBase}/lxgwwenkaitc-${w}/result.css`);
 	}
 	if (langs.includes('jp')) {
-		urls.push(`https://${hosts.googleFontsCss}/css2?${GOOGLE_KLEE}&display=swap`);
+		urls.push(`https://${hosts.fontsCss}/css2?${KLEE_PARAMS}&display=swap`);
 	}
 	return urls;
 }
@@ -119,25 +119,25 @@ export function renderCjkLinks(
 	const langs = langsForHtmlLang(htmlLang);
 	const seen = new Set<string>();
 	const body: string[] = [];
-	let needsJsdelivr = false;
-	let needsGoogle = false;
+	let needsPkgCdn = false;
+	let needsFontsCdn = false;
 	for (const choice of choices) {
 		for (const url of linksFor(choice, langs, hosts)) {
 			if (seen.has(url)) continue;
 			seen.add(url);
 			body.push(`<link rel="stylesheet" href="${url}" data-cjk-link>`);
-			if (url.includes(hosts.jsdelivr)) needsJsdelivr = true;
-			if (url.includes(hosts.googleFontsCss)) needsGoogle = true;
+			if (url.includes(hosts.packageCdn)) needsPkgCdn = true;
+			if (url.includes(hosts.fontsCss)) needsFontsCdn = true;
 		}
 	}
 	if (body.length === 0) return '';
 
 	const pre: string[] = [];
-	if (needsJsdelivr)
-		pre.push(`<link rel="preconnect" href="https://${hosts.jsdelivr}" crossorigin>`);
-	if (needsGoogle) {
-		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`);
-		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`);
+	if (needsPkgCdn)
+		pre.push(`<link rel="preconnect" href="https://${hosts.packageCdn}" crossorigin>`);
+	if (needsFontsCdn) {
+		pre.push(`<link rel="preconnect" href="https://${hosts.fontsCss}">`);
+		pre.push(`<link rel="preconnect" href="https://${hosts.fontsStatic}" crossorigin>`);
 	}
 	return [...pre, ...body].join('');
 }

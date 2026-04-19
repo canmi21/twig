@@ -40,8 +40,8 @@ export function isEmojiFont(v: unknown): v is EmojiFont {
 
 function linksFor(emoji: EmojiFont, hosts: CdnHosts): string[] {
 	if (emoji === 'system') return [];
-	if (emoji === 'twemoji') return [`https://${hosts.jsdelivr}/npm/${TWEMOJI_PKG}`];
-	return [`https://${hosts.googleFontsCss}/css2?${NOTO_PARAMS}`];
+	if (emoji === 'twemoji') return [`https://${hosts.packageCdn}/npm/${TWEMOJI_PKG}`];
+	return [`https://${hosts.fontsCss}/css2?${NOTO_PARAMS}`];
 }
 
 // SSR entry. /settings preloads every loadable choice so preview cards render
@@ -66,14 +66,14 @@ export function renderEmojiLinks(emoji: EmojiFont, isSettings: boolean, hosts: C
 	}
 	if (body.length === 0) return '';
 
-	const usesGoogle = choices.includes('noto');
-	const usesJsdelivr = choices.includes('twemoji');
+	const usesFontsCdn = choices.includes('noto');
+	const usesPkgCdn = choices.includes('twemoji');
 	const pre: string[] = [];
-	if (usesJsdelivr)
-		pre.push(`<link rel="preconnect" href="https://${hosts.jsdelivr}" crossorigin>`);
-	if (usesGoogle) {
-		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`);
-		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`);
+	if (usesPkgCdn)
+		pre.push(`<link rel="preconnect" href="https://${hosts.packageCdn}" crossorigin>`);
+	if (usesFontsCdn) {
+		pre.push(`<link rel="preconnect" href="https://${hosts.fontsCss}">`);
+		pre.push(`<link rel="preconnect" href="https://${hosts.fontsStatic}" crossorigin>`);
 	}
 	return [...pre, ...body].join('');
 }

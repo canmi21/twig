@@ -5,37 +5,38 @@ export type FontFamily = 'system' | 'inter' | 'roboto' | 'source-sans';
 export const FONT_COOKIE = 'font';
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-// `system` renders with the platform default and never hits Google Fonts.
-// `googleFamily` is the `family=` query param segment (without weights); weights
-// are appended centrally by `buildFontsHref` so every font ships the same set.
+// `system` renders with the platform default and never hits the remote CSS
+// endpoint. `remoteFamily` is the `family=` query param segment (without
+// weights); weights are appended centrally by `buildFontsHref` so every font
+// ships the same set.
 export const FONTS = {
 	system: {
 		label: 'System',
-		googleFamily: null,
+		remoteFamily: null,
 		stack: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
 	},
 	inter: {
 		label: 'Inter',
-		googleFamily: 'Inter',
+		remoteFamily: 'Inter',
 		stack: '"Inter", ui-sans-serif, system-ui, -apple-system, sans-serif'
 	},
 	roboto: {
 		label: 'Roboto',
-		googleFamily: 'Roboto',
+		remoteFamily: 'Roboto',
 		stack: '"Roboto", ui-sans-serif, system-ui, -apple-system, sans-serif'
 	},
 	'source-sans': {
 		label: 'Source Sans',
-		googleFamily: 'Source Sans 3',
+		remoteFamily: 'Source Sans 3',
 		stack: '"Source Sans 3", ui-sans-serif, system-ui, -apple-system, sans-serif'
 	}
 } as const satisfies Record<
 	FontFamily,
-	{ label: string; googleFamily: string | null; stack: string }
+	{ label: string; remoteFamily: string | null; stack: string }
 >;
 
 export const FONT_IDS = Object.keys(FONTS) as FontFamily[];
-export const LOADABLE_FONT_IDS = FONT_IDS.filter((id) => FONTS[id].googleFamily !== null);
+export const LOADABLE_FONT_IDS = FONT_IDS.filter((id) => FONTS[id].remoteFamily !== null);
 
 const WEIGHTS = '400;500;600;700';
 
@@ -49,12 +50,12 @@ export function isFontFamily(value: unknown): value is FontFamily {
 export function buildFontsHref(ids: readonly FontFamily[], hosts: CdnHosts): string | null {
 	const params: string[] = [];
 	for (const id of ids) {
-		const family = FONTS[id].googleFamily;
+		const family = FONTS[id].remoteFamily;
 		if (family === null) continue;
 		params.push(`family=${encodeURIComponent(family).replace(/%20/g, '+')}:wght@${WEIGHTS}`);
 	}
 	if (params.length === 0) return null;
-	return `https://${hosts.googleFontsCss}/css2?${params.join('&')}&display=swap`;
+	return `https://${hosts.fontsCss}/css2?${params.join('&')}&display=swap`;
 }
 
 // SSR-rendered <link> tags for the given font set. Tagged with data-font-ids
@@ -62,10 +63,10 @@ export function buildFontsHref(ids: readonly FontFamily[], hosts: CdnHosts): str
 export function renderFontLinks(ids: readonly FontFamily[], hosts: CdnHosts): string {
 	const href = buildFontsHref(ids, hosts);
 	if (!href) return '';
-	const tag = ids.filter((id) => FONTS[id].googleFamily !== null).join(' ');
+	const tag = ids.filter((id) => FONTS[id].remoteFamily !== null).join(' ');
 	return [
-		`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`,
-		`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`,
+		`<link rel="preconnect" href="https://${hosts.fontsCss}">`,
+		`<link rel="preconnect" href="https://${hosts.fontsStatic}" crossorigin>`,
 		`<link rel="stylesheet" href="${href}" data-font-ids="${tag}">`
 	].join('');
 }
@@ -89,7 +90,7 @@ function hasSsrLink(id: FontFamily): boolean {
 // Inject one <link> for a single font if it isn't already present from SSR or
 // a prior runtime load. No-op for `system` and for anything already loaded.
 export function ensureFontLoaded(id: FontFamily): void {
-	if (FONTS[id].googleFamily === null) return;
+	if (FONTS[id].remoteFamily === null) return;
 	if (loadedRuntime.has(id) || hasSsrLink(id)) return;
 	const href = buildFontsHref([id], getClientCdnHosts());
 	if (!href) return;

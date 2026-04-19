@@ -44,13 +44,13 @@ export function isCodeFont(v: unknown): v is CodeFont {
 function linksFor(code: CodeFont, hosts: CdnHosts): string[] {
 	if (code === 'monospace') return [];
 	if (code === 'maple') {
-		const base = `https://${hosts.jsdelivr}/npm/${MAPLE_PKG}`;
+		const base = `https://${hosts.packageCdn}/npm/${MAPLE_PKG}`;
 		return [`${base}/latin-400.css`, `${base}/latin-700.css`];
 	}
 	if (code === 'jetbrains') {
-		return [`https://${hosts.googleFontsCss}/css2?family=JetBrains+Mono:wght@400;700&display=swap`];
+		return [`https://${hosts.fontsCss}/css2?family=JetBrains+Mono:wght@400;700&display=swap`];
 	}
-	return [`https://${hosts.googleFontsCss}/css2?family=Fira+Code:wght@400;700&display=swap`];
+	return [`https://${hosts.fontsCss}/css2?family=Fira+Code:wght@400;700&display=swap`];
 }
 
 // SSR entry. /settings preloads every loadable choice so preview cards render
@@ -75,14 +75,14 @@ export function renderCodeLinks(code: CodeFont, isSettings: boolean, hosts: CdnH
 	}
 	if (body.length === 0) return '';
 
-	const usesGoogle = choices.some((c) => c === 'jetbrains' || c === 'fira');
-	const usesJsdelivr = choices.includes('maple');
+	const usesFontsCdn = choices.some((c) => c === 'jetbrains' || c === 'fira');
+	const usesPkgCdn = choices.includes('maple');
 	const pre: string[] = [];
-	if (usesJsdelivr)
-		pre.push(`<link rel="preconnect" href="https://${hosts.jsdelivr}" crossorigin>`);
-	if (usesGoogle) {
-		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsCss}">`);
-		pre.push(`<link rel="preconnect" href="https://${hosts.googleFontsStatic}" crossorigin>`);
+	if (usesPkgCdn)
+		pre.push(`<link rel="preconnect" href="https://${hosts.packageCdn}" crossorigin>`);
+	if (usesFontsCdn) {
+		pre.push(`<link rel="preconnect" href="https://${hosts.fontsCss}">`);
+		pre.push(`<link rel="preconnect" href="https://${hosts.fontsStatic}" crossorigin>`);
 	}
 	return [...pre, ...body].join('');
 }
