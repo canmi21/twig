@@ -20,6 +20,12 @@
 	let underline = $state<{ x: number; w: number }>({ x: 0, w: 0 });
 	let pill = $state<{ y: number; h: number }>({ y: 0, h: 0 });
 
+	// Programmatic scrolls (sidebar click, hash landing) cross every anchor
+	// on the way to the target. Without this lock the scroll-spy below would
+	// flash the pill through each intermediate section during the smooth
+	// scroll. User-driven scrolling never sets the lock, so it keeps tracking.
+	let scrollLockUntil = 0;
+
 	$effect(() => {
 		const b = mobileBtns[activeId];
 		if (b) underline = { x: b.offsetLeft, w: b.offsetWidth };
@@ -65,16 +71,63 @@
 	}
 
 	function focusSection(id: string) {
-		activeId = id;
 		const target = document.getElementById(id);
-		target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		if (!target) return;
+		activeId = id;
+		scrollLockUntil = performance.now() + 800;
+		target.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		pulseHeadingOnArrival(target);
 	}
 
-	function handleScroll() {
-		if (window.scrollY > 20) return;
-		activeId = 'general';
-	}
+	// Scroll-spy. IO fires whenever an anchor crosses the scroll-mt reference
+	// line (24px mobile / 80px desktop); recompute then picks the last anchor
+	// whose top edge has passed that line as active. Rebuilt on breakpoint
+	// change so rootMargin stays aligned with the matching reference.
+	$effect(() => {
+		type TabId = (typeof TABS)[number]['id'];
+		const tabs = TABS.map((t) => t.id);
+		const anchors = tabs
+			.map((id) => ({ id, el: document.getElementById(id) }))
+			.filter((a): a is { id: TabId; el: HTMLElement } => a.el !== null);
+		if (anchors.length === 0) return;
+
+		const lgMq = window.matchMedia('(min-width: 1024px)');
+		let io: IntersectionObserver | null = null;
+
+		function recompute() {
+			if (performance.now() < scrollLockUntil) return;
+			const atBottom =
+				window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+			if (atBottom) {
+				activeId = tabs[tabs.length - 1];
+				return;
+			}
+			const reference = lgMq.matches ? 80 : 24;
+			let landed: TabId = tabs[0];
+			for (const a of anchors) {
+				if (a.el.getBoundingClientRect().top <= reference + 1) landed = a.id;
+			}
+			activeId = landed;
+		}
+
+		function build() {
+			io?.disconnect();
+			const ref = lgMq.matches ? 80 : 24;
+			io = new IntersectionObserver(() => recompute(), {
+				rootMargin: `-${ref + 1}px 0px 0px 0px`,
+				threshold: 0
+			});
+			anchors.forEach((a) => io!.observe(a.el));
+		}
+
+		build();
+		lgMq.addEventListener('change', build);
+
+		return () => {
+			io?.disconnect();
+			lgMq.removeEventListener('change', build);
+		};
+	});
 
 	// SvelteKit's client-side scroll manager suppresses the browser's native
 	// "scroll to hash on load" behavior. Restore it explicitly so refreshing
@@ -82,20 +135,13 @@
 	$effect(() => {
 		const id = page.url.hash.slice(1);
 		if (!id) return;
-		activeId = id;
-		requestAnimationFrame(() => {
-			const target = document.getElementById(id);
-			target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-			pulseHeadingOnArrival(target);
-		});
+		requestAnimationFrame(() => focusSection(id));
 	});
 
 	// Slider elements only exist in Full; Reduce/None fall back to per-button
 	// color swaps (caught by the global 120ms transition on <button>).
 	const showSlider = $derived(motion.value === 'full');
 </script>
-
-<svelte:window onscroll={handleScroll} />
 
 <div class="flex min-h-svh flex-col lg:flex-row">
 	<nav class="shrink-0 border-b border-divider px-4 pt-4 pb-0 lg:hidden">
