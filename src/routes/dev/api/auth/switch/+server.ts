@@ -6,8 +6,9 @@ import { DEV_SEED_USERS, type DevRole } from '$lib/server/auth-roles';
 // Dev-only session-flip endpoint backing the floating DevOverlay. Three
 // double-locks before the body runs:
 //   1. `dev` from $app/environment — vite-dev-only, false in any prod build.
-//   2. `platform.env.DATABASE` — wrangler preview also satisfies this; vite
-//      dev short-circuits to 503 since auth has no D1 binding there anyway.
+//   2. `platform.env.DATABASE` — satisfied by both vite dev (via adapter's
+//      platformProxy) and `just preview` (wrangler/miniflare). 503 here means
+//      the platform proxy itself is misconfigured, not an expected branch.
 //   3. The route lives under /dev/, which the dev-routes layout 404s in
 //      production; this guard is the in-endpoint belt to that suspenders.
 //

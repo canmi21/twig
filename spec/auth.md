@@ -45,11 +45,11 @@ CF Email Service (public beta since 2026-04-16). Binding `EMAIL` (type `send_ema
 
 | Caller              | `env.EMAIL` | Behaviour                                          |
 | ------------------- | ----------- | -------------------------------------------------- |
-| vite dev            | undefined   | `console.log` the OTP — copy from terminal         |
 | `*.local` recipient | any         | no-op — OTP is forced to `000000`, no need to send |
-| wrangler / prod     | defined     | `env.EMAIL.send({ to, from, subject, text })`      |
+| binding absent      | undefined   | `console.log` the OTP — copy from terminal         |
+| binding present     | defined     | `env.EMAIL.send({ to, from, subject, text })`      |
 
-The binding lacks `remote: true` by default, so `wrangler dev` stubs sends locally (logs to console + writes file under `.wrangler/`). Add `"remote": true` to the binding entry if you want preview to actually deliver mail through the production service.
+The binding in `wrangler.jsonc` carries `"remote": true` — both `vite dev` and `just preview` honour that and proxy sends to the real Cloudflare Email Service (needs `wrangler login`). Everything else — D1, vars, future KV/R2 — stays miniflare-local because it has no `"remote"` flag. `svelte.config.js` leaves `remoteBindings` at its wrangler 4.x default (`true`), which is what makes the per-binding `"remote"` markers actually take effect; flipping the global to `false` would stub EMAIL via miniflare's strict MIME validator and 500 on real sends.
 
 ## Dev sign-in (`.local` convention)
 
@@ -57,7 +57,7 @@ The binding lacks `remote: true` by default, so `wrangler dev` stubs sends local
 
 1. `generateOTP` returns `'000000'` for any `*.local` email — so the sign-in flow can be exercised end-to-end without leaving the editor.
 2. `sendVerificationOTP` skips delivery for `*.local` (no MX, no point).
-3. `databaseHooks.user.create.before` returns `false` for `*.local` when `env.ENVIRONMENT === 'production'`. The wrangler.jsonc default is `"production"`; the `just preview` recipe overrides via `--var ENVIRONMENT:preview` so local preview still accepts the seeds.
+3. `databaseHooks.user.create.before` returns `false` for `*.local` when the caller is actually production — `!dev && env.ENVIRONMENT === 'production'`. `dev` from `$app/environment` is the authoritative local-mode signal; without it, platformProxy would surface the wrangler.jsonc `"production"` default to vite dev and misclassify local dev as prod. The `just preview` recipe still overrides via `--var ENVIRONMENT:preview` as a belt-and-suspenders.
 
 `src/lib/server/auth-roles.ts` is the canonical list:
 
@@ -74,7 +74,7 @@ The binding lacks `remote: true` by default, so `wrangler dev` stubs sends local
 
 Each action POSTs to `/dev/api/auth/switch?as=admin|user|none`. The endpoint:
 
-1. Hard-gates on `dev` from `$app/environment` (404 in prod) **and** `platform.env.DATABASE` (503 in vite-only context).
+1. Hard-gates on `dev` from `$app/environment` (404 in prod) **and** `platform.env.DATABASE` (503 if the platform proxy itself is misconfigured — the binding is expected to be present under both vite dev and `just preview`).
 2. Lazy-seeds the target user with the canonical fixed ID if missing (`INSERT OR IGNORE`).
 3. Calls `auth.api.sendVerificationOTP` (writes a verification row with `value = '000000'`).
 4. Calls `auth.api.signInEmailOTP({ otp: '000000' })` and returns its Response — the Set-Cookie header carries the new session.
@@ -87,9 +87,10 @@ Out of scope for now — most blog visitors don't log in, and writing a `user` r
 
 ## Local vs remote
 
-- `vite dev` short-circuits `authHandle` because `platform.env` is undefined. Use `just preview` for any auth-touching work.
-- `just database-migrate-local` materializes the auth tables in miniflare's SQLite at `.wrangler/state/v3/d1/`.
-- The catch-all returns 503 from `vite dev` so missing-binding failures surface with a clear message instead of a stack trace.
+- `svelte.config.js` enables adapter-cloudflare's `platformProxy` with `persist: true`, so `vite dev` gets the full local CF runtime — D1 at `.wrangler/state/v3/d1/` (shared with `just preview`), `vars` read from `wrangler.jsonc`. Auth works under vite dev; HMR stays intact.
+- `just database-migrate-local` materializes the auth tables in that same miniflare SQLite. Run it once per fresh clone or reset.
+- `just preview` still exists for testing the actually-built worker bundle (no HMR, closer to production); use it to verify anything that the platform proxy might fib about.
+- The `send_email` binding carries `"remote": true` and both `vite dev` and `just preview` proxy sends to the real Cloudflare Email Service (requires `wrangler login`). Every other binding stays miniflare-local because it has no `"remote"` flag — the wrangler 4.x default of `remoteBindings: true` is what lets per-binding markers drive the split. `.local` addresses skip delivery entirely.
 
 ## Releasing
 
