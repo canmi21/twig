@@ -59,7 +59,8 @@
 		"wrangler": "^4.83.0"
 	},
 	"overrides": {
-		"@better-auth/core": "1.6.5"
+		"@better-auth/core": "1.6.5",
+		"@better-auth/utils": "0.4.0"
 	},
 	"engines": {
 		"node": ">=25"
