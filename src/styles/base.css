@@ -6,25 +6,9 @@ html {
 	-webkit-tap-highlight-color: transparent;
 }
 
-/* Composite font-family stack: specific Latin face → primary CJK face for the
-   page language → coexisting CJK fallback → generic Latin+system tail → emoji
-   face → OS emoji fallbacks. Generics must come before the emoji tail but after
-   all --font-cjk-* slots: `ui-sans-serif` / `system-ui` / `sans-serif` supply
-   CJK glyphs through OS font fallback, so any of them placed before --font-cjk-*
-   would capture CJK characters and make LXGW / Noto never render. The Latin
-   slot uses --font-latin (not --font-sans) because Tailwind v4 pre-declares
-   --font-sans on :root with its full generic stack; var(--font-sans, __unset)
-   would silently pull that stack in whenever the user picks "system",
-   re-introducing the same generic-capture bug. Simplified and Traditional
-   never coexist in a stack (same Unicode code points, conflicting glyphs —
-   pick one); JP pairs with whichever Chinese variant is primary. :lang()
-   overrides let mixed content (e.g. an inline JP quote on an SC page) render
-   with the correct face when authors tag the element. The __unset var()
-   fallback is a placeholder identifier that matches no installed family, so
-   the slot is skipped when the user's choice is "system". Emoji codepoints
-   don't overlap with Latin/CJK so the emoji slot is safe at the tail, and the
-   explicit OS emoji families after it make fallback deterministic (including
-   for glyphs Twemoji/Noto don't cover). */
+/* Generics come after every --font-cjk-* slot — otherwise OS CJK fallback on
+   ui-sans-serif / system-ui captures CJK glyphs first. Simplified and
+   traditional never coexist (same codepoints); JP pairs with the primary Chinese. */
 html {
 	font-family:
 		var(--font-latin, __unset),
@@ -107,11 +91,8 @@ html[lang='ja-JP'] {
 		'Noto Color Emoji';
 }
 
-/* Code-block typography. Scoped to the two core tags (pre/code) so Markdown,
-   MDX, and plain HTML all pick it up automatically. `.font-code` is the escape
-   hatch for inline tokens that can't wrap in <code> (e.g. a CLI flag inside a
-   paragraph authored as regular text). --font-code rather than --font-mono
-   keeps us out of Tailwind v4's reserved variable space. */
+/* Scoped to pre/code so Markdown and HTML both inherit; .font-code is the
+   escape hatch for inline tokens outside a <code> element. */
 pre,
 code,
 .font-code {
@@ -124,10 +105,8 @@ code,
 	background-color: var(--color-selection);
 }
 
-/* Default hover/focus fade on interactive elements. `:where()` gives zero
-   specificity so any utility class (`transition-none`, `duration-*`,
-   `transition-transform`, etc.) overrides or stacks freely. Scoped to color
-   properties only — transform/opacity/size stay snappy unless opted in. */
+/* :where() gives zero specificity so utility classes override freely; scoped
+   to color-only so transform/opacity/size stay snappy unless opted in. */
 :where(a, button, [role='button']) {
 	transition:
 		color 120ms ease,

@@ -5,10 +5,8 @@ export type FontFamily = 'system' | 'inter' | 'roboto' | 'source-sans';
 export const FONT_COOKIE = 'font';
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-// `system` renders with the platform default and never hits the remote CSS
-// endpoint. `remoteFamily` is the `family=` query param segment (without
-// weights); weights are appended centrally by `buildFontsHref` so every font
-// ships the same set.
+// `remoteFamily` is the `family=` param without weights; buildFontsHref
+// appends the shared weight set so every font ships identical coverage.
 export const FONTS = {
 	system: {
 		label: 'System',

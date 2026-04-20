@@ -11,10 +11,8 @@
 
 	let { data, children } = $props();
 
-	// $effect.pre flushes before any child $effect, so runtime font-injection
-	// helpers (settings page, pickers) see the mirror hosts before they build
-	// their first URL. Tracks data.cdn reactively but in practice it's stable
-	// per session (derived from Cloudflare's country header).
+	// $effect.pre installs mirror hosts before any child $effect font-injection
+	// helper composes its first CDN URL.
 	$effect.pre(() => {
 		setClientCdnHosts(data.cdn);
 	});

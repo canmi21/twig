@@ -13,11 +13,8 @@
 		// literal so the preview is self-contained and ignores the page theme).
 		// Sample-style cards leave this undefined and inherit the page surface.
 		bg?: string;
-		// CSS variables driving the idle/hover border. WindowCard passes palette
-		// literals so the preview chrome matches the theme it's showing. When
-		// omitted we fall back to the semantic border tokens, which is what
-		// font / emoji / code previews want (they live on the page background
-		// and should track its theme).
+		// Idle/hover border vars. WindowCard passes palette literals so chrome
+		// matches the theme it's showing; other previews inherit the page theme.
 		borderIdle?: string;
 		borderHover?: string;
 		// Extra attributes applied to the frame div, not the button (e.g.

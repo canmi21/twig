@@ -38,18 +38,13 @@ function isDotLocal(email: string): boolean {
 // widens the plugin tuple to the empty supertype, which makes `auth.api`
 // lose the email-otp endpoints (sendVerificationOTP, signInEmailOTP, …).
 function buildOptions(env: Env) {
-	// `dev` is the authoritative local-mode signal. platformProxy surfaces the
-	// wrangler.jsonc `vars` default ("production") to vite dev too, so falling
-	// back to ENVIRONMENT alone would misclassify local dev as prod and trip
-	// the `.local` creation guard. Preview still rides `--var ENVIRONMENT:preview`
-	// from the Justfile recipe; the deployed worker keeps "production".
+	// platformProxy surfaces wrangler.jsonc's default ENVIRONMENT=production to
+	// vite dev too, so gate on `dev` first to avoid misclassifying local as prod.
 	const isProd = !dev && (env.ENVIRONMENT as string) === 'production';
 
 	return {
-		// drizzleAdapter reads auth-schema.ts's column mappings (e.g. TS
-		// `expiresAt` ↔ DB `expires_at`), so Better Auth speaks the same
-		// snake_case dialect the migrations use. Raw `env.DATABASE` would
-		// fall back to the kysely adapter, which ignores those mappings.
+		// drizzleAdapter honors auth-schema.ts's column mappings (expiresAt ↔
+		// expires_at); the kysely fallback from raw env.DATABASE ignores them.
 		database: drizzleAdapter(getDatabase(env), { provider: 'sqlite', schema }),
 		advanced: {
 			database: {

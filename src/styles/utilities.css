@@ -8,10 +8,8 @@
 	outline-offset: 2px;
 }
 
-/* Sibling of `.focus-ring` for buttons whose hit area wraps a composite
-   (card + caption, nav row + label). Outline hugs only the marked child;
-   the focusable ancestor must add `focus-visible:outline-none` to drop its
-   default browser ring. */
+/* Applies the ring to an inner child when the focusable ancestor wraps a
+   composite hit area; ancestor must set `focus-visible:outline-none`. */
 :where(.focus-ring-inner) {
 	border-radius: 4px;
 }
@@ -20,11 +18,8 @@
 	outline-offset: 2px;
 }
 
-/* Motion: none — instant everything. Svelte JS-driven transitions must also
-   pass duration:0 because their internal timer ignores this CSS override.
-   The `:not([data-motion-exempt] *)` guard carves out an escape hatch for the
-   motion-tier preview cards in settings: those must keep animating to demo
-   what each tier looks like, even when the user has globally picked None. */
+/* Svelte JS-driven transitions need their own duration:0 since their timers
+   ignore this rule. `data-motion-exempt` keeps preview cards demoing. */
 :root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *),
 :root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *)::before,
 :root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *)::after {
@@ -34,10 +29,8 @@
 	scroll-behavior: auto !important;
 }
 
-/* Motion preview keyframes — two content states (A: list, B: grid) alternate
-   on a shared 5s period so all three cards render the same interaction in
-   three flavours simultaneously. Full adds a horizontal slide to the fade,
-   Reduce keeps fade only, None is a hard cut. */
+/* Shared 5s period keeps the three motion-tier demo cards in lockstep so
+   users can compare Full / Reduce / None on the same interaction. */
 @keyframes motion-state-a-full {
 	0%,
 	40% {
@@ -128,11 +121,8 @@
 	}
 }
 
-/* Motion preview rest state: layer A visible, layer B hidden. Active cards'
-   inline `animation: ... infinite` drives both during the keyframe run (CSS
-   animations beat cascaded property values while active). For inactive cards,
-   hover flips A↔B and CSS transitions handle both directions — leave the card
-   mid-animation and it tweens back on its own. */
+/* Active cards run the inline infinite animation (keyframes beat cascade);
+   inactive cards swap A↔B via hover transitions. */
 .motion-layer-a {
 	opacity: 1;
 }
@@ -140,10 +130,8 @@
 	opacity: 0;
 }
 
-/* Per-tier transition shape. Full adds a horizontal slide, Reduce is fade
-   only, None snaps. Transform defaults give each layer its entry/exit
-   direction so the :hover swap below reads as "A leaves left, B enters from
-   right". */
+/* Transform defaults pre-stage each layer's entry/exit direction so the :hover
+   swap below reads as "A leaves left, B enters from right". */
 .motion-tier-full .motion-layer {
 	transition:
 		opacity 400ms ease-in-out,
@@ -177,10 +165,8 @@
 	transform: translateX(0);
 }
 
-/* Card press feedback. A short overlay pulse (opacity only) confirms the
-   click on selection cards that were otherwise instant; Full adds a micro
-   scale dip on the frame itself. Reduce keeps the opacity pulse only —
-   scale is spatial. None is flattened by the global animation-kill rule. */
+/* Opacity pulse confirms the click on otherwise-instant selections; Full adds
+   a scale dip, Reduce skips it since scale is spatial motion. */
 @keyframes press-flash {
 	0% {
 		opacity: 0;

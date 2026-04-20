@@ -11,10 +11,8 @@
 
 	let { item }: { item: Notification } = $props();
 
-	// Single source of truth — `remaining` drives both the visual bar and the
-	// dismissal. rAF decrements it per frame; hover/focus cancel the frame and
-	// freeze everything on the same tick. `item.duration` is immutable per
-	// mounted toast (items are keyed by id), so the seed effect runs once.
+	// `remaining` drives both the bar and the dismiss; hover/focus cancels the
+	// rAF so both freeze on the same tick. item.duration is stable per mount.
 	let remaining = $state(0);
 	let lastTickAt = 0;
 	let rafId: number | null = null;

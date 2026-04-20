@@ -19,11 +19,8 @@ export type ThemeOption = {
 	colors: PaletteColors;
 };
 
-// Six-card matrix for the theme picker preview on /settings. Colors are
-// palette literals (not CSS tokens) so each card self-represents its theme
-// regardless of the page's active palette — hovering any one card previews
-// it in isolation. Order matters: the picker lays them out 3×2 column-first
-// on mobile, so lights and darks form light/dark pairs per palette.
+// Palette literals (not CSS tokens) so each card renders its own theme
+// regardless of the page palette; column-first 3×2 pairs light/dark on mobile.
 export const THEMES: readonly ThemeOption[] = [
 	{
 		palette: 'neutral',

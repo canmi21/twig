@@ -5,11 +5,8 @@ export type CodeFont = 'monospace' | 'maple' | 'jetbrains' | 'fira';
 export const CODE_FONT_COOKIE = 'code_font';
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-// Maple Mono lives outside Google Fonts; Fontsource mirrors it on jsDelivr with
-// the same unicode-range + font-display: swap shape as Google's CSS, so a link
-// tag only registers @font-face declarations — actual woff2 files don't fetch
-// until an element renders a glyph that needs them. Pinned to patch; bump here
-// and in spec/styling.md in one commit.
+// Fontsource Maple Mono is wire-compatible with Google Fonts — unicode-range
+// + font-display: swap defer woff2 fetches until a glyph demands them. Pin to patch.
 const MAPLE_PKG = '@fontsource/maple-mono@5.2.6';
 
 export const CODE_FONT_LABELS: Record<CodeFont, string> = {
@@ -36,11 +33,8 @@ export function isCodeFont(v: unknown): v is CodeFont {
 	return v === 'monospace' || v === 'maple' || v === 'jetbrains' || v === 'fira';
 }
 
-// 400 for body code, 700 reserved for future syntax-highlighting bold tokens.
-// Google bundles both weights into one CSS with unicode-range per weight;
-// Fontsource splits them across two stylesheets. Neither approach pre-pulls
-// woff2 — font-display: swap + unicode-range defer the actual download until
-// a rendered glyph demands the weight.
+// 400 for body code, 700 reserved for future bold syntax tokens. Fontsource
+// splits weights across two sheets; woff2 still defers until a glyph demands it.
 export function linksFor(code: CodeFont, hosts: CdnHosts): string[] {
 	if (code === 'monospace') return [];
 	if (code === 'maple') {

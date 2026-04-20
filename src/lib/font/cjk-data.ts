@@ -99,10 +99,8 @@ export function linksFor(cjk: CjkFont, langs: readonly CjkLang[], hosts: CdnHost
 	return urls;
 }
 
-// SSR entry. /settings loads every CJK choice so previews can render their
-// own glyphs; elsewhere only the selected choice ships. Language scope is
-// always (primary, fallback) — simplified + traditional are never loaded
-// together to avoid CJK-unified-code-point glyph conflicts.
+// /settings preloads every choice for previews; simplified and traditional
+// are never loaded together due to CJK-unified codepoint glyph conflicts.
 export function renderCjkLinks(
 	cjk: CjkFont,
 	htmlLang: string,

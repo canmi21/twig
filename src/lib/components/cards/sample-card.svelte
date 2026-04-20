@@ -18,11 +18,8 @@
 
 	const EMOJIS = ['😊', '🔥', '🎉'];
 
-	// Normalize preview glyph size across emoji families: Noto Color Emoji's
-	// face ships with ~25% larger glyph metrics than Twemoji / Apple, so at
-	// the same font-size its emojis visually overrun the card. Shrinking it
-	// here keeps the three cards optically identical; outside the preview
-	// (real content use) each font renders at its native size.
+	// Noto Color Emoji ships ~25% larger glyph metrics than Twemoji/Apple;
+	// shrink only here so preview cards stay optically identical.
 	function emojiSize(family: string): string {
 		return family.startsWith('"Noto Color Emoji"') ? '1.4rem' : '1.75rem';
 	}

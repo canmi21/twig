@@ -20,10 +20,8 @@
 	let underline = $state<{ x: number; w: number }>({ x: 0, w: 0 });
 	let pill = $state<{ y: number; h: number }>({ y: 0, h: 0 });
 
-	// Programmatic scrolls (sidebar click, hash landing) cross every anchor
-	// on the way to the target. Without this lock the scroll-spy below would
-	// flash the pill through each intermediate section during the smooth
-	// scroll. User-driven scrolling never sets the lock, so it keeps tracking.
+	// Suppresses the scroll-spy during programmatic smooth scrolls so the pill
+	// doesn't flash through intermediate anchors; user scrolls leave this at 0.
 	let scrollLockUntil = 0;
 
 	$effect(() => {
@@ -45,11 +43,8 @@
 		return () => window.removeEventListener('resize', onResize);
 	});
 
-	// Fires the heading pulse once the landed section actually enters the
-	// viewport — firing immediately would play the animation while the smooth
-	// scroll is still in flight. IntersectionObserver self-disconnects after
-	// one hit; if the heading is already visible (user clicked the active
-	// tab), the observer callback fires synchronously on the next frame.
+	// IO defer — playing the pulse immediately would race the in-flight smooth
+	// scroll; the observer self-disconnects after its one arrival hit.
 	function pulseHeadingOnArrival(target: Element | null) {
 		if (!target || motion.value === 'none') return;
 		const h3 = target.querySelector<HTMLElement>('h3');
@@ -79,10 +74,8 @@
 		pulseHeadingOnArrival(target);
 	}
 
-	// Scroll-spy. IO fires whenever an anchor crosses the scroll-mt reference
-	// line (24px mobile / 80px desktop); recompute then picks the last anchor
-	// whose top edge has passed that line as active. Rebuilt on breakpoint
-	// change so rootMargin stays aligned with the matching reference.
+	// Scroll-spy: rootMargin tracks the scroll-mt reference (24px mobile / 80px
+	// desktop), rebuilt on breakpoint change so both stay aligned.
 	$effect(() => {
 		type TabId = (typeof TABS)[number]['id'];
 		const tabs = TABS.map((t) => t.id);

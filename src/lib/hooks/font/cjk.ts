@@ -4,10 +4,8 @@ import { htmlLangFor } from '$lib/i18n/urls';
 import { CJK_FONT_COOKIE, isCjkFont, renderCjkLinks, type CjkFont } from '$lib/font/cjk-data';
 import { LANG_COOKIE, isSettingsPath } from '../shared';
 
-// CJK font choice drives a `<html lang>`-aware stack: the primary CJK face for
-// the current language plus one coexisting fallback (SC+JP or TC+JP or JP+SC).
-// /settings loads every CJK option's primary + fallback face pair so preview
-// cards can render their own glyphs; elsewhere only the selected choice ships.
+// Emits a `<html lang>`-aware CJK stack — primary face plus one coexisting
+// fallback (SC+JP, TC+JP, or JP+SC); /settings ships every option for previews.
 export const cjkFontHandle: Handle = async ({ event, resolve }) => {
 	const cookie = event.cookies.get(CJK_FONT_COOKIE);
 	const cjkFont: CjkFont = isCjkFont(cookie) ? cookie : 'system';

@@ -13,10 +13,8 @@
 		return { duration: 240, easing: cubicOut };
 	}
 
-	// On dismiss: collapse the wrapper's height + top margin so the cards below
-	// flow up into the gap, while animate:flip carries the movement smoothly.
-	// Item.svelte already fades its own root in parallel; we deliberately leave
-	// opacity untouched here so the two transitions don't fight over it.
+	// Collapse height + margin only; Item.svelte fades its own root in parallel,
+	// so touching opacity here would make the two transitions fight.
 	function collapseOut(node: HTMLElement) {
 		const pref = motion.value;
 		if (pref === 'none') return { duration: 0 };

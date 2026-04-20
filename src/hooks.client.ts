@@ -10,10 +10,8 @@ Sentry.init({
 	environment: dev ? 'development' : 'production'
 });
 
-// Sentry's npm build intentionally leaves `window.Sentry` unset — that's a
-// CDN-loader affordance. Publishing it ourselves lets Wappalyzer pick up
-// `Sentry.SDK_VERSION` the way it does on CDN-installed sites. SDK_VERSION
-// is a const from @sentry/core, inlined at bundle time.
+// Npm Sentry leaves window.Sentry unset; exposing SDK_VERSION manually makes
+// Wappalyzer fingerprint us the way it does CDN-loaded sites.
 (window as unknown as { Sentry?: Record<string, unknown> }).Sentry = {
 	...(window as unknown as { Sentry?: Record<string, unknown> }).Sentry,
 	SDK_VERSION

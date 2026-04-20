@@ -5,11 +5,8 @@ export type EmojiFont = 'system' | 'twemoji' | 'noto';
 export const EMOJI_FONT_COOKIE = 'emoji_font';
 export const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-// Twemoji ships as a COLR/CPAL color font, not an image asset. Mozilla's source
-// repo (mozilla/twemoji-colr) only publishes the .ttf as a GitHub release
-// artifact, which jsDelivr doesn't mirror. Tilman Vatteroth's npm build tracks
-// upstream Twemoji at the same version and provides a ready woff2 + @font-face
-// stylesheet; pin to patch and bump in spec/styling.md in the same commit.
+// Mozilla's twemoji-colr .ttf isn't jsDelivr-mirrored; this npm repackage
+// provides the woff2 + @font-face we use instead. Pin to patch.
 const TWEMOJI_PKG = 'twemoji-colr-font@15.0.3/twemoji.css';
 // Google Fonts serves Noto Color Emoji as a single woff2 with font-display: swap.
 // No subset split — emoji presentation sequences must stay intact across

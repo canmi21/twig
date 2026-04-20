@@ -11,10 +11,7 @@
 	import CodeFontSection from '$lib/components/settings/sections/code-font-section.svelte';
 	import EmojiFontSection from '$lib/components/settings/sections/emoji-font-section.svelte';
 
-	// Covers the soft-navigation case where the SSR chunk already shipped the
-	// full font set for /settings — this is a no-op — and the case where the
-	// user landed on another route first and is now switching into /settings
-	// via client routing, so the extra faces need to be pulled in.
+	// Soft-nav entry pulls in the faces the SSR font chunk only ships on direct hits.
 	$effect(() => {
 		ensureAllFontsLoaded();
 		ensureAllCjkLoaded();

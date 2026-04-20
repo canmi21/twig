@@ -25,7 +25,7 @@
 	--color-selection: #4a605f;
 }
 
-/* Nord — Snow Storm (雪山) */
+/* Nord — Snow Storm */
 .nord {
 	--color-background: #eceff4;
 	--color-foreground: #2e3440;
@@ -38,7 +38,7 @@
 	--color-selection: #d8dee9;
 }
 
-/* Nord — Polar Night (蓝) */
+/* Nord — Polar Night */
 .nord.dark {
 	--color-background: #2e3440;
 	--color-foreground: #d8dee9;
@@ -77,19 +77,9 @@
 	--color-selection: #333333;
 }
 
-/* Font family selection. --font-latin / --font-cjk-* hold SPECIFIC face names
-   only; the generic Latin fallback chain lives at the tail of the html stack
-   in base.css. Putting generics (ui-sans-serif, system-ui, sans-serif) ahead
-   of --font-cjk-* would let them capture CJK glyphs via OS font fallback
-   before the stack ever reached a specific CJK face. Naming-wise --font-sans
-   is reserved: Tailwind v4 pre-declares it on :root with its full generic
-   stack to power `.font-sans`, so reusing that name would leak generics into
-   the Latin slot whenever data-font is 'system' (no override → var() resolves
-   to Tailwind's value, never our __unset fallback). Left deliberately outside
-   @theme so they don't spawn useless Tailwind font-* utilities. `data-font` /
-   `data-cjk` on <html> are set by hooks.server.ts from cookies and by
-   applyFont() / applyCjkFont() on runtime switches; when unset, the var()
-   fallback in base.css inserts a no-op placeholder. */
+/* Outside @theme so no stray font-* utilities; named --font-latin (not
+   --font-sans) because Tailwind v4 pre-declares --font-sans with generics
+   that would leak into the "system" no-override path. */
 html[data-font='inter'] {
 	--font-latin: 'Inter';
 }
@@ -111,10 +101,8 @@ html[data-cjk='lxgw'] {
 	--font-cjk-jp: 'Klee One';
 }
 
-/* Code font. --font-code (not --font-mono) for the same reason --font-latin
-   isn't --font-sans: Tailwind v4 pre-declares --font-mono on :root for the
-   .font-mono utility, so reusing the name would leak Tailwind's generic stack
-   into pre/code whenever data-code-font is 'monospace'. */
+/* --font-code (not --font-mono) — same Tailwind v4 reserved-name issue as
+   --font-latin above. */
 html[data-code-font='maple'] {
 	--font-code: 'Maple Mono';
 }
@@ -125,12 +113,8 @@ html[data-code-font='fira'] {
 	--font-code: 'Fira Code';
 }
 
-/* Emoji font. --font-emoji holds only a specific face name; the OS emoji
-   fallbacks ('Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji') live
-   at the tail of the html stack in base.css, so data-emoji='system' simply
-   resolves the var() to __unset and those fallbacks win. Unlike Latin/CJK,
-   emoji codepoints don't collide with text faces, so placement at the end of
-   the stack is safe. */
+/* Emoji codepoints don't overlap with text faces, so --font-emoji can live
+   at the tail; 'system' resolves to __unset and the OS emoji tail wins. */
 html[data-emoji='twemoji'] {
 	--font-emoji: 'Twemoji';
 }

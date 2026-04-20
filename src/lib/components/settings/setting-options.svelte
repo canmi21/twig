@@ -25,10 +25,8 @@
 		// accessible name from the visible h3 instead of duplicating it.
 		ariaLabelledby?: string;
 		ariaDescribedby?: string;
-		// Caller draws the card visual. Receives the option, the props bag to
-		// spread onto the inner button (`buttonProps={props}`), and the active
-		// flag. Spreading wires aria-pressed + click + keyboard activation;
-		// native <button> already handles Enter/Space, so no custom keydown.
+		// Caller owns the card visual. Spreading `props` onto a <button> wires
+		// aria-pressed + click; Enter/Space come for free from native semantics.
 		card: Snippet<[{ option: OptionItem<T>; props: Record<string, unknown>; pressed: boolean }]>;
 	}
 
@@ -44,11 +42,8 @@
 		card
 	}: Props = $props();
 
-	// Toggle-button-group pattern (WAI-ARIA APG):
-	// `role="group"` (not "radiogroup"), each item a native <button> with
-	// aria-pressed for selected state. Each button is a real Tab stop —
-	// no roving tabindex, no arrow-key auto-apply — so focus and selection
-	// are decoupled. Enter/Space on a focused button triggers select.
+	// Toggle-button-group (WAI-ARIA APG): role="group" with aria-pressed buttons,
+	// no roving tabindex so focus and selection stay decoupled.
 </script>
 
 <div role="group" aria-labelledby={ariaLabelledby} aria-describedby={ariaDescribedby}>

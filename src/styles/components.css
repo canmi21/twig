@@ -6,11 +6,8 @@
 	paint-order: stroke fill;
 }
 
-/* Footer greeting 👋 — waves only while the visitor hasn't set a name yet,
-   then the wave element is removed from the DOM by the component. The three
-   motion tiers mirror the rule in spec/motion.md: full = keep attracting
-   attention; reduce = halve amplitude, double period, cap at two cycles;
-   none = static emoji. Pivot is the wrist area (bottom-right-ish). */
+/* Motion tiers follow spec/motion.md; pivot at the wrist (70% 70%) reads
+   as a hand motion, not a full-glyph spin. */
 .greeting-wave {
 	display: inline-block;
 	transform-origin: 70% 70%;
@@ -48,11 +45,8 @@ html[data-motion='reduce'] .greeting-wave {
 	animation-timing-function: ease-in-out;
 }
 
-/* Notification lifetime bar — 3px neutral strip at the bottom. Geometry
-   (scaleX or opacity) is driven per-frame from item.svelte via inline style;
-   a single rAF loop decrements `remaining`, so hover pause freezes bar and
-   dismissal on the same tick. Keeping this CSS minimal means no dual-system
-   drift between a CSS keyframe and a JS timer. */
+/* Geometry is driven per-frame by item.svelte's rAF loop, not a CSS keyframe,
+   so the bar and the dismiss never drift out of sync. */
 .toast-bar {
 	position: absolute;
 	inset: auto 0 0 0;
@@ -61,10 +55,8 @@ html[data-motion='reduce'] .greeting-wave {
 	pointer-events: none;
 }
 
-/* Kind accent — absolute strip instead of an asymmetric left border, so the
-   card's four corners share one 1px border geometry and the rounded-md arc
-   stays clean. Inset by 1px and fully rounded to soften the strip's ends into
-   a capsule that overlays the lifetime bar at the bottom-left corner. */
+/* Absolute strip (not a left border) so all four corners share one border
+   geometry; inset + fully rounded so the capsule meets the lifetime bar. */
 .toast-accent {
 	position: absolute;
 	top: 1px;

@@ -2,10 +2,8 @@ import type { Handle } from '@sveltejs/kit';
 import { CODE_FONT_COOKIE, isCodeFont, renderCodeLinks, type CodeFont } from '$lib/font/code-data';
 import { isSettingsPath } from '../shared';
 
-// Code font handle mirrors fontHandle. Default `maple` ships @font-face CSS
-// with unicode-range subsets; woff2 downloads defer until a <pre> or <code>
-// renders a glyph at the requested weight. `monospace` is the CSS generic —
-// zero network cost for users who opt out.
+// Emits @font-face CSS only; woff2 downloads defer until a <pre>/<code> renders
+// a glyph. `monospace` is the CSS generic and ships zero network.
 export const codeFontHandle: Handle = async ({ event, resolve }) => {
 	const cookie = event.cookies.get(CODE_FONT_COOKIE);
 	const codeFont: CodeFont = isCodeFont(cookie) ? cookie : 'maple';

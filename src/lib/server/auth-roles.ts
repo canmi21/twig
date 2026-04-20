@@ -1,15 +1,11 @@
-// Single source of truth for "is this user an admin?" — read by app code
-// and by the dev-overlay seed. Roles aren't a DB column yet (avoids the
-// admin-plugin schema bloat: role/banned/banReason/banExpires/impersonatedBy);
-// when more than one human ever needs admin, promote this to a real column.
+// Single source of truth — kept as an ID list to avoid Better Auth's
+// admin-plugin schema bloat; promote to a DB column when more than one admin exists.
 export const ADMIN_USER_IDS: readonly string[] = ['a0000000000000000000000000000001'];
 
 export type DevRole = 'admin' | 'user';
 
-// Fixed dev seed accounts. IDs are 32-char hex (matches advanced.database.generateId
-// in src/lib/server/auth.ts) but use a recognisable all-zero pattern so they can
-// never collide with a real RFC-4122-derived ID. Emails end in `.local` which
-// the auth pipeline pins to OTP `000000` and refuses to register in production.
+// All-zero IDs can't collide with generateId's RFC-4122 output; `.local` emails
+// are pinned to OTP "000000" and refused by the auth pipeline in production.
 export const DEV_SEED_USERS = {
 	admin: { id: 'a0000000000000000000000000000001', email: 'admin@dev.local', name: 'Dev Admin' },
 	user: { id: 'b0000000000000000000000000000002', email: 'user@dev.local', name: 'Dev User' }

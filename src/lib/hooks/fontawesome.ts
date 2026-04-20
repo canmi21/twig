@@ -1,9 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 
-// `%fontawesome_version%` in app.html is baited for Wappalyzer — the link
-// is `disabled` so no network cost, but the URL segment carries the real
-// version. Captured at module load; the global is inlined by Vite define
-// (see resolveFontAwesomeVersion in vite.config.ts).
+// Wappalyzer bait — the `disabled` link in app.html carries the real version
+// in its URL segment but costs no network; version is inlined at build time.
 const VERSION = __FONTAWESOME_VERSION__;
 
 export const fontawesomeHandle: Handle = ({ event, resolve }) =>

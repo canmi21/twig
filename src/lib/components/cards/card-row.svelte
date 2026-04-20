@@ -5,10 +5,8 @@
 	type Cols = Partial<Record<BP, number>>;
 
 	interface Props {
-		// 'custom' passes `class` straight through — caller owns the grid math
-		// (theme's 3×2 column-first flow is the canonical case). 'wrap' lays
-		// items into a cols-per-bp grid, extras spill to a new row. 'scroll'
-		// keeps one row, extras overflow horizontally for a swipe UX on mobile.
+		// 'custom' passes class through for caller-owned grids; 'wrap' uses a
+		// cols-per-bp grid; 'scroll' overflows horizontally for swipe UX.
 		layout: 'custom' | 'wrap' | 'scroll';
 		// Per-breakpoint column counts. Missing breakpoints inherit the nearest
 		// smaller one, so `{ base: 3, md: 4 }` means 3 up to md, 4 from md on.
@@ -21,10 +19,8 @@
 
 	const BP_ORDER: BP[] = ['base', 'sm', 'md', 'lg', 'xl', '2xl'];
 
-	// Default density for a settings-style page: 3 on phones (per product
-	// spec — the smallest viewport must fit exactly 3 without scrolling),
-	// widening to 4/5/6 as the content area grows. Sections with fixed
-	// counts (motion=3 forever) override via the `cols` prop.
+	// 3 on phones is a product hard-rule (smallest viewport must fit 3 without
+	// scroll); widens to 4/5/6, fixed-count sections override via `cols`.
 	const DEFAULTS: Record<BP, number> = {
 		base: 3,
 		sm: 4,

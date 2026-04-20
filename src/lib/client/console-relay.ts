@@ -1,11 +1,7 @@
 import { notifications } from '$lib/notification/state.svelte';
 
-// Diagnostic bridge: browser console noise → in-app toast stack. This is
-// the one place that bypasses spec/notifications.md's Paraglide rule —
-// console/error strings come from arbitrary libraries and stack traces,
-// there is nothing to translate. Every path through here must stay on
-// the 'warn' | 'error' kinds so users can tell diagnostic toasts apart
-// from real UX feedback at a glance.
+// Bridges console → toasts. The one place that bypasses spec/notifications.md's
+// Paraglide rule since library messages aren't translatable.
 
 type Level = 'warn' | 'error';
 
@@ -14,11 +10,8 @@ const MAX_TITLE = 120;
 const MAX_BODY = 240;
 const seen = new Map<string, number>();
 
-// Patterns to drop on the floor. Any match means "don't surface as a
-// toast" — the original console call still runs, so it's visible in
-// devtools. Add entries here when a known-harmless warning starts
-// spamming the toast stack (Svelte dev warnings, HMR churn, third-
-// party scripts, etc).
+// Drop from toasts; the original console call still runs in devtools.
+// Extend when a known-harmless warning starts spamming the stack.
 const IGNORE: RegExp[] = [
 	/\[vite\]/i,
 	/\[HMR\]/i,
