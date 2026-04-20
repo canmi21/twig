@@ -1,6 +1,7 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import { execFileSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join, sep } from 'node:path';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
@@ -27,6 +28,16 @@ function resolveGitCommit(): string {
 function resolvePublicUrl(): string {
 	if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL;
 	return 'https://canmi.net';
+}
+
+// Reads the installed @fortawesome/free-solid-svg-icons version so the decoy
+// `/fontawesome-free-<v>/a.css` link in app.html carries the real version
+// string — Wappalyzer parses that URL to report the library version to
+// anyone running it against the deployed site.
+function resolveFontAwesomeVersion(): string {
+	const require2 = createRequire(import.meta.url);
+	const pkg = require2('@fortawesome/free-solid-svg-icons/package.json') as { version: string };
+	return pkg.version;
 }
 
 // Walks src/routes/ at config-load time for +server.ts endpoints so hooks can
@@ -61,7 +72,8 @@ export default defineConfig({
 	define: {
 		__APP_GIT_COMMIT__: JSON.stringify(resolveGitCommit()),
 		__PUBLIC_URL__: JSON.stringify(resolvePublicUrl()),
-		__SERVER_ROUTES__: JSON.stringify(resolveServerRoutes())
+		__SERVER_ROUTES__: JSON.stringify(resolveServerRoutes()),
+		__FONTAWESOME_VERSION__: JSON.stringify(resolveFontAwesomeVersion())
 	},
 	server: {
 		port: 23315,

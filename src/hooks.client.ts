@@ -1,6 +1,6 @@
 import { dev } from '$app/environment';
 import * as Sentry from '@sentry/sveltekit';
-import { handleErrorWithSentry } from '@sentry/sveltekit';
+import { handleErrorWithSentry, SDK_VERSION } from '@sentry/sveltekit';
 import type { HandleClientError } from '@sveltejs/kit';
 import { installConsoleRelay, relayHandledError } from '$lib/client/console-relay';
 
@@ -9,6 +9,15 @@ Sentry.init({
 	enabled: !dev,
 	environment: dev ? 'development' : 'production'
 });
+
+// Sentry's npm build intentionally leaves `window.Sentry` unset — that's a
+// CDN-loader affordance. Publishing it ourselves lets Wappalyzer pick up
+// `Sentry.SDK_VERSION` the way it does on CDN-installed sites. SDK_VERSION
+// is a const from @sentry/core, inlined at bundle time.
+(window as unknown as { Sentry?: Record<string, unknown> }).Sentry = {
+	...(window as unknown as { Sentry?: Record<string, unknown> }).Sentry,
+	SDK_VERSION
+};
 
 installConsoleRelay();
 
