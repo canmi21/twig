@@ -1,9 +1,5 @@
-/* Single source of truth for every hex literal in the project.
-   tokens.css resolves its Nord / Contrast overrides through these vars, and
-   palettes.ts references the same names for theme-preview cards — changing a
-   swatch here updates both. Tailwind v4's --color-*-NNN OKLCH scale is a
-   sibling palette (external, untouchable) and referenced directly where used,
-   not re-aliased here. */
+/* Single source of truth for every hex literal. Tailwind v4's
+   --color-*-NNN scale is a sibling palette, referenced directly. */
 
 :root {
 	/* Nord — official numbering from nordtheme.com (nord0..nord10, nord7 unused) */
