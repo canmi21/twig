@@ -21,6 +21,8 @@ declare global {
 			emojiFont: import('$lib/font/emoji-data').EmojiFont;
 			htmlLang: string;
 			cdn: import('$lib/cdn/hosts').CdnHosts;
+			user?: import('$lib/server/auth').Auth['$Infer']['Session']['user'];
+			session?: import('$lib/server/auth').Auth['$Infer']['Session']['session'];
 		}
 		interface PageData {
 			theme: import('$lib/theme/data').ThemeState;

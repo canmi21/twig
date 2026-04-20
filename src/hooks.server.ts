@@ -7,7 +7,11 @@ import { fontHandle } from '$lib/hooks/font';
 import { cjkFontHandle } from '$lib/hooks/cjk-font';
 import { codeFontHandle } from '$lib/hooks/code-font';
 import { emojiFontHandle } from '$lib/hooks/emoji-font';
+import { authHandle } from '$lib/hooks/auth';
 
+// authHandle goes last because it owns the resolve() call when the request
+// targets /api/auth/* (svelteKitHandler dispatches there). For every other
+// path it just populates locals.user/session and falls through.
 export const handle = sequence(
 	langHandle,
 	i18nHandle,
@@ -16,5 +20,6 @@ export const handle = sequence(
 	fontHandle,
 	cjkFontHandle,
 	codeFontHandle,
-	emojiFontHandle
+	emojiFontHandle,
+	authHandle
 );

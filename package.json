@@ -19,6 +19,7 @@
 		"@lucide/svelte": "^1.8.0",
 		"@sentry/sveltekit": "^10.49.0",
 		"@sveltejs/kit": "^2.57.1",
+		"better-auth": "^1.6.5",
 		"bits-ui": "^2.18.0",
 		"drizzle-orm": "^0.45.2",
 		"feedsmith": "^2.9.2",
@@ -26,6 +27,7 @@
 		"svelte-fa": "^4.0.4"
 	},
 	"devDependencies": {
+		"@better-auth/cli": "^1.4.21",
 		"@commitlint/cli": "^20.5.0",
 		"@commitlint/config-conventional": "^20.5.0",
 		"@eslint/compat": "^2.0.5",
