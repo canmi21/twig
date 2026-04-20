@@ -58,6 +58,9 @@
 		"vitest": "^4.1.4",
 		"wrangler": "^4.83.0"
 	},
+	"overrides": {
+		"@better-auth/core": "1.6.5"
+	},
 	"engines": {
 		"node": ">=25"
 	}
