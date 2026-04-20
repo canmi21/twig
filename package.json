@@ -24,7 +24,8 @@
 		"drizzle-orm": "^0.45.2",
 		"feedsmith": "^2.9.2",
 		"svelte": "^5.55.4",
-		"svelte-fa": "^4.0.4"
+		"svelte-fa": "^4.0.4",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@better-auth/cli": "^1.4.21",

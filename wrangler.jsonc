@@ -36,5 +36,11 @@
 	"vars": {
 		"ENVIRONMENT": "production",
 		"EMAIL_FROM": "noreply@canmi.net"
-	}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "CACHE",
+			"id": "0c2e2911cbeb4e9c9a974d95ae26eec3"
+		}
+	]
 }

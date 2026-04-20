@@ -40,6 +40,17 @@ function resolveFontAwesomeVersion(): string {
 	return pkg.version;
 }
 
+// Derives the list of hostnames treated as same-site by the article
+// renderer when deciding whether an <a> opens in-place or in a new tab.
+// v1 populates from the public URL only; extend here when we add aliases.
+function resolveSafeDomains(): string[] {
+	try {
+		return [new URL(resolvePublicUrl()).hostname];
+	} catch {
+		return [];
+	}
+}
+
 // Walks src/routes/ at config-load time for +server.ts endpoints so hooks can
 // skip locale negotiation without a hand-maintained route list.
 function resolveServerRoutes(): string[] {
@@ -73,6 +84,7 @@ export default defineConfig({
 		__APP_GIT_COMMIT__: JSON.stringify(resolveGitCommit()),
 		__PUBLIC_URL__: JSON.stringify(resolvePublicUrl()),
 		__SERVER_ROUTES__: JSON.stringify(resolveServerRoutes()),
+		__SAFE_DOMAINS__: JSON.stringify(resolveSafeDomains()),
 		__FONTAWESOME_VERSION__: JSON.stringify(resolveFontAwesomeVersion())
 	},
 	server: {
