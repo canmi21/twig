@@ -6,7 +6,7 @@ import {
 	renderFontLinks,
 	type FontFamily
 } from '$lib/font/data';
-import { isSettingsPath } from './shared';
+import { isSettingsPath } from '../shared';
 
 // Scope Google Fonts network cost to the route that actually needs it:
 // /settings preloads every loadable font so the preview cards render their own

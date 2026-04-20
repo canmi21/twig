@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { CODE_FONT_COOKIE, isCodeFont, renderCodeLinks, type CodeFont } from '$lib/font/code-data';
-import { isSettingsPath } from './shared';
+import { isSettingsPath } from '../shared';
 
 // Code font handle mirrors fontHandle. Default `maple` ships @font-face CSS
 // with unicode-range subsets; woff2 downloads defer until a <pre> or <code>

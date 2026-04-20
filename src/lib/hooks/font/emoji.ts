@@ -5,7 +5,7 @@ import {
 	renderEmojiLinks,
 	type EmojiFont
 } from '$lib/font/emoji-data';
-import { isSettingsPath } from './shared';
+import { isSettingsPath } from '../shared';
 
 // Emoji font handle mirrors codeFontHandle. `system` means zero network (browser
 // resolves the tail 'Apple Color Emoji' / 'Segoe UI Emoji' / 'Noto Color Emoji'
