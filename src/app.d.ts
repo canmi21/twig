@@ -33,6 +33,7 @@ declare global {
 			htmlLang: string;
 			runtimeDays: number;
 			cdn: import('$lib/cdn/hosts').CdnHosts;
+			devUser: { id: string; email: string; isAdmin: boolean } | null;
 		}
 	}
 }

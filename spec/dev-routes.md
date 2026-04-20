@@ -17,3 +17,11 @@ The exemption is boundary-local. A component imported by `/dev/*` that also rend
 - Sub-routes are plain `/dev/<feature>/` (e.g. `/dev/notification/`). No further groups or prefixes.
 - Not linked from production navigation — the URL is typed, not discovered.
 - Folder name must be `dev/`, not `_dev` or `__dev` — SvelteKit's router treats leading-underscore directories as private and skips them.
+
+## Dev API endpoints
+
+`+server.ts` files under `/dev/api/*` don't inherit the `+layout.server.ts` 404 — layout loads run for pages, not endpoints. Each dev endpoint must self-gate with `if (!dev) error(404)` (importing `dev` from `$app/environment`). See `src/routes/dev/api/auth/switch/+server.ts` for the canonical shape.
+
+## DevOverlay
+
+`src/lib/dev/overlay/dev-overlay.svelte` — left-edge vertically-centered panel mounted from the root layout under `{#if dev}`. Collapsed to a `>` handle, expands to a small panel split into a vertical icon-nav sidebar (one icon per tool category) and a content pane that renders the active tool's actions. Currently hosts one tool: Auth (admin / user / sign-out, see [spec/auth.md](auth.md)). Add a new tool by appending an entry to the `TOOLS` array and a matching `{:else if active === '<id>'}` block inside the content pane.

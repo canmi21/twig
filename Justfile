@@ -9,8 +9,10 @@ test *args:
     bunx vitest {{args}}
 
 # Serve the built CF Worker bundle via miniflare on :{{PREVIEW_PORT}}.
+# `--var ENVIRONMENT:preview` overrides the wrangler.jsonc "production" default
+# so the auth pipeline still accepts *.local seed accounts during local preview.
 preview:
-    bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port {{PREVIEW_PORT}}
+    bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port {{PREVIEW_PORT}} --var ENVIRONMENT:preview
 
 # Fast project-wide TypeScript typecheck (.ts only, ~1s).
 typecheck:
@@ -44,3 +46,8 @@ database-migrate-remote:
 database-reset-local:
     rm -rf .wrangler/state/v3/d1
     just database-migrate-local
+
+# Seed dev accounts (admin@dev.local, user@dev.local) into the local D1.
+# Idempotent — INSERT OR REPLACE — safe to re-run after a reset.
+database-seed-local:
+    bunx wrangler d1 execute DATABASE --local --file=./database/seed.sql

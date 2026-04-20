@@ -26,5 +26,15 @@
 			"database_id": "12a03679-e3ac-4166-b206-60822e86468b",
 			"migrations_dir": "database/migrations"
 		}
-	]
+	],
+	"send_email": [
+		{
+			"name": "EMAIL",
+			"remote": true
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "production",
+		"EMAIL_FROM": "noreply@canmi.net"
+	}
 }

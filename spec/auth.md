@@ -37,25 +37,49 @@ All models (`user`, `session`, `account`, `verification`) use 32-char lowercase 
 
 6 chars from a Crockford-style alphabet (`23456789ABCDEFGHJKMNPQRSTVWXYZ`, 30 chars) — digits + uppercase letters minus the lookalikes `0/O/1/I/L/U`. Generated with `crypto.getRandomValues()` and 5-bit slicing with rejection of the top 2 codepoints, so the distribution is unbiased. 30^6 ≈ 729M combinations, plenty for a 5-minute OTP with 3 attempts.
 
-## Email delivery (TODO)
+## Email delivery
 
-`sendVerificationOTP` currently `console.log`s the OTP — fine for `just preview` testing. To wire CF Email Service (public beta as of 2026-04-16):
+CF Email Service (public beta since 2026-04-16). Binding `EMAIL` (type `send_email`) is declared in `wrangler.jsonc`; from inside a Worker the call needs no API token, no account ID — auth is implicit via the binding. `EMAIL_FROM` is a plain `vars` entry, edit it there to change the sender (the address must belong to a domain onboarded in CF dash → Email Service, which auto-provisions MX/SPF/DKIM/DMARC).
 
-1. In CF dash → Email Sending, onboard the sending domain (auto-provisions MX/SPF/DKIM/DMARC).
-2. Add to `wrangler.jsonc`:
-   ```jsonc
-   "send_email": [{ "name": "EMAIL", "remote": true }]
-   ```
-3. Re-run `just gen` so `Env.EMAIL` types in.
-4. Replace the `console.log` body in `src/lib/server/auth.ts` with:
-   ```ts
-   await env.EMAIL.send({
-   	to: email,
-   	from: 'no-reply@<your-domain>',
-   	subject: `Your code: ${otp}`,
-   	text: `Your verification code is ${otp}. Expires in 5 minutes.`
-   });
-   ```
+`sendVerificationOTP` in `src/lib/server/auth.ts` branches three ways:
+
+| Caller              | `env.EMAIL` | Behaviour                                          |
+| ------------------- | ----------- | -------------------------------------------------- |
+| vite dev            | undefined   | `console.log` the OTP — copy from terminal         |
+| `*.local` recipient | any         | no-op — OTP is forced to `000000`, no need to send |
+| wrangler / prod     | defined     | `env.EMAIL.send({ to, from, subject, text })`      |
+
+The binding lacks `remote: true` by default, so `wrangler dev` stubs sends locally (logs to console + writes file under `.wrangler/`). Add `"remote": true` to the binding entry if you want preview to actually deliver mail through the production service.
+
+## Dev sign-in (`.local` convention)
+
+`.local` is the reserved test-mailbox domain. Three guarantees in `src/lib/server/auth.ts`:
+
+1. `generateOTP` returns `'000000'` for any `*.local` email — so the sign-in flow can be exercised end-to-end without leaving the editor.
+2. `sendVerificationOTP` skips delivery for `*.local` (no MX, no point).
+3. `databaseHooks.user.create.before` returns `false` for `*.local` when `env.ENVIRONMENT === 'production'`. The wrangler.jsonc default is `"production"`; the `just preview` recipe overrides via `--var ENVIRONMENT:preview` so local preview still accepts the seeds.
+
+`src/lib/server/auth-roles.ts` is the canonical list:
+
+| Role  | Email             | Fixed user_id                      |
+| ----- | ----------------- | ---------------------------------- |
+| admin | `admin@dev.local` | `a0000000000000000000000000000001` |
+| user  | `user@dev.local`  | `b0000000000000000000000000000002` |
+
+`isAdmin(userId)` checks against `ADMIN_USER_IDS`. There is no `role` column on the `user` table — when more than one human ever needs admin, promote `ADMIN_USER_IDS` to a real column rather than installing the better-auth admin plugin (which would add `role` + `banned` + `banReason` + `banExpires` + `impersonatedBy` and force a migration).
+
+## Dev overlay & switch endpoint
+
+`src/lib/dev/overlay/dev-overlay.svelte` is mounted from the root layout under `{#if dev}` — vite-dev-only, dead-stripped from prod bundles. Floating bottom-right, foldable to a single icon, three actions: Login as admin / Login as user / Sign out.
+
+Each action POSTs to `/dev/api/auth/switch?as=admin|user|none`. The endpoint:
+
+1. Hard-gates on `dev` from `$app/environment` (404 in prod) **and** `platform.env.DATABASE` (503 in vite-only context).
+2. Lazy-seeds the target user with the canonical fixed ID if missing (`INSERT OR IGNORE`).
+3. Calls `auth.api.sendVerificationOTP` (writes a verification row with `value = '000000'`).
+4. Calls `auth.api.signInEmailOTP({ otp: '000000' })` and returns its Response — the Set-Cookie header carries the new session.
+
+The explicit `just database-seed-local` recipe stays useful for vitest fixtures and bulk reseeds; the overlay path doesn't depend on it.
 
 ## Anonymous users (deferred)
 

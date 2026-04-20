@@ -1,11 +1,11 @@
-import { betterAuth, type BetterAuthOptions } from 'better-auth';
+import { betterAuth } from 'better-auth';
 import { emailOTP } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
 
 // Crockford-style base32: digits + uppercase letters minus 0/O/1/I/L/U
-// to avoid lookalikes in serif email fonts. 32 chars = exact 5-bit slice,
-// so masking & 0x1f is unbiased — no rejection sampling needed.
+// to avoid lookalikes in serif email fonts. 30 chars in the alphabet, but
+// we sample 0..31 from a 5-bit slice and reject the top 2 codepoints.
 const OTP_ALPHABET = '23456789ABCDEFGHJKMNPQRSTVWXYZ';
 
 function generateAlphanumericOtp(length: number): string {
@@ -13,8 +13,6 @@ function generateAlphanumericOtp(length: number): string {
 	crypto.getRandomValues(bytes);
 	let out = '';
 	for (let i = 0; i < length; i++) {
-		// 30 chars in alphabet, but we sample 0..31 from 5 bits and
-		// reject the top 2 codepoints — keeps it unbiased without modulo.
 		let byte = bytes[i] & 0x1f;
 		while (byte >= OTP_ALPHABET.length) {
 			const replacement = new Uint8Array(1);
@@ -26,15 +24,42 @@ function generateAlphanumericOtp(length: number): string {
 	return out;
 }
 
-function buildOptions(env: Env): BetterAuthOptions {
+// Emails ending in `.local` are reserved for dev/preview seeds — they get
+// a fixed OTP `000000`, no email is sent, and the user.create.before hook
+// blocks them outright in production.
+function isDotLocal(email: string): boolean {
+	return email.toLowerCase().endsWith('.local');
+}
+
+// Return type intentionally inferred — annotating it as `BetterAuthOptions`
+// widens the plugin tuple to the empty supertype, which makes `auth.api`
+// lose the email-otp endpoints (sendVerificationOTP, signInEmailOTP, …).
+function buildOptions(env: Env) {
+	// vite dev has no `env`, the wrangler preview recipe passes
+	// `--var ENVIRONMENT:preview`, the deployed worker keeps the wrangler.jsonc
+	// default ("production"). String-cast widens the literal type wrangler
+	// generates so the comparison isn't flagged as always-true.
+	const isProd = (env.ENVIRONMENT as string) === 'production';
+
 	return {
 		database: env.DATABASE,
 		advanced: {
 			database: {
-				// 32-char lowercase hex for every model (user, session, account,
-				// verification). UUID v4 stripped of dashes — RFC 4122 entropy,
-				// URL-safe, case-uniform.
+				// 32-char lowercase hex for every model. UUID v4 stripped of
+				// dashes — RFC 4122 entropy, URL-safe, case-uniform.
 				generateId: () => crypto.randomUUID().replace(/-/g, '')
+			}
+		},
+		databaseHooks: {
+			user: {
+				create: {
+					// Returning `false` aborts the create. .local is a dev-only
+					// convention; in production any attempt to register one is
+					// either a typo or someone probing the dev affordance.
+					before: async (user: { email: string }) => {
+						if (isProd && isDotLocal(user.email)) return false;
+					}
+				}
 			}
 		},
 		plugins: [
@@ -42,14 +67,31 @@ function buildOptions(env: Env): BetterAuthOptions {
 				otpLength: 6,
 				expiresIn: 300,
 				allowedAttempts: 3,
-				generateOTP: () => generateAlphanumericOtp(6),
+				generateOTP: ({ email }) => {
+					if (isDotLocal(email)) return '000000';
+					return generateAlphanumericOtp(6);
+				},
 				async sendVerificationOTP({ email, otp, type }) {
-					// TODO: swap to `env.EMAIL.send({...})` once the sending
-					// domain is onboarded in CF Email Service. See spec/auth.md.
-					console.log(`[email-otp] type=${type} to=${email} otp=${otp}`);
+					// .local users already know their OTP is 000000, no point
+					// trying to deliver to a domain that doesn't exist.
+					if (isDotLocal(email)) return;
+
+					// vite dev has no EMAIL binding — log to terminal so the
+					// developer can copy the code without leaving the editor.
+					if (!env.EMAIL) {
+						console.log(`[email-otp] type=${type} to=${email} otp=${otp}`);
+						return;
+					}
+
+					await env.EMAIL.send({
+						to: email,
+						from: env.EMAIL_FROM,
+						subject: `Your code: ${otp}`,
+						text: `Your verification code is ${otp}. It expires in 5 minutes.`
+					});
 				}
 			}),
-			// Must be the last plugin — it patches outgoing responses with
+			// Must be the last plugin — patches outgoing responses with
 			// SvelteKit's cookie API so Set-Cookie survives form actions.
 			sveltekitCookies(getRequestEvent)
 		]
@@ -58,13 +100,16 @@ function buildOptions(env: Env): BetterAuthOptions {
 
 // Better Auth instances are non-trivial to construct (plugin router, schema
 // resolution). Cache by env so we build at most once per isolate per binding.
-// WeakMap keys on Env — when the isolate dies, the cache dies with it.
-const cache = new WeakMap<Env, ReturnType<typeof betterAuth>>();
+function buildAuth(env: Env) {
+	return betterAuth(buildOptions(env));
+}
 
-export function getAuth(env: Env): ReturnType<typeof betterAuth> {
+const cache = new WeakMap<Env, ReturnType<typeof buildAuth>>();
+
+export function getAuth(env: Env): ReturnType<typeof buildAuth> {
 	let auth = cache.get(env);
 	if (!auth) {
-		auth = betterAuth(buildOptions(env));
+		auth = buildAuth(env);
 		cache.set(env, auth);
 	}
 	return auth;
