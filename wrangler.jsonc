@@ -8,6 +8,15 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
-	"workers_dev": true,
-	"preview_urls": true
+	"observability": {
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": false,
+	"preview_urls": false
 }
