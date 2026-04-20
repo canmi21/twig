@@ -70,7 +70,7 @@ The binding lacks `remote: true` by default, so `wrangler dev` stubs sends local
 
 ## Dev overlay & switch endpoint
 
-`src/lib/dev/overlay/dev-overlay.svelte` is mounted from the root layout under `{#if dev}` — vite-dev-only, dead-stripped from prod bundles. Floating bottom-right, foldable to a single icon, three actions: Login as admin / Login as user / Sign out.
+`src/lib/dev/overlay/dev-overlay.svelte` is mounted from the root layout under `{#if dev}` — vite-dev-only, dead-stripped from prod bundles. Anchored to the left edge, vertically centered, collapses to a `>` handle and expands to a sidebar-tabbed panel; the Auth tab exposes three actions: Login as admin / Login as user / Sign out. See [spec/dev-routes.md](dev-routes.md) for the layout shape and how to add a new tool.
 
 Each action POSTs to `/dev/api/auth/switch?as=admin|user|none`. The endpoint:
 
