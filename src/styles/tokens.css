@@ -7,9 +7,9 @@
 	--color-border: var(--color-neutral-200);
 	--color-divider: var(--color-neutral-200);
 	--color-scrollbar: var(--color-neutral-300);
-	--color-success: #75d199;
+	--color-success: var(--palette-twig-success-light);
 	--color-destructive: var(--color-red-700);
-	--color-selection: #fef9b2;
+	--color-selection: var(--palette-twig-selection-light);
 }
 
 .dark {
@@ -20,61 +20,61 @@
 	--color-border: var(--color-neutral-700);
 	--color-divider: var(--color-neutral-800);
 	--color-scrollbar: var(--color-neutral-800);
-	--color-success: #587969;
+	--color-success: var(--palette-twig-success-dark);
 	--color-destructive: var(--color-red-400);
-	--color-selection: #4a605f;
+	--color-selection: var(--palette-twig-selection-dark);
 }
 
 /* Nord — Snow Storm */
 .nord {
-	--color-background: #eceff4;
-	--color-foreground: #2e3440;
-	--color-inset: #e5e9f0;
-	--color-muted: #e5e9f0;
-	--color-muted-foreground: #4c566a;
-	--color-border: #d8dee9;
-	--color-divider: #d8dee9;
-	--color-scrollbar: #d8dee9;
-	--color-selection: #d8dee9;
+	--color-background: var(--palette-nord-6);
+	--color-foreground: var(--palette-nord-0);
+	--color-inset: var(--palette-nord-5);
+	--color-muted: var(--palette-nord-5);
+	--color-muted-foreground: var(--palette-nord-3);
+	--color-border: var(--palette-nord-4);
+	--color-divider: var(--palette-nord-4);
+	--color-scrollbar: var(--palette-nord-4);
+	--color-selection: var(--palette-nord-4);
 }
 
 /* Nord — Polar Night */
 .nord.dark {
-	--color-background: #2e3440;
-	--color-foreground: #d8dee9;
-	--color-inset: #242933;
-	--color-muted: #3b4252;
-	--color-muted-foreground: #81a1c1;
-	--color-border: #434c5e;
-	--color-divider: #3b4252;
-	--color-scrollbar: #434c5e;
-	--color-selection: #4c566a;
+	--color-background: var(--palette-nord-0);
+	--color-foreground: var(--palette-nord-4);
+	--color-inset: var(--palette-nord-inset);
+	--color-muted: var(--palette-nord-1);
+	--color-muted-foreground: var(--palette-nord-9);
+	--color-border: var(--palette-nord-2);
+	--color-divider: var(--palette-nord-1);
+	--color-scrollbar: var(--palette-nord-2);
+	--color-selection: var(--palette-nord-3);
 }
 
 /* Contrast — pure white (vercel-minimal) */
 .contrast {
-	--color-background: #ffffff;
-	--color-foreground: #000000;
-	--color-inset: #fafafa;
-	--color-muted: #fafafa;
-	--color-muted-foreground: #666666;
-	--color-border: #eaeaea;
-	--color-divider: #eaeaea;
-	--color-scrollbar: #d4d4d4;
-	--color-selection: #eaeaea;
+	--color-background: var(--palette-mono-12);
+	--color-foreground: var(--palette-mono-0);
+	--color-inset: var(--palette-mono-11);
+	--color-muted: var(--palette-mono-11);
+	--color-muted-foreground: var(--palette-mono-6);
+	--color-border: var(--palette-mono-9);
+	--color-divider: var(--palette-mono-9);
+	--color-scrollbar: var(--palette-mono-8);
+	--color-selection: var(--palette-mono-9);
 }
 
 /* Contrast — pure black (vercel-dark) */
 .contrast.dark {
-	--color-background: #000000;
-	--color-foreground: #ffffff;
-	--color-inset: #0a0a0a;
-	--color-muted: #0a0a0a;
-	--color-muted-foreground: #888888;
-	--color-border: #333333;
-	--color-divider: #1a1a1a;
-	--color-scrollbar: #333333;
-	--color-selection: #333333;
+	--color-background: var(--palette-mono-0);
+	--color-foreground: var(--palette-mono-12);
+	--color-inset: var(--palette-mono-1);
+	--color-muted: var(--palette-mono-1);
+	--color-muted-foreground: var(--palette-mono-7);
+	--color-border: var(--palette-mono-4);
+	--color-divider: var(--palette-mono-2);
+	--color-scrollbar: var(--palette-mono-4);
+	--color-selection: var(--palette-mono-4);
 }
 
 /* Outside @theme so no stray font-* utilities; named --font-latin (not

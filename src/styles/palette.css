@@ -1,0 +1,46 @@
+/* Single source of truth for every hex literal in the project.
+   tokens.css resolves its Nord / Contrast overrides through these vars, and
+   palettes.ts references the same names for theme-preview cards — changing a
+   swatch here updates both. Tailwind v4's --color-*-NNN OKLCH scale is a
+   sibling palette (external, untouchable) and referenced directly where used,
+   not re-aliased here. */
+
+:root {
+	/* Nord — official numbering from nordtheme.com (nord0..nord10, nord7 unused) */
+	--palette-nord-0: #2e3440;
+	--palette-nord-1: #3b4252;
+	--palette-nord-2: #434c5e;
+	--palette-nord-3: #4c566a;
+	--palette-nord-4: #d8dee9;
+	--palette-nord-5: #e5e9f0;
+	--palette-nord-6: #eceff4;
+	--palette-nord-8: #88c0d0;
+	--palette-nord-9: #81a1c1;
+	--palette-nord-10: #5e81ac;
+
+	/* Nord extensions not in the upstream scale */
+	--palette-nord-inset: #242933;
+	--palette-nord-hover: #c8cdd4;
+
+	/* Monochrome ramp backing the Contrast (vercel-minimal) theme; indices run
+	   black → white so a higher number is always lighter. */
+	--palette-mono-0: #000000;
+	--palette-mono-1: #0a0a0a;
+	--palette-mono-2: #1a1a1a;
+	--palette-mono-3: #282828;
+	--palette-mono-4: #333333;
+	--palette-mono-5: #3a3a3a;
+	--palette-mono-6: #666666;
+	--palette-mono-7: #888888;
+	--palette-mono-8: #d4d4d4;
+	--palette-mono-9: #eaeaea;
+	--palette-mono-10: #ededed;
+	--palette-mono-11: #fafafa;
+	--palette-mono-12: #ffffff;
+
+	/* twig one-offs — not drawn from any external palette */
+	--palette-twig-success-light: #75d199;
+	--palette-twig-success-dark: #587969;
+	--palette-twig-selection-light: #fef9b2;
+	--palette-twig-selection-dark: #4a605f;
+}

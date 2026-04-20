@@ -19,22 +19,23 @@ export type ThemeOption = {
 	colors: PaletteColors;
 };
 
-// Palette literals (not CSS tokens) so each card renders its own theme
-// regardless of the page palette; column-first 3×2 pairs light/dark on mobile.
+// Every value resolves through src/styles/palette.css (or Tailwind's own
+// --color-neutral-* scale for the neutral preview) so these cards stay in
+// lockstep with the semantic tokens that share the same source.
 export const THEMES: readonly ThemeOption[] = [
 	{
 		palette: 'neutral',
 		mode: 'light',
 		labelKey: 'settings.appearance.theme.neutral.light',
 		colors: {
-			bg: '#fff',
-			titlebar: '#f5f5f5',
-			dot: '#d4d4d4',
-			sidebar: '#e5e5e5',
-			title: '#171717',
-			body: '#d4d4d4',
-			border: '#e5e5e5',
-			borderHover: '#d4d4d4'
+			bg: 'var(--color-white)',
+			titlebar: 'var(--color-neutral-100)',
+			dot: 'var(--color-neutral-300)',
+			sidebar: 'var(--color-neutral-200)',
+			title: 'var(--color-neutral-900)',
+			body: 'var(--color-neutral-300)',
+			border: 'var(--color-neutral-200)',
+			borderHover: 'var(--color-neutral-300)'
 		}
 	},
 	{
@@ -42,14 +43,14 @@ export const THEMES: readonly ThemeOption[] = [
 		mode: 'dark',
 		labelKey: 'settings.appearance.theme.neutral.dark',
 		colors: {
-			bg: '#171717',
-			titlebar: '#262626',
-			dot: '#525252',
-			sidebar: '#404040',
-			title: '#d4d4d4',
-			body: '#525252',
-			border: '#404040',
-			borderHover: '#525252'
+			bg: 'var(--color-neutral-900)',
+			titlebar: 'var(--color-neutral-800)',
+			dot: 'var(--color-neutral-600)',
+			sidebar: 'var(--color-neutral-700)',
+			title: 'var(--color-neutral-300)',
+			body: 'var(--color-neutral-600)',
+			border: 'var(--color-neutral-700)',
+			borderHover: 'var(--color-neutral-600)'
 		}
 	},
 	{
@@ -57,14 +58,14 @@ export const THEMES: readonly ThemeOption[] = [
 		mode: 'light',
 		labelKey: 'settings.appearance.theme.nord.light',
 		colors: {
-			bg: '#eceff4',
-			titlebar: '#e5e9f0',
-			dot: '#d8dee9',
-			sidebar: '#e5e9f0',
-			title: '#2e3440',
-			body: '#4c566a',
-			border: '#d8dee9',
-			borderHover: '#c8cdd4'
+			bg: 'var(--palette-nord-6)',
+			titlebar: 'var(--palette-nord-5)',
+			dot: 'var(--palette-nord-4)',
+			sidebar: 'var(--palette-nord-5)',
+			title: 'var(--palette-nord-0)',
+			body: 'var(--palette-nord-3)',
+			border: 'var(--palette-nord-4)',
+			borderHover: 'var(--palette-nord-hover)'
 		}
 	},
 	{
@@ -72,14 +73,14 @@ export const THEMES: readonly ThemeOption[] = [
 		mode: 'dark',
 		labelKey: 'settings.appearance.theme.nord.dark',
 		colors: {
-			bg: '#2e3440',
-			titlebar: '#3b4252',
-			dot: '#5e81ac',
-			sidebar: '#3b4252',
-			title: '#88c0d0',
-			body: '#4c566a',
-			border: '#3b4252',
-			borderHover: '#4c566a'
+			bg: 'var(--palette-nord-0)',
+			titlebar: 'var(--palette-nord-1)',
+			dot: 'var(--palette-nord-10)',
+			sidebar: 'var(--palette-nord-1)',
+			title: 'var(--palette-nord-8)',
+			body: 'var(--palette-nord-3)',
+			border: 'var(--palette-nord-1)',
+			borderHover: 'var(--palette-nord-3)'
 		}
 	},
 	{
@@ -87,14 +88,14 @@ export const THEMES: readonly ThemeOption[] = [
 		mode: 'light',
 		labelKey: 'settings.appearance.theme.contrast.light',
 		colors: {
-			bg: '#ffffff',
-			titlebar: '#fafafa',
-			dot: '#eaeaea',
-			sidebar: '#fafafa',
-			title: '#000000',
-			body: '#666666',
-			border: '#eaeaea',
-			borderHover: '#d4d4d4'
+			bg: 'var(--palette-mono-12)',
+			titlebar: 'var(--palette-mono-11)',
+			dot: 'var(--palette-mono-9)',
+			sidebar: 'var(--palette-mono-11)',
+			title: 'var(--palette-mono-0)',
+			body: 'var(--palette-mono-6)',
+			border: 'var(--palette-mono-9)',
+			borderHover: 'var(--palette-mono-8)'
 		}
 	},
 	{
@@ -102,14 +103,14 @@ export const THEMES: readonly ThemeOption[] = [
 		mode: 'dark',
 		labelKey: 'settings.appearance.theme.contrast.dark',
 		colors: {
-			bg: '#000000',
-			titlebar: '#0a0a0a',
-			dot: '#333333',
-			sidebar: '#1a1a1a',
-			title: '#ededed',
-			body: '#888888',
-			border: '#282828',
-			borderHover: '#3a3a3a'
+			bg: 'var(--palette-mono-0)',
+			titlebar: 'var(--palette-mono-1)',
+			dot: 'var(--palette-mono-4)',
+			sidebar: 'var(--palette-mono-2)',
+			title: 'var(--palette-mono-10)',
+			body: 'var(--palette-mono-7)',
+			border: 'var(--palette-mono-3)',
+			borderHover: 'var(--palette-mono-5)'
 		}
 	}
 ];

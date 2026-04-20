@@ -2,29 +2,31 @@
 
 ## Color tokens
 
-`src/styles/tokens.css` defines two layers:
+Three layers, each with a single responsibility:
 
-- **Physical:** Tailwind v4 built-ins (`var(--color-neutral-300)`, …). OKLCH canonical scale, untouchable.
-- **Semantic:** project tokens whose values `var()` into the physical layer. Light in `@theme`, dark overrides in `.dark`. Omit the dark override when the light value works across modes.
+- **Physical (external):** Tailwind v4 built-ins (`var(--color-neutral-300)`, `var(--color-blue-500)`, …). OKLCH canonical scale, untouchable.
+- **Palette (project):** `src/styles/palette.css` — the **single source of truth** for every hex literal in the project. Grouped by external reference (`--palette-nord-*` follows the official nord0..nord10 numbering) or by ramp position (`--palette-mono-0..12` runs black → white). Consumed by both `tokens.css` and `src/lib/theme/palettes.ts`.
+- **Semantic (project):** project tokens in `tokens.css` whose values `var()` into either the physical or palette layer. Light in `@theme`, dark overrides in `.dark`. Omit the dark override when the light value works across modes.
 
-| Token              | Light       | Dark        | Use for                                         |
-| ------------------ | ----------- | ----------- | ----------------------------------------------- |
-| `background`       | white       | neutral-900 | Page surface                                    |
-| `foreground`       | neutral-900 | neutral-300 | Default body text                               |
-| `inset`            | neutral-200 | neutral-950 | Selected state darker than background (sunken)  |
-| `muted`            | neutral-100 | neutral-800 | Elevated / tinted surface (hover, raised)       |
-| `muted-foreground` | neutral-500 | neutral-500 | Secondary text                                  |
-| `border`           | neutral-200 | neutral-700 | Outlines that must read (buttons, inputs)       |
-| `divider`          | neutral-200 | neutral-800 | Soft visual separators (nav, footer, sections)  |
-| `scrollbar`        | neutral-300 | neutral-800 | Browser scrollbar thumb (via `scrollbar-color`) |
-| `success`          | `#75d199`   | `#587969`   | Positive status                                 |
-| `destructive`      | red-700     | red-400     | Errors                                          |
-| `selection`        | `#fef9b2`   | `#4a605f`   | Text selection highlight (`::selection`)        |
+| Token              | Light                | Dark                | Use for                                         |
+| ------------------ | -------------------- | ------------------- | ----------------------------------------------- |
+| `background`       | white                | neutral-900         | Page surface                                    |
+| `foreground`       | neutral-900          | neutral-300         | Default body text                               |
+| `inset`            | neutral-200          | neutral-950         | Selected state darker than background (sunken)  |
+| `muted`            | neutral-100          | neutral-800         | Elevated / tinted surface (hover, raised)       |
+| `muted-foreground` | neutral-500          | neutral-500         | Secondary text                                  |
+| `border`           | neutral-200          | neutral-700         | Outlines that must read (buttons, inputs)       |
+| `divider`          | neutral-200          | neutral-800         | Soft visual separators (nav, footer, sections)  |
+| `scrollbar`        | neutral-300          | neutral-800         | Browser scrollbar thumb (via `scrollbar-color`) |
+| `success`          | twig-success-light   | twig-success-dark   | Positive status                                 |
+| `destructive`      | red-700              | red-400             | Errors                                          |
+| `selection`        | twig-selection-light | twig-selection-dark | Text selection highlight (`::selection`)        |
 
 **Rules:**
 
 - Project code uses semantic tokens only (`bg-background`, `text-muted-foreground`, …). No raw `bg-neutral-900`, no hex (brand colors excepted).
-- New semantics go in `tokens.css` pointing at a physical `var(--color-*)` — never a raw value.
+- New semantics go in `tokens.css` pointing at a physical `var(--color-*)` or a palette `var(--palette-*)` — never a raw hex value.
+- New hex values go in `palette.css` first. If the value is drawn from an external palette (Nord, Geist, Material, …), name it after that source's canonical scale; otherwise name it `--palette-twig-*`.
 - One-off intermediate dimming uses opacity modifiers (`text-foreground/72`), not a new token per level.
 - No `dark:` prefix on semantic utilities — `@theme` redefinitions inside `.dark` auto-flip everything.
 
@@ -37,6 +39,7 @@ Canonical Tailwind class scale (`size-3.25` vs `size-[0.8125rem]` etc.) is enfor
 | File             | Responsibility                                    |
 | ---------------- | ------------------------------------------------- |
 | `app.css`        | Tailwind import, `@custom-variant`, `@theme` anim |
+| `palette.css`    | Canonical hex values (`--palette-*`)              |
 | `tokens.css`     | Semantic color tokens (light + `.dark` overrides) |
 | `base.css`       | Element baselines (`html`) and `::selection`      |
 | `utilities.css`  | Reusable class primitives (`.focus-ring`)         |
