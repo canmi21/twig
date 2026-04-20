@@ -1,7 +1,10 @@
 import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { emailOTP } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
+import { dev } from '$app/environment';
 import { getRequestEvent } from '$app/server';
+import { getDatabase, schema } from '$lib/server/database';
 
 // Crockford-style base32: digits + uppercase letters minus 0/O/1/I/L/U
 // to avoid lookalikes in serif email fonts. 30 chars in the alphabet, but
@@ -35,14 +38,19 @@ function isDotLocal(email: string): boolean {
 // widens the plugin tuple to the empty supertype, which makes `auth.api`
 // lose the email-otp endpoints (sendVerificationOTP, signInEmailOTP, …).
 function buildOptions(env: Env) {
-	// vite dev has no `env`, the wrangler preview recipe passes
-	// `--var ENVIRONMENT:preview`, the deployed worker keeps the wrangler.jsonc
-	// default ("production"). String-cast widens the literal type wrangler
-	// generates so the comparison isn't flagged as always-true.
-	const isProd = (env.ENVIRONMENT as string) === 'production';
+	// `dev` is the authoritative local-mode signal. platformProxy surfaces the
+	// wrangler.jsonc `vars` default ("production") to vite dev too, so falling
+	// back to ENVIRONMENT alone would misclassify local dev as prod and trip
+	// the `.local` creation guard. Preview still rides `--var ENVIRONMENT:preview`
+	// from the Justfile recipe; the deployed worker keeps "production".
+	const isProd = !dev && (env.ENVIRONMENT as string) === 'production';
 
 	return {
-		database: env.DATABASE,
+		// drizzleAdapter reads auth-schema.ts's column mappings (e.g. TS
+		// `expiresAt` ↔ DB `expires_at`), so Better Auth speaks the same
+		// snake_case dialect the migrations use. Raw `env.DATABASE` would
+		// fall back to the kysely adapter, which ignores those mappings.
+		database: drizzleAdapter(getDatabase(env), { provider: 'sqlite', schema }),
 		advanced: {
 			database: {
 				// 32-char lowercase hex for every model. UUID v4 stripped of
