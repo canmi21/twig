@@ -14,12 +14,14 @@
 		<link rel="icon" type="image/svg+xml" sizes="any" href="%sveltekit.assets%/favicon.svg" />
 		<link rel="icon" type="image/png" sizes="96x96" href="%sveltekit.assets%/favicon-96x96.png" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
-		<link rel="preconnect" href="https://uptime.betterstack.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="preconnect" href="https://uptime.betterstack.com" crossorigin />
 		<link rel="wappalyzer" href="/fontawesome-free-%fontawesome_version%/a.css" disabled />
 		%font_links% %cjk_font_links% %code_font_links% %emoji_links% %theme_script% %motion_script%
 		%sveltekit.head%
 		<script
 			defer
+			fetchpriority="low"
 			src="https://cloud.umami.is/script.js"
 			data-website-id="2b0a1e79-405a-47c0-a263-05732e0a130c"
 			data-domains="canmi.net"
@@ -29,6 +31,7 @@
 			src="https://uptime.betterstack.com/widgets/announcement.js"
 			data-id="244075"
 			async="async"
+			fetchpriority="low"
 			type="text/javascript"
 		></script>
 	</head>
