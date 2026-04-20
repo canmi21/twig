@@ -8,6 +8,8 @@ English, declarative, compact. State the non-obvious _why_ — the constraint, t
 
 Aim for one or two lines. A comment block over three lines usually means the function is under-named or doing too much — fix the code, not the comment. If a comment carries a URL, the link stays when you compress the prose around it.
 
+Lefthook runs `scripts/check-comment-length.sh` at pre-commit and warns (soft, non-blocking) when a block exceeds three lines. If a block genuinely needs the extra length, add a line containing `spec-disable-next-block comments` anywhere inside it to suppress the warning for that block only.
+
 ## No separator lines
 
 Never use `// ---`, `// ===`, `// ***`, `/* === */`, or any visual divider made of repeated characters.

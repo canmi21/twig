@@ -16,6 +16,9 @@ pre-commit:
     - name: typecheck
       glob: '*.{ts,svelte}'
       run: ./node_modules/.bin/tsc --noEmit
+    - name: comment-length
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,svelte,css,scss,html}'
+      run: ./scripts/check-comment-length.sh {staged_files}
 
 commit-msg:
   jobs:
