@@ -18,6 +18,22 @@
 	outline-offset: 2px;
 }
 
+/* Text-input focus pattern. `:focus-visible` fires for mouse clicks on
+   text inputs too (spec: users need to see the caret), so we can't reuse
+   .focus-ring here. Gate the ring on the global focus-source attribute
+   set by $lib/client/focus-source so it only shows for keyboard nav. */
+.focus-input {
+	outline: none;
+	transition: border-color 120ms ease;
+}
+.focus-input:focus {
+	border-color: var(--color-border-strong);
+}
+html[data-focus-source='kbd'] .focus-input:focus-visible {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
+}
+
 /* Svelte JS-driven transitions need their own duration:0 since their timers
    ignore this rule. `data-motion-exempt` keeps preview cards demoing. */
 :root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *),

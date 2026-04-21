@@ -5,6 +5,7 @@
 	import { baseLocale, locales } from '$lib/paraglide/runtime';
 	import { canonicalPath, htmlLangFor, localizedPath } from '$lib/i18n/urls';
 	import { setClientCdnHosts } from '$lib/cdn/hosts';
+	import { installFocusSourceTracker } from '$lib/client/focus-source';
 	import Footer from '$lib/components/footer.svelte';
 	import NotificationHost from '$lib/components/notification/host.svelte';
 	import DevOverlay from '$lib/dev/overlay/dev-overlay.svelte';
@@ -16,6 +17,8 @@
 	$effect.pre(() => {
 		setClientCdnHosts(data.cdn);
 	});
+
+	$effect(() => installFocusSourceTracker());
 
 	const alternateLocales = locales.filter((l) => l !== baseLocale);
 </script>

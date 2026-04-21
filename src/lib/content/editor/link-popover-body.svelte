@@ -54,7 +54,7 @@
 		type="url"
 		placeholder="Paste or type URL"
 		onkeydown={onKeydown}
-		class="focus-ring w-64 rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground"
+		class="focus-input w-64 rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground"
 	/>
 	{#if isEditing}
 		<button

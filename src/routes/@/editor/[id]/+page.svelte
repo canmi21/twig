@@ -192,7 +192,7 @@
 				<input
 					bind:value={title}
 					placeholder="Post title"
-					class="focus-ring rounded-md border border-border bg-background px-2 py-1 text-foreground"
+					class="focus-input rounded-md border border-border bg-background px-2 py-1 text-foreground"
 				/>
 			</label>
 
@@ -206,7 +206,7 @@
 				<input
 					bind:value={slug}
 					oninput={onSlugInput}
-					class="focus-ring rounded-md border border-border bg-background px-2 py-1 font-code text-xs text-foreground"
+					class="focus-input rounded-md border border-border bg-background px-2 py-1 font-code text-xs text-foreground"
 				/>
 			</label>
 
@@ -216,7 +216,7 @@
 					bind:value={description}
 					rows="3"
 					placeholder="Short description for feed / OG"
-					class="focus-ring resize-none rounded-md border border-border bg-background px-2 py-1 text-foreground"
+					class="focus-input resize-none rounded-md border border-border bg-background px-2 py-1 text-foreground"
 				></textarea>
 			</label>
 		</div>

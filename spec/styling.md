@@ -16,6 +16,7 @@ Three layers, each with a single responsibility:
 | `muted`            | neutral-100          | neutral-800         | Elevated / tinted surface (hover, raised)       |
 | `muted-foreground` | neutral-500          | neutral-500         | Secondary text                                  |
 | `border`           | neutral-200          | neutral-700         | Outlines that must read (buttons, inputs)       |
+| `border-strong`    | neutral-400          | neutral-500         | Input focus border (see `.focus-input`)         |
 | `divider`          | neutral-200          | neutral-800         | Soft visual separators (nav, footer, sections)  |
 | `scrollbar`        | neutral-300          | neutral-800         | Browser scrollbar thumb (via `scrollbar-color`) |
 | `success`          | twig-success-light   | twig-success-dark   | Positive status                                 |
@@ -62,6 +63,21 @@ Two variants cover every focusable element with no visible border of its own:
 | `.focus-ring-inner` | `+2px` | Composite button — ring hugs a marked child, not the hit area |
 
 **Elements that already render their own visible 2px border** (e.g. card previews in `card-frame.svelte`) don't use either utility — they recolor their own border to `var(--color-blue-500)` on `:focus-visible`, plus a `outline: 2px solid transparent` stub for `forced-colors`. Stacking a negative-offset outline over an existing border makes Chromium/WebKit reconcile two corner-radii on every paint and can briefly render a 1-frame "too large" ring during Tab transitions; recoloring the already-rendered border has no geometry to resolve.
+
+## Text inputs
+
+`<input>` and `<textarea>` follow a two-channel focus pattern via `.focus-input` (in `utilities.css`):
+
+- **Mouse / touch focus** — border shifts to `border-strong`. No blue ring — it would compete with the surrounding UI every time the author clicks a field.
+- **Keyboard focus** — the blue ring layers on top of the border change.
+
+```html
+<input class="focus-input rounded-md border border-border bg-background px-2 py-1" />
+```
+
+Note: **no `.focus-ring` on text inputs.** Browsers apply `:focus-visible` to text inputs on mouse click too (spec: users must see the caret), so `.focus-ring:focus-visible` would fire on mouse. `.focus-input` keeps its own ring rule gated on `html[data-focus-source="kbd"]`, a root attribute stamped by `$lib/client/focus-source` via `keydown` (Tab / arrows / Enter / Space) vs `mousedown` / `pointerdown` / `touchstart`. Buttons, links, and other non-text-input elements continue to use `.focus-ring` as normal — `:focus-visible` correctly skips them on mouse.
+
+Inline editors that render no border of their own (e.g. `greeting-name.svelte`) need their own keyboard-source detection; they stay out of `.focus-input` and keep their bespoke logic.
 
 ## Browser default resets
 
