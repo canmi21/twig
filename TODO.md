@@ -164,16 +164,115 @@ Philosophy: `CACHE` is fully disposable. Every value must be reconstructable fro
 - Any real migration files under `migrations/` beyond the framework
 - The actual link-target render logic (declared here, implemented in R1)
 
-### Phase E2 — editor mount at `/@/editor/`
+### Phase E2a — editor engine
 
-Outcome: a Tiptap instance renders on the route, respects the E1 schema, and emits well-formed JSON.
+Outcome: a Tiptap instance mounted on a dev sandbox page produces JSON that passes the E1 validator across a variety of edits.
 
-- Thin Svelte wrapper: mount, destroy, transaction subscription, content get/set
-- Tiptap config reads node/mark definitions from the same E1 schema module
-- Route structure: list + new + edit (exact URL shape for the edit page — slug vs numeric id vs ULID — decide at execution)
-- Pasting unsupported content is silently normalized by ProseMirror schema, never stored raw
+- Svelte wrapper (~50 lines) around `@tiptap/core`: mount, destroy, content get / set, transaction callback
+- Tiptap extensions configured for exactly the v1 coverage set (paragraph, heading h2 / h3, bold / italic / strike / underline / code marks, link with `href` only — no author-settable `target` / `rel` / `class`)
+- Extensions file lives alongside the schema module; drift against E1 is caught by a round-trip test that pipes editor output back through `validateDoc`
+- Mounted under `/dev/*` (per `spec/dev-routes.md`) — **not** on `/@/editor/` yet
+- Dev harness page exposes a "Dump JSON" button for manual validator round-trips
 
-Decide at execution: toolbar placement and styling, keyboard shortcut set, focus / blur behavior, empty-state UX, draft autosave cadence (or none), where the slug is authored (auto from title vs explicit field).
+No chrome in this phase: no toolbar, no custom keyboard shortcuts beyond Tiptap defaults, no metadata inputs, no real route under `/@/editor/`.
+
+#### Execution detail (decided)
+
+**Svelte wrapper** (`src/lib/content/editor/editor.svelte`):
+
+Props (Svelte 5 runes):
+
+```ts
+interface Props {
+	doc?: DocV1; // $bindable — two-way content binding
+	editable?: boolean; // default true; false keeps structure + styling, disables editing
+	placeholder?: string; // forwarded to @tiptap/extension-placeholder
+	onUpdate?: (doc: DocV1) => void; // fires on Tiptap onUpdate (doc changes only, not selection)
+	onFocus?: () => void;
+	onBlur?: () => void;
+}
+```
+
+Lifecycle:
+
+- `$effect` creates the Tiptap instance, returns `editor.destroy()` for cleanup
+- Reactive `doc` prop changes propagate via `editor.commands.setContent(doc, { emitUpdate: false })` to avoid feedback loops
+- `onUpdate` reads `editor.getJSON()` and both writes to the bound `doc` and invokes the callback
+
+Deliberately not exposed: the raw `Editor` instance (avoids leaking Tiptap types to callers) and an `extensions` prop (whole app uses one schema — keep it centralized).
+
+**Tiptap extensions** (`src/lib/content/editor/extensions.ts`):
+
+Export: `createExtensions(opts: { placeholder?: string } = {}): Extension[]`
+
+Curated list matching E1 v1 exactly:
+
+- `Document`, `Paragraph`, `Text`
+- `Heading.configure({ levels: [2, 3] })` — h1 unreachable by construction
+- `Bold`, `Italic`, `Strike`, `Underline`, `Code`
+- `Link.extend({ addAttributes: () => ({ href: { default: null } }) }).configure({ openOnClick: false, autolink: false })` — attrs locked to `href`
+- `History`
+- `Placeholder.configure({ placeholder: opts.placeholder ?? '' })`
+
+**Drift test** (`tests/content-editor-extensions.test.ts`):
+
+Uses Tiptap's `getSchema(extensions)` to build a ProseMirror schema, round-trips canonical docs through `schema.nodeFromJSON(doc).toJSON()`, and asserts each result passes `validateDoc`. Runs in vitest's default node env — no DOM needed.
+
+Cases:
+
+- Canonical v1 doc exercising every mark and node round-trips identically
+- Link attrs with `{ href, target, class }` get stripped to `{ href }` only
+- Heading with `level: 1` is rejected by the PM schema
+- Nested marks (bold + italic + code on the same text span) pass through cleanly
+
+**Dev harness** (`src/routes/dev/editor-kernel/+page.svelte`):
+
+Two-column layout: editor on the left, inspector on the right. Inspector contents:
+
+- Live `JSON.stringify(doc, null, 2)` in a `<pre>` block, reacting to editor transactions
+- Live validator indicator: green tick when `validateDoc` passes, red with the formatted zod issue when it fails
+- "Copy JSON" button (clipboard write)
+- Five preset loaders: `empty`, `headings only`, `all marks`, `nested marks`, `malformed (should fail)`
+
+No production polish: minimal styling, English-only, desktop-only. Covered by the existing `/dev/*` 404 gate and i18n exemption (`spec/dev-routes.md`).
+
+#### Acceptance criteria
+
+- `/dev/editor-kernel` renders, typing works, nothing throws in the console
+- Live validator indicator stays green during legitimate editing and flips red on the `malformed` preset with a readable zod error
+- Drift test passes four cases
+- `just check` stays at zero errors
+
+#### Out of scope for E2a
+
+- Toolbar, keyboard shortcuts beyond Tiptap defaults (E2b)
+- `/@/editor/` routes, metadata inputs, list page (E2c)
+- Save, compile, KV write, autosave (E3)
+- Public article rendering (R1)
+
+### Phase E2b — editor UI chrome
+
+Outcome: every v1 mark and node is reachable via both the toolbar and a keyboard shortcut; the editor communicates its state (empty, focused) and refuses unsupported pasted content cleanly.
+
+- Toolbar with one control per v1 mark and node
+- Keyboard shortcuts for every mark (Cmd+B / Cmd+I / Cmd+Shift+X / Cmd+U / Cmd+E / Cmd+K at minimum)
+- Placeholder for empty state
+- Paste handling: confirm that ProseMirror's schema normalization strips unsupported HTML (tables, marquee, images — the latter until the v2 image block) without surprising failures
+
+Still on the dev sandbox route; no real `/@/editor/` pages yet.
+
+### Phase E2c — `/@/editor/` routes, metadata, list
+
+Outcome: an author can pick or create a post, fill in metadata, edit its body, and copy the current JSON for manual verification. Save-to-DB remains in E3.
+
+- `/@/editor/` list page reading from D1 (columns: title, slug, updated, draft / published badge)
+- `/@/editor/new` draft creation (ULID generated, held in client state; no DB write until E3)
+- `/@/editor/[id]` edit existing post
+- Metadata inputs: title, slug, description
+- Slug: explicit field, pre-filled from a slugified title on first entry but freely editable
+- Dev-only "Copy JSON" / "Validate now" button on the editor page — the bridge to E3's real save
+
+Autosave and save-to-DB both land in E3.
 
 ### Phase E3 — save + compile + KV write
 
@@ -183,8 +282,9 @@ Outcome: Save persists canonical JSON to D1 and rendered artifacts to KV.
 - Compile: JSON → HTML, JSON → plain text, JSON → TOC
 - Write order: D1 first (source of truth), KV second (derivative). KV-write failure is recoverable by the read-path fallback, so no cross-store transaction is needed.
 - Every save stamps `schema_version = CURRENT_SCHEMA_VERSION`
+- Client-side autosave (debounced) triggers the save endpoint while the author is editing a draft — not on published posts
 
-Decide at execution: HTML compiler implementation (pure string walker vs SSR of a Svelte component — lean toward string walker for testability), shiki integration point (here vs R2 — see R2), plain-text extraction rules, KV payload shape, whether publish vs save-draft are one endpoint or two.
+Decide at execution: HTML compiler implementation (pure string walker vs SSR of a Svelte component — lean toward string walker for testability), shiki integration point (here vs R2 — see R2), plain-text extraction rules, KV payload shape, whether publish vs save-draft are one endpoint or two, autosave debounce interval and the exact trigger conditions (idle vs every N transactions).
 
 ### Phase E4 — Cloudflare Access gate
 
