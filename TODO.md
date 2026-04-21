@@ -261,6 +261,131 @@ Outcome: every v1 mark and node is reachable via both the toolbar and a keyboard
 
 Still on the dev sandbox route; no real `/@/editor/` pages yet.
 
+#### Execution detail (decided)
+
+**Top toolbar** (always visible above the editor):
+
+```
+[↶ Undo] [↷ Redo] │ [Paragraph ▾] │ [B] [I] [U] [S] [</>] │ [🔗] [⌫]
+  history          block type        inline marks (5)         actions
+```
+
+Eleven controls, four groups separated by `border-r border-divider` dividers. Background `bg-muted`, bottom edge `border-b border-border`. Each button:
+
+- Default `text-muted-foreground`, hover `text-foreground bg-inset`, active (mark / node currently applied) `bg-inset text-foreground`
+- `focus-ring` utility for keyboard focus
+- `title` attribute carries the action name + shortcut hint (`"Bold (⌘B)"`)
+- Lucide icons throughout (`@lucide/svelte/icons/<name>`)
+
+The block type control uses bits-ui `DropdownMenu`. Label reflects the current block at the selection (`Paragraph` / `Heading 2` / `Heading 3`); the menu lists the same three options.
+
+**Bubble menu** (anchored above selected text via `@tiptap/extension-bubble-menu`):
+
+```
+[B] [I] [U] [S] [</>] │ [🔗]
+```
+
+Six controls — inline marks plus link, no history / no block type / no clear. Same visual language as top-bar buttons.
+
+**Keyboard shortcuts**:
+
+| Action             | Shortcut | Source                    |
+| ------------------ | -------- | ------------------------- |
+| Bold               | ⌘B       | Tiptap default            |
+| Italic             | ⌘I       | Tiptap default            |
+| Underline          | ⌘U       | Underline default         |
+| Strikethrough      | ⌘⇧X      | Tiptap default            |
+| Inline code        | ⌘E       | Tiptap default            |
+| Heading 2          | ⌘⌥2      | Heading default           |
+| Heading 3          | ⌘⌥3      | Heading default           |
+| Paragraph          | ⌘⌥0      | Paragraph default         |
+| Undo               | ⌘Z       | History default           |
+| Redo               | ⌘⇧Z      | History default           |
+| Insert / edit link | ⌘K       | Custom (wired in wrapper) |
+| Clear formatting   | ⌘\       | Custom (wired in wrapper) |
+
+The two custom shortcuts are added via a one-off `addKeyboardShortcuts` extension declared next to the wrapper, not inside `extensions.ts` — keeps the schema-shape file pure.
+
+**Link interaction**:
+
+Trigger paths: top-bar 🔗 button, bubble 🔗 button, or `⌘K`.
+
+Popover (bits-ui `Popover`):
+
+- Anchored under the triggering button, or at the caret coordinate when triggered via `⌘K`
+- Single text input, `placeholder="Paste or type URL"`, autofocused
+- `Enter` confirms, `Esc` cancels
+- Editing an existing link: input pre-filled with current `href`, plus a `Remove link` button
+
+Confirm behavior:
+
+- Selection non-empty → wrap selection in link mark with `attrs.href` set to the input value
+- Selection empty → close popover, no-op
+- URL not strictly validated at input time (zod gates at save in E3); soft hint shows when input doesn't look like a URL
+
+**Placeholder**:
+
+```ts
+Placeholder.configure({
+	placeholder: ({ node }) =>
+		node.type.name === 'heading' ? `Heading ${node.attrs.level}` : 'Start typing…'
+});
+```
+
+Default `showOnlyCurrent: true` keeps non-focused empty blocks silent.
+
+**Paste handling**:
+
+`Heading` extension extended with `parseHTML` to clamp levels into the v1 range:
+
+```ts
+Heading.extend({
+	parseHTML() {
+		return [
+			{ tag: 'h1', attrs: { level: 2 } },
+			{ tag: 'h2', attrs: { level: 2 } },
+			{ tag: 'h3', attrs: { level: 3 } },
+			{ tag: 'h4', attrs: { level: 3 } },
+			{ tag: 'h5', attrs: { level: 3 } },
+			{ tag: 'h6', attrs: { level: 3 } }
+		];
+	}
+}).configure({ levels: [2, 3] });
+```
+
+`h1` → `h2`, `h4`–`h6` → `h3`. Preserves the primary vs secondary heading distinction. Pure JSON input bypassing HTML still goes through the validator (the documented layered defense from E2a).
+
+Other unsupported HTML (tables, lists, blockquotes, images) is left to ProseMirror's default normalization — text content preserved, structure dropped. No custom paste handlers for these in v1.
+
+**Dev harness updates** (`/dev/editor-kernel/+page.svelte`):
+
+- Mount the wrapped editor with the new toolbar above and the bubble menu attached
+- Existing right-hand inspector stays unchanged
+- One or two preset HTML blobs added (Notion-like, Word-like) for manual paste verification — exposed as buttons that copy the blob into the clipboard so the user can paste it into the editor
+
+**Packages**:
+
+One new install: `@tiptap/extension-bubble-menu`. (15th Tiptap package.)
+
+#### Acceptance criteria
+
+- Top toolbar renders with all 11 controls; pressing each toggles the corresponding mark / node / action and reflects active state
+- Bubble menu appears above the selection when text is highlighted and disappears when selection collapses or editor blurs
+- Each shortcut in the table works as listed
+- Link popover opens on trigger, focuses its input, accepts a URL, and applies the link mark to the selection; pre-fills and offers `Remove link` when editing an existing link
+- Placeholder shows `Start typing…` in an empty paragraph and `Heading 2` / `Heading 3` in empty headings (current block only)
+- Pasting HTML containing `<h1>` produces `h2`; pasting `<h4>`–`<h6>` produces `h3` (manual verification in dev harness)
+- Pasting tables / lists / images flattens to text with no structure but no errors
+- Existing drift test still passes; `just check` stays at zero errors
+
+#### Out of scope for E2b
+
+- Real `/@/editor/` routes, metadata inputs, list page (E2c)
+- Save endpoint, compile pipeline, KV writes, autosave (E3)
+- Image upload and image block (post-launch)
+- Visual flash / notification when paste flattens unsupported structure
+- Markdown-shortcut input rules (typing `**foo**` → bold) — Tiptap defaults handle some; we don't audit exhaustively in v1
+
 ### Phase E2c — `/@/editor/` routes, metadata, list
 
 Outcome: an author can pick or create a post, fill in metadata, edit its body, and copy the current JSON for manual verification. Save-to-DB remains in E3.

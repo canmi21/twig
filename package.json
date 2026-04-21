@@ -21,6 +21,7 @@
 		"@sveltejs/kit": "^2.57.1",
 		"@tiptap/core": "^3.22.4",
 		"@tiptap/extension-bold": "^3.22.4",
+		"@tiptap/extension-bubble-menu": "^3.22.4",
 		"@tiptap/extension-code": "^3.22.4",
 		"@tiptap/extension-document": "^3.22.4",
 		"@tiptap/extension-heading": "^3.22.4",

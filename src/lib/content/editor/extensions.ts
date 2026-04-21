@@ -19,7 +19,21 @@ export function createExtensions(opts: { placeholder?: string } = {}): Extension
 		Document,
 		Paragraph,
 		Text,
-		Heading.configure({ levels: [2, 3] }),
+		Heading.extend({
+			// Clamp pasted h1 / h4-h6 into the v1 range so HTML paste can never
+			// land an h1 in storage. Pure JSON input bypasses parseHTML and is
+			// caught by the validator instead — the documented layered defense.
+			parseHTML() {
+				return [
+					{ tag: 'h1', attrs: { level: 2 } },
+					{ tag: 'h2', attrs: { level: 2 } },
+					{ tag: 'h3', attrs: { level: 3 } },
+					{ tag: 'h4', attrs: { level: 3 } },
+					{ tag: 'h5', attrs: { level: 3 } },
+					{ tag: 'h6', attrs: { level: 3 } }
+				];
+			}
+		}).configure({ levels: [2, 3] }),
 		Bold,
 		Italic,
 		Strike,
@@ -31,6 +45,11 @@ export function createExtensions(opts: { placeholder?: string } = {}): Extension
 			}
 		}).configure({ openOnClick: false, autolink: false }),
 		History,
-		Placeholder.configure({ placeholder: opts.placeholder ?? '' })
+		Placeholder.configure({
+			placeholder: ({ node }) =>
+				node.type.name === 'heading'
+					? `Heading ${node.attrs.level}`
+					: (opts.placeholder ?? 'Start typing…')
+		})
 	];
 }
