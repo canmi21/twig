@@ -40,6 +40,7 @@
 		"feedsmith": "^2.9.2",
 		"svelte": "^5.55.4",
 		"svelte-fa": "^4.0.4",
+		"ulid": "^3.0.2",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { Editor } from '@tiptap/core';
 	import { DropdownMenu, Popover } from 'bits-ui';
 	import IconBold from '@lucide/svelte/icons/bold';
@@ -16,9 +17,10 @@
 	interface Props {
 		editor: Editor;
 		linkPopoverOpen?: boolean;
+		trailing?: Snippet;
 	}
 
-	let { editor, linkPopoverOpen = $bindable(false) }: Props = $props();
+	let { editor, linkPopoverOpen = $bindable(false), trailing }: Props = $props();
 
 	type BlockKind = 'paragraph' | 'heading2' | 'heading3';
 	const BLOCK_LABEL: Record<BlockKind, string> = {
@@ -222,4 +224,10 @@
 	>
 		<IconRemoveFormatting class="size-4 " />
 	</button>
+
+	{#if trailing}
+		<div class="ml-auto flex items-center gap-1">
+			{@render trailing()}
+		</div>
+	{/if}
 </div>

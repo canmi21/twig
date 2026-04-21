@@ -40,7 +40,7 @@
 <main class="flex min-h-svh flex-col">
 	{@render children()}
 </main>
-{#if !page.url.pathname.startsWith('/settings')}
+{#if !page.url.pathname.startsWith('/settings') && !page.url.pathname.startsWith('/@')}
 	<Footer runtimeDays={data.runtimeDays} />
 {/if}
 <NotificationHost />
