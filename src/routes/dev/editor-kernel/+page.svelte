@@ -105,10 +105,8 @@
 <div class="flex h-screen flex-col">
 	<div class="flex flex-1 overflow-hidden">
 		<div class="flex flex-1 flex-col border-r border-border">
-			{#if editor}
-				<Toolbar {editor} bind:linkPopoverOpen={toolbarLinkOpen} />
-				<Bubble {editor} />
-			{/if}
+			<Toolbar {editor} bind:linkPopoverOpen={toolbarLinkOpen} />
+			<Bubble {editor} />
 			<div class="flex-1 overflow-auto p-6">
 				<Editor
 					bind:doc

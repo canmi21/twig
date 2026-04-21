@@ -2,30 +2,20 @@
 	import IconChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import IconChevronRight from '@lucide/svelte/icons/chevron-right';
 	import IconFileText from '@lucide/svelte/icons/file-text';
+	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import type { LayoutData } from './$types';
 
-	let { children } = $props();
+	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
 
-	// Collapsed state hydrates from localStorage on mount. SSR always renders
-	// expanded; brief flicker on reload is acceptable for an admin-only route.
-	let collapsed = $state(false);
-
-	$effect(() => {
-		try {
-			collapsed = localStorage.getItem('twig:admin-sidebar') === 'collapsed';
-		} catch {
-			/* storage unavailable — stay expanded */
-		}
-	});
+	// Cookie source of truth — see +layout.server.ts. Initial state is SSR-
+	// consistent, so reload doesn't flash the expanded width for one frame.
+	let collapsed = $state(untrack(() => data.adminSidebarCollapsed));
 
 	function toggle() {
 		collapsed = !collapsed;
-		try {
-			localStorage.setItem('twig:admin-sidebar', collapsed ? 'collapsed' : 'expanded');
-		} catch {
-			/* storage unavailable — in-memory toggle still works */
-		}
+		document.cookie = `twig:admin-sidebar=${collapsed ? 'collapsed' : 'expanded'};path=/;max-age=31536000;samesite=lax`;
 	}
 
 	const navItems = [{ href: '/@/editor', label: 'Editor', icon: IconFileText }] as const;

@@ -92,35 +92,33 @@
 	</form>
 
 	<div class="flex flex-1 flex-col overflow-hidden">
-		{#if editor}
-			<Toolbar {editor} bind:linkPopoverOpen={toolbarLinkOpen}>
-				{#snippet trailing()}
-					{#if form?.error}
-						<span class="mr-1 text-xs text-destructive">{form.error}</span>
-					{:else if form?.success}
-						<span class="mr-1 text-xs text-success">Saved</span>
-					{/if}
-					<button
-						form="post-save-form"
-						type="submit"
-						class="focus-ring rounded-md bg-foreground px-3 py-1 text-xs text-background hover:opacity-90"
-					>
-						Save
-					</button>
-					<button
-						type="button"
-						onclick={() => (drawerOpen = !drawerOpen)}
-						class="focus-ring flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-inset hover:text-foreground"
-						title="Post metadata"
-						aria-label="Post metadata"
-						aria-expanded={drawerOpen}
-					>
-						<IconPanelRight class="size-4" />
-					</button>
-				{/snippet}
-			</Toolbar>
-			<Bubble {editor} />
-		{/if}
+		<Toolbar {editor} bind:linkPopoverOpen={toolbarLinkOpen}>
+			{#snippet trailing()}
+				{#if form?.error}
+					<span class="mr-1 text-xs text-destructive">{form.error}</span>
+				{:else if form?.success}
+					<span class="mr-1 text-xs text-success">Saved</span>
+				{/if}
+				<button
+					form="post-save-form"
+					type="submit"
+					class="focus-ring rounded-md bg-foreground px-3 py-1 text-xs text-background hover:opacity-90"
+				>
+					Save
+				</button>
+				<button
+					type="button"
+					onclick={() => (drawerOpen = !drawerOpen)}
+					class="focus-ring flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-inset hover:text-foreground"
+					title="Post metadata"
+					aria-label="Post metadata"
+					aria-expanded={drawerOpen}
+				>
+					<IconPanelRight class="size-4" />
+				</button>
+			{/snippet}
+		</Toolbar>
+		<Bubble {editor} />
 		<div class="mx-auto w-full max-w-3xl flex-1 overflow-auto px-6 py-10">
 			<Editor
 				bind:doc

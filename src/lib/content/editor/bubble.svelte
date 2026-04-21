@@ -11,7 +11,7 @@
 	import LinkPopoverBody from './link-popover-body.svelte';
 
 	interface Props {
-		editor: Editor;
+		editor: Editor | null;
 	}
 
 	let { editor }: Props = $props();
@@ -26,6 +26,15 @@
 	let linkOpen = $state(false);
 
 	function refresh() {
+		if (!editor) {
+			activeBold = false;
+			activeItalic = false;
+			activeUnderline = false;
+			activeStrike = false;
+			activeCode = false;
+			activeLink = false;
+			return;
+		}
 		activeBold = editor.isActive('bold');
 		activeItalic = editor.isActive('italic');
 		activeUnderline = editor.isActive('underline');
@@ -48,6 +57,7 @@
 
 	$effect(() => {
 		refresh();
+		if (!editor) return;
 		const handler = () => refresh();
 		editor.on('selectionUpdate', handler);
 		editor.on('transaction', handler);
@@ -72,7 +82,7 @@
 	<button
 		type="button"
 		class="{btnBase} {activeBold ? btnActive : ''}"
-		onclick={() => editor.chain().focus().toggleBold().run()}
+		onclick={() => editor?.chain().focus().toggleBold().run()}
 		title="Bold (⌘B)"
 		aria-label="Bold"
 		aria-pressed={activeBold}
@@ -82,7 +92,7 @@
 	<button
 		type="button"
 		class="{btnBase} {activeItalic ? btnActive : ''}"
-		onclick={() => editor.chain().focus().toggleItalic().run()}
+		onclick={() => editor?.chain().focus().toggleItalic().run()}
 		title="Italic (⌘I)"
 		aria-label="Italic"
 		aria-pressed={activeItalic}
@@ -92,7 +102,7 @@
 	<button
 		type="button"
 		class="{btnBase} {activeUnderline ? btnActive : ''}"
-		onclick={() => editor.chain().focus().toggleUnderline().run()}
+		onclick={() => editor?.chain().focus().toggleUnderline().run()}
 		title="Underline (⌘U)"
 		aria-label="Underline"
 		aria-pressed={activeUnderline}
@@ -102,7 +112,7 @@
 	<button
 		type="button"
 		class="{btnBase} {activeStrike ? btnActive : ''}"
-		onclick={() => editor.chain().focus().toggleStrike().run()}
+		onclick={() => editor?.chain().focus().toggleStrike().run()}
 		title="Strikethrough (⌘⇧X)"
 		aria-label="Strikethrough"
 		aria-pressed={activeStrike}
@@ -112,7 +122,7 @@
 	<button
 		type="button"
 		class="{btnBase} {activeCode ? btnActive : ''}"
-		onclick={() => editor.chain().focus().toggleCode().run()}
+		onclick={() => editor?.chain().focus().toggleCode().run()}
 		title="Inline code (⌘E)"
 		aria-label="Inline code"
 		aria-pressed={activeCode}
@@ -137,7 +147,9 @@
 				align="start"
 				class="z-50 rounded-md border border-divider bg-background p-2 shadow-sm outline-none"
 			>
-				<LinkPopoverBody {editor} onClose={() => (linkOpen = false)} />
+				{#if editor}
+					<LinkPopoverBody {editor} onClose={() => (linkOpen = false)} />
+				{/if}
 			</Popover.Content>
 		</Popover.Portal>
 	</Popover.Root>
