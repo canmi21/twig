@@ -12,8 +12,20 @@ export interface Compiled {
 	toc: TocItem[];
 }
 
+export interface MediaResolution {
+	displaySha256: string;
+	hqSha256: string | null;
+	thumbhash: string;
+	width: number;
+	height: number;
+}
+
 export interface CompileOptions {
 	safeDomains: readonly string[];
+	// mid → variant data, pre-resolved by the save pipeline so the walker
+	// stays pure/synchronous. Missing mids render as empty blocks rather
+	// than throwing — a deleted media item shouldn't break the post.
+	media?: Record<string, MediaResolution>;
 }
 
 // Pure JSON → HTML / plain-text / TOC walker. No DOM, no Svelte SSR — easy
@@ -27,10 +39,22 @@ export function compileDoc(doc: DocV1, opts: CompileOptions): Compiled {
 
 	for (const block of doc.content) {
 		html += renderBlock(block, opts, toc, seenAnchors);
-		plainParts.push(plainFromInline(block.content ?? []));
+		if (block.type !== 'image') {
+			plainParts.push(plainFromInline(block.content ?? []));
+		}
 	}
 
 	return { html, plain: plainParts.join('\n\n').trim(), toc };
+}
+
+// Walk the doc tree collecting every `mid` from image blocks. Used by the
+// save pipeline to batch-resolve media before compiling.
+export function extractMediaIds(doc: DocV1): string[] {
+	const mids = new Set<string>();
+	for (const block of doc.content) {
+		if (block.type === 'image' && block.attrs.mid) mids.add(block.attrs.mid);
+	}
+	return [...mids];
 }
 
 function renderBlock(
@@ -39,6 +63,7 @@ function renderBlock(
 	toc: TocItem[],
 	seenAnchors: Set<string>
 ): string {
+	if (block.type === 'image') return renderImage(block.attrs, opts);
 	const inner = renderInline(block.content ?? [], opts);
 	if (block.type === 'paragraph') return `<p>${inner}</p>`;
 	const { level } = block.attrs;
@@ -46,6 +71,27 @@ function renderBlock(
 	const id = allocateAnchor(text, seenAnchors);
 	toc.push({ level, text, id });
 	return `<h${level} id="${escapeAttr(id)}">${inner}</h${level}>`;
+}
+
+function renderImage(attrs: { mid: string; alt?: string | null }, opts: CompileOptions): string {
+	const resolution = opts.media?.[attrs.mid];
+	if (!resolution) return '';
+	const src = `/api/media/image/${resolution.displaySha256}.webp`;
+	const alt = attrs.alt ?? '';
+	const parts = [
+		`src="${escapeAttr(src)}"`,
+		`alt="${escapeAttr(alt)}"`,
+		`width="${resolution.width}"`,
+		`height="${resolution.height}"`,
+		`data-thumbhash="${escapeAttr(resolution.thumbhash)}"`,
+		`data-mid="${escapeAttr(attrs.mid)}"`,
+		'loading="lazy"',
+		'decoding="async"'
+	];
+	if (resolution.hqSha256) {
+		parts.push(`data-hq="/api/media/image/${resolution.hqSha256}.webp"`);
+	}
+	return `<img ${parts.join(' ')}>`;
 }
 
 function renderInline(inline: InlineV1[], opts: CompileOptions): string {

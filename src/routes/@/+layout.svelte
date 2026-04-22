@@ -2,6 +2,7 @@
 	import IconChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import IconChevronRight from '@lucide/svelte/icons/chevron-right';
 	import IconFileText from '@lucide/svelte/icons/file-text';
+	import IconImage from '@lucide/svelte/icons/image';
 	import { untrack } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -18,7 +19,10 @@
 		document.cookie = `twig:admin-sidebar=${collapsed ? 'collapsed' : 'expanded'};path=/;max-age=31536000;samesite=lax`;
 	}
 
-	const navItems = [{ href: '/@/editor', label: 'Editor', icon: IconFileText }] as const;
+	const navItems = [
+		{ href: '/@/editor', label: 'Editor', icon: IconFileText },
+		{ href: '/@/media', label: 'Media', icon: IconImage }
+	] as const;
 </script>
 
 <div class="flex h-svh">

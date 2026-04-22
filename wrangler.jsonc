@@ -42,5 +42,11 @@
 			"binding": "CACHE",
 			"id": "0c2e2911cbeb4e9c9a974d95ae26eec3"
 		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "twig-bucket",
+			"binding": "STORAGE"
+		}
 	]
 }

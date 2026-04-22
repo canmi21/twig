@@ -5,6 +5,7 @@
 	import IconBold from '@lucide/svelte/icons/bold';
 	import IconChevronDown from '@lucide/svelte/icons/chevron-down';
 	import IconCode from '@lucide/svelte/icons/code';
+	import IconImage from '@lucide/svelte/icons/image';
 	import IconItalic from '@lucide/svelte/icons/italic';
 	import IconLink from '@lucide/svelte/icons/link';
 	import IconRedo from '@lucide/svelte/icons/redo-2';
@@ -87,6 +88,26 @@
 		else if (kind === 'heading2') c.setHeading({ level: 2 }).run();
 		else c.setHeading({ level: 3 }).run();
 		blockMenuOpen = false;
+	}
+
+	// Stop-gap image insertion — prompts for a mid. The /@/media library
+	// shows each item's mid on its detail page. A proper picker belongs
+	// here eventually, but this keeps publish-time resolution testable
+	// end-to-end without blocking on UI polish.
+	function insertImagePrompt() {
+		if (!editor) return;
+		const raw = prompt('Paste media id (mid) from /@/media detail page:');
+		if (!raw) return;
+		const mid = raw.trim().toLowerCase();
+		if (!/^[0-9a-f]{32}$/.test(mid)) {
+			alert('Invalid mid — expected 32-char lowercase hex (UUIDv7)');
+			return;
+		}
+		editor
+			.chain()
+			.focus()
+			.insertContent({ type: 'image', attrs: { mid, alt: null } })
+			.run();
 	}
 
 	const btnBase =
@@ -239,6 +260,18 @@
 		aria-label="Clear formatting"
 	>
 		<IconRemoveFormatting class="size-4 " />
+	</button>
+
+	<div class="mx-1 h-5 w-px bg-divider" aria-hidden="true"></div>
+
+	<button
+		type="button"
+		class={btnBase}
+		onclick={insertImagePrompt}
+		title="Insert image"
+		aria-label="Insert image"
+	>
+		<IconImage class="size-4 " />
 	</button>
 
 	{#if trailing}

@@ -15,6 +15,13 @@
 			"when": 1776697066081,
 			"tag": "0001_posts",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1776836057204,
+			"tag": "0002_media",
+			"breakpoints": true
 		}
 	]
 }

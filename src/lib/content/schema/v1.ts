@@ -23,6 +23,9 @@ const inlineSchema = z.strictObject({
 });
 
 // h1 is reserved for the post title column; body headings are h2 or h3.
+// Image blocks carry only the logical media id (mid) — the publish
+// pipeline resolves it to the current display/hq sha256 + thumbhash at
+// compile time so draft doc JSON stays stable across encoder changes.
 const blockSchema = z.discriminatedUnion('type', [
 	z.strictObject({
 		type: z.literal('paragraph'),
@@ -32,6 +35,13 @@ const blockSchema = z.discriminatedUnion('type', [
 		type: z.literal('heading'),
 		attrs: z.strictObject({ level: z.union([z.literal(2), z.literal(3)]) }),
 		content: z.array(inlineSchema).optional()
+	}),
+	z.strictObject({
+		type: z.literal('image'),
+		attrs: z.strictObject({
+			mid: z.string().regex(/^[0-9a-f]{32}$/, 'mid must be 32-char lowercase hex (UUIDv7)'),
+			alt: z.string().nullable().optional()
+		})
 	})
 ]);
 

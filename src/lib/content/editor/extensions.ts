@@ -11,6 +11,7 @@ import { Placeholder } from '@tiptap/extension-placeholder';
 import { Strike } from '@tiptap/extension-strike';
 import { Text } from '@tiptap/extension-text';
 import { Underline } from '@tiptap/extension-underline';
+import { ImageBlock } from './image-node';
 
 // Tiptap config that emits exactly the shape declared in $lib/content/schema/v1.
 // Drift caught by tests/content-editor-extensions.test.ts.
@@ -44,6 +45,7 @@ export function createExtensions(opts: { placeholder?: string } = {}): Extension
 				return { href: { default: null } };
 			}
 		}).configure({ openOnClick: false, autolink: false }),
+		ImageBlock,
 		History,
 		Placeholder.configure({
 			placeholder: ({ node }) =>
