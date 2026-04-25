@@ -9,6 +9,7 @@
 	"footer.greeting.invalid.length": "Use 2 to 16 characters.",
 	"footer.greeting.invalid.chars": "Use letters, digits, hyphens, or underscores.",
 	"notification.dismiss": "Dismiss",
+	"banner.wip.text": "Site's still taking shape — some corners may be unfinished.",
 	"footer.runtime.days": "Running for {days} days",
 	"footer.presence": "{count} people browsing",
 	"footer.link.visit": "Go to {service}",

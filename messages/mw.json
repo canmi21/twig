@@ -9,6 +9,7 @@
 	"footer.greeting.invalid.length": "只允许使用 2-16 字符",
 	"footer.greeting.invalid.chars": "请使用字母、数字、常见中日文、连字符和下划线",
 	"notification.dismiss": "Dismiss",
+	"banner.wip.text": "Site's still taking shape — some corners may be unfinished.",
 	"footer.runtime.days": "小站已经活了 {days} 天",
 	"footer.presence": "{count} 位小伙伴正在浏览呢",
 	"footer.link.visit": "Go to {service}",
