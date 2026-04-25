@@ -19,7 +19,7 @@ const config = {
 				// strict MIME validator and 500 on real sends.
 			}
 		}),
-		appDir: '_app',
+		appDir: '_',
 		files: { assets: 'public' }
 	}
 };
