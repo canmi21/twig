@@ -1,6 +1,6 @@
 /* src/routes/__root.tsx */
 
-import { version as reactVersion } from 'react'
+import { version as reactVersion, Suspense, lazy } from 'react'
 import type { ReactNode } from 'react'
 import {
   Outlet,
@@ -9,6 +9,14 @@ import {
   useRouteContext,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
+
+// Dev-only overlay. The dynamic import() sits inside a literal `false`
+// branch when Vite replaces `import.meta.env.DEV` in production, so
+// the dev-overlay module — and the server functions it declares —
+// never enters the production module graph.
+const DevOverlay = import.meta.env.DEV
+  ? lazy(() => import('~/components/dev/dev-overlay'))
+  : null
 import type { RootContext } from '~/router'
 import {
   getCdnPublicUrl,
@@ -100,6 +108,11 @@ function RootComponent() {
       <AppErrorBoundary fallback={<SentryFallback />}>
         <Outlet />
       </AppErrorBoundary>
+      {DevOverlay ? (
+        <Suspense fallback={null}>
+          <DevOverlay />
+        </Suspense>
+      ) : null}
     </RootDocument>
   )
 }

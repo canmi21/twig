@@ -29,7 +29,11 @@ function devTrustedOrigins(): string[] {
 export function getAuth() {
   const resend = new Resend(getResendApiKey())
   const isDev = import.meta.env.DEV
-  const skipOtp = getSkipOtpVerify()
+  // In dev the /__dev debug dashboard signs users in by calling the
+  // real OTP flow with a hardcoded code, so OTP verification must be
+  // a no-op. Keep the explicit binding as an override for prod-like
+  // local preview (where vite build sets isDev=false).
+  const skipOtp = isDev || getSkipOtpVerify()
   const baseURL = isDev ? `http://localhost:${DEV_PORT}` : getPublicUrl()
   const fromNoreply = getEmailFromNoreply()
 

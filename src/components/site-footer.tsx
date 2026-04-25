@@ -166,7 +166,7 @@ export function VisitCounter({
       {[...padded].map((digit, i) => (
         <span
           key={i}
-          className="inline-flex h-6 w-4.5 items-center justify-center rounded-[3px] border border-border bg-raised font-['Roboto'] text-[13px] font-[500] leading-none text-primary"
+          className="inline-flex h-6 w-4.5 items-center justify-center rounded-[3px] border border-border bg-raised font-['Roboto'] text-[13px] leading-none font-medium text-primary"
         >
           {digit}
         </span>
