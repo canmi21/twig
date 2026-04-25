@@ -42,7 +42,3 @@ A test written after the fix proves nothing — it is a rubber stamp, not a safe
 | E2E         | Full browser flows (Playwright etc.)       | Not yet       |
 
 Start with unit tests. When a feature genuinely needs integration or E2E coverage, suggest it — don't pre-build the harness.
-
-## Temporary exemptions
-
-Items listed in `TODO.md` are exempt from coverage requirements. They represent in-flight or placeholder logic that will change imminently. Once the item is resolved and the code stabilizes, tests are required before the next release.

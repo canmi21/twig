@@ -37,8 +37,6 @@ Each file below is the authoritative source for its topic. Edit there, not here.
 
 - [spec/styling.md](spec/styling.md) — color tokens, icons
 - [spec/components.md](spec/components.md) — Bits UI, accessibility
-- [spec/auth.md](spec/auth.md) — Better Auth factory, OTP alphabet, email-send TODO, anonymous deferral
-- [spec/database.md](spec/database.md) — D1 binding, drizzle schema layout, migration workflow
 - [spec/i18n.md](spec/i18n.md) — Paraglide, locale roles, translation rules
 - [spec/build.md](spec/build.md) — build-time constants, Vite `define`
 - [spec/comments.md](spec/comments.md) — tone, separators, svelte-ignore directives

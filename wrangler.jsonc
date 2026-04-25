@@ -27,16 +27,6 @@
 			"migrations_dir": "database/migrations"
 		}
 	],
-	"send_email": [
-		{
-			"name": "EMAIL",
-			"remote": true
-		}
-	],
-	"vars": {
-		"ENVIRONMENT": "production",
-		"EMAIL_FROM": "noreply@canmi.net"
-	},
 	"kv_namespaces": [
 		{
 			"binding": "CACHE",

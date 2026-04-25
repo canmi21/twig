@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../styles/app.css';
-	import { dev } from '$app/environment';
 	import { page } from '$app/state';
 	import { baseLocale, locales } from '$lib/paraglide/runtime';
 	import { canonicalPath, htmlLangFor, localizedPath } from '$lib/i18n/urls';
@@ -8,7 +7,6 @@
 	import { installFocusSourceTracker } from '$lib/client/focus-source';
 	import Footer from '$lib/components/footer.svelte';
 	import NotificationHost from '$lib/components/notification/host.svelte';
-	import DevOverlay from '$lib/dev/overlay/dev-overlay.svelte';
 
 	let { data, children } = $props();
 
@@ -43,10 +41,7 @@
 <main class="flex min-h-svh flex-col">
 	{@render children()}
 </main>
-{#if !page.url.pathname.startsWith('/settings') && !page.url.pathname.startsWith('/@')}
+{#if !page.url.pathname.startsWith('/settings')}
 	<Footer runtimeDays={data.runtimeDays} />
 {/if}
 <NotificationHost />
-{#if dev}
-	<DevOverlay user={data.devUser} />
-{/if}

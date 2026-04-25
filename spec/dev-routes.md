@@ -20,12 +20,4 @@ The exemption is boundary-local. A component imported by `/dev/*` that also rend
 
 ## Dev API endpoints
 
-`+server.ts` files under `/dev/api/*` don't inherit the `+layout.server.ts` 404 — layout loads run for pages, not endpoints. Each dev endpoint must self-gate with `if (!dev) error(404)` (importing `dev` from `$app/environment`). See `src/routes/dev/api/auth/switch/+server.ts` for the canonical shape.
-
-## DevOverlay
-
-Two files, one responsibility split. The **dock shell** (`src/lib/dev/dock/dev-dock.svelte`) owns chrome, edge snap, and persistence; it takes a `tools` array and a `panel` snippet and renders the rest. The **overlay** (`src/lib/dev/overlay/dev-overlay.svelte`) is mounted from the root layout under `{#if dev}` and supplies the tool list plus the panel body — currently one tool, Auth (admin / user / sign-out, see [spec/auth.md](auth.md)).
-
-Collapsed to a vertically-centred edge handle. Expanded into a fixed 64×72 panel split into a 9-wide icon-nav column and a content pane. The nav footer exposes two controls: snap to the opposite edge (left ↔ right), and collapse. `sessionStorage` key `twig:dev-dock` persists `{ open, active, edge }`; invalid or stale `active` ids fall back to the first tool. Hydration is deferred via a `hydrated` flag so SSR output stays stable and the initial effect never clobbers the stored state.
-
-Add a new tool by appending an entry to the `TOOLS` array in the overlay and a matching `{#if active === '<id>'}` branch inside the `panel` snippet.
+`+server.ts` files under `/dev/api/*` don't inherit the `+layout.server.ts` 404 — layout loads run for pages, not endpoints. Each dev endpoint must self-gate with `if (!dev) error(404)` (importing `dev` from `$app/environment`).
