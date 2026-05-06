@@ -21,7 +21,7 @@
 </script>
 
 <!-- Top-level anchors (#general, #appearance, #typography) land on the divider
-     or the page top; only level-3 sections render a visible header. -->
+    or the page top; only level-3 sections render a visible header. -->
 <div id="general" class="mb-10 scroll-mt-6 lg:scroll-mt-20">
 	<p class="text-sm text-muted-foreground">{m['settings.tab.general.wip']()}</p>
 </div>
