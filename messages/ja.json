@@ -9,7 +9,6 @@
 	"footer.greeting.invalid.length": "2〜16 もじにしてね",
 	"footer.greeting.invalid.chars": "つかえるのは にほんご・えいすうじ・ハイフン・アンダースコア だよ",
 	"notification.dismiss": "とじる",
-	"banner.wip.text": "まだつくりかけだよ〜、みかんせいなところもあるかも",
 	"footer.runtime.days": "もう {days} 日目だよ〜",
 	"footer.presence": "いま {count} 人がみてるよ",
 	"footer.link.visit": "{service} にいく",

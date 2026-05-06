@@ -9,7 +9,6 @@
 	"footer.greeting.invalid.length": "需要 2 到 16 個字元",
 	"footer.greeting.invalid.chars": "只能用中英文、數字、連字號或底線",
 	"notification.dismiss": "關閉",
-	"banner.wip.text": "小站還在搭建中，部分頁面和功能可能尚未完成",
 	"footer.runtime.days": "小站已經活了 {days} 天",
 	"footer.presence": "{count} 位小夥伴正在瀏覽呢",
 	"footer.link.visit": "前往 {service}",
