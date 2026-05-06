@@ -1,40 +1,26 @@
 {
 	"name": "twig",
-	"version": "0.2.1",
 	"private": true,
 	"license": "AGPL-3.0-or-later",
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "wrangler types && vite build",
-		"test": "vitest",
-		"prepare": "svelte-kit sync || true; lefthook install || true",
-		"gen": "wrangler types",
-		"knip": "knip",
-		"lint": "oxfmt --check . && prettier --check '**/*.svelte' && eslint .",
-		"fmt": "oxfmt --write . && prettier --write '**/*.svelte'"
-	},
-	"dependencies": {
-		"@fortawesome/free-solid-svg-icons": "^7.2.0",
-		"@lucide/svelte": "^1.8.0",
-		"@sentry/sveltekit": "^10.49.0",
-		"@sveltejs/kit": "^2.57.1",
-		"bits-ui": "^2.18.0",
-		"feedsmith": "^2.9.2",
-		"svelte": "^5.55.4",
-		"svelte-fa": "^4.0.4"
+		"prepare": "lefthook install || true",
+		"dev": "bun --filter ffoni dev",
+		"build": "bun --filter ffoni build",
+		"test": "bun --filter ffoni test",
+		"lint": "oxfmt --check . && prettier --check 'apps/*/**/*.svelte' && eslint .",
+		"fmt": "oxfmt --write . && prettier --write 'apps/*/**/*.svelte'",
+		"knip": "knip"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^20.5.0",
 		"@commitlint/config-conventional": "^20.5.0",
 		"@eslint/compat": "^2.0.5",
 		"@eslint/js": "^10.0.1",
-		"@iconify-json/mingcute": "^1.2.7",
-		"@inlang/paraglide-js": "^2.16.0",
-		"@sveltejs/adapter-cloudflare": "^7.2.8",
-		"@sveltejs/vite-plugin-svelte": "^7.0.0",
-		"@tailwindcss/vite": "^4.2.3",
-		"@types/node": "^25.6.0",
 		"eslint": "^10.2.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-better-tailwindcss": "^4.4.1",
@@ -45,14 +31,9 @@
 		"oxfmt": "^0.46.0",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
-		"svelte-check": "^4.4.6",
 		"tailwindcss": "^4.2.3",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.59.0",
-		"unplugin-icons": "^23.0.1",
-		"vite": "^8.0.9",
-		"vitest": "^4.1.4",
-		"wrangler": "^4.84.0"
+		"typescript-eslint": "^8.59.0"
 	},
 	"engines": {
 		"node": ">=25"

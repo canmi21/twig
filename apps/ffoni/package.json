@@ -1,0 +1,42 @@
+{
+	"name": "ffoni",
+	"version": "0.2.1",
+	"private": true,
+	"license": "AGPL-3.0-or-later",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "wrangler types && vite build",
+		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js",
+		"test": "vitest",
+		"typecheck": "tsc --noEmit",
+		"check": "wrangler types && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"deploy": "wrangler deploy",
+		"gen": "wrangler types",
+		"prepare": "svelte-kit sync || true"
+	},
+	"dependencies": {
+		"@fortawesome/free-solid-svg-icons": "^7.2.0",
+		"@lucide/svelte": "^1.8.0",
+		"@sentry/sveltekit": "^10.49.0",
+		"@sveltejs/kit": "^2.57.1",
+		"bits-ui": "^2.18.0",
+		"feedsmith": "^2.9.2",
+		"svelte": "^5.55.4",
+		"svelte-fa": "^4.0.4"
+	},
+	"devDependencies": {
+		"@iconify-json/mingcute": "^1.2.7",
+		"@inlang/paraglide-js": "^2.16.0",
+		"@sveltejs/adapter-cloudflare": "^7.2.8",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@tailwindcss/vite": "^4.2.3",
+		"@types/node": "^25.6.0",
+		"svelte-check": "^4.4.6",
+		"tailwindcss": "^4.2.3",
+		"unplugin-icons": "^23.0.1",
+		"vite": "^8.0.9",
+		"vitest": "^4.1.4",
+		"wrangler": "^4.84.0"
+	}
+}

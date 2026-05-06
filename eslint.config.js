@@ -7,13 +7,13 @@ import svelte from 'eslint-plugin-svelte';
 import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
-import svelteConfig from './svelte.config.js';
+import svelteConfig from './apps/ffoni/svelte.config.js';
 
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
-	{ ignores: ['worker-configuration.d.ts'] },
+	{ ignores: ['**/worker-configuration.d.ts'] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,
@@ -43,7 +43,7 @@ export default defineConfig(
 		plugins: { 'better-tailwindcss': betterTailwindcss },
 		settings: {
 			'better-tailwindcss': {
-				entryPoint: 'src/styles/app.css'
+				entryPoint: 'apps/ffoni/src/styles/app.css'
 			}
 		},
 		rules: {
