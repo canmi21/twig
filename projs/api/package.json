@@ -1,7 +1,7 @@
 {
 	"name": "api",
 	"private": true,
-	"license": "(MIT OR BSD-3-Clause)",
+	"license": "BSD-3-Clause",
 	"type": "module",
 	"scripts": {
 		"dev": "wrangler dev",
@@ -11,7 +11,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"hono": "^4.6.0"
+		"hono": "^4.12.18"
 	},
 	"devDependencies": {
 		"wrangler": "^4.84.0"

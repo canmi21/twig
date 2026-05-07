@@ -16,8 +16,9 @@
 		"svelte": "^5.55.4"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-vercel": "^5.10.4",
+		"@sveltejs/adapter-vercel": "^6.3.3",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@types/node": "^25.6.0",
 		"svelte-check": "^4.4.6",
 		"vite": "^8.0.9"
 	}

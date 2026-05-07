@@ -8,7 +8,7 @@ twig — Bun-workspace monorepo. Each project under `projs/*` is a deploy unit (
 twig/
 ├── projs/
 │   ├── ffoni/          # SvelteKit @ ffoni.com — content site (CF Worker, AGPL-3.0-or-later)
-│   ├── api/            # Hono @ api.innc.cc — multi-scope API (CF Worker, MIT OR BSD-3-Clause)
+│   ├── api/            # Hono @ api.innc.cc — multi-scope API (CF Worker, BSD-3-Clause)
 │   ├── dash/           # SvelteKit @ canmi.app — UI shell + auth front (Vercel, MIT)
 │   └── landing/        # @ canmi.net — placeholder
 ├── packages/           # empty until a real shared lib appears (rule of three, not two)
@@ -26,12 +26,12 @@ License is per-project via SPDX in each `package.json`. Full license texts live 
 
 ## Stacks
 
-| Project   | Stack                          | Host      | Domain                  | License             |
-| --------- | ------------------------------ | --------- | ----------------------- | ------------------- |
-| `ffoni`   | SvelteKit + adapter-cloudflare | CF Worker | ffoni.com               | AGPL-3.0-or-later   |
-| `api`     | Hono                           | CF Worker | api.innc.cc             | MIT OR BSD-3-Clause |
-| `dash`    | SvelteKit + adapter-vercel     | Vercel    | canmi.app (+ canmi.dev) | MIT                 |
-| `landing` | TBD                            | TBD       | canmi.net               | TBD                 |
+| Project   | Stack                          | Host      | Domain                  | License           |
+| --------- | ------------------------------ | --------- | ----------------------- | ----------------- |
+| `ffoni`   | SvelteKit + adapter-cloudflare | CF Worker | ffoni.com               | AGPL-3.0-or-later |
+| `api`     | Hono                           | CF Worker | api.innc.cc             | BSD-3-Clause      |
+| `dash`    | SvelteKit + adapter-vercel     | Vercel    | canmi.app (+ canmi.dev) | MIT               |
+| `landing` | TBD                            | TBD       | canmi.net               | TBD               |
 
 Node 25 (dev/build) for all projects. Bun is installer only, never runtime. `ffoni` dev server on `:23315`, `dash` on `:23316`.
 
