@@ -25,11 +25,20 @@ commit-msg:
     - name: commitlint
       run: ./node_modules/.bin/commitlint --edit {1}
 
-# Catches runtime-only failures that pre-commit can't see: CSS import chain,
-# vite build, a11y_* compiler warnings, wrangler type drift, and SvelteKit
-# prerender violations. Runs once per push, not per commit, so the ~10s cost
-# amortizes.
+# Per-project build, gated by glob — only the projs/<name> touched in the
+# pushed commits gets built. Runs in parallel so multi-project pushes don't
+# serialize. Catches runtime-only failures that pre-commit can't see: CSS
+# import chain, vite build, a11y_* warnings, wrangler type drift, prerender
+# violations.
 pre-push:
+  parallel: true
   jobs:
-    - name: build
-      run: bun run build
+    - name: build-ffoni
+      glob: 'projs/ffoni/**/*'
+      run: bun --filter ffoni build
+    - name: build-api
+      glob: 'projs/api/**/*'
+      run: bun --filter api build
+    - name: build-dash
+      glob: 'projs/dash/**/*'
+      run: bun --filter dash build
