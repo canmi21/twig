@@ -1,0 +1,42 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "ffoni",
+	"compatibility_date": "2026-04-20",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".svelte-kit/cloudflare"
+	},
+	"observability": {
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": false,
+	"preview_urls": false,
+	"d1_databases": [
+		{
+			"binding": "DATABASE",
+			"database_name": "twig_sql",
+			"database_id": "12a03679-e3ac-4166-b206-60822e86468b",
+			"migrations_dir": "database/migrations"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "CACHE",
+			"id": "0c2e2911cbeb4e9c9a974d95ae26eec3"
+		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "twig-bucket",
+			"binding": "STORAGE"
+		}
+	]
+}

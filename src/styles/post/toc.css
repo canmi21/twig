@@ -1,8 +1,0 @@
-/* src/styles/post/toc.css */
-
-/* hover / active state — combined selector that Tailwind can't express inline */
-.toc__link:hover,
-.toc__link.text-primary {
-  color: var(--color-primary);
-  opacity: 1;
-}

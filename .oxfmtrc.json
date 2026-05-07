@@ -1,12 +1,12 @@
 {
-  "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "semi": false,
-  "singleQuote": true,
-  "tabWidth": 2,
-  "trailingComma": "all",
-  "printWidth": 80,
-  "endOfLine": "lf",
-  "arrowParens": "always",
-  "bracketSpacing": true,
-  "ignorePatterns": ["dist", "build", "coverage"]
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"singleQuote": true,
+	"trailingComma": "none",
+	"printWidth": 100,
+	"endOfLine": "lf",
+	"sortTailwindcss": {
+		"stylesheet": "./apps/ffoni/src/styles/app.css"
+	},
+	"ignorePatterns": ["bun.lock", "apps/*/public/"]
 }

@@ -1,0 +1,35 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: oxfmt
+      glob: '*.{js,ts,json,jsonc,css,md,yml,yaml,html}'
+      run: ./node_modules/.bin/oxfmt --write {staged_files}
+      stage_fixed: true
+    - name: prettier
+      glob: '*.svelte'
+      run: ./node_modules/.bin/prettier --write --cache --cache-location node_modules/.cache/prettier-cache {staged_files}
+      stage_fixed: true
+    - name: eslint
+      glob: '*.{js,ts,svelte}'
+      run: ./node_modules/.bin/eslint --fix {staged_files}
+      stage_fixed: true
+    - name: typecheck
+      glob: '*.{ts,svelte}'
+      run: cd apps/ffoni && ../../node_modules/.bin/tsc --noEmit
+    - name: comment-length
+      glob: '*.{ts,tsx,js,jsx,mjs,cjs,svelte,css,scss,html}'
+      run: ./scripts/check-comment-length.sh {staged_files}
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: ./node_modules/.bin/commitlint --edit {1}
+
+# Catches runtime-only failures that pre-commit can't see: CSS import chain,
+# vite build, a11y_* compiler warnings, wrangler type drift, and SvelteKit
+# prerender violations. Runs once per push, not per commit, so the ~10s cost
+# amortizes.
+pre-push:
+  jobs:
+    - name: build
+      run: bun run build

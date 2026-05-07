@@ -1,0 +1,235 @@
+/* Canonical keyboard focus indicator. Uses outline (not ring/box-shadow) so
+  forced-colors recolors it automatically. Apply to every interactive element. */
+:where(.focus-ring) {
+	border-radius: 4px;
+}
+.focus-ring:focus-visible {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
+}
+
+/* Applies the ring to an inner child when the focusable ancestor wraps a
+   composite hit area; ancestor must set `focus-visible:outline-none`. */
+:where(.focus-ring-inner) {
+	border-radius: 4px;
+}
+:focus-visible .focus-ring-inner {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
+}
+
+/* Text-input focus pattern. `:focus-visible` fires for mouse clicks on
+   text inputs too (spec: users need to see the caret), so we can't reuse
+   .focus-ring here. Gate the ring on the global focus-source attribute
+   set by $lib/client/focus-source so it only shows for keyboard nav. */
+.focus-input {
+	outline: none;
+	transition: border-color 120ms ease;
+}
+.focus-input:focus {
+	border-color: var(--color-border-strong);
+}
+html[data-focus-source='kbd'] .focus-input:focus-visible {
+	outline: 2px solid var(--color-blue-500);
+	outline-offset: 2px;
+}
+
+/* Svelte JS-driven transitions need their own duration:0 since their timers
+   ignore this rule. `data-motion-exempt` keeps preview cards demoing. */
+:root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *),
+:root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *)::before,
+:root[data-motion='none'] :not([data-motion-exempt], [data-motion-exempt] *)::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}
+
+/* Shared 5s period keeps the three motion-tier demo cards in lockstep so
+   users can compare Full / Reduce / None on the same interaction. */
+@keyframes motion-state-a-full {
+	0%,
+	40% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	50%,
+	90% {
+		opacity: 0;
+		transform: translateX(-10px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+@keyframes motion-state-b-full {
+	0%,
+	40% {
+		opacity: 0;
+		transform: translateX(10px);
+	}
+	50%,
+	90% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(10px);
+	}
+}
+@keyframes motion-state-a-reduce {
+	0%,
+	40% {
+		opacity: 1;
+	}
+	50%,
+	90% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes motion-state-b-reduce {
+	0%,
+	40% {
+		opacity: 0;
+	}
+	50%,
+	90% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+/* None snaps at the same instant Full/Reduce start their transition (40%),
+   not when they finish (50%). Otherwise None looks like it's waiting for the
+   others to complete. */
+@keyframes motion-state-a-none {
+	0%,
+	39.99% {
+		opacity: 1;
+	}
+	40%,
+	89.99% {
+		opacity: 0;
+	}
+	90%,
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes motion-state-b-none {
+	0%,
+	39.99% {
+		opacity: 0;
+	}
+	40%,
+	89.99% {
+		opacity: 1;
+	}
+	90%,
+	100% {
+		opacity: 0;
+	}
+}
+
+/* Active cards run the inline infinite animation (keyframes beat cascade);
+   inactive cards swap A↔B via hover transitions. */
+.motion-layer-a {
+	opacity: 1;
+}
+.motion-layer-b {
+	opacity: 0;
+}
+
+/* Transform defaults pre-stage each layer's entry/exit direction so the :hover
+   swap below reads as "A leaves left, B enters from right". */
+.motion-tier-full .motion-layer {
+	transition:
+		opacity 400ms ease-in-out,
+		transform 400ms ease-in-out;
+}
+.motion-tier-full .motion-layer-a {
+	transform: translateX(0);
+}
+.motion-tier-full .motion-layer-b {
+	transform: translateX(10px);
+}
+
+.motion-tier-reduce .motion-layer {
+	transition: opacity 400ms ease-in-out;
+}
+
+.motion-tier-none .motion-layer {
+	transition: none;
+}
+
+.group:hover .motion-layer-a {
+	opacity: 0;
+}
+.group:hover .motion-layer-b {
+	opacity: 1;
+}
+.group:hover .motion-tier-full .motion-layer-a {
+	transform: translateX(-10px);
+}
+.group:hover .motion-tier-full .motion-layer-b {
+	transform: translateX(0);
+}
+
+/* Opacity pulse confirms the click on otherwise-instant selections; Full adds
+   a scale dip, Reduce skips it since scale is spatial motion. */
+@keyframes press-flash {
+	0% {
+		opacity: 0;
+	}
+	40% {
+		opacity: 0.22;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+.press-flash {
+	animation: press-flash 180ms ease-out;
+}
+
+@keyframes press-scale {
+	0% {
+		transform: scale(1);
+	}
+	40% {
+		transform: scale(0.985);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+.press-scale {
+	animation: press-scale 180ms ease-out;
+}
+
+/* Hash-target heading pulse — brief color flash on the <h3> of the section
+   that just scrolled into view. Color-only (non-spatial), so Reduce keeps
+   it, just shorter. None is flattened by the global rule. */
+@keyframes heading-pulse {
+	0% {
+		color: var(--color-foreground);
+	}
+	40% {
+		color: var(--color-blue-500);
+	}
+	100% {
+		color: var(--color-foreground);
+	}
+}
+.heading-pulse {
+	animation: heading-pulse 250ms ease-out;
+}
+:root[data-motion='reduce'] .heading-pulse {
+	animation-duration: 150ms;
+}

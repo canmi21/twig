@@ -1,0 +1,3 @@
+bun.lock
+apps/*/public/
+apps/*/src/lib/paraglide/

@@ -1,0 +1,139 @@
+/* Optical-weight patch for Mingcute "line" icons that read too thin next to
+  filled icons in the footer row. */
+.footer-icon-bold > svg path[fill='currentColor'] {
+	stroke: currentColor;
+	stroke-width: 0.75;
+	paint-order: stroke fill;
+}
+
+/* Motion tiers follow spec/motion.md; pivot at the wrist (70% 70%) reads
+   as a hand motion, not a full-glyph spin. */
+.greeting-wave {
+	display: inline-block;
+	transform-origin: 70% 70%;
+}
+
+@keyframes greeting-wave {
+	0%,
+	60%,
+	100% {
+		transform: rotate(0deg);
+	}
+	10% {
+		transform: rotate(14deg);
+	}
+	20% {
+		transform: rotate(-8deg);
+	}
+	30% {
+		transform: rotate(14deg);
+	}
+	40% {
+		transform: rotate(-4deg);
+	}
+	50% {
+		transform: rotate(10deg);
+	}
+}
+
+html[data-motion='full'] .greeting-wave {
+	animation: greeting-wave 2.4s ease-in-out 0.4s infinite;
+}
+
+html[data-motion='reduce'] .greeting-wave {
+	animation: greeting-wave 3.6s ease-in-out 0.4s 2;
+	animation-timing-function: ease-in-out;
+}
+
+/* Geometry is driven per-frame by item.svelte's rAF loop, not a CSS keyframe,
+   so the bar and the dismiss never drift out of sync. */
+.toast-bar {
+	position: absolute;
+	inset: auto 0 0 0;
+	height: 3px;
+	background: color-mix(in oklch, var(--color-muted-foreground) 55%, transparent);
+	pointer-events: none;
+}
+
+/* Absolute strip (not a left border) so all four corners share one border
+   geometry; inset + fully rounded so the capsule meets the lifetime bar. */
+.toast-accent {
+	position: absolute;
+	top: 1px;
+	bottom: 1px;
+	left: 0;
+	width: 3px;
+	border-radius: 9999px;
+	pointer-events: none;
+}
+
+/* WYSIWYG-ish typography for the post editor's contenteditable. Tailwind
+   preflight strips heading sizes; restore them so what the author sees
+   tracks the eventual public render (R1 will own the canonical styles). */
+.twig-editor-content .ProseMirror {
+	outline: none;
+	min-height: 12rem;
+	color: var(--color-foreground);
+	line-height: 1.65;
+}
+
+.twig-editor-content .ProseMirror > * + * {
+	margin-top: 0.75rem;
+}
+
+.twig-editor-content .ProseMirror h2 {
+	font-size: 1.5rem;
+	font-weight: 600;
+	line-height: 1.3;
+	margin-top: 1.75rem;
+}
+
+.twig-editor-content .ProseMirror h3 {
+	font-size: 1.25rem;
+	font-weight: 600;
+	line-height: 1.4;
+	margin-top: 1.25rem;
+}
+
+.twig-editor-content .ProseMirror strong {
+	font-weight: 700;
+}
+
+.twig-editor-content .ProseMirror em {
+	font-style: italic;
+}
+
+.twig-editor-content .ProseMirror s {
+	text-decoration: line-through;
+}
+
+.twig-editor-content .ProseMirror u {
+	text-decoration: underline;
+}
+
+.twig-editor-content .ProseMirror code {
+	font-family: var(--font-code), ui-monospace, monospace;
+	font-size: 0.92em;
+	background-color: var(--color-muted);
+	border: 1px solid var(--color-border);
+	border-radius: 0.25rem;
+	padding: 0.05em 0.3em;
+}
+
+.twig-editor-content .ProseMirror a {
+	color: var(--color-foreground);
+	text-decoration: underline;
+	text-decoration-color: var(--color-muted-foreground);
+	text-underline-offset: 0.18em;
+}
+
+/* Placeholder ext marks empty nodes with .is-editor-empty / .is-empty and
+   the configured text in data-placeholder; show via ::before. */
+.twig-editor-content .ProseMirror .is-editor-empty:first-child::before,
+.twig-editor-content .ProseMirror .is-empty::before {
+	content: attr(data-placeholder);
+	color: var(--color-muted-foreground);
+	pointer-events: none;
+	float: left;
+	height: 0;
+}

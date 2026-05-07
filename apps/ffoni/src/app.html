@@ -1,0 +1,40 @@
+<!doctype html>
+<html
+	lang="%lang%"
+	class="%theme%"
+	data-font="%font%"
+	data-cjk="%cjk_font%"
+	data-code-font="%code_font%"
+	data-emoji="%emoji_font%"
+>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="text-scale" content="scale" />
+		<link rel="icon" type="image/svg+xml" sizes="any" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="icon" type="image/png" sizes="96x96" href="%sveltekit.assets%/favicon-96x96.png" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/apple-touch-icon.png" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="wappalyzer" href="/fontawesome-free-%fontawesome_version%/a.css" disabled />
+		%font_links% %cjk_font_links% %code_font_links% %emoji_links% %theme_script% %motion_script%
+		%sveltekit.head%
+		<script
+			defer
+			fetchpriority="low"
+			src="https://cloud.umami.is/script.js"
+			data-website-id="2b0a1e79-405a-47c0-a263-05732e0a130c"
+			data-domains="canmi.net"
+			data-exclude="/@/*"
+		></script>
+		<script
+			src="https://uptime.betterstack.com/widgets/announcement.js"
+			data-id="244075"
+			async="async"
+			fetchpriority="low"
+			type="text/javascript"
+		></script>
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

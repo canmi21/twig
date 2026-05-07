@@ -1,91 +1,25 @@
-# Task runner for taki
-# Run `just` to list all available recipes.
+DEV_PORT     := "23315"
+PREVIEW_PORT := "4173"
 
-set shell := ["bash", "-euo", "pipefail", "-c"]
+_default:
+    @just --list
 
-# List available recipes
-default:
-    @just --list --unsorted
+# Run vitest in apps/ffoni (requires dev server on :{{DEV_PORT}} for integration tests).
+test *args:
+    cd apps/ffoni && bunx vitest {{args}}
 
-# --- Quality ---
+# Serve the built CF Worker bundle via miniflare on :{{PREVIEW_PORT}}.
+preview:
+    cd apps/ffoni && bunx wrangler dev .svelte-kit/cloudflare/_worker.js --port {{PREVIEW_PORT}}
 
-# Format all source files
-fmt:
-    oxfmt --write .
-    prettier --write --ignore-path /dev/null 'contents/**/*.md' 2>/dev/null || true
-    chore .
-    eslint . --fix > /dev/null 2>&1 || true
+# Fast TypeScript typecheck for ffoni (.ts/.svelte only, ~1s).
+typecheck:
+    cd apps/ffoni && ../../node_modules/.bin/tsc --noEmit
 
-# Run all linters and knip
-lint:
-    bun run lint:oxlint
-    bun run lint:eslint
-    bunx knip
+# Full type + a11y gate (wrangler types -> svelte-kit sync -> svelte-check).
+check:
+    cd apps/ffoni && bunx wrangler types && bunx svelte-kit sync && bunx svelte-check --tsconfig ./tsconfig.json
 
-# Fix lint issues
-lint-fix:
-    bun run lint:oxlint:fix
-    bun run lint:eslint:fix
-
-# Run fmt + lint + typecheck
-check: fmt lint
-    bun run typecheck
-
-# --- Content ---
-
-# Push local content to D1/R2/KV
-push:
-    bun run src/cli/push/index.ts
-
-# Pull content from D1/R2 to local
-pull:
-    bun run src/cli/pull/index.ts
-
-# Recompile all posts and refresh KV cache
-rebuild:
-    bun run src/cli/rebuild/index.ts
-
-# Watch content changes
-watch:
-    bun run src/cli/watch/index.ts
-
-# Sync remote D1/R2/KV to local (clears local first)
-sync-remote:
-    bun run src/cli/sync-remote/index.ts
-
-# --- Database ---
-
-# Reset database schema
-db-reset:
-    bun run src/cli/db-reset/index.ts
-
-# Seed database with initial data
-db-seed:
-    bun run src/cli/db-seed/index.ts
-
-# Reset and reseed database
-db-fresh: db-reset db-seed
-
-# --- Deploy ---
-
-# Deploy to Cloudflare Workers
-deploy:
-    ./scripts/deploy.sh
-
-# Deploy with full data sync
-deploy-sync:
-    ./scripts/deploy.sh --sync
-
-# --- Setup ---
-
-# Download OG image font to public/fonts/
-setup-og-font:
-    mkdir -p public/fonts
-    curl -fsSL -o public/fonts/lxgw-wenkai-regular.ttf \
-        'https://cdn.jsdelivr.net/gh/lxgw/lxgwwenkai@5dea838/fonts/TTF/LXGWWenKai-Regular.ttf'
-
-# --- Version ---
-
-# Bump version: just bump [patch|minor|x.y.z]
-bump level="patch":
-    ./scripts/bump-version.sh {{ level }}
+# Watch mode for the type + a11y gate.
+check-watch:
+    cd apps/ffoni && bunx svelte-kit sync && bunx svelte-check --tsconfig ./tsconfig.json --watch

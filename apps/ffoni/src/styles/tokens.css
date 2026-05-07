@@ -1,0 +1,129 @@
+@theme {
+	--color-background: var(--color-white);
+	--color-foreground: var(--color-neutral-900);
+	--color-inset: var(--color-neutral-200);
+	--color-muted: var(--color-neutral-100);
+	--color-muted-foreground: var(--color-neutral-500);
+	--color-border: var(--color-neutral-200);
+	--color-border-strong: var(--color-neutral-400);
+	--color-divider: var(--color-neutral-200);
+	--color-scrollbar: var(--color-neutral-300);
+	--color-success: var(--palette-twig-success-light);
+	--color-destructive: var(--color-red-700);
+	--color-selection: var(--palette-twig-selection-light);
+}
+
+.dark {
+	--color-background: var(--color-neutral-900);
+	--color-foreground: var(--color-neutral-300);
+	--color-inset: var(--color-neutral-950);
+	--color-muted: var(--color-neutral-800);
+	--color-border: var(--color-neutral-700);
+	--color-border-strong: var(--color-neutral-500);
+	--color-divider: var(--color-neutral-800);
+	--color-scrollbar: var(--color-neutral-800);
+	--color-success: var(--palette-twig-success-dark);
+	--color-destructive: var(--color-red-400);
+	--color-selection: var(--palette-twig-selection-dark);
+}
+
+/* Nord — Snow Storm */
+.nord {
+	--color-background: var(--palette-nord-6);
+	--color-foreground: var(--palette-nord-0);
+	--color-inset: var(--palette-nord-5);
+	--color-muted: var(--palette-nord-5);
+	--color-muted-foreground: var(--palette-nord-3);
+	--color-border: var(--palette-nord-4);
+	--color-border-strong: var(--palette-nord-3);
+	--color-divider: var(--palette-nord-4);
+	--color-scrollbar: var(--palette-nord-4);
+	--color-selection: var(--palette-nord-4);
+}
+
+/* Nord — Polar Night */
+.nord.dark {
+	--color-background: var(--palette-nord-0);
+	--color-foreground: var(--palette-nord-4);
+	--color-inset: var(--palette-nord-inset);
+	--color-muted: var(--palette-nord-1);
+	--color-muted-foreground: var(--palette-nord-9);
+	--color-border: var(--palette-nord-2);
+	--color-border-strong: var(--palette-nord-3);
+	--color-divider: var(--palette-nord-1);
+	--color-scrollbar: var(--palette-nord-2);
+	--color-selection: var(--palette-nord-3);
+}
+
+/* Contrast — pure white (vercel-minimal) */
+.contrast {
+	--color-background: var(--palette-mono-12);
+	--color-foreground: var(--palette-mono-0);
+	--color-inset: var(--palette-mono-11);
+	--color-muted: var(--palette-mono-11);
+	--color-muted-foreground: var(--palette-mono-6);
+	--color-border: var(--palette-mono-9);
+	--color-border-strong: var(--palette-mono-7);
+	--color-divider: var(--palette-mono-9);
+	--color-scrollbar: var(--palette-mono-8);
+	--color-selection: var(--palette-mono-9);
+}
+
+/* Contrast — pure black (vercel-dark) */
+.contrast.dark {
+	--color-background: var(--palette-mono-0);
+	--color-foreground: var(--palette-mono-12);
+	--color-inset: var(--palette-mono-1);
+	--color-muted: var(--palette-mono-1);
+	--color-muted-foreground: var(--palette-mono-7);
+	--color-border: var(--palette-mono-4);
+	--color-border-strong: var(--palette-mono-6);
+	--color-divider: var(--palette-mono-2);
+	--color-scrollbar: var(--palette-mono-4);
+	--color-selection: var(--palette-mono-4);
+}
+
+/* Outside @theme so no stray font-* utilities; named --font-latin (not
+   --font-sans) because Tailwind v4 pre-declares --font-sans with generics
+   that would leak into the "system" no-override path. */
+html[data-font='inter'] {
+	--font-latin: 'Inter';
+}
+html[data-font='roboto'] {
+	--font-latin: 'Roboto';
+}
+html[data-font='source-sans'] {
+	--font-latin: 'Source Sans 3';
+}
+
+html[data-cjk='noto'] {
+	--font-cjk-sc: 'Noto Sans SC';
+	--font-cjk-tc: 'Noto Sans TC';
+	--font-cjk-jp: 'Noto Sans JP';
+}
+html[data-cjk='lxgw'] {
+	--font-cjk-sc: 'LXGW WenKai';
+	--font-cjk-tc: 'LXGW WenKai TC';
+	--font-cjk-jp: 'Klee One';
+}
+
+/* --font-code (not --font-mono) — same Tailwind v4 reserved-name issue as
+   --font-latin above. */
+html[data-code-font='maple'] {
+	--font-code: 'Maple Mono';
+}
+html[data-code-font='jetbrains'] {
+	--font-code: 'JetBrains Mono';
+}
+html[data-code-font='fira'] {
+	--font-code: 'Fira Code';
+}
+
+/* Emoji codepoints don't overlap with text faces, so --font-emoji can live
+   at the tail; 'system' resolves to __unset and the OS emoji tail wins. */
+html[data-emoji='twemoji'] {
+	--font-emoji: 'Twemoji';
+}
+html[data-emoji='noto'] {
+	--font-emoji: 'Noto Color Emoji';
+}
