@@ -11,5 +11,5 @@
 		"sourceMap": true,
 		"types": ["./worker-configuration.d.ts"]
 	},
-	"include": ["src/**/*.ts", "auth/**/*.ts", "link/**/*.ts"]
+	"include": ["src/**/*.ts", "auth/**/*.ts", "link/**/*.ts", "drizzle.config.ts"]
 }
