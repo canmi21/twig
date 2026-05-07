@@ -1,6 +1,5 @@
 {
 	"name": "ffoni",
-	"version": "0.2.1",
 	"private": true,
 	"license": "AGPL-3.0-or-later",
 	"type": "module",

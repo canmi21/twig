@@ -1,6 +1,5 @@
 {
 	"name": "api",
-	"version": "0.1.0",
 	"private": true,
 	"license": "(MIT OR BSD-3-Clause)",
 	"type": "module",

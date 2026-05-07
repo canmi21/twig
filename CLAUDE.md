@@ -59,7 +59,7 @@ Everything that can be mechanical is mechanical — treat the gate as authoritat
 
 ## Git
 
-Remote `origin` → `github.com/canmi21/taki`. Working branch: **`twig`** (not `main` — taken by another project on the same remote). No force-push without explicit instruction.
+Remote `origin` → `github.com/canmi21/twig`. Working branch: **`main`**. No force-push without explicit instruction.
 
 ## Root vs project config
 
