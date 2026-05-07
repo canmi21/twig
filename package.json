@@ -3,7 +3,7 @@
 	"private": true,
 	"license": "AGPL-3.0-or-later",
 	"workspaces": [
-		"apps/*",
+		"projs/*",
 		"packages/*"
 	],
 	"type": "module",
@@ -12,8 +12,8 @@
 		"dev": "bun --filter ffoni dev",
 		"build": "bun --filter ffoni build",
 		"test": "bun --filter ffoni test",
-		"lint": "oxfmt --check . && prettier --check 'apps/*/**/*.svelte' && eslint .",
-		"fmt": "oxfmt --write . && prettier --write 'apps/*/**/*.svelte'",
+		"lint": "oxfmt --check . && prettier --check 'projs/*/**/*.svelte' && eslint .",
+		"fmt": "oxfmt --write . && prettier --write 'projs/*/**/*.svelte'",
 		"knip": "knip"
 	},
 	"devDependencies": {

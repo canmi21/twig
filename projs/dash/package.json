@@ -1,0 +1,25 @@
+{
+	"name": "dash",
+	"version": "0.1.0",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"typecheck": "tsc --noEmit",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"prepare": "svelte-kit sync || true"
+	},
+	"dependencies": {
+		"@sveltejs/kit": "^2.57.1",
+		"svelte": "^5.55.4"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-vercel": "^5.10.4",
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"svelte-check": "^4.4.6",
+		"vite": "^8.0.9"
+	}
+}

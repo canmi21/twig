@@ -2,9 +2,9 @@ node_modules
 .svelte-kit
 build
 .wrangler
-apps/*/src/lib/paraglide
+projs/*/src/lib/paraglide
 .env
 .env.*
 !.env.example
 .DS_Store
-apps/*/worker-configuration.d.ts
+projs/*/worker-configuration.d.ts

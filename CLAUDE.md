@@ -1,54 +1,73 @@
 # CLAUDE.md
 
-twig — Bun-workspace monorepo. The website lives in `apps/ffoni/` (SvelteKit on Cloudflare Workers); `packages/*` is reserved for future shared libs and is currently empty. Future siblings (landing page, docs, smaller Workers) will sit alongside `ffoni` under `apps/`. This file is the orchestration index for the whole repo. Domain rules live in `spec/*.md`.
+twig — Bun-workspace monorepo. Each project under `projs/*` is a deploy unit (one CF Worker or one Vercel app), keyed to a primary domain via its `projs/<name>/CNAME` (identifying only — no deploy pipeline reads it). `packages/*` is reserved for future shared libs and is currently empty. This file is the orchestration index for the whole repo. Domain rules live in `spec/*.md`.
 
 ## Layout
 
 ```
 twig/
-├── apps/
-│   └── ffoni/          # SvelteKit site, dev :23315, prod via adapter-cloudflare
+├── projs/
+│   ├── ffoni/          # SvelteKit @ ffoni.com — content site (CF Worker, AGPL-3.0-or-later)
+│   ├── api/            # Hono @ api.innc.cc — multi-scope API (CF Worker, MIT OR BSD-3-Clause)
+│   ├── dash/           # SvelteKit @ canmi.app — UI shell + auth front (Vercel, MIT)
+│   └── landing/        # @ canmi.net — placeholder
 ├── packages/           # empty until a real shared lib appears (rule of three, not two)
 ├── spec/               # cross-project rules (load-bearing — read before acting)
 ├── scripts/            # repo-wide shell helpers (lefthook references)
+├── LICENSES/           # SPDX-named license texts referenced by per-project SPDX expressions
 └── (root configs)      # workspace, lint, fmt, typecheck, hooks, commitlint
 ```
 
-Each `apps/<name>/` carries its own `wrangler.jsonc`, `vite.config.ts`, `svelte.config.js`, `tsconfig.json`, `package.json` — **one Worker per app, hard rule**. The CF deploy unit is the Worker, not the repo. Run `wrangler` commands from inside the app directory; never put a `wrangler.jsonc` at root.
+Each `projs/<name>/` carries its own `package.json`, `tsconfig.json`, plus stack-specific configs (`wrangler.jsonc` for Workers, `svelte.config.js` + `vite.config.ts` for SvelteKit). **One Worker / one Vercel app per project, hard rule.** Run `wrangler` / `vite` commands from inside the project directory; never put deploy configs at root.
 
-Different apps may pick different stacks (SvelteKit, Hono, static Astro, etc.). The repo-wide stack is only Bun + Node 25 + the lint/fmt/typecheck toolchain.
+Different projects pick different stacks (SvelteKit on CF, SvelteKit on Vercel, Hono, etc.). The repo-wide stack is only Bun + Node 25 + the lint/fmt/typecheck toolchain.
 
-## Stack — apps/ffoni
+License is per-project via SPDX in each `package.json`. Full license texts live in `LICENSES/` at root, referenced by name (`AGPL-3.0-or-later`, `MIT`, `BSD-3-Clause`).
 
-Node 25 (dev/build) → CF Workers prod via `@sveltejs/adapter-cloudflare`. Bun is installer only, never runtime. Dev server on `http://localhost:23315`.
+## Stacks
+
+| Project   | Stack                          | Host      | Domain                  | License             |
+| --------- | ------------------------------ | --------- | ----------------------- | ------------------- |
+| `ffoni`   | SvelteKit + adapter-cloudflare | CF Worker | ffoni.com               | AGPL-3.0-or-later   |
+| `api`     | Hono                           | CF Worker | api.innc.cc             | MIT OR BSD-3-Clause |
+| `dash`    | SvelteKit + adapter-vercel     | Vercel    | canmi.app (+ canmi.dev) | MIT                 |
+| `landing` | TBD                            | TBD       | canmi.net               | TBD                 |
+
+Node 25 (dev/build) for all projects. Bun is installer only, never runtime. `ffoni` dev server on `:23315`, `dash` on `:23316`.
 
 ## Quality gates
 
 Everything that can be mechanical is mechanical — treat the gate as authoritative, don't re-check by hand.
 
-| Gate                  | Runs                                                                                           | When               |
-| --------------------- | ---------------------------------------------------------------------------------------------- | ------------------ |
-| Lefthook `pre-commit` | Prettier `--write` + ESLint `--fix` on staged files + `tsc --noEmit` (cd into the touched app) | Every commit, auto |
-| Lefthook `commit-msg` | commitlint (Conventional Commits per `commitlint.config.js`)                                   | Every commit, auto |
-| `just typecheck`      | `tsc --noEmit` for `apps/ffoni` (fast, ~1s)                                                    | On demand          |
-| `just check`          | `wrangler types` → `svelte-kit sync` → `svelte-check` (types + a11y warnings) for `apps/ffoni` | On demand (slow)   |
-| `bun run build`       | Delegates to `bun --filter ffoni build` → `wrangler types` + `vite build`                      | Pre-release / CI   |
+| Gate                  | Runs                                                                                            | When               |
+| --------------------- | ----------------------------------------------------------------------------------------------- | ------------------ |
+| Lefthook `pre-commit` | Prettier `--write` + ESLint `--fix` on staged files + `tsc --noEmit` (cd into the touched app)  | Every commit, auto |
+| Lefthook `commit-msg` | commitlint (Conventional Commits per `commitlint.config.js`)                                    | Every commit, auto |
+| `just typecheck`      | `tsc --noEmit` for `projs/ffoni` (fast, ~1s)                                                    | On demand          |
+| `just check`          | `wrangler types` → `svelte-kit sync` → `svelte-check` (types + a11y warnings) for `projs/ffoni` | On demand (slow)   |
+| `bun run build`       | Delegates to `bun --filter ffoni build` → `wrangler types` + `vite build`                       | Pre-release / CI   |
 
 `just check` is the authoritative type + a11y gate and the only place Svelte 5's `a11y_*` compiler warnings surface — **zero tolerance** for any of them. Run before a release or PR push; too slow for pre-commit.
+
+`just` targets currently only cover `ffoni`; equivalents for `api` / `dash` will be added when those projects accumulate enough surface to warrant them. Until then, run their per-project scripts via `bun --filter <name> <script>`.
 
 ## Conventions
 
 - **Chat:** Simplified Chinese. **Code / commits / docs-in-repo:** English.
-- **Commit scope is optional.** Default to no scope (`feat: add X`, `fix: handle Y`); roughly 90% of commits should not have one. Only add a scope when the change is genuinely confined to one app or one well-known subsystem and the scope adds disambiguating value (`fix(ffoni): ...`, `chore(deps): ...`). Never invent narrow scopes for routes or files.
+- **Commit scope is optional.** Default to no scope (`feat: add X`, `fix: handle Y`); roughly 90% of commits should not have one. Only add a scope when the change is genuinely confined to one project or one well-known subsystem and the scope adds disambiguating value (`fix(ffoni): ...`, `chore(deps): ...`). Never invent narrow scopes for routes or files.
 - When the user says "commit this" without a message, write one that passes commitlint.
 
 ## Git
 
 Remote `origin` → `github.com/canmi21/taki`. Working branch: **`twig`** (not `main` — taken by another project on the same remote). No force-push without explicit instruction.
 
-## Domain rules (apps/ffoni)
+## Root vs project config
 
-These rules describe the SvelteKit app in `apps/ffoni/`. Future apps may have their own `apps/<name>/CLAUDE.md` for app-specific rules; this section stays focused on ffoni until that happens.
+Root currently carries some `ffoni`-shaped tooling (Tailwind sort entry-point in `.oxfmtrc.json`, Svelte/Tailwind plugins in `eslint.config.js`). This is acceptable while `ffoni` is the only Svelte+Tailwind consumer — extracting prematurely creates duplication. As `dash` (also SvelteKit) catches up, fold the shared parts back into root by the **rule of three**: only when 3 projects need a config does it earn root status.
+
+## Domain rules (projs/ffoni)
+
+These rules describe the SvelteKit app in `projs/ffoni/`. Future projects may have their own `projs/<name>/CLAUDE.md` for project-specific rules; this section stays focused on ffoni until that happens.
 
 Each line is the load-bearing rule from its spec — enough to avoid the common trap, not enough to act on. Read the linked file before relying on details.
 

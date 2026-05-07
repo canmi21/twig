@@ -1,0 +1,18 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "api",
+	"compatibility_date": "2026-04-20",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "src/index.ts",
+	"observability": {
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true
+		}
+	},
+	"placement": {
+		"mode": "smart"
+	},
+	"workers_dev": false,
+	"preview_urls": false
+}

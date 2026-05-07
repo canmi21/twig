@@ -1,3 +1,3 @@
 bun.lock
-apps/*/public/
-apps/*/src/lib/paraglide/
+projs/*/public/
+projs/*/src/lib/paraglide/

@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"sourceMap": true,
+		"types": ["./worker-configuration.d.ts"]
+	},
+	"include": ["src/**/*.ts", "auth/**/*.ts", "link/**/*.ts"]
+}

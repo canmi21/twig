@@ -9,7 +9,7 @@ set -u
 for file in "$@"; do
 	[ -f "$file" ] || continue
 	case "$file" in
-		apps/*/src/lib/paraglide/*) continue ;;
+		projs/*/src/lib/paraglide/*) continue ;;
 		*.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.svelte|*.css|*.scss|*.html) ;;
 		*) continue ;;
 	esac
