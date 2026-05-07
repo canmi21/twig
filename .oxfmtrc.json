@@ -6,7 +6,7 @@
 	"printWidth": 100,
 	"endOfLine": "lf",
 	"sortTailwindcss": {
-		"stylesheet": "./apps/ffoni/src/styles/app.css"
+		"stylesheet": "./projs/space/src/styles/app.css"
 	},
 	"ignorePatterns": ["bun.lock", "apps/*/public/"]
 }

@@ -15,7 +15,7 @@ pre-commit:
       stage_fixed: true
     - name: typecheck
       glob: '*.{ts,svelte}'
-      run: cd apps/ffoni && ../../node_modules/.bin/tsc --noEmit
+      run: cd projs/space && ../../node_modules/.bin/tsc --noEmit
     - name: comment-length
       glob: '*.{ts,tsx,js,jsx,mjs,cjs,svelte,css,scss,html}'
       run: ./scripts/check-comment-length.sh {staged_files}

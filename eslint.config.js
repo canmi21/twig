@@ -7,7 +7,7 @@ import svelte from 'eslint-plugin-svelte';
 import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
-import svelteConfig from './apps/ffoni/svelte.config.js';
+import svelteConfig from './projs/space/svelte.config.js';
 
 const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
@@ -43,7 +43,7 @@ export default defineConfig(
 		plugins: { 'better-tailwindcss': betterTailwindcss },
 		settings: {
 			'better-tailwindcss': {
-				entryPoint: 'apps/ffoni/src/styles/app.css'
+				entryPoint: 'projs/space/src/styles/app.css'
 			}
 		},
 		rules: {
