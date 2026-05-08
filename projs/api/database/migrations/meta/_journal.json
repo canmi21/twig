@@ -1,0 +1,13 @@
+{
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1778208199005,
+			"tag": "0000_stale_shooting_star",
+			"breakpoints": true
+		}
+	]
+}

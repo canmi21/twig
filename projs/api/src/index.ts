@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: Cloudflare.Env }>();
 
 app.get('/', (c) => c.json({ ok: true, service: 'api' }));
 
