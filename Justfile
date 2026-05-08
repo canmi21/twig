@@ -58,6 +58,18 @@ api-migrate-prod:
 api-types:
     bun --filter api types
 
+# Print a fresh 32-byte master AES key (hex). Paste into projs/api/.dev.vars.
+api-gen-master-key:
+    @openssl rand -hex 32
+
+# Generate + INSERT a new ES256 signing key into the LOCAL D1 (one-time setup).
+api-bootstrap-key:
+    cd projs/api && bun run scripts/bootstrap-signing-key.ts
+
+# Same but against the REMOTE D1 (one-time, before first prod deploy).
+api-bootstrap-key-prod:
+    cd projs/api && bun run scripts/bootstrap-signing-key.ts --remote
+
 # Fast TypeScript typecheck for api.
 api-typecheck:
     cd projs/api && ../../node_modules/.bin/tsc --noEmit

@@ -6,5 +6,6 @@ projs/*/src/lib/paraglide
 .env
 .env.*
 !.env.example
+projs/*/.dev.vars
 .DS_Store
 projs/*/worker-configuration.d.ts

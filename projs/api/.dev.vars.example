@@ -1,0 +1,5 @@
+# Copy to .dev.vars and fill in. .dev.vars is gitignored; never commit secrets.
+# Generate MASTER_AES_KEY with `just api-gen-master-key` (or `openssl rand -hex 32`).
+
+MASTER_AES_KEY=
+EMAIL_MODE=console

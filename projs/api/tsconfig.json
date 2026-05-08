@@ -9,7 +9,7 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"sourceMap": true,
-		"types": ["./worker-configuration.d.ts"]
+		"types": ["./worker-configuration.d.ts", "node"]
 	},
-	"include": ["src/**/*.ts", "auth/**/*.ts", "link/**/*.ts", "drizzle.config.ts"]
+	"include": ["src/**/*.ts", "scripts/**/*.ts", "drizzle.config.ts"]
 }

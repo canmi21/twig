@@ -16,9 +16,11 @@
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.45.2",
-		"hono": "^4.12.18"
+		"hono": "^4.12.18",
+		"jose": "^6.2.3"
 	},
 	"devDependencies": {
+		"@types/node": "^25.6.0",
 		"drizzle-kit": "^0.31.10",
 		"wrangler": "^4.84.0"
 	}
